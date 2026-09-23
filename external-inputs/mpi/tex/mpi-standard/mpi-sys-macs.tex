@@ -1,0 +1,207 @@
+% Version of June 15, 2021
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The first set of commands control the overall configuration - such as,
+% is color used to show changes since the last version, are changebars
+% used, etc.
+% Control the use of color
+\newif\ifusecolor
+\usecolortrue
+% For publisher's additions in the printed book
+\newif\ifbookprinting
+\bookprintingfalse
+% Provide a way to indicate whether the text is within a float (such as a
+% table); this is necessary to avoid problems with lost floats.  Use this
+% for macros that use the \ticket command (such as the MPIupdate, MPIreplace,
+% or MPIdelete macros) within table for figure environments.
+\newif\ifinfloat
+\infloatfalse
+
+%
+% Use this to make pages start on the right side
+\newcommand{\startchap}[0]{\cleardoublepage}
+%\newcommand{\startchap}[0]{\relax}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% There are two elements to ``draft'':
+%   1. Mark the headers/footers/watermark with draft information
+%   2. Provide text about the ``draft specification''
+% use \drafttrue for the headers/footers/watermaky
+% use \draftspectrue to turn on the text abot the draft specification
+\newif\ifdraftspec
+\draftspecfalse
+
+\newif\ifdraft
+\def\drafttext{\upshape\normalsize\textbf{Unofficial Draft for Comment Only}}
+\def\insertdraft{\ifdraft\drafttext\else\fi}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The following places line numbers along the page sides
+%
+% Get line numbers in the gutters.  Thanks to Guy Steele and HPFF!
+%
+
+\makeatletter
+%
+% This is used to put line numbers on plain pages.  Used in draft.tex
+%
+\def\withlinenumbers{\relax
+  \def\@evenfoot{\hbox to 0pt{\hss\LineNumberRuler\hskip 1.5pc}\hfil\insertdraft\hfil}\relax
+  \def\@oddfoot{\hfil\insertdraft\hfil\hbox to 0pt{\hskip 1.5pc\LineNumberRuler\hss}}}
+
+\def\LineNumberRuler{\vbox to 0pt{\vss\normalsize \baselineskip13.6pt
+    \lineskip 1pt \normallineskip 1pt \def\baselinestretch{1}\relax
+    \LNR{1}\LNR{2}\LNR{3}\LNR{4}\LNR{5}\LNR{6}\LNR{7}\LNR{8}\LNR{9}
+    \LNR{10}\LNR{11}\LNR{12}\LNR{13}\LNR{14}
+        \LNR{15}\LNR{16}\LNR{17}\LNR{18}\LNR{19}
+    \LNR{20}\LNR{21}\LNR{22}\LNR{23}\LNR{24}
+        \LNR{25}\LNR{26}\LNR{27}\LNR{28}\LNR{29}
+    \LNR{30}\LNR{31}\LNR{32}\LNR{33}\LNR{34}\LNR{35}
+        \LNR{36}\LNR{37}\LNR{38}\LNR{39}
+    \LNR{40}\LNR{41}\LNR{42}\LNR{43}\LNR{44}
+        \LNR{45}\LNR{46}\LNR{47}\LNR{48}
+    \vskip 31pt
+%    \vskip 20pt % Additional adjustment when using scrbook/latex-headings
+    \vskip 17pt % Additional ajustment when using srcbook/headings
+}}
+\def\LNR#1{\hbox to 1pc{\hfil\tiny#1\hfil}}
+
+% jmm; merge the withlinenumbers stuff into
+% the centered page numbers that tex defines by default
+\def\ps@plainwithlinenumbers{\let\@mkboth\@gobbletwo
+     \def\@oddhead{}
+     \def\@oddfoot{\hfil\rmfamily\ifdraft\drafttext\hfil\thepage\else\thepage\hfil\fi
+       \hbox to 0pt{\hskip 1.5pc\LineNumberRuler\hss}}
+     \def\@evenhead{}
+     \def\@evenfoot{\hbox to 0pt{\hss
+     \LineNumberRuler\hskip 1.5pc}\rmfamily\hfil\ifdraft\drafttext\hfil\thepage\else\thepage\hfil\fi}}
+
+% The old version; uncommenting the withlinenumbers part didn't
+% work because that macro replaced the footer definition that
+% did page numbering.
+%\def\ps@plainwithlinenumbers{\ps@plain}%\withlinenumbers}
+% end jmm changes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%
+% 1st page of a chapter has its own page style, so we have to put line
+% numbers in here also.
+%
+\newwrite\chappages
+\immediate\openout\chappages=chappage.txt
+\def\writespace{ }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Contents is done with \chapter*{Contents}, so we need to turn off the
+% line numbers in this case.  Easiest to look at def
+%
+\def\incontents{0}
+\newif\ifcontents
+\contentsfalse
+\def\chapter{\clearpage \ifcontents\else\thispagestyle{plainwithlinenumbers}\fi
+        \write\chappages{Chapter \thechapter\writespace - \the\count0}
+        \global\@topnum\z@ \@afterindentfalse \secdef\@chapter\@schapter}
+
+%
+% Change "Chapter" to "Chapter", "Appendix" to "Annex"
+%
+\renewcommand{\chaptername}{Chapter}
+\renewcommand{\appendixname}{Annex}
+% ... old code does not work correctly with pdflatex
+% \def\@chapapp{Chapter}
+% \def\appendix{\par
+%  \setcounter{chapter}{0}
+%  \setcounter{section}{0}
+%  \def\@chapapp{Annex}
+%  \def\thechapter{\Alph{chapter}}}
+
+\makeatother
+%
+% Use Sans Serif font for sections, etc.  S. Otto
+%
+\if 0 % Use standard section etc as defined by book or srcbook style
+\makeatletter
+\def\section{\@startsection {section}{1}{\z@}{-3.5ex plus -1ex minus 
+-.2ex}{2.3ex plus .2ex}{\Large\sf}}
+\def\subsection{\@startsection{subsection}{2}{\z@}{-3.25ex plus -1ex minus 
+-.2ex}{1.5ex plus .2ex}{\large\sf}}
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}{-3.25ex plus 
+-1ex minus -.2ex}{1.5ex plus .2ex}{\normalsize\sf}}
+\def\paragraph{\@startsection {paragraph}{4}{\z@}{3.25ex plus 1ex 
+minus .2ex}{-1em}{\normalsize\sf}}
+\makeatother
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% For the funcdef macros, we use s list environment.  To make this consistent,
+%%
+\def\MPIfunclist{
+    \begin{list}{}{                     % see pg 113 of Lamport's book
+        \setlength{\leftmargin}{200pt}
+        \setlength{\labelwidth}{180pt}
+        \setlength{\labelsep}{10pt}
+        \setlength{\itemindent}{0pt}
+        \setlength{\itemsep}{0pt}
+        \setlength{\topsep}{5pt}
+    }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+%
+% make our own index environment that can have a different
+% title than just "Index" -- S. Otto
+%
+\def\@index{Index}
+\def\@introtext{}  % MPI-2.1
+\newif\if@restonecol
+\def\myindex{\@restonecoltrue\if@twocolumn\@restonecolfalse\fi
+\columnseprule \z@
+%\columnsep 35pt\twocolumn[\@makeschapterhead{Index}]
+ %\@mkboth{INDEX}{INDEX}\thispagestyle{plain}\parindent\z@
+%\columnsep 35pt\twocolumn[\@makeschapterhead{\@index}]
+%\columnsep 35pt\twocolumn[\@makeschapterhead{\@index}\@introtext\vspace{15pt}] % MPI-2.1
+\columnsep 20pt\twocolumn[\@makeschapterhead{\@index}\@introtext\vspace{15pt}] % MPI-3.0
+ \@mkboth{\@index}{\@index}\thispagestyle{plainwithlinenumbers}\parindent\z@
+ \parskip\z@ plus .3pt\relax\let\item\@idxitem}
+\def\@idxitem{\par\hangindent 40pt}
+\def\subitem{\par\hangindent 40pt \hspace*{20pt}}
+\def\subsubitem{\par\hangindent 40pt \hspace*{30pt}}
+\def\endmyindex{\if@restonecol\onecolumn\else\clearpage\fi}
+\def\indexspace{\par \vskip 10pt plus 5pt minus 3pt\relax}
+\makeatother
+
+\newcommand{\uu}[1]{\underline{\hyperpage{#1}}} 
+\newcommand{\bold}[1]{\textbf{\hyperpage{#1}}} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% These improve the formatting of backref links in the bibliography
+% See http://ctan.math.washington.edu/tex-archive/macros/latex/contrib/hyperref/doc/manual.pdf , section 5.26 (New Featurs/Backref entries)
+% The regular backref features don't work when combined with the hyperref
+% package
+\def\fixupbackrefformatting{%
+\renewcommand*{\backref}[1]{
+% default interface
+% #1: backref list
+%
+% We want to use the alternative interface,
+% therefore the definition is empty here.
+}
+\renewcommand*{\backrefalt}[4]{
+\ifnum ##1=1 %
+ Citation on page ##2.
+\else
+ Citations on pages ##2.
+\fi}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\raggedbottom
+
+% deleting the content where the macro is used; but preserving it for the Annex
+\def\OnlyForAutomaticAnnexGeneration#1{}

@@ -1,0 +1,57 @@
+\apisummary{
+    A collective operation that allocates and initializes the resources used by
+    the \openshmem library.
+}
+
+\begin{apidefinition}
+
+\begin{Csynopsis}
+void @\FuncDecl{shmem\_init}@(void);
+\end{Csynopsis}
+
+\begin{apiarguments}
+    \apiargument{None.}{}{}
+\end{apiarguments}
+
+\apidescription{
+    \FUNC{shmem\_init} allocates and initializes resources used by the \openshmem
+    library. It is a collective operation that all \acp{PE} must call before any
+    other \openshmem routine may be called, except \FUNC{shmem\_query\_initialized}
+    which checks the current initialized state of the library. In the
+    \openshmem program which it initialized, each call to \FUNC{shmem\_init} must
+    be matched with a corresponding call to \FUNC{shmem\_finalize}.
+
+    The \FUNC{shmem\_init} and \FUNC{shmem\_init\_thread} initialization
+    routines may be called multiple times within an \openshmem program. A
+    corresponding call to \FUNC{shmem\_finalize} must be made for each call to
+    an \openshmem initialization routine. The \openshmem library must not be
+    finalized until after the last call to \FUNC{shmem\_finalize} and may be
+    re-initialized with a subsequent call to an initialization routine.
+
+}
+
+\apireturnvalues{
+    None.
+}
+
+\begin{DeprecateBlock}
+\apinotes{
+    As of \openshmem[1.2], the use of \FUNC{start\_pes} has been
+    deprecated and calls to it should be replaced with calls to \FUNC{shmem\_init}.
+    While support for \FUNC{start\_pes} is still required in \openshmem libraries,
+    users are encouraged to use \FUNC{shmem\_init}. An important difference between
+    \FUNC{shmem\_init} and \FUNC{start\_pes} is that every call to
+    \FUNC{shmem\_init} within a program must be matched with a call to \FUNC{shmem\_finalize}.
+}
+\end{DeprecateBlock}
+
+\begin{apiexamples}
+
+\apicexample
+    {The following \FUNC{shmem\_init} example is for \Cstd[11] programs:}
+    {example_code/shmem_init_example.c}
+    {}
+
+\end{apiexamples}
+
+\end{apidefinition}

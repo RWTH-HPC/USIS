@@ -1,0 +1,169 @@
+#! /usr/bin/env python3
+#
+# -*- mode: python-mode; -*-
+#
+# Create the sections in the language binding appendix by extracting the
+# relevant binding macros
+
+import re
+import os
+import subprocess
+import datetime
+import sys
+import argparse
+
+verbose = 0
+
+## Process arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('--verbose', help="Verbose for debugging this script", action="store_true")
+args = parser.parse_args()
+if args.verbose :
+    verbose = 1
+
+# FileList is a list of tuples of files and the section title that goes with
+# each file
+FileList = [
+    ("chap-pt2pt/pt2pt-rendered.tex" , "Point-to-Point Communication"),
+    ("chap-part/part-rendered.tex" , "Partitioned Communication"),
+    ("chap-datatypes/datatypes-rendered.tex", "Datatypes"),
+    ("chap-coll/coll-rendered.tex", "Collective Communication"),
+    ("chap-context/context-rendered.tex", "Groups, Contexts, Communicators, and Caching"),
+    ("chap-topol/topol-rendered.tex","Virtual Topologies for \\texorpdfstring{\\MPI/}{MPI} Processes"),
+    ("chap-inquiry/inquiry-rendered.tex","\\texorpdfstring{\\MPI/}{MPI} Environmental Management"),
+    ("chap-misc/misc-2-rendered.tex","The Info Object"),
+    ("chap-dynamic/dynamic-2-rendered.tex", "Process Creation and Management"),
+    ("chap-one-side/one-side-2-rendered.tex","One-Sided Communications"),
+    ("chap-ei/ei-2-rendered.tex","External Interfaces"),
+    ("chap-io/io-2-rendered.tex", "I/O"),
+    ("chap-binding/binding-2-rendered.tex", "Language Bindings"),
+    ("chap-abi/abi-rendered.tex", "Application Binary Interface (ABI)"),
+    ("chap-tools/prof-rendered.tex", "Tools / Profiling Interface"),
+    ("chap-tools/mpit-rendered.tex", "Tools / \\texorpdfstring{\\MPI/}{MPI} Tool Information Interface"),
+    ("chap-deprecated/deprecated-rendered.tex", "Deprecated"),
+    ("chap-appLang/appLang-Const-rendered.tex", "Language Bindings Summary")
+    ]
+
+# Routines to extract bindings from files, sort them, and write the sorted
+# set out.  If there are any, add the "header" as a subsection title.
+def extractF90Bindings( file, outfd, header ) :
+    "Extract the F90 bindings"
+    fndRoutines = {}
+    infile = open( file )
+    for line in infile :
+        # Match mpifbind
+        fnd = re.match(r' *\\mpifbindmain{([^}]*)}{([^}]*)}', line, 0)
+        if fnd:
+            if verbose:
+                print( "Routine " + fnd.group(1) + "; " + fnd.group(2))
+            fndRoutines[fnd.group(1)] = line.rstrip().replace("fbindmain", "fbind")
+        else:
+            fnd = re.match(r' *\\mpifbindspecial{([^}]*)}{([^}]*)}', line, 0)
+            if fnd:
+                fndRoutines[fnd.group(1)] = line.rstrip()
+            else:
+                fnd = re.match(r' *\\mpifbindretmain{([^}]*)}{([^}]*)}{([^}]*)}', line, 0)
+                if fnd:
+                    fndRoutines[fnd.group(2)] = line.rstrip().replace("fbindretmain", "fbindret")
+
+    # Only add the section header if there are entries
+    # FIXME: MAKE-APPLANG always generated this blank line.  Leave in for
+    # now to simplify comparisons, but this should be moved into the
+    # conditional (here and in the other 2 routines)
+    print( file=outfd )
+    if len(fndRoutines) > 0:
+        print( header, file=outfd )
+    for routine in sorted(fndRoutines.keys(),key=str.lower):
+        print( fndRoutines[routine], file=outfd )
+    infile.close()
+
+def extractF08Bindings( file, outfd, header ) :
+    "Extract the F2008 bindings"
+    fndRoutines = {}
+    infile = open( file )
+    for line in infile :
+        # Match mpifbind
+        fnd = re.match(r' *\\mpifnewbindmain{([^}]*)}{([^}]*)}', line, 0)
+        if fnd:
+            if verbose:
+                print( "Routine " + fnd.group(1) + "; " + fnd.group(2))
+            # Note that there may be multiple entries to each
+            if fnd.group(1) in fndRoutines:
+                fndRoutines[fnd.group(1)] += "\n" + line.rstrip().replace("bindmain", "bind")
+            else:
+                fndRoutines[fnd.group(1)] = line.rstrip().replace("bindmain", "bind")
+        else:
+            fnd = re.match(r' *\\mpifnewbindretmain{([^}]*)}{([^}]*)}{([^}]*)}', line, 0)
+            if (fnd):
+                fndRoutines[fnd.group(2)] = "\n" + line.rstrip().replace("bindretmain", "bindret")
+
+
+    # Only add the section header if there are entries
+    print( file=outfd )
+    if len(fndRoutines) > 0:
+        print( header, file=outfd )
+        # Special case label
+        if file == "chap-context/context-rendered.tex":
+            print( "\\label{app:subsec:f08:context}", file=outfd )
+
+    for routine in sorted(fndRoutines.keys(),key=str.lower):
+        print( fndRoutines[routine], file=outfd )
+    infile.close()
+
+def extractCBindings( file, outfd, header ) :
+    "Extract the F90 bindings"
+    fndRoutines = {}
+    infile = open( file )
+    for line in infile :
+        # Match mpifbind
+        fnd = re.match(r' *\\mpibindmain{([^\(]*)(\(.*)}', line, 0)
+        if fnd:
+            if verbose:
+                print( "Routine " + fnd.group(1) + "; " + fnd.group(2))
+            fndRoutines[fnd.group(1)] = line.rstrip().replace("bindmain", "bind")
+        else :
+            # The argument is type name(parms) - extract the name
+            fnd = re.match(r' *\\mpibindnotintmain{([^\(]* +)([^ \(]*)(\(.*)}', line, 0)
+            if fnd:
+                if verbose:
+                    print( fnd.group(2) + ":" + line)
+                fndRoutines[fnd.group(2)] = line.rstrip().replace("bindnotintmain", "bindnotint")
+            else :
+                fnd = re.match(r' *\\mpiemptybindidx{([^\(]*)(\(.*}){[^}]*}', line, 0)
+                if fnd:
+                    if verbose:
+                        print( "Routine " + fnd.group(1) + "; " + fnd.group(2))
+                    fndRoutines[fnd.group(1)] = "\\mpiemptybindNOidx{" + fnd.group(1) + fnd.group(2)
+
+    # Only add the section header if there are entries
+    print( file=outfd )
+    if len(fndRoutines) > 0:
+        print( header, file=outfd )
+    for routine in sorted(fndRoutines.keys(),key=str.lower):
+        print( fndRoutines[routine], file=outfd )
+    infile.close()
+
+# Extract the information from each source file
+
+# Here are the output files:
+f90file = open( 'appLang-FNames.tex', "w" )
+f08file = open( 'appLang-F2008Names.tex', "w" )
+cfile   = open( 'appLang-CNames.tex', "w" )
+
+header = "% Do not edit this file. It is automatically generated by buildapplang"
+print( header, file=f90file )
+print( header, file=f08file )
+print( header, file=cfile )
+
+for t in FileList:
+    (filename, heading) = t
+    secheader = "\\subsection{" + heading + " Fortran Bindings}"
+    extractF90Bindings( filename, f90file, secheader )
+    secheader = "\\subsection{" + heading + " Fortran 2008 Bindings}"
+    extractF08Bindings( filename, f08file, secheader )
+    secheader = "\\subsection{" + heading + " C Bindings}"
+    extractCBindings( filename, cfile, secheader )
+
+f90file.close()
+f08file.close()
+cfile.close()

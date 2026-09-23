@@ -1,0 +1,617 @@
+{
+  "_comment": [
+    "Third-party inputs the build needs but this repository does not redistribute.",
+    "workflow/fetch/fetch.py reads this file and nothing else: every URL it downloads",
+    "and every file it writes is listed here, each with the sha256 it must match."
+  ],
+  "sources": [
+    {
+      "id": "cuda-headers",
+      "model": "cuda",
+      "kind": "archive",
+      "why_not_vendored": "NVIDIA proprietary: the header notice forbids redistribution without NVIDIA's written consent.",
+      "url": "https://developer.download.nvidia.com/compute/cuda/redist/cuda_cudart/linux-x86_64/cuda_cudart-linux-x86_64-13.1.80-archive.tar.xz",
+      "sha256": "b626f4790f46bc9324a1047f2fbcc9a42bc4a722b053056e61cc00da54ad6f32",
+      "listed_in": "https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.1.0.json",
+      "dest": "cuda/implementation/cuda-13.1.0",
+      "files": [
+        {
+          "member": "cuda_cudart-linux-x86_64-13.1.80-archive/include/cuda_runtime_api.h",
+          "path": "include/cuda_runtime_api.h",
+          "sha256": "8b8a86cab3470a0673de17332ac8a71dc8197964e4f931f1e0fe4ced09eaa5c3"
+        },
+        {
+          "member": "cuda_cudart-linux-x86_64-13.1.80-archive/include/cuda_device_runtime_api.h",
+          "path": "include/cuda_device_runtime_api.h",
+          "sha256": "d3110e08d9dbe604058dfae1d5c54c58b9385ce54b32b941b79b850eadc4765f"
+        },
+        {
+          "member": "cuda_cudart-linux-x86_64-13.1.80-archive/LICENSE",
+          "path": "EULA.txt",
+          "sha256": "72c22161fc1ebf242443d45158a7dd382d68597b00eeb7a7f539be5c6114be33"
+        }
+      ]
+    },
+    {
+      "id": "cuda-docs",
+      "model": "cuda",
+      "kind": "pages",
+      "why_not_vendored": "docs.nvidia.com content, published without a redistribution licence.",
+      "fetch_base": "https://docs.nvidia.com/cuda/archive/13.1.0/cuda-runtime-api/",
+      "link_base": "https://docs.nvidia.com/cuda/archive/13.1.0/cuda-runtime-api/",
+      "dest": "cuda/docs/13.1",
+      "raw_dir": "raw",
+      "md_dir": "md",
+      "pages": [
+        {
+          "path": "api-sync-behavior.html",
+          "sha256": "2237cc1ba2ee693c350a6f005c2e69e325e1c56bdf68e4b53e3bfc6fb8bb3b1b",
+          "md_sha256": "826c78654d4c3ae0fba21473d8aa87079a9e8e33c653a99e262deef6dfadf0f0"
+        },
+        {
+          "path": "deprecated.html",
+          "sha256": "e36600264ef81581784d7313ba3f8e285388bdee7704e78850b885a61c06c8d8",
+          "md_sha256": "c8bb92e541f66ecc22fe80a011efa787191bcd488ca3e9e65e7189a56d5f2596"
+        },
+        {
+          "path": "driver-vs-runtime-api.html",
+          "sha256": "a1d7b5de2b3fc04e6cb0bedb88da16451efdb0e4063f5ef7cf2682e7133d1045",
+          "md_sha256": "10665985cdea9b9fb7d04306ae65919bdebd678d631a2515571a519c65dd79c8"
+        },
+        {
+          "path": "graphs-thread-safety.html",
+          "sha256": "f45d17f45b02bf70c237f7601311c508f75f3910650b0eeb139ddbcd82e92287",
+          "md_sha256": "8b1001883db3a50f3fd7a8d819ead576b36b6898dfb412c6a4e373bfc89711e8"
+        },
+        {
+          "path": "stream-sync-behavior.html",
+          "sha256": "72db6bbda694066f6bc7a8d245ff6244418397fb5459daabb86d7e9bda30d2cf",
+          "md_sha256": "090a60b2bd27d02b276e3292b2b1d5e9f7bf03863296e41f637197ae28f9cd02"
+        },
+        {
+          "path": "version-mixing-rules.html",
+          "sha256": "b2dd773b1dc0bf3dc7e4a16831cf2722d4ee26759c604ae4cf48b509bc2f1b64",
+          "md_sha256": "298679a98598f283f13417c5d6b657256e75a4f616c4299ee4d6db14de1e7234"
+        }
+      ]
+    },
+    {
+      "id": "nccl-docs",
+      "model": "nccl",
+      "kind": "pages",
+      "why_not_vendored": "docs.nvidia.com content, published without a redistribution licence.",
+      "fetch_base": "https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2307/user-guide/docs/",
+      "link_base": "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/",
+      "link_base_note": "The mirror was taken from the live site (then 2.30) on 2026-07-15; NVIDIA's 2.30.7 archive serves byte-identical pages, so it is fetched from there, but the Markdown keeps the original URLs it was converted with.",
+      "dest": "nccl/docs/2.30",
+      "raw_dir": "raw",
+      "md_dir": ".",
+      "pages": [
+        {
+          "path": "api.html",
+          "sha256": "572155d661ec12edc94c9891efcaf3df72804a9d707e2be4e744c9ea27ba84c2",
+          "md_sha256": "75a7a63a38651d863d53a9365a7b46841cad55f357e0b113c8f0594e60a785d0"
+        },
+        {
+          "path": "api/colls.html",
+          "sha256": "4d6b661c061e1d026e332a1d079c06cd2e8a10a51046195b41feb3999c6a957e",
+          "md_sha256": "94d6b4af22cbed194c1cb3b19c8073671515eca41daf3152c145525fa15e5285"
+        },
+        {
+          "path": "api/comms.html",
+          "sha256": "896f94464fc8bb4cc63062ff2bccc729f53a880fc3be08445c68d10337ef9a5b",
+          "md_sha256": "1db8d1532c49d90b589ace76510e8ecacff66839855574cdcb6b9252c7b6cb4a"
+        },
+        {
+          "path": "api/device.html",
+          "sha256": "526653ee2601de4f39e972edf431f91b89838a226adf7fae1b43544cfcdb9a8b",
+          "md_sha256": "b91f0ffa17cbf08912b21ca3beccac5f024873b9743fa129cc1abc8463ed25b2"
+        },
+        {
+          "path": "api/device_gin.html",
+          "sha256": "4b507c07770e70992d32a2df195880a369e68080d9f62a7e153349cd78eb7c69",
+          "md_sha256": "15b4c9a4933f4f2e14e72c941da5d98f7e14bed5d19b0811cbee6840e1890ba4"
+        },
+        {
+          "path": "api/device_memory.html",
+          "sha256": "8fd0a231055331f018cc625d100240008205d854440af3d55cb1488e3163b512",
+          "md_sha256": "3cc62ce3d91448457c3154fdbb4579f2d5a8447e00c4afdbf834af41e8372256"
+        },
+        {
+          "path": "api/device_reducecopy.html",
+          "sha256": "8e205f8c653843af6fcb8f5580201cb833c34d886e93514ed6e414d25cc7a1e9",
+          "md_sha256": "57c97ea50f5cf8a67a507e7cf519202cff5a31ef6a5dc0a0a6923a7501031757"
+        },
+        {
+          "path": "api/device_setup.html",
+          "sha256": "612a022af07e287e3cb0ce5a1369200d1d829c83687d9606d480d88a44c8a1a2",
+          "md_sha256": "101c448c6f71fe902ed046238447e32bf284c20d2174bda5c6adc2d9a71e904e"
+        },
+        {
+          "path": "api/flags.html",
+          "sha256": "5aeeadb922a788058339b04b239e7187c0a36078c60f3bba9c1b57365bc49ae1",
+          "md_sha256": "aca6a39404d31f8d385aab806cd24aa9470500658731b590a53b86247d861c34"
+        },
+        {
+          "path": "api/group.html",
+          "sha256": "debcdc3ea38298cb4a2e5f0c36fdcb41abed1598970d050bc36faf22c5cb5ba4",
+          "md_sha256": "79b6c2a33f5e8205d8e8a7653f9184a514dddc127b3749b20e238e5a0b9b8065"
+        },
+        {
+          "path": "api/ops.html",
+          "sha256": "f08e6c5bfef7bdc1b8b89834488900875c1982a382de9b78282eb36e349d4f3f",
+          "md_sha256": "d1a532a3a67a6328eb073259c3900928c69f59c86fc8667a0f99db77f5dcd091"
+        },
+        {
+          "path": "api/p2p.html",
+          "sha256": "e8ae432a290d6e557bac114dc7813b5135fea56860ea5afd7702e62dc99e1917",
+          "md_sha256": "d9cd30502a5c347f658d4ce35d41ed5d500d743dad526c5bbc87a210e9449689"
+        },
+        {
+          "path": "api/param.html",
+          "sha256": "8e84bea864dbb0c6461466030ec45d12afe24e2e9d38dfea83ba5bbadd918cbb",
+          "md_sha256": "ee9213ed973e88596a04659fb9bcf659797136718ad25df578ec75f8b9c208a4"
+        },
+        {
+          "path": "api/types.html",
+          "sha256": "9de3126d6bcda997520ed80aa4f51c2b5d635ed7e5767f19fbdce700361da761",
+          "md_sha256": "841b6a7fc55c5ea7b33fdf84e3e6528bb8b716f8da038f2fea098d659b992264"
+        },
+        {
+          "path": "bindings.html",
+          "sha256": "f2201d555d1dad0b2bbae5c85c53b9cf1d1de080e4d5c38a29c2e596b51ec54f",
+          "md_sha256": "a34a2aae2bac938971b907447f60d8b395b19027c4f043b76736ca6dfdfbe08f"
+        },
+        {
+          "path": "env.html",
+          "sha256": "93e67a1eba0d45d7db8fed9a127ee295f9382df2e67b9395c241c5602b25a666",
+          "md_sha256": "fe1c6b336852ed60276ee3a4309feb83a44257a98e94cca071080b2cb570a8f8"
+        },
+        {
+          "path": "examples.html",
+          "sha256": "fdfe98871144130d01dc0e6eaa67ebd5c47838139d10881832d97c441fca7ee1",
+          "md_sha256": "ccb7a80da285372f0f299517891f5616e4c85c5d3917db6a33a715454d3b11bf"
+        },
+        {
+          "path": "mpi.html",
+          "sha256": "314ce8c4df9abf9c39d70d21f4fb543ba2ac548fd02266645cf7f3b351a8d3b1",
+          "md_sha256": "394becdd2406b7b965030636a8f3c2247fcbb2af62df907686bee511f3d58794"
+        },
+        {
+          "path": "nccl1.html",
+          "sha256": "8e915d56aa20b357da76d1db006eb0d161f56b5c196314f412cc7bdc24c31fa1",
+          "md_sha256": "b635d907a2891621c8a31869547b706c3423350ca4925ecb281c9b2d742e7fb1"
+        },
+        {
+          "path": "nccl4py.html",
+          "sha256": "0886aaa21dccce0c34708fc1deece2a19659b5b115319f9c352933307cc4cf33",
+          "md_sha256": "60c61c5deef4bd79048377ae003a5ba0274edc6124e30830acd59b46c6641793"
+        },
+        {
+          "path": "nccl4py/communicator.html",
+          "sha256": "b14fae279a32597735dce9b37b28d057248d5a433e2b61e807adeba075923ee4",
+          "md_sha256": "1d19c9a03f31e029e0e259a146a0239794fcd0d723e4afd3037b2ebc336fe137"
+        },
+        {
+          "path": "nccl4py/communicator/class.html",
+          "sha256": "a5430ad113fe1dcd00b7fd3c7b0fabaffef1d1a3c78e778b65e831fd99adb4d7",
+          "md_sha256": "7f1dd5197fd5e34d53bd6de7cef08e133ca28805b540dbc9ba000e9b5fda0e77"
+        },
+        {
+          "path": "nccl4py/communicator/collectives.html",
+          "sha256": "44080934abb97ae25abfe1b3e442520e1e85dd6b344f21fb2530b568f5580c7d",
+          "md_sha256": "ba5c0b28bbe537c295692b6ba0135153c3d7b93d96ee09332ea6f6319a78367b"
+        },
+        {
+          "path": "nccl4py/communicator/device_setup.html",
+          "sha256": "3dcbb3343346a18d39574354b35ff6f6a53796c5e750296ef1fb2fb34f291d8c",
+          "md_sha256": "52417cd3dc7cffbea954e1b10954ad3f300d009b8f828f966409f05c97d4aa8d"
+        },
+        {
+          "path": "nccl4py/communicator/lifecycle.html",
+          "sha256": "d6b666d292e75e9f820525dbbb7a25f045ec2bb2bce217ce002acf482c0624e2",
+          "md_sha256": "41df2e99fe39079dcb9cc7c6570e602c7d0995c026dbcf64e8cc406c3cd98248"
+        },
+        {
+          "path": "nccl4py/communicator/p2p.html",
+          "sha256": "9f9946d5b2c2cae11f07215623d09e90b4e708f2be486b814e7e5f409bf646d3",
+          "md_sha256": "ee84b0ef03cec4aa836c4f5c2cedc32dfea788a7a069b60bd12c5becdde9c233"
+        },
+        {
+          "path": "nccl4py/communicator/registration.html",
+          "sha256": "98776ab34869fa8c32e1099e2aa336d224919ce3092f9e0d43ae045ab69dc0b6",
+          "md_sha256": "62b2ff9065b496c042c3e2cceaf29a9908a1dd05ed2b8205d599ac1d96984e09"
+        },
+        {
+          "path": "nccl4py/communicator/status.html",
+          "sha256": "f83c9fcf7d2dcc4e90917a3608bead377e6a0cfb090515de21de037119b7c739",
+          "md_sha256": "75c702e58f0e212d46149af0b9f5b2e39228afe7df4b455a64cad81087525e6f"
+        },
+        {
+          "path": "nccl4py/configuration.html",
+          "sha256": "30081be1f61fe8f5384d3c0f5c6d0843a5b5bb3d906e1a192c85bee165ca7411",
+          "md_sha256": "546e87867e27e04b61314b024d074414bbb7af02e14b3a38ee87de48a72fec53"
+        },
+        {
+          "path": "nccl4py/group.html",
+          "sha256": "7c7cfb749b4fc04fdf4dec393b61d7d1887f29a2d75aabc9953798fc82c42532",
+          "md_sha256": "662538bfd8de272375d236b4a5a9e0b6c2d9e97e06f063820a1b2c54c77fad25"
+        },
+        {
+          "path": "nccl4py/interop.html",
+          "sha256": "fce8969e4a1a244c0fb77601412c1c94f4970f7d854111bb9e4a6376abaa3b2b",
+          "md_sha256": "33c0d22e6e8c0b915c60a634f5b96b04eafc2400e7cd48bad605dcb2284a9dff"
+        },
+        {
+          "path": "nccl4py/memory.html",
+          "sha256": "d593dfd131bc628f0396518ba47122be35f5b2245ea76bf205df7d8af12e586b",
+          "md_sha256": "c9b1bbd18ea0e1e1b3ac3a0c2e96be1723a3dd29877bc0a314a5af965b8db01e"
+        },
+        {
+          "path": "nccl4py/resources.html",
+          "sha256": "84cdb8e7dedbc4c0cb40f01c273f8ba075792fb55900e0d9f28b8bcc061f721b",
+          "md_sha256": "61bb1c51cca49e813cd8e94472499411070e6be5ac1067eb657cd0bc8ffbc66e"
+        },
+        {
+          "path": "nccl4py/types.html",
+          "sha256": "d2e56df165dab3480b5695c2872b1ac82ba6955524f686964d10409b88e753f3",
+          "md_sha256": "a5404366704316ab81489c0d7b2fa8ccab67ad342168cd3c9bee31b8f65f2ab6"
+        },
+        {
+          "path": "nccl4py/versions.html",
+          "sha256": "db75a78003fbb9d5023b8925008e37f9fa7055f0f64587d19df55b5f1baa340e",
+          "md_sha256": "04cf57fe30598d49d6ab8228ad02bdf62dd5fd08740c14a1bb14757fe429984f"
+        },
+        {
+          "path": "overview.html",
+          "sha256": "20e00e9abad463cb58b3e5a50527c185d39ca2d102105d7f0362546c94cafada",
+          "md_sha256": "93d9aedf0c5b06dd4dcf5788b8798e6c6988cd0533c842104b6d1768c4fc5468"
+        },
+        {
+          "path": "setup.html",
+          "sha256": "9731c0681fe027a6d9d695ce28f10389bdc35c4995a6ad7684bfe0433d004756",
+          "md_sha256": "6cde3d168b0fb42ba0a17fdd2032ae9f013d5a7cf5483ee544297ec63468896c"
+        },
+        {
+          "path": "troubleshooting.html",
+          "sha256": "0515edcb5553d208546159cd0ecd1ed0ade69ba03a261b4238329f9b85f8d316",
+          "md_sha256": "9e69d2830c716a27f598d0d6efb795a955e3daf14aa728f2e46cc265ac242cb7"
+        },
+        {
+          "path": "troubleshooting/gpu_troubleshooting.html",
+          "sha256": "f5e2f61e983f9dc8cd913e2f0101d41dd242a21cc8b103a1ded82394ffb83fd8",
+          "md_sha256": "30ce5d8f8dfdbdfeb8da6d5d544d5ee4faf83f44225c5e6b5b4fb931625b0dd9"
+        },
+        {
+          "path": "troubleshooting/logging.html",
+          "sha256": "3a87dccc6d8c8cf32e77adfff32a140e2297308d49f4dca69d50d28ecdb89793",
+          "md_sha256": "476988665d206add824422ac8dd36e209f1de152d522fa4588b53c8c4298997d"
+        },
+        {
+          "path": "troubleshooting/networking_troubleshooting.html",
+          "sha256": "a0296b3ecfa99b56096ab1581dadf2d18988c4528d435ffd5563872d584a2d0c",
+          "md_sha256": "cf5f2bb3c3125f34f48b67d0e8c3083b76da0f7d9154917760ee39c6f0e33906"
+        },
+        {
+          "path": "troubleshooting/performance_and_tuning.html",
+          "sha256": "fdd40df05afbd4e6b4263301bfd43a05c04982d1992c5ab1a3e399556268d9b4",
+          "md_sha256": "d8b17bd1ae3b9fbd45e678104ad3d66a8092d3d7d93e5710d8d4b591115c606f"
+        },
+        {
+          "path": "troubleshooting/ras.html",
+          "sha256": "5cbcc5460cb7593a16a083d6dbe93bef20ad2cd3fc0b9e2e7bfbc2d0c6cd3dfb",
+          "md_sha256": "556f32f9ed91c3519d25a0cf1326ea3d648bfe026ed3f620a8c4193744b5a15b"
+        },
+        {
+          "path": "troubleshooting/runtime_and_mpi_issues.html",
+          "sha256": "c5d5953d7e74ad123c83b7a11b0cab127105e6eb93e104aa98af514e8d3b423d",
+          "md_sha256": "d82e2a53cffe5e606c351b041ba8dd1b6775b6c8773d24909426491d91b0894d"
+        },
+        {
+          "path": "usage.html",
+          "sha256": "d8b82f80df83d26a08ef69b5ca55ea206751ed66acd4dd359b5bf0d338de2aca",
+          "md_sha256": "f6944aa508ccdc9a9d6bceae62c11b1bef9ad806839d91a9d6bd71e243c2b395"
+        },
+        {
+          "path": "usage/bufferreg.html",
+          "sha256": "f4f6406fd17bd800c8a64b7ba40a50899482be6ecf3817e2d8c12e997429b939",
+          "md_sha256": "8da23298a98d7ac3f4401f4bbea74048ace521d9bcba48d9344c55fb952db007"
+        },
+        {
+          "path": "usage/collectives.html",
+          "sha256": "e428681763e9c32d5290ac4c31f63bb7e9b02e95786f29698ab964e28990a254",
+          "md_sha256": "6c45d44618d82785c0bdc2455fa80ccb3ed778a725b027542aa55ca4efce6483"
+        },
+        {
+          "path": "usage/communicators.html",
+          "sha256": "90335417c7b9c9b47137ad55629a8911119b9a70aee3662a2a829d2080ab3eaa",
+          "md_sha256": "ecf5f564410233cbbab7a41679840ba012a115d15f033df7cb5b87f334e42273"
+        },
+        {
+          "path": "usage/cudagraph.html",
+          "sha256": "1bbad85dc9f2e758ee52d56623adb2b1dd6d594b504150403590648c19cbb93a",
+          "md_sha256": "5d24746e8ee1aaf79a61cd0773d8e7841d1f806c855b10005a07b89b7b5471d1"
+        },
+        {
+          "path": "usage/data.html",
+          "sha256": "3bf308e679e32a840a6a6591af93ab828acfffadf38b4de985aec020d5af169a",
+          "md_sha256": "32255dc210218455a9e59d29259ecd5b197c673615667c9d15d8c195fc8a63e5"
+        },
+        {
+          "path": "usage/deviceapi.html",
+          "sha256": "9cbc71aba0ebef854797ab2b137fb4e60f1e0ca1e5d62fcdbb0310d66328dd69",
+          "md_sha256": "91bb15cdfd2219b3d7d8f492a62d088914301a201c61174fed887dad246f68f3"
+        },
+        {
+          "path": "usage/groups.html",
+          "sha256": "6fd65acf68f5fca02df4e73700683db1282aa96ea368b42705513058f2a121ab",
+          "md_sha256": "83d7b0aa124bab2eed1bca496255fac33e0038a225aa3a22fd3a406983353518"
+        },
+        {
+          "path": "usage/inplace.html",
+          "sha256": "e080d5f99ae929c9a2e70203dfd155cac9694544e9af76c1eaeadc3afc6b818f",
+          "md_sha256": "7bbd2c608749e9d76299aaf2b17f025c4e0ba9e3d9be8f9b76f485d980f3def6"
+        },
+        {
+          "path": "usage/p2p.html",
+          "sha256": "ee2840a8880b64c2b1928dd63e0b2cea24e727ac66baf23195402561eb6b322a",
+          "md_sha256": "55754d9fcb457fd6ec48e9510765b5bd7ba9d68bdb49ca8babf4b3787a444a6c"
+        },
+        {
+          "path": "usage/streams.html",
+          "sha256": "925b2c675d8287739abe8ec09acdd6118d194c90adea46cd83ce41e29dea37e8",
+          "md_sha256": "f55029eef73988b96a3617860bee47da4a1546ab7b6a0c999753c561dcce0a87"
+        },
+        {
+          "path": "usage/threadsafety.html",
+          "sha256": "645d6d4692a394dd894c5059c18277958eea4e9015fc30cbf28aea65d2bd815f",
+          "md_sha256": "bbc88dce2ae4e45b7ec322135f4e24e88fe957468acb603f722baf48a02eb7ea"
+        }
+      ]
+    },
+    {
+      "id": "nvshmem-docs",
+      "model": "nvshmem",
+      "kind": "pages",
+      "why_not_vendored": "docs.nvidia.com content, published without a redistribution licence.",
+      "fetch_base": "https://archive.docs.nvidia.com/nvshmem/api/3.7.0/",
+      "link_base": "https://docs.nvidia.com/nvshmem/api/",
+      "link_base_note": "The corpus was built from a mirror of the live site taken 2026-07-15, since replaced there by 3.8. NVIDIA's version archive serves 3.7.0 re-rendered in a newer theme: different bytes, so the checksums below are the archive's, but Extract reads identical values from it (all 93 NVSHMEM entries compared field by field, 2026-09-23). The Markdown keeps the original live-site URLs.",
+      "dest": "nvshmem/docs/3.7.0",
+      "raw_dir": "raw",
+      "md_dir": ".",
+      "pages": [
+        {
+          "path": "acknowledgements.html",
+          "sha256": "eb8d277a97373201aacba578b030ab3a42065cc10671abcdbb465546b637bb8d",
+          "md_sha256": "0f9c3d2534a60e6303e88bc96b6ccc222c2f9564931ab71188a32351da045adc"
+        },
+        {
+          "path": "api.html",
+          "sha256": "b1753f0bb85fb1a35ba30f8e7d061ee5747af026d4c6233024ce667ad5934e93",
+          "md_sha256": "035a9e2e9cbcfa74d3cdb64698ad8cfef96830c06acf2fa9622540ccbe55f201"
+        },
+        {
+          "path": "api/language_bindings/index.html",
+          "sha256": "7d4d31ee37282b9a2d36bcbcf9182ade05cd8f37f10b9527f4d24fb5d10de0ee",
+          "md_sha256": "15dde7e3e2c1c63e04cb3f4d091d21359c1be848268613eb50fb29b0b7e48322"
+        },
+        {
+          "path": "api/language_bindings/python/collectives.html",
+          "sha256": "3d5c22fa392ace2b2c08faf1f0f4d89a412f1c34c22c0a586689a04b16e6aa81",
+          "md_sha256": "1a549bb1b0832a63ab613973fda06dd9c70fdd4943b51516d503fd7e47645941"
+        },
+        {
+          "path": "api/language_bindings/python/device/cute/amo.html",
+          "sha256": "3fc3c3985fd97793012b5204990a5b8d19cc1fe5b4ea43f5bf3b57870662ce1d",
+          "md_sha256": "81bef5ece7b5883c057df63109fc0b010be182e7eae181454eb86062f3bd8077"
+        },
+        {
+          "path": "api/language_bindings/python/device/cute/collectives.html",
+          "sha256": "1013e37a4e6462f19d97a26cb842602082c491a0551bb4d5fd967fa35f1d1dd2",
+          "md_sha256": "8937e4acb54d0de4e9fa7003cbc6ae980de404fc7877c68147881ce0bc73844a"
+        },
+        {
+          "path": "api/language_bindings/python/device/cute/index.html",
+          "sha256": "3b9f67ba79dc021c38b33663f9888b5b9424e79eae12617c412591ca4f8c8104",
+          "md_sha256": "1b5862bce5a043d47f9b1fb2767d9cd4c68766c5aed65fe2b7ad2d2b5474836a"
+        },
+        {
+          "path": "api/language_bindings/python/device/cute/rma.html",
+          "sha256": "2a5403bea97f32fe81f82f89c6ae448f06f63aac5acb7f15ca239ccb842ed83f",
+          "md_sha256": "e2ba081e006c95e6476805bf765d5895b092d0c09df435fa74b86c61ba03af07"
+        },
+        {
+          "path": "api/language_bindings/python/device/index.html",
+          "sha256": "0252d0aa7dcd7b8fd02a5190eed68c65aa3d42326117beff48268f60b8b9db82",
+          "md_sha256": "ff4bf1eb1ee9c2c56c7b96c640dee6541cc874b961bd52259a1f1644d5cf791d"
+        },
+        {
+          "path": "api/language_bindings/python/device/numba/amo.html",
+          "sha256": "0cd3f5484c1b3e3d2159406d95a6aaa7e8f09c8efb66979c734cdedb129aebaa",
+          "md_sha256": "96bb0051ba00a5138ec307dd46e497771bec04351f31c47308f16aa5a19e059d"
+        },
+        {
+          "path": "api/language_bindings/python/device/numba/collectives.html",
+          "sha256": "9eeeb91a028ab7bf513214c7dea077d025d93f16e57a78cf07e1405e7ba8d0a1",
+          "md_sha256": "137ecbdce31d46175f8627d5596a5bb75ad1ef76e087bf4763927f619732c3aa"
+        },
+        {
+          "path": "api/language_bindings/python/device/numba/index.html",
+          "sha256": "d507dd0943ec35b8e7096342fea0b2a11a12b251cb8c8e5b290b86beb281a52c",
+          "md_sha256": "2bdb6831b594c40e6eff7f827378b98fb14a4c9fb0f9d2421178ae07706ad1aa"
+        },
+        {
+          "path": "api/language_bindings/python/device/numba/rma.html",
+          "sha256": "fa77701ea04cf739ed112df87e9dedddc01fb091ab42dbadaad6a9685ed8dbed",
+          "md_sha256": "c45183009e76f391b7edeaa5026c7edcd5402dd887e25c8fa214af38fa24530b"
+        },
+        {
+          "path": "api/language_bindings/python/index.html",
+          "sha256": "720347c2dacfdc5ad39487aade2479830fbcfa09b2625d0b1bbc5d59da91977a",
+          "md_sha256": "dab6334b74de0734ab8a5a581861c52f29387dfba0317870cf202da200a8ceb9"
+        },
+        {
+          "path": "api/language_bindings/python/initialization.html",
+          "sha256": "9b2de2f8953a984c1de47381fe8be6f3b450c1e32a9b4cedb428ce701ebaeedd",
+          "md_sha256": "901a17ba495e775006fd71157d9f6832b98bf9c261368ed427f93a17d9017a12"
+        },
+        {
+          "path": "api/language_bindings/python/interoperability.html",
+          "sha256": "16e45def806828971f70406fde744d4cc4dddab2778fbe0ad9b0519eecbd2f8c",
+          "md_sha256": "b958a5d70aa50e1f7095cc67756e8e8c6395fb39e32b7146703bacadb53df9c6"
+        },
+        {
+          "path": "api/language_bindings/python/memory_management.html",
+          "sha256": "a8a3110a032d0cd559994af0b151ef7c97fb67f9a7a569d220bb577108b14422",
+          "md_sha256": "96375d7f6e8c48c2a86197d4d2ec95304fd35a3fb0f7025b90eafc1be7a7101f"
+        },
+        {
+          "path": "api/language_bindings/python/overview.html",
+          "sha256": "925566712a23081fd64ad3de2af80bcfa020f640e1dc796c52a6bd8cc9fba044",
+          "md_sha256": "8982814e97a5aa767f2238d14a4850613da8daee73d93773dfee9cd32a0d44bf"
+        },
+        {
+          "path": "api/language_bindings/python/rma.html",
+          "sha256": "2975a3b683496c49210009a55031dc59352411a458af63557c5f0edd34144cad",
+          "md_sha256": "624bd8d0f2846154c9933d18fd56f922ad0e5a0eac7a360fe89da55f36b17c5c"
+        },
+        {
+          "path": "api/language_bindings/python/utils.html",
+          "sha256": "c1b89edc85f3134cf2a0b5ef776357b11d57142b1e4543ef24d3c51b1e1190d8",
+          "md_sha256": "df950ef7f1c083dfe7b124b9b17cf29c17c534c7e0048522e71eb942cf86975b"
+        },
+        {
+          "path": "api/launch.html",
+          "sha256": "82bef9a093219d7020522562b580baaa07e39bf6bb4b8f6eb5bfb96ef65c5550",
+          "md_sha256": "0e303f11f38cb96dc3025268b3740df663635b1723aaa9d6d31812fadf1f2538"
+        },
+        {
+          "path": "api/overview.html",
+          "sha256": "f1632e452454e3d2187004fb281068f4475ae43c497b7b61e90e79c754898875",
+          "md_sha256": "9b71581684c020c6bfc1836b03de1b729b3ffddc181edd7226eb56aa2064fa4f"
+        },
+        {
+          "path": "cuda-interactions.html",
+          "sha256": "d33ee084ea8a12d0443c55d98ade92f32fe10623c7d6ceae8c6e6defa02dc68e",
+          "md_sha256": "c7766f976295e454fb98f8f94755a04794f71f1959137df646c843c97957c299"
+        },
+        {
+          "path": "examples.html",
+          "sha256": "1afa851df8990cdfb79d836c0bdac8fe5de216868fe8b0f7f0d72caf07db1bd0",
+          "md_sha256": "3fa5f3a968b39b66c4840253ce063599ee0fe6ef60ac7d141fb99cb2be5c5e26"
+        },
+        {
+          "path": "examples/language_bindings/index.html",
+          "sha256": "4f781f8b870646b30cb518348fb483b5be0f12d816e98dd9285984272d0b5d57",
+          "md_sha256": "d6299d61324a739f76c33a4b4491cad59b77b0bd9b27f01644ff2111863e6b76"
+        },
+        {
+          "path": "examples/language_bindings/python/index.html",
+          "sha256": "534562af08f44cdf5df7b0dbe424d425dd13fdef2b8e4ec3376ae1efe0ea9245",
+          "md_sha256": "90c4b30c87351847917bd546834535bc4c09a92551c113fcce23f3c7e3661b43"
+        },
+        {
+          "path": "faq.html",
+          "sha256": "2df659bc67463c2fa8de8ece53e157deb5e3e663a611c10ee3b444bdb41ea08e",
+          "md_sha256": "2acdd13d59ad4ee725562b1ec0374dd9eacfbf995bbca2971907bae49c7e8915"
+        },
+        {
+          "path": "gen/api/amo.html",
+          "sha256": "4376121fceade5bfe9758bcf664850e75783f5fc41a583ff664025d49a3dc581",
+          "md_sha256": "90b2133f4a1a07bed2d3f41ad4b4d535d90088093179e1f04881f9929a9eb58b"
+        },
+        {
+          "path": "gen/api/collectives.html",
+          "sha256": "0479fdb0580d8c7e7389efe16243a1a42aa67081a998debb74bae73d5c7d78ca",
+          "md_sha256": "9129f44708f278d9adb4217cabda05bf23c895d5e2799e012b26c1f5328d924b"
+        },
+        {
+          "path": "gen/api/memory.html",
+          "sha256": "eec30704600866cfe8bd481cb17830dced0a1854db0ed0d15d5b068fa2d1f2e9",
+          "md_sha256": "6abdfd96747a4f3eda9c8741152a12cd58db841a5b9eecf253e2ed32c4840d20"
+        },
+        {
+          "path": "gen/api/ordering.html",
+          "sha256": "fc8a9aed02da63c7845181fb84aa5a63ade079af9d1a87f341d13d3142c15a1f",
+          "md_sha256": "07f78dcd7709ca30c47ec8f3a170678987bb27e1a3661d4f2c073ad758e5f445"
+        },
+        {
+          "path": "gen/api/qp.html",
+          "sha256": "f434396e2af5b4cae104c383fc37e534a6f4eda79b1a99aa62beae0224a382d4",
+          "md_sha256": "04166d1286c635a319fa67ed5395be2e598279e3df74e88bbb812a53a03fbe4a"
+        },
+        {
+          "path": "gen/api/rma.html",
+          "sha256": "ad3a9c8f54ac9e99b87a3d6dbd4a5631dc7571aa00e64576f5d22a36badc6dc5",
+          "md_sha256": "21b012b4671bd1b91783be6f33e94ddb7b3212186720d09df6efbd7655fbbe5c"
+        },
+        {
+          "path": "gen/api/setup.html",
+          "sha256": "751955a59f3c6a0ae1fb7ab2a480a09f620a1de7b3d00ce65691dbada4871216",
+          "md_sha256": "8b11826e3ed4379a378099c730cccc8a1ab5628170e34ae680e712f96f76500e"
+        },
+        {
+          "path": "gen/api/signal.html",
+          "sha256": "5d20f8f3d956de61fcde1e62637cb9cb4d0b9c83e48cb25fa36e1e4bd59f7137",
+          "md_sha256": "f01d407710cfe69d67c418c9848246d7223009e19df7e09c411e0f78040df71f"
+        },
+        {
+          "path": "gen/api/sync.html",
+          "sha256": "e30f62e5bb04587ccf9842c7aec08fce10c62e56e5bec81d782b40f320dad87b",
+          "md_sha256": "f464f95e0d4db1eaa7fd3705b37431ec838dddde417d1ecf4ed1f2dca34eede5"
+        },
+        {
+          "path": "gen/api/teams.html",
+          "sha256": "d87028673db12e0fd9968d07822e7b4a8c682873a1ce563f05b013c4e3bf0622",
+          "md_sha256": "b76ba543776ba655634033334f62232dfdf4ed294bc778031325618a7e9dbbcb"
+        },
+        {
+          "path": "gen/const.html",
+          "sha256": "690ff60bccffd09c0857029d0bba5e725eff683cc615903dedb8e01ff419a752",
+          "md_sha256": "02c3339b10bb3a2955ff6d548dc32362b1c63f97180d0df69bbbfd69ac7d8fa4"
+        },
+        {
+          "path": "gen/env.html",
+          "sha256": "20d7adfa509555fcd4d4068c70b8af72fd8649c048fdc033787e4a9f4052c32c",
+          "md_sha256": "f932de56aa6f4e0992bcbff1a49f238a303148afb71f7f53d151cfddd84bfc10"
+        },
+        {
+          "path": "gen/exec-model.html",
+          "sha256": "2877ccb8c901e07eefea5459cb4d0f06a1f558e9b5fb6cd599e7365061723801",
+          "md_sha256": "c031922529376601afaad7f4e63230076865c8e263158e69c221189fff58eb0c"
+        },
+        {
+          "path": "gen/handles.html",
+          "sha256": "b4ecd265b63bbcc590352a2ae199b8e256cf330844993849367839fa24383a88",
+          "md_sha256": "3d508c5a2a5f08fab713c9242d32d3ca011a28ed92de2c0323e61510ece0a97f"
+        },
+        {
+          "path": "gen/mem-model.html",
+          "sha256": "79b7c5029eb49dbfdc721540914cb897a007af7ac31c38eafef3581a3e50eb14",
+          "md_sha256": "e81c11d644e56b5d7aef065ef65bf1ef769f1ce41f3fbf8f42d5448bbc4ffe8e"
+        },
+        {
+          "path": "introduction.html",
+          "sha256": "43a6fb3fd5f76546bd7e8353b356dacc11de2f1b5838cf3bd08b531f62d8bcad",
+          "md_sha256": "bfaf3e956162a3bae0b1b85e74ef9e8c2dbae2ea43a957f956f89d2b5c0b38c5"
+        },
+        {
+          "path": "sla.html",
+          "sha256": "9e01b393f9ce1283b79dfd8066d7e31f3ca2269435fd7d1c661fa49569fdf983",
+          "md_sha256": "3e2c2d9bf3d30a06de15a43e2971a4bb79a6b5692a3675b388500eabeaa5aeff"
+        },
+        {
+          "path": "tma.html",
+          "sha256": "d507820da20b033eed505c13731a9b9ef1ed624dbd0bf2ac399ce6ab5c097e84",
+          "md_sha256": "509208c12480d22f63089f603a8888df777dd1d14bc604736a46f6bf22b59033"
+        },
+        {
+          "path": "using.html",
+          "sha256": "6816d53983c4f47d2da94a084af5e7470e7121eee0ed25637ce81a7803a296de",
+          "md_sha256": "49dac7d34264c3496a1ab79989d267b92be9e6063e5075c657c329039492217e"
+        }
+      ]
+    }
+  ]
+}

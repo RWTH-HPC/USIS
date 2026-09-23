@@ -1,0 +1,2 @@
+nvshmem_add_transport(nvshmem_transport_gpunetio gpunetio.cpp ON ON ON ON)
+target_link_libraries(nvshmem_transport_gpunetio PRIVATE doca_gpunetio)

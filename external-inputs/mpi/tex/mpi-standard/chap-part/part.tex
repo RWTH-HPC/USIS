@@ -1,0 +1,705 @@
+\chapter{Partitioned Point-to-Point Communication}
+\mpitermtitleindexsubmain{partitioned point-to-point}{communication}
+\label{sec:part}
+\label{chap:part}
+
+\section{Introduction}
+\label{sec:part-intro}
+Partitioned communication extends persistent point-to-point communication as  defined in
+Chapter~\ref{chap:pt2pt}. Partitioned communication operations are matched based on the order in which the local initialization calls are performed. Partitioned
+communication is ``partitioned'' because it allows for multiple contributions of
+data to be made, potentially, from multiple actors (e.g., threads or tasks) in an \MPI/ process to a single communication
+operation.
+
+\begin{users}
+The techniques of partitioned communication were known as ``finepoints'' 
+before their adoption into the \MPI/ standard. 
+We refer the interested reader to the original literature describing the
+design goals, functioning, initial implementation 
+and performance improvements~\cite{finepoints_isc,finepoints}.
+\end{users}
+
+Partitioned communication operations use
+a persistent communication style that involves a sequence of start and test or wait operations. For this
+sequence, partitioned communications use \mpifunc{MPI\_START} or \mpifunc{MPI\_STARTALL} calls
+and completion mechanisms (e.g., \mpifunc{MPI\_TEST} or \mpifunc{MPI\_WAIT}).
+Partitioned communication is different in three fundamental ways from persistent
+point-to-point operations in \MPI/. 
+First, partitioned communication
+allows additional partitioned test function calls that can expose partial completion
+of the operation.
+Second, partitioned communication may perform all
+of the initialization required to enable data transfer as
+early as its initialization phase. Third, partitioned communication allows for
+\MPI/ to be independently notified of multiple contributions from the 
+send-side to a single data buffer of a single \MPI/ message.
+
+\begin{rationale}
+The rationale behind having different initialization behavior allowed for
+partitioned communication as opposed to persistent point-to-point communication is to
+enable flexibility and optimization possibilities in implementations.
+Buffer setup can occur in the
+partitioned communication initialization functions (see Section~\ref{sec:part_comm_init}). 
+However, such negotiation can be deferred until
+data is to be moved between two processes. This means that partitioned communication can
+lazily negotiate as late as testing for completion of the operation on the first
+iteration of a sequence of partitioned communication start and test or wait operations.
+Matching still occurs as if matching happened at the partitioned communication initialization functions
+as noted in the function descriptions.
+\end{rationale}
+
+\section{Semantics of Partitioned Point-to-Point Communication}
+\mpitermtitleindex{semantics!partitioned point-to-point communication}
+\label{sec:part-semantics} 
+\MPI/ guarantees certain general properties of
+partitioned point-to-point communication progress,
+which are described in this section.
+
+Persistent communications use opaque \mpiarg{MPI\_REQUEST} objects
+as described in Section~\ref{sec:pt2pt}. Partitioned communication
+uses these same semantics for \mpiarg{MPI\_REQUEST} objects.
+
+Partitioned communication provides fine-grained transfers on either or
+both sides of a send-receive operation described by requests.
+Persistent communication semantics are ideal for partitioned
+communication: they provide \mpifunc{MPI\_PSEND\_INIT} and
+\mpifunc{MPI\_PRECV\_INIT} functions that allow partitioned
+communication setup to occur prior to message transfers. Partitioned
+communication initialization functions are local.  The partitioned
+communication initialization includes inputs on the number of
+user-visible partitions on the send-side and receive-side, which may
+differ.  Valid partitioned communication operations must have
+one or more partitions specified.
+
+Once an \mpifunc{MPI\_PSEND\_INIT} call has been made, the user may start the
+operation with a call to a starting procedure and complete the
+operation with one \mpifunc{MPI\_PREADY} call for every
+send partition followed by a call to a completing
+procedure. A call to \mpifunc{MPI\_PREADY} notifies the
+\MPI/ library that a specified portion of the data buffer (a specific partition) is ready to be sent.
+Notification of partial completion can be done
+via fine-grained \mpifunc{MPI\_PARRIVED} calls at the receiver before a final
+\mpifunc{MPI\_TEST}/\mpifunc{MPI\_WAIT} on the request itself; the latter
+represents overall operation completion upon success.  
+A full set of methods
+for starting and completing partitioned communication is given in the
+following sections.
+
+\begin{users}
+Having a large number of receiver-side partitions can increase overheads 
+as the completion mechanism may need to work with finer-grained notifications. Using a small
+number of receiver-side partitions \emph{may} provide higher performance.
+
+A large number of sender-side partitions may be aggregated by an \MPI/ implementation,
+making performance concerns of a large number of sender-side partitions potentially less impactful
+than receiver-side granularity. 
+\end{users}
+
+\begin{implementors}
+It is expected that an \MPI/ implementation will attempt to balance
+latency and aggregation for
+data transfers for the requested partition counts on the sender-side and receiver-side
+to allow optimization for different hardware. A high quality implementation may 
+perform significant optimizations to enhance performance in this way; they may, for example,
+resize the data transfers of the partitions to combine partitions in fractional
+partition sizes (e.g., 2.5 partitions in a single data transfer). 
+\end{implementors}
+
+ 
+Example~\ref{part-example1} shows a simple partitioned transfer
+in which the sender-side and receiver-side partitioning is identical in partition count.
+
+\begin{example}
+Simple partitioned communication example.
+\label{part-example1}%
+\exindex{Partitioned communication!Simple example}%
+\Exindex{C}{Partitioned communication}{MPI\_Psend\_init,MPI\_Precv\_init,MPI\_Pready}%
+%%HEADER
+%%LANG: C
+%%DECL: void error(const char *);
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#include <stdlib.h>
+#include "mpi.h"
+#define PARTITIONS 8
+#define COUNT 5
+int main(int argc, char *argv[])
+{
+  double message[PARTITIONS*COUNT];
+  int partitions = PARTITIONS;
+  int source = 0, dest = 1, tag = 1, flag = 0;
+  int myrank, i;
+  MPI_Request request;
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  if (myrank == 0)
+  {
+     MPI_Psend_init(message, partitions, COUNT, MPI_DOUBLE, dest, tag,
+                    MPI_COMM_WORLD, MPI_INFO_NULL, &request);
+     MPI_Start(&request);
+     for(i = 0; i < partitions; ++i)
+     {
+        /* compute and fill partition #i, then mark ready: */
+        MPI_Pready(i, request);
+     }
+     while(!flag)
+     {
+        /* do useful work #1 */
+        MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
+        /* do useful work #2 */
+     }
+     MPI_Request_free(&request);
+  }
+  else if (myrank == 1)
+  {
+     MPI_Precv_init(message, partitions, COUNT, MPI_DOUBLE, source, tag,
+                    MPI_COMM_WORLD, MPI_INFO_NULL, &request);
+     MPI_Start(&request);
+     while(!flag)
+     {
+        /* do useful work #1 */
+        MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
+        /* do useful work #2 */
+     }
+     MPI_Request_free(&request);
+  }
+  MPI_Finalize();
+  return 0;
+}
+\end{lstlisting}
+\end{example}
+
+\begin{rationale}
+Partitioned communication is designed to provide opportunities for \MPI/ implementations to
+optimize data transfers. \MPI/ is free to choose how many transfers to do within a partitioned communication send
+independent of how many partitions are reported as ready to \MPI/ through
+\mpifunc{MPI\_PREADY} calls.
+Aggregation of partitions is permitted but not required.  Ordering of partitions  is permitted but not required.
+A naive implementation can simply
+wait for the entire message buffer to be marked ready before any transfer(s) occur and
+could wait until the completion function is called on a request before transferring data.
+However, this modality of communication gives \MPI/ implementations far more flexibility in data
+movement than
+nonpartitioned communications.
+\end{rationale}
+
+\subsection{Communication Initialization and Starting with Partitioning}
+\label{sec:part_comm_init}
+%\mpitermtitleindexmainsub{initialization}
+%\mpitermtitleindexmainsub{starting}
+%
+Initialization of partitioned communication operations use the initialization calls described below.
+Subsequent to initialization, \mpifunc{MPI\_START}/\mpifunc{MPI\_STARTALL} are used as the first indication
+to \MPI/ that a message transfer will occur.
+For send-side operations,
+neither initializing nor starting the operation enables 
+transfer of any part of the user buffer.
+Freeing or canceling a partitioned communication request that is active (i.e., initialized and
+started) and not completed is erroneous.
+After the partitioned communication operation is started, individual partitions of a 
+message are indicated as ready to be sent by \MPI/ via the \mpifunc{MPI\_PREADY}
+function, described below.
+
+\cdeclindex{MPI\_Request}
+\begin{mpi-binding}
+    function_name("MPI_Psend_init")
+    parameter("buf", "BUFFER", direction="IN", desc=r"initial address of send buffer", constant="true")
+    parameter("partitions", "PARTITION", direction="IN", desc=r"number of partitions")
+    parameter("count", "XFER_NUM_ELEM_NNI", direction="IN", desc=r"number of elements sent per partition")
+    parameter("datatype", "DATATYPE", direction="IN", desc=r"type of each element")
+    parameter("dest", "RANK", direction="IN", desc=r"rank of destination")
+    parameter("tag", "TAG", direction="IN", desc=r"message tag")
+    parameter("comm", "COMMUNICATOR", direction="IN", desc=r"communicator")
+    parameter("info", "INFO", desc=r"info argument")
+    parameter("request", "REQUEST", direction="OUT", desc=r"communication request")
+\end{mpi-binding}
+
+\noindent \mpifunc{MPI\_PSEND\_INIT} 
+creates a partitioned communication request and binds to it all the
+arguments of a partitioned send operation.
+Matching follows the same \MPI/ matching rules as for point-to-point communication (see Chapter~\ref{chap:pt2pt}) with communicator, tag, and source dictating
+message matching. In the event that the communicator, tag, and source do not
+uniquely identify a message, the order in which partitioned 
+communication \emph{initialization} calls are made is the order in which they will eventually match.
+This operation can only match with partitioned communication initialization operations,
+therefore it is required to be matched with a corresponding
+\mpifunc{MPI\_PRECV\_INIT} call. 
+Partitioned communication initialization calls are
+local. It is erroneous to provide a \mpiarg{partitions} value $\le 0$.
+Send-side and receive-side buffers must be identical in size.
+
+\begin{implementors}
+  Unlike \mpifunc{MPI\_SEND\_INIT}, \mpifunc{MPI\_PSEND\_INIT} can be matched as early as the initialization call.
+  Also, unlike \mpifunc{MPI\_SEND\_INIT}, \mpifunc{MPI\_PSEND\_INIT} takes an info argument.  
+\end{implementors}
+ 
+\cdeclindex{MPI\_Request}
+\begin{mpi-binding}
+    function_name("MPI_Precv_init")
+    parameter("buf", "BUFFER", direction="IN", desc=r"initial address of recv buffer")
+    parameter("partitions", "PARTITION", direction="IN", desc=r"number of partitions")
+    parameter("count", "XFER_NUM_ELEM_NNI", direction="IN", desc=r"number of elements received per partition")
+    parameter("datatype", "DATATYPE", direction="IN", desc=r"type of each element")
+    parameter("source", "RANK", direction="IN", desc=r"rank of source")
+    parameter("tag", "TAG", direction="IN", desc=r"message tag")
+    parameter("comm", "COMMUNICATOR", direction="IN", desc=r"communicator")
+    parameter("info", "INFO", desc=r"info argument")
+    parameter("request", "REQUEST", direction="OUT", desc=r"communication request")
+\end{mpi-binding}
+
+\begin{rationale}
+The \mpiarg{info} argument is provided in order to support per-operation implementation\hyphen/defined info keys.
+\end{rationale}
+
+\mpifunc{MPI\_PRECV\_INIT} creates a partitioned communication receive request
+and binds to it all the
+arguments of a partitioned receive operation.
+This operation can only match with partitioned communication initialization operations,
+therefore the \MPI/ library is required to match \mpifunc{MPI\_PRECV\_INIT} calls only with a corresponding
+\mpifunc{MPI\_PSEND\_INIT} call. 
+Matching follows the same \MPI/ matching rules as for point-to-point communication (see Chapter~\ref{chap:pt2pt}) with communicator, tag, and source dictating
+message matching. In the event that the communicator, tag, and source do not
+uniquely identify a message, the order in which partitioned 
+communication initialization calls are made
+is the order in which they will eventually match.
+Partitioned communication initialization calls are
+local. That is, \mpifunc{MPI\_PRECV\_INIT} may return before the operation
+completes. It is erroneous to provide a \mpiarg{partitions} value $\le 0$. Wildcards for source and tag are not allowed.
+
+\begin{implementors}
+Unlike \mpifunc{MPI\_RECV\_INIT}, \mpifunc{MPI\_PRECV\_INIT} may communicate.
+Also unlike \mpifunc{MPI\_RECV\_INIT}, \mpifunc{MPI\_PRECV\_INIT} takes an \mpiarg{info} argument.
+\end{implementors}
+
+\cdeclindex{MPI\_Request}
+\begin{mpi-binding}
+    function_name("MPI_Pready")
+    parameter("partition", "PARTITION", direction="IN", desc=r"partition to mark ready for transfer")
+    parameter("request", "REQUEST", direction="lis:inout,param:in", desc=r"partitioned communication request")
+\end{mpi-binding}
+
+\mpifunc{MPI\_PREADY} is a send-side call that indicates that a given \mpiarg{partition} is ready to be
+transferred.  It is erroneous to use \mpifunc{MPI\_PREADY} on any request object that does not correspond to a partitioned send operation.
+The partitioning is defined by the \mpifunc{MPI\_PSEND\_INIT} call.
+Partition numbering starts at zero and ranges to one less than the number of partitions declared in
+the \mpifunc{MPI\_PSEND\_INIT} call.  
+Specifying a partition number that is equal to or larger than the number of partitions is erroneous.
+After a call to \mpifunc{MPI\_START}/\mpifunc{MPI\_STARTALL}, all partitions associated with that operation are inactive. A call to
+\mpifunc{MPI\_PREADY} marks the indicated partition as active. 
+Calling \mpifunc{MPI\_PREADY} on an active partition is erroneous.
+
+\cdeclindex{MPI\_Request}
+\begin{mpi-binding}
+    function_name("MPI_Pready_range")
+    parameter("partition_low", "PARTITION", direction="IN", desc=r"lowest partition ready for transfer")
+    parameter("partition_high", "PARTITION", direction="IN", desc=r"highest partition ready for transfer")
+    parameter("request", "REQUEST", direction="lis:inout,param:in", desc=r"partitioned communication request")
+\end{mpi-binding}
+
+A call to \mpifunc{MPI\_PREADY\_RANGE} has the same effect as calls to
+\mpifunc{MPI\_PREADY}, executed for \mpicode{i=partition\_low, $\ldots$,
+partition\_high}, in some arbitrary order.
+Calls to \mpifunc{MPI\_PREADY\_RANGE} follow the same rules as those for 
+\mpifunc{MPI\_PREADY} calls.
+
+\cdeclindex{MPI\_Request}
+\begin{mpi-binding}
+    function_name("MPI_Pready_list")
+    parameter("length", "ARRAY_LENGTH", direction="IN", desc=r"list length")
+    parameter("array_of_partitions", "PARTITION", direction="IN", desc=r"array of partitions", length="length", constant="true")
+    parameter("request", "REQUEST", direction="lis:inout,param:in", desc=r"partitioned communication request")
+\end{mpi-binding}
+
+A call to \mpifunc{MPI\_PREADY\_LIST} has the same effect as calls to
+\mpifunc{MPI\_PREADY}, executed for the partitions specified by the elements
+\[
+\mpicode{$array\_of\_partitions[0]$ ,$\ldots$, $array\_of\_partitions[count-1]$}
+\]
+of the \mpiarg{array\_of\_partitions}, executed in some arbitrary order.
+Calls to \mpifunc{MPI\_PREADY\_LIST} follow the same rules as those for
+\mpifunc{MPI\_PREADY} calls.
+
+\subsection{Communication Completion under Partitioning}
+\mpitermtitleindexmainsub{nonblocking!persistent}{partitioned completion}
+\label{subsec:part-commend}
+
+The functions \mpifunc{MPI\_WAIT} and \mpifunc{MPI\_TEST} (and
+variants) are used to complete a partitioned
+communication operation.  The completion of a partitioned send
+operation indicates that the sender is now free to call \mpifunc{MPI\_START}/\mpifunc{MPI\_STARTALL} to restart
+the operation and
+subsequently \mpifunc{MPI\_PREADY}, \mpifunc{MPI\_PREADY\_RANGE} or
+\mpifunc{MPI\_PREADY\_LIST}. Alternatively, the user can safely free 
+the partitioned communication request after the completion of
+the partitioned operation.
+For the sending process, completion of the
+partitioned send operation does not indicate that the
+partitions of the message have all been received. 
+
+The completion of a partitioned receive operation through \mpifunc{MPI\_WAIT} or
+\mpifunc{MPI\_TEST} indicates that the receive buffer contains all of the
+partitions. A function for probing the partial reception of the receive buffer is provided by 
+\mpifunc{MPI\_PARRIVED}.
+The \mpifunc{MPI\_PARRIVED} function can be used to determine if
+the message data for the indicated partition has been received into the receive buffer. Upon success, the
+receiver becomes free to access the indicated partition (as well as any others
+that previously completed for that operation).  
+
+\cdeclindex{MPI\_Request}
+\begin{mpi-binding}
+    function_name("MPI_Parrived")
+    parameter("request", "REQUEST", direction="IN", desc=r"partitioned communication request")
+    parameter("partition", "PARTITION", direction="IN", desc=r"partition to be tested")
+    parameter(
+        "flag",
+        "LOGICAL",
+        direction="out",
+        desc=r"\mpicode{true} if operation completed on the specified partition, \mpicode{false} if not",
+    )
+\end{mpi-binding}
+
+The function \mpifunc{MPI\_PARRIVED} can be used to
+test partial completion of partitioned receive operations.
+A call to \mpifunc{MPI\_PARRIVED} on an active partitioned communication request
+returns \mpiarg{flag}\mpicode{ = true} if the
+operation identified by \mpiarg{request} for the specified \mpiarg{partition} is complete.  
+The request is not marked as complete/inactive by this procedure.
+A subsequent call to an \MPI/ completing procedure (e.g., \mpifunc{MPI\_TEST}/\mpifunc{MPI\_WAIT}) is required to
+complete the operation, as described in Chapter~\ref{chap:pt2pt}.
+\mpifunc{MPI\_PARRIVED} may be called multiple times for a partition.
+\mpifunc{MPI\_PARRIVED} may be called with a null or inactive \mpiarg{request}
+argument. In either case, the operation returns with \mpiarg{flag}\code{ = true}.
+Calling \mpifunc{MPI\_PARRIVED} on a request that does not correspond to a partitioned
+receive operation is erroneous.
+
+Repeated calls to \mpifunc{MPI\_PARRIVED} with the same \mpiarg{request} and \mpiarg{partition} arguments will 
+eventually return \mpiarg{flag}\code{ = true} if the corresponding partitioned send operation has
+been started and all send partitions have been marked as ready. For additional information on \MPI/ 
+\mpitermni{progress}\mpitermindex{progress!partitioned point-to-point communication}
+\mpitermindex{semantics!partitioned point-to-point communication!progress} see
+\namedref{Sections}{subsec:terms:progress} \namedref{and}{subsec:pt2pt-semantics}.
+
+\begin{implementors}
+A high quality implementation will eventually return \mpiarg{flag}\mpicode{ =
+true} from \mpifunc{MPI\_PARRIVED} after all of the corresponding
+\mpifunc{MPI\_PREADY} calls have been made for a receive-side partition, 
+even if other send partitions are not yet marked as ready. 
+\end{implementors}
+
+\subsection{Semantics of Communications in Partitioned Mode}
+\mpitermtitleindex{semantics!nonblocking partitioned communications}
+\label{subsec:part-semantics}
+
+The semantics of nonblocking partitioned communication are defined by suitably extending the
+definitions in Section~\ref{sec:pt2pt-semantics}.
+
+\paraheading{Interpretation of count and datatype for partitioned communication.}
+Partitioned communication uses the \mpiarg{count} and \mpiarg{datatype}
+arguments in the partitioned communication initialization functions to describe
+a single partition. The argument \mpiarg{partitions} specifies how many equal
+partitions of a number (\mpiarg{count}) of objects of \mpiarg{datatype}s make up the
+entire buffer to be transferred in the partitioned communication. As partitioned
+communication describes many partitions, using absolute displacements in datatypes
+(e.g., \mpiconst{MPI\_BOTTOM}) is not supported. Partitions are contiguous in memory, there
+is no padding in between them.
+Once a partitioned send operation is started, each partition must be marked as ready
+using \mpifunc{MPI\_PREADY} and the operation must be completed using a completion
+function, such as \mpifunc{MPI\_TEST} or \mpifunc{MPI\_WAIT}.
+
+
+\paraheading{Order.}
+Matching follows the same \MPI/ matching rules as for point-to-point communication (see Chapter~\ref{chap:pt2pt}) with communicator, tag, and source dictating
+message matching. In the event that the communicator, tag, and source do not
+uniquely identify the message, the order in which partitioned 
+communication initialization calls are made is the order in which they will eventually match.
+
+\section{Partitioned Communication Examples}
+\label{sec:part-communication-examples}
+This section provides concrete examples of the utility of partitioned communication
+in realistic settings.
+\subsection{Partition Communication with Threads/Tasks Using OpenMP 4.0 or later}
+\label{subsec:part-channel-examples}
+In the following the equal partitioning on send-side and receive-side Example~\ref{part-example1} is extended
+to utilize threads. In this case, the receive-side uses the same
+number of partitions as the send-side as in the previous example, but this
+example uses multiple threads on the send-side. Note that the
+\mpifunc{MPI\_PSEND\_INIT} and \mpifunc{MPI\_PRECV\_INIT} functions match
+each other like in the previous example.
+
+\begin{example}
+Equal partitioning on send-side and receive-side using threads.
+\label{part-example2}%
+\exindex{Partitioned communication!Equal send/recv partitioning}%
+\Exindex{C}{Partitioned communication using threads}{MPI\_Psend\_init,MPI\_Precv\_init,MPI\_Pready}%
+%%HEADER
+%%LANG: C
+%%DECL: void error(const char *);
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#include <stdlib.h>
+#include "mpi.h"
+#define NUM_THREADS 8
+#define PARTITIONS 8
+#define PARTLENGTH 16
+int main(int argc, char *argv[]) /* same send/recv partitioning */
+{
+  double message[PARTITIONS*PARTLENGTH];
+  int partitions = PARTITIONS;
+  int partlength = PARTLENGTH;
+  int count = 1, source = 0, dest = 1, tag = 1, flag = 0;
+  int myrank;
+  int provided;
+  MPI_Request request;
+  MPI_Info info = MPI_INFO_NULL;
+  MPI_Datatype xfer_type;
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+  if (provided < MPI_THREAD_MULTIPLE)
+     MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Type_contiguous(partlength, MPI_DOUBLE, &xfer_type);
+  MPI_Type_commit(&xfer_type);
+  if (myrank == 0)
+  {
+     MPI_Psend_init(message, partitions, count, xfer_type, dest, tag,
+                    MPI_COMM_WORLD, info, &request);
+     MPI_Start(&request);
+
+     #pragma omp parallel for shared(request) num_threads(NUM_THREADS)
+     for (int i=0; i<partitions; i++)
+     {
+        /* compute and fill partition #i, then mark ready: */
+        MPI_Pready(i, request);
+     }
+     while(!flag)
+     {
+        /* Do useful work */
+        MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
+        /* Do useful work */
+     }
+     MPI_Request_free(&request);
+  }
+  else if (myrank == 1)
+  {
+     MPI_Precv_init(message, partitions, count, xfer_type, source, tag,
+                    MPI_COMM_WORLD, info, &request);
+     MPI_Start(&request);
+     while(!flag)
+     {
+        /* Do useful work */
+        MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
+        /* Do useful work */
+     }
+     MPI_Request_free(&request);
+  }
+  MPI_Finalize();
+  return 0;
+}
+\end{lstlisting}
+\end{example}
+
+\subsection{Send-only Partitioning Example with Tasks and OpenMP version 4.0 or later}
+The previous example is tailored specifically for send-side partitioning using threads.
+This is an example where parallel task producers produce
+input to part of an overall buffer; they complete in any order and contribute
+to the overall buffer. 
+\begin{example}
+Parallel task producers for partitioned communication using threads.
+\label{partexample3}%
+\exindex{Partitioned communication!Send with tasks}%
+\Exindex{C}{Partitioned communication with tasks}{MPI\_Psend\_init,MPI\_Precv\_init,MPI\_Pready}%
+%%HEADER
+%%LANG: C
+%%DECL: void error(const char *);
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C},basicstyle=\lstsmall]
+#include <stdlib.h>
+#include "mpi.h"
+#define NUM_THREADS 8
+#define NUM_TASKS 64
+#define PARTITIONS NUM_TASKS
+#define PARTLENGTH 16
+#define MESSAGE_LENGTH PARTITIONS*PARTLENGTH
+int main(int argc, char *argv[]) /* send-side partitioning */
+{
+  double message[MESSAGE_LENGTH];
+  int send_partitions = PARTITIONS,
+      send_partlength = PARTLENGTH,
+      recv_partitions = 1,
+      recv_partlength = PARTITIONS*PARTLENGTH;
+  int count = 1, source = 0, dest = 1, tag = 1, flag = 0;
+  int myrank;
+  int provided;
+  MPI_Request request;
+  MPI_Info info = MPI_INFO_NULL;
+  MPI_Datatype send_type;
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+  if (provided < MPI_THREAD_MULTIPLE)
+     MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Type_contiguous(send_partlength, MPI_DOUBLE, &send_type);
+  MPI_Type_commit(&send_type);
+
+  if (myrank == 0)
+  {
+     MPI_Psend_init(message, send_partitions, count, send_type, dest, tag,
+                    MPI_COMM_WORLD, info, &request);
+     MPI_Start(&request);
+
+     #pragma omp parallel shared(request) num_threads(NUM_THREADS)
+     {
+        #pragma omp single
+        {
+           /* single thread creates 64 tasks to be executed by 8 threads */
+           for (int partition_num=0;partition_num<NUM_TASKS;partition_num++)
+           {
+              #pragma omp task firstprivate(partition_num)
+              {
+                 /* compute and fill partition #partition_num, then mark
+                 ready: */
+                 /* buffer is filled in arbitrary order from each task */
+                 MPI_Pready(partition_num, request);
+              } /*end task*/
+           } /* end for */
+        } /* end single */
+     } /* end parallel */
+     while(!flag)
+     {
+        /* Do useful work */
+        MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
+        /* Do useful work */
+     }
+     MPI_Request_free(&request);
+  }
+  else if (myrank == 1)
+  {
+     MPI_Precv_init(message, recv_partitions, recv_partlength, MPI_DOUBLE,
+                    source, tag, MPI_COMM_WORLD, info, &request);
+
+     MPI_Start(&request);
+     while(!flag)
+     {
+        /* Do useful work */
+        MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
+        /* Do useful work */
+     }
+     MPI_Request_free(&request);
+  }
+  MPI_Finalize();
+  return 0;
+}
+\end{lstlisting}
+\end{example}
+
+\subsection{Send and Receive Partitioning Example with OpenMP version 4.0 or later}
+This example demonstrates receive-side partial completion notification
+using more than one partition per receive-side thread. It uses a naive flag 
+based method to test for multiple completed partitions per thread.
+Note that this means that some threads may be busy polling for completion of
+assigned partitions when partitions are available to work on that were not 
+assigned to the polling threads in this example. More advanced work stealing methods
+could be employed for greater efficiency.
+Like previous examples, it also demonstrates send-side production of
+input to part of an overall buffer. This example also uses different send-side and
+receive-side partitioning. 
+
+\begin{example}
+\label{partexample4}
+\exindex{Partitioned communication!Partial completion notification}%
+\Exindex{C}{Partitioned communication with partial completion}{MPI\_Parrived,MPI\_Psend\_init,MPI\_Precv\_init,MPI\_Pready}%
+Partitioned communication receive-side partial completion.\\
+%%HEADER
+%%LANG: C
+%%DECL: void error(const char *);
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#include <stdlib.h>
+#include "mpi.h"
+#define NUM_THREADS 64
+#define PARTITIONS NUM_THREADS
+#define PARTLENGTH 16
+#define MESSAGE_LENGTH PARTITIONS*PARTLENGTH
+int main(int argc, char *argv[]) /* send-side partitioning */
+{
+  double message[MESSAGE_LENGTH];
+  int send_partitions = PARTITIONS,
+      send_partlength = PARTLENGTH,
+      recv_partitions = PARTITIONS*2,
+      recv_partlength = PARTLENGTH/2;
+  int source = 0, dest = 1, tag = 1, flag = 0;
+  int myrank;
+  int provided;
+  MPI_Request request;
+  MPI_Info info = MPI_INFO_NULL;
+  MPI_Datatype send_type;
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+  if (provided < MPI_THREAD_MULTIPLE)
+     MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Type_contiguous(send_partlength, MPI_DOUBLE, &send_type);
+  MPI_Type_commit(&send_type);
+
+  if (myrank == 0)
+  {
+     MPI_Psend_init(message, send_partitions, 1, send_type, dest, tag,
+                    MPI_COMM_WORLD, info, &request);
+     MPI_Start(&request);
+     #pragma omp parallel for shared(request) \
+                              firstprivate(send_partitions) \
+                              num_threads(NUM_THREADS)
+     for (int i=0; i<send_partitions; i++)
+     {
+        /* compute and fill partition #i, then mark ready: */
+        MPI_Pready(i, request);
+     }
+     while(!flag)
+     {
+        /* Do useful work */
+        MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
+        /* Do useful work */
+     }
+     MPI_Request_free(&request);
+  }
+  else if (myrank == 1)
+  {
+     MPI_Precv_init(message, recv_partitions, recv_partlength,
+                    MPI_DOUBLE, source, tag, MPI_COMM_WORLD, info,
+                    &request);
+     MPI_Start(&request);
+     #pragma omp parallel for shared(request) \
+                              firstprivate(recv_partitions) \
+                              num_threads(NUM_THREADS)
+     for (int j=0; j<recv_partitions; j+=2)
+     {
+        int part_flag = 0;
+        int part1_complete = 0;
+        int part2_complete = 0;
+        while(part1_complete == 0 || part2_complete == 0)
+        {
+           /* test partition #j and #j+1 */
+           MPI_Parrived(request, j, &part_flag);
+           if(part_flag && part1_complete == 0)
+           {
+              part1_complete++;
+              /* Do work using partition j data */
+           }
+           MPI_Parrived(request, j+1, &part_flag);
+           if(part_flag && part2_complete == 0)
+           {
+              part2_complete++;
+              /* Do work using partition j+1 */
+           }
+        }
+     }
+     while(!flag)
+     {
+        /* Do useful work */
+        MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
+        /* Do useful work */
+     }
+     MPI_Request_free(&request);
+  }
+  MPI_Finalize();
+  return 0;
+}
+\end{lstlisting}
+\end{example}

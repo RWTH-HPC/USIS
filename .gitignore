@@ -1,0 +1,87 @@
+# Compiled/binary artifacts from vendored PPM implementations under external-inputs/.
+# These are build output (shared libs, static archives, device code blobs,
+# CUDA fatbins/cubins/LTO-IR, stripped executables) — never useful as text
+# input to the extraction pipeline, and too large to belong in git history.
+*.so
+*.so.*
+*.a
+*.bc
+*.cubin
+*.fatbin
+*.ltoir
+
+# Python bytecode caches.
+__pycache__/
+
+# LaTeX build output from running (pdf)latex on external-inputs/mpi/tex/mpi-standard/
+# (mpi-report.tex and its chapter includes). Regenerable, not pipeline input.
+*.aux
+*.toc
+*.out
+*.lof
+*.lot
+*.idx
+*.ilg
+*.ind
+*.glo
+*.gls
+*.glg
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+mpi-report.log
+
+# MPICH vendored source (external-inputs/mpi/implementation/mpich-5.0.1): keep only
+# what's relevant to extracting the MPI API surface — headers, per-call
+# source, the binding layer, and prose docs. Excluded: internal engines
+# (datatype packing/yaksa, ROMIO MPI-IO, the hydra process launcher and its
+# bundled third-party deps like hwloc/netloc), device/utility layers
+# (mpid/pmi/mpl/util and other internal-only dirs), and build-system
+# scaffolding (autotools files, maintainer scripts, examples).
+external-inputs/mpi/implementation/mpich-5.0.1/src/mpi/datatype/
+external-inputs/mpi/implementation/mpich-5.0.1/src/mpi/romio/
+external-inputs/mpi/implementation/mpich-5.0.1/src/pm/
+external-inputs/mpi/implementation/mpich-5.0.1/src/mpid/
+external-inputs/mpi/implementation/mpich-5.0.1/src/pmi/
+external-inputs/mpi/implementation/mpich-5.0.1/src/mpl/
+external-inputs/mpi/implementation/mpich-5.0.1/src/util/
+external-inputs/mpi/implementation/mpich-5.0.1/src/mpi_t/
+external-inputs/mpi/implementation/mpich-5.0.1/src/env/
+external-inputs/mpi/implementation/mpich-5.0.1/src/nameserv/
+external-inputs/mpi/implementation/mpich-5.0.1/src/packaging/
+external-inputs/mpi/implementation/mpich-5.0.1/src/glue/
+external-inputs/mpi/implementation/mpich-5.0.1/src/cross/
+external-inputs/mpi/implementation/mpich-5.0.1/maint/
+external-inputs/mpi/implementation/mpich-5.0.1/examples/
+external-inputs/mpi/implementation/mpich-5.0.1/contrib/
+external-inputs/mpi/implementation/mpich-5.0.1/configure.ac
+external-inputs/mpi/implementation/mpich-5.0.1/aclocal.m4
+external-inputs/mpi/implementation/mpich-5.0.1/autogen.sh
+external-inputs/mpi/implementation/mpich-5.0.1/Makefile.am
+external-inputs/mpi/implementation/mpich-5.0.1/subsys_include.m4
+external-inputs/mpi/implementation/mpich-5.0.1/mpich-doxygen.in
+external-inputs/mpi/implementation/mpich-5.0.1/README.envvar
+external-inputs/mpi/implementation/mpich-5.0.1/MPICH_COMMIT_HASH
+
+# Timestamped copies of curated files, made by workflow/build.py --regenerate
+# before it overwrites them. Local safety net, not history.
+curated/backups/
+
+# Build output of workflow/build.py. Regenerable; the shipped final-<ppm>-api.json
+# files are published as GitHub release assets rather than committed.
+instances/
+
+# NVIDIA inputs that are fetched, not vendored: the CUDA headers are proprietary
+# and the docs.nvidia.com mirrors carry no redistribution licence. Only the
+# READMEs we wrote (origin, version, retrieval method) are tracked.
+external-inputs/cuda/**
+external-inputs/nccl/docs/**
+external-inputs/nvshmem/docs/**
+!external-inputs/cuda/**/
+!external-inputs/nccl/docs/**/
+!external-inputs/nvshmem/docs/**/
+!external-inputs/cuda/**/README.md
+!external-inputs/nccl/docs/**/README.md
+!external-inputs/nvshmem/docs/**/README.md

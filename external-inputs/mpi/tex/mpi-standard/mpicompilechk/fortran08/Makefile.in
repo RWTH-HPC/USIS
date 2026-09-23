@@ -1,0 +1,28 @@
+ALL: all-redirect
+
+FC        = @FC@
+FCFLAGS   = @FCFLAGS@
+MODSUFFIX = @FC_MODEXT@
+
+.SUFFIXES:
+.SUFFIXES: .@FC_MODEXT@ .f90
+
+all-redirect: mpi_f08.$(MODSUFFIX)
+
+mpi_f08.$(MODSUFFIX): mpi_f08.f90 mpi_f08_compile_constants.$(MODSUFFIX) \
+	mpi_f08_link_constants.$(MODSUFFIX) mpi_f08_types.$(MODSUFFIX) \
+	mpi_f08_callbacks.$(MODSUFFIX) pmpi_f08.$(MODSUFFIX)
+	$(FC) -c $(FCFLAGS) mpi_f08.f90
+
+mpi_c_interface_types.$(MODSUFFIX): mpi_c_interface_types.f90
+
+mpi_f08_types.$(MODSUFFIX): mpi_f08_types.f90 mpi_c_interface_types.$(MODSUFFIX)
+
+mpi_f08_compile_constants.$(MODSUFFIX): mpi_f08_compile_constants.f90 \
+	mpi_f08_types.$(MODSUFFIX)
+
+.f90.mod:
+	$(FC) -c $(FCFLAGS) $<
+
+clean:
+	-rm -f *.mod *.o

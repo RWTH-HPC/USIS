@@ -1,0 +1,208 @@
+This directory contains codes to extract and fixup the examples.
+
+The LaTeX source must be annotated to mark the code fragments and to provide
+details that are missing from the example (since many code examples do not
+declare all variables or define complete functions).  The general approach is
+
+%%HEADER
+....
+%%ENDHEADER
+\begin{verbatim}
+code
+\end{verbatim}
+
+This allows easy extraction of the code from the source files.  Commands
+in the header allow you to specify how the code should be processed.
+
+Commands include:
+
+%%LANG: C
+%%LANG: FORTRAN
+%%LANG: FORTRAN90
+%%LANG: FORTRAN08
+%%LANG: C++
+    Specify language
+    If no LANG is specified, C is the default.
+
+%%DECL:
+    declarations to add
+    For example,
+    %%DECL: int a;
+
+%%DECLAFTERMOD:
+    declarations to add after a "use mpi" or "use mpi_f08" that appears in
+    a program fragment. Only if %%NOADDMPIMOD is also set. For example,
+    %%DECLAFTERMOD: TYPE(MPI_Comm) :: commold
+
+%%FRAGMENT
+    code is not an entire routine.  In this case, the code is placed into
+    a function named "testroutine", which by default is typed as
+    void testroutine(void).  The return type may be changed with %%RETURN: ;
+    the arguments with %%ARGS:
+
+%%SKIPELIPSIS
+    ignore ... in code
+
+%%SUBST:searchstring:replacement
+    Edit the text.  For example,
+    %%SUBST:/\* compute value \*/:1
+    replaces
+        if (/* compute value */) {
+    with
+        if (1) {
+    (Yes, you need to escape perl regular-expresion characters like *)
+    For example, to change ... to a,b,c use
+    %%SUBST:\.\.\.:a,b,c
+
+%%SKIP
+    Skip the related verbatim environment
+%%NOCHECK
+    Ignore this verbatim
+
+%%TAIL:
+    Text to add at the end of the code
+    Example:
+    %%TAIL: return 0;}
+
+%%NOUSEMPI
+    In Fortran examples, do not replace mpif.h with "use mpi"
+
+%%NOADDMPIMOD
+    In Fortran examples, do not add a "use MPI" or "use MPI_F08" statuement
+    This should be used only when the example fragment includes the appropriate
+    use statement
+
+%%NOIMPLICITNONE
+    In Fortran examples that are code fragments, an IMPLICIT NONE is normally
+    added after a "use mpi" or "use mpi_f08" (IMPLICIT NONE must occur after
+    all use statements). It this command is present, no IMPLICIT NONE is
+    added. This is needed for Fortran code fragments that have explicit "use"
+    statements (and are most likely also marked with %%NOADDMPIMOD)
+
+%%INCDIR:
+    Specify a directory to add for the include search path
+    For example,
+    %%INCDIR ../include
+
+%%TOP:
+    Text to add at the top of the code
+    For example,
+    %%TOP: #include <unistd.h>
+
+%%RETURN:
+    Type of return from routine
+    For example,
+    %%HEADER
+    %%LANG: C
+    %%FRAGMENT
+    %%RETURN: int
+    %%ENDHEADER
+    \begin{verbatim}
+        if (!malloc(4)) return 1;
+    \end{verbatim}
+
+%%ARGS:
+    Pass these arguments to the testroutine.  See FRAGMENT and RETURN.
+
+%%MSG:string
+    Output the string to stdout. This is useful for examples that are
+    erroneous and are expected to generate a warning or error message, while
+    allowing the rest of the example to be checked for correctness.
+    Used in one example where scalars are passed to a Fortran routine that
+    is expecting arrays.
+
+%%AUTOCONTINUE
+    For Fortran and Fortran90 only, this adds a Fortran (free format)
+    continuation to lines that end in a comma, plus, or minus
+
+%%ALLOWMISMATCH
+    For Fortran (any version), attempt to add a compile-time option to
+    allow argument mismatches. This is needed for some of the "choice"
+    routines, when the Fortran modele doesn't handle this case. This may
+    work only when such an option is available (and known) for the compiler
+    being used.  E.g., for gfortran, -fallow-argument-mismatch
+
+(Unimplemented)
+%%ALLOWIMPLICIT
+    For Fortran (any version), allow implicit function declarations.
+    This should only be used when a non-MPI function is used, and
+    including an interface declaration is considered distracting or
+    unnecessary.
+
+-------------
+Once the source files have been annotated, the command mpichk should be used
+to extract and compile the example code.  This command is created by configure,
+as in
+
+   ./configure
+
+By default, it will attempt to find mpicc (or mpcc), mpif90 (or mpxlf90),
+mpicxx (or mpixlC) and mpif77 (or mpxlf).  These can be overridden by defining
+the environment variables MPICC, MPIF90, MPICXX, and MPIF77 (you can set
+these on the configure command line).
+
+
+
+Also useful, if the underlying compile command is gcc or gfortran, is
+
+MPICHK_CFLAGS="-Wall -Wextra -Wstrict-prototypes -ansi"
+MPICHK_CXXFLAGS="-Wall -Wextra -ansi"
+MPICHK_F90FLAGS="-Wall -Wextra"
+
+Depending on the version of gcc, you might want to use the MPICHK_CFLAGS value
+
+-Werror-implicit-function-declaration
+
+(Note that the misnamed -Wall does not enable all warnings, and the set of
+warnings that it does enable can change between versions of gcc, so using
+an explicit option to force these checks is safer.)
+
+These will generate some warnings that may be ignored (e.g., warnings about
+unused arguments in routines such as the attribute copy and delete functions,
+where some of the arguments are unnneeded) but will also point out such things
+as unused (and hence possibly confusing to the reader) variables.
+
+To reject any MPI example that uses a deprected routine, define the
+environment variable
+
+MPICHK_NODEPRECATED=yes
+
+Setting the environment variable MPICHK_VERBOSE will echo the command that
+is being run for each test.
+
+If you do not have a Fortran compiler, use --disable-fortran on the configure
+line:
+
+    ./configure --disable-fortran
+
+The script will still extract the Fortan examples and create files with them,
+but it will not attempt to compile them.
+
+If you do use Fortran, there is a Fortran module that can be used to
+you will need to either use a version of mpifort that supports all
+features of MPI in the Fortran examples or build the MPI module in the
+mpicompilechk/fortran directory.  Use
+
+     cd fortran
+     make
+
+to build the MPI module.  At this time, an mpi_f08 module is not available.
+
+To run the mpichk program, either use the target in the mpi-standard Makefile
+(runs mpichk on all chapters) or use this command to run the check on a single
+file:
+
+   mpicompilechk/mpichk file.tex
+
+e.g.,
+
+   mpicompilechk/mpichk chap-pt2pt/pt2pt.tex
+
+Sligbtly cleaner is to use the same options as in the Makefile:
+
+   mpicompilechk/mpichk --outdir=chap-pt2pt chap-pt2pt/pt2pt.tex
+
+
+
+
+

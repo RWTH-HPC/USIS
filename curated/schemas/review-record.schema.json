@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/RWTH-HPC/USIS/v0.1.0/curated/schemas/review-record.schema.json",
+  "title": "Review record",
+  "description": "Validates curated/review/<artifact>.review.json -- the record of which proposals a human has read and what they decided. Three artifacts carry one (assignments, shapes, supplement); each groups by its own unit, so some group properties below apply to only one of them. Half-generated, half-hand-edited: the `groups` are rebuilt by the stage that produces the proposals, while each group's status/reason/reviewed_at/exceptions are hand-set and preserved across regenerations. This schema exists for the hand-edited half; a mistyped status is otherwise invisible, because nothing consumes these records yet (the chain has been ungated since 2026-07-21) and so nothing would fail. See docs/workflow/review-records.md.",
+  "type": "object",
+  "required": ["reviews", "generated_at", "status_vocabulary", "groups"],
+  "properties": {
+    "$comment": { "type": "string" },
+    "reviews": {
+      "type": "string",
+      "description": "Repo-relative path of the artifact this record reviews."
+    },
+    "generated_at": { "type": "string" },
+    "status_vocabulary": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["unreviewed", "approved", "withheld"] },
+      "description": "Written out in the file so a reader never has to consult code to learn the closed vocabulary."
+    },
+    "summary": {
+      "type": "object",
+      "description": "Counts, regenerated. Informational only.",
+      "properties": {
+        "groups": { "type": "integer" },
+        "groups_reviewed": { "type": "integer" },
+        "groups_unreviewed": { "type": "integer" },
+        "proposals_covered": { "type": "integer" },
+        "proposals_in_reviewed_groups": { "type": "integer" }
+      }
+    },
+    "groups": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/group" }
+    },
+    "orphaned_decisions": {
+      "type": "array",
+      "description": "Decisions whose group no longer exists -- the matcher changed, or its rationale was reworded. Carried rather than deleted, so a reviewed judgment is never silently dropped.",
+      "items": { "$ref": "#/$defs/group" }
+    }
+  },
+  "$defs": {
+    "group": {
+      "type": "object",
+      "required": ["group_id", "status", "members", "member_count"],
+      "properties": {
+        "group_id": {
+          "type": "string",
+          "description": "Stable identity of the group, derived from the substance of the decision so that if the substance changes the id changes with it and the group returns to unreviewed rather than inheriting a decision nobody made about it. Per artifact: '<outcome>:<hash of the pattern>' for assignments, the shape id for shapes, '<field_path>:<method>' for supplement."
+        },
+        "outcome": { "type": "string" },
+        "shape_ref": { "type": ["string", "null"] },
+        "rationale": { "type": ["string", "null"] },
+        "binder_notes": { "type": "array", "items": { "type": "string" } },
+        "expansion_error": { "type": ["string", "null"] },
+        "member_count": { "type": "integer" },
+        "members": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Entry keys ('model:function_key') sharing this decision pattern."
+        },
+        "exemplar": {
+          "type": ["object", "null"],
+          "description": "One fully-worked member, so a reviewer can judge the group from a concrete case. Its shape is artifact-specific: a full proposal for assignments, a golden example for a shape, a {entry_key, value, source_url, note} for a supplement value."
+        },
+
+        "slots": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "shapes record only: the shape's bindable slots, 'name: kind', so the reviewer sees the interface without opening shapes.json."
+        },
+        "justification": {
+          "type": ["string", "null"],
+          "description": "shapes record only: the shape's own $comment -- why it exists rather than being folded into a neighbour."
+        },
+        "field_path": {
+          "type": "string",
+          "description": "supplement record only: the field these values fill."
+        },
+        "method": {
+          "type": "string",
+          "enum": ["web", "condensed", "general_knowledge"],
+          "description": "supplement record only: how the values were sourced. Half of the group key, because 'from a cited page' and 'from general knowledge' are different judgments about the same field."
+        },
+        "ppms": {
+          "type": "object",
+          "description": "supplement record only: value count per PPM within the group.",
+          "additionalProperties": { "type": "integer" }
+        },
+
+        "status": {
+          "type": "string",
+          "enum": ["unreviewed", "approved", "withheld"],
+          "description": "HAND-EDITED. approved = read and correct; withheld = read and rejected; unreviewed = nobody has looked."
+        },
+        "reason": {
+          "type": ["string", "null"],
+          "description": "HAND-EDITED. Why this decision, especially when a value is approved as best-available rather than certain."
+        },
+        "reviewed_at": { "type": ["string", "null"], "description": "HAND-EDITED." },
+        "exceptions": {
+          "type": "object",
+          "description": "HAND-EDITED. Members deviating from the group's decision, keyed by entry key, optionally '::<field_path>'-qualified.",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["status"],
+            "properties": {
+              "status": { "type": "string", "enum": ["unreviewed", "approved", "withheld"] },
+              "reason": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "orphaned_at": { "type": "string", "description": "Set only inside orphaned_decisions." }
+      }
+    }
+  }
+}

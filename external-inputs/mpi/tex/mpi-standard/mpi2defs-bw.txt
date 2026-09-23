@@ -1,0 +1,60 @@
+#
+# Extra definitions
+nop gb 0
+nop begchange 0
+nop endchange 0
+nop begchangejuly 0
+nop endchangejuly 0
+nop begchangesept 0
+nop endchangesept 0
+nop begchangeoct 0
+nop endchangeoct 0
+nop begchangedec 0
+nop endchangedec 0
+nop begchangejan 0
+nop endchangejan 0
+nop begchangefeb 0
+nop endchangefeb 0
+nop begchangemarch 0
+nop endchangemarch 0
+nop begchangeapr 0
+nop endchangeapr 0
+nop begchangefini 0
+nop endchangefini 0
+nop begchangefinii 0
+nop endchangefinii 0
+nop begchangefiniii 0
+nop endchangefiniii 0
+asis mbox 1
+name class 0 <CLASS>
+begin-env funcdef 1 '<TABLE><TR><TD COLSPAN=2>'#1'</TD></TR>'\index{#1}
+end-env funcdef   0 '</TABLE>'
+begin-env ffuncdef 1 '<TABLE><TR><TD COLSPAN=2>'#1'</TD></TR>'
+end-env ffuncdef   0 '</TABLE>'
+begin-env cfuncdef 1 '<TABLE><TR><TD COLSPAN=2>'#1'</TD></TR>'
+end-env cfuncdef   0 '</TABLE>'
+hdef funcarg 3 '<TR><TD>'#1 #2'</TD><TD>'#3'</TD></TR>'
+hdef cfuncarg 3 '<TR><TD>'#1 #2'</TD><TD>'#3'</TD></TR>'
+hdef ffuncarg 3 '<TR><TD>'#1 #2'</TD><TD>'#3'</TD></TR>'
+# New with 2.1
+# In the black-and-white version, we just ignore the color argument
+nop mpimergecolor 1
+# There is some misuse of \center in the document
+hdef center 1 '<CENTER>'#1'</CENTER>'
+# There are some uses of \mpiii...begin%...\ninteger that get
+# converted into a single token - this works around this bug in tohtml
+name mpiiidotiMergeFromONEdotTHREEbegininteger 0 integer
+name mpiiidotiMergeFromONEdotTHREEbeginwhere 0 where
+name mpiiidotiMergeFromONEdotTHREEbeginreturn 0 return
+name mpiiidotiMergeFromONEdotTHREEbeginPredefined 0 Predefined
+name mpiiidotiMergeFromTWOdotZERObegininteger 0 integer
+name mpiiidotiMergeNEWforSINGLEbeginnon 0 non
+#
+# These are the new update macros introduced in MPI 2.2
+nop MPIupdateBegin 2
+nop MPIupdateEnd 1
+hdef MPIupdate 3 #3
+hdef MPIreplace 4 #4
+nop MPIdeleteBegin 2 
+nop MPIdeleteEnd
+nop MPIdelete 3

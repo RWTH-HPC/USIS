@@ -1,0 +1,3922 @@
+\chapter{Datatypes}
+\mpitermtitleindex{datatypes}
+\label{chap:datatypes}
+
+% Define a macro to format words in math mode. Otherwise, each letter is
+% treated as a separate variable name (as is the convention in math)
+%ALLOWLATEX:mword%
+\def\mword#1{\textrm{\itshape{#1}}} %ALLOWLATEX%
+%ALLOWLATEX:msword%
+\def\msword#1{\textrm{\itshape{\scriptsize #1}}} %ALLOWLATEX%
+%ALLOWLATEX:mscode%
+\def\mscode#1{\mpicode{\scriptsize #1}} %%ALLOWLATEX%
+Basic datatypes are introduced
+in \sectionref{subsec:pt2pt-messagedata}
+and
+in \sectionref{sec:pt2pt-typematch}.
+In this chapter, this model is
+extended
+to describe any data layout.
+We consider general
+datatypes that allow one to transfer efficiently
+heterogeneous and noncontiguous data.
+We conclude with the description of calls for explicit packing and unpacking of
+messages.
+
+\section{Derived Datatypes}
+\mpitermtitleindex{derived datatype}
+\label{sec:pt2pt-datatype}
+
+Point-to-point communications on buffers containing a sequence of identical basic datatypes
+is constraining.  One often wants to pass
+messages that contain values with different datatypes (e.g., an integer count,
+followed by a sequence of real numbers); and one often wants to send
+noncontiguous data (e.g., a sub-block of a matrix).  One solution is to
+pack noncontiguous data into a contiguous buffer
+at the sender site and unpack it
+at the receiver site.   This has
+the disadvantage of requiring additional memory-to-memory copy operations
+at both sites, even when the communication
+subsystem has scatter-gather capabilities.   Instead, \MPI/ provides
+mechanisms to specify more general, mixed, and noncontiguous
+communication buffers. It is up to the implementation to decide
+whether data should be first packed in a contiguous buffer before being
+transmitted, or whether it can be collected directly from where it
+resides.
+
+The general mechanisms provided here allow one to transfer directly,
+without copying, objects of various shapes and sizes.  It is not assumed
+that the \MPI/ library is cognizant of the objects declared in the host
+language. Thus, if one wants to transfer a structure, or an array
+section, it will be necessary to provide in \MPI/ a definition of a
+communication buffer that mimics the definition of the structure or
+array section in question.  These facilities can be used by library
+designers to define communication functions that can transfer objects
+defined in the host language---by decoding their definitions as
+available in a symbol table or a dope vector.  Such higher-level
+communication functions are not part of \MPI/.
+
+More general communication buffers are specified by replacing the
+basic datatypes that have been used so far with derived datatypes that
+are constructed from basic datatypes using the constructors described
+in this section.  These methods of constructing derived datatypes can
+be applied recursively.
+
+A \mpitermdef{general datatype} is an opaque object that specifies two
+things:
+\begin{itemize}
+\item
+A sequence of basic datatypes.
+\item
+A sequence of integer (byte) displacements.
+\end{itemize}
+
+The displacements are not required to be positive, distinct, or
+in increasing order. Therefore, the order of items need not
+coincide with their order in store, and an item may appear more than
+once.
+We call such a pair of sequences (or sequence of pairs) a \mpitermdef{type map}.
+The sequence of basic datatypes (displacements ignored) is the \mpitermdef{type
+signature} of the datatype.
+
+Let
+\[
+\mword{Typemap} = \{ (\mword{type}_0,\mword{disp}_0), \ldots , (\mword{type}_{n-1}, \mword{disp}_{n-1}) \} ,
+\]
+be such a type map, where $\mword{type}_i$ are basic types, and
+$\mword{disp}_i$ are  displacements.
+Let
+\[
+\mword{Typesig} = \{ \mword{type}_0 , \ldots , \mword{type}_{n-1} \}
+\]
+be the associated type signature.
+This type map, together with a base address \mpicode{buf},
+specifies a communication buffer: the communication buffer that consists of $n$
+entries, where the $i$-th entry is at address $\mpicode{buf} +
+\mword{disp}_i$ and has type $\mword{type}_i$.
+A message assembled from such a
+communication buffer will consist of $n$ values, of the types defined
+by $\mword{Typesig}$.
+
+Most datatype constructors have replication count or block length arguments.
+Allowed values are nonnegative integers. If the value is zero, no elements are
+generated in the type map and there is no effect on datatype bounds or
+extent.
+
+We can use a handle to a general datatype as an argument in a send or
+receive operation, instead of a basic datatype argument.  The
+operation
+\mpifunc{MPI\_SEND}\mpicode{(buf, 1, datatype,$\ldots$)} will use the send buffer
+defined by the base address \mpiarg{buf} and the general datatype
+associated with \mpiarg{datatype}; it will generate a message with the type
+signature determined by the \mpiarg{datatype} argument.
+\mpifunc{MPI\_RECV}\mpicode{(buf, 1, datatype,$\ldots$)} will use the receive buffer
+defined by the base address \mpiarg{buf} and the general datatype
+associated with \mpiarg{datatype}.
+
+General datatypes can be used in all send and receive
+operations.  We discuss, in \sectionref{subsec:pt2pt-datatypeuse}, the
+case where the second argument \mpiarg{count} has value $> 1$.
+
+The basic datatypes presented in
+Section~\ref{subsec:pt2pt-messagedata}
+are particular cases of a general datatype, and are predefined.
+Thus, \type{MPI\_INT} is a predefined handle to a datatype with type
+map $\{ (\ctype{int}, 0) \}$, with one entry of type \ctype{int} and
+displacement zero.  The other basic datatypes are similar.
+
+The \mpitermdefni{extent}\mpitermdefindex{extent of datatypes} of a datatype is defined to
+be the span from the first byte to the last byte occupied by entries in this
+datatype, rounded up to satisfy alignment requirements.
+That is, if
+\[
+\mword{Typemap} = \{ (\mword{type}_0,\mword{disp}_0), \ldots , (\mword{type}_{n-1}, \mword{disp}_{n-1}) \} ,
+\]
+then
+\begin{eqnarray}
+lb(\mword{Typemap}) & = & \min_j \mword{disp}_j , \nonumber \\
+ub(\mword{Typemap}) & = & \max_j (\mword{disp}_j + \mpicode{sizeof}(\mword{type}_j)) + \epsilon , \mbox{ and}
+\nonumber \\ extent(\mword{Typemap}) & = & ub(\mword{Typemap}) - lb(\mword{Typemap}).
+\label{soft-lb-ub-definition}
+\end{eqnarray}
+If $\mword{type}_j$ requires alignment to a byte address that
+is
+a multiple
+of $k_j$,
+then $\epsilon$ is the least nonnegative increment needed to round
+$extent(\mword{Typemap})$ to the next multiple of $\max_j k_j$.
+In Fortran, it is implementation dependent whether the \MPI/ implementation
+computes the alignments $k_j$ according to the alignments
+used by the compiler in common blocks, \ftype{SEQUENCE} derived types,
+\ftype{BIND(C)} derived types,
+or derived types that are neither \ftype{SEQUENCE} nor \ftype{BIND(C)}.
+The complete definition of \mpitermdefni{extent}\mpitermdefindex{extent of datatypes} is given
+by Equation~\ref{soft-lb-ub-definition}.
+
+
+\begin{example}
+\label{pt2pt-exR}
+\exindex{Typemap}%
+\Exindex{Neutral}{Typemap}{}%
+Assume that
+$Type = \{ (\ctype{double},0), (\ctype{char}, 8) \}$
+(a \ctype{double} at
+displacement zero, followed by a \ctype{char} at displacement eight).
+Assume, furthermore, that
+doubles have to be strictly aligned at addresses that are multiples of eight.
+Then, the extent of this datatype is 16 (9 rounded to the next multiple of 8).
+A datatype that consists of a character immediately followed by a double will
+also have an extent of 16.
+\end{example}
+
+\begin{rationale}
+The definition of extent is motivated by the assumption that
+the amount of padding added at the end of each structure in an array of
+structures is the least needed to fulfill alignment constraints.
+More explicit control of the extent is provided in
+Section~\ref{subsec:pt2pt-markers}.  Such explicit control is needed
+in cases where the assumption does not hold, for example, where union types
+are used.
+In Fortran, structures can be expressed with several language features, e.g.,
+common blocks, \ftype{SEQUENCE} derived types, or \ftype{BIND(C)} derived types. The compiler may
+use different alignments, and therefore, it is recommended to use \mpifunc{MPI\_TYPE\_CREATE\_RESIZED}
+for arrays of structures if an alignment may cause an alignment-gap at the end of
+a structure as described
+in \sectionref{subsec:pt2pt-markers} and
+in \sectionref{sec:f90-problems:derived-types}.
+\end{rationale}
+
+
+
+
+\subsection{Type Constructors with Explicit Addresses}
+\label{sec:misc-extent}
+In Fortran, the procedures
+\mpifunc{MPI\_TYPE\_CREATE\_HVECTOR},\flushline  % force break to keep in margin
+\mpifunc{MPI\_TYPE\_CREATE\_HINDEXED},
+\mpifunc{MPI\_TYPE\_CREATE\_HINDEXED\_BLOCK},
+\mpifunc{MPI\_TYPE\_CREATE\_STRUCT}, and \mpifunc{MPI\_GET\_ADDRESS}
+accept arguments of type
+\mpiftypekind{ADDRESS}, wherever arguments of type
+\cdeclmainindex{MPI\_Aint}%
+\mpictype{MPI\_Aint}
+are used in C.
+For Fortran compilers that do not support the Fortran~90 \ftype{KIND}
+notation, and where addresses are 64~bits whereas default \ftype{INTEGER}s
+are 32~bits, these arguments will be of type \ftype{INTEGER*8} (assuming
+the Fortran compiler accepts the common extension of \ftype{INTEGER*8}
+for eight-byte integers).
+
+For the large count versions of three datatype constructors with explicit addresses,
+\mpifunc{MPI\_TYPE\_CREATE\_HINDEXED}, \mpifunc{MPI\_TYPE\_CREATE\_HINDEXED\_BLOCK}, and
+\mpifunc{MPI\_TYPE\_CREATE\_STRUCT}, absolute addresses shall not be used to
+specify byte displacements since the parameter is of type \mpidtype{MPI\_COUNT}
+instead of type \mpidtype{MPI\_AINT}.
+
+\subsection{Datatype Constructors}
+\label{subsec:pt2pt-datatypeconst}
+
+\paraheading{Contiguous.}
+The simplest datatype constructor is
+\mpifunc{MPI\_TYPE\_CONTIGUOUS}, which
+allows replication of a datatype into contiguous locations.
+
+\cdeclmainindex{MPI\_Datatype}\cdeclmainindex{TYPE(MPI\_Datatype)}%
+\begin{mpi-binding}
+    function_name("MPI_Type_contiguous")
+    parameter("count", "POLYDTYPE_NUM_ELEM_NNI", desc=r"replication count")
+    parameter("oldtype", "DATATYPE", desc=r"old datatype")
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+
+\noindent
+\mpiarg{newtype} is the datatype obtained by concatenating
+\mpiarg{count} copies of
+\mpiargshort{oldtype}.
+Concatenation is defined using \emph{extent} as the size of
+the concatenated copies.
+
+
+\begin{example}
+\label{pt2pt-exS}
+\exindex{Typemap}%
+\Exindex{Neutral}{Typemap for contiguous}{MPI\_TYPE\_CONTIGUOUS}%
+Let \mpiarg{oldtype} have type map
+\(
+\{ (\ctype{double}, 0), (\ctype{char}, 8) \} ,
+\)
+with extent 16,
+and let $\mpiarg{count} = 3$.  The type map of
+the datatype returned by \mpiarg{newtype} is
+\begin{displaymath}
+\{ (\ctype{double}, 0), (\ctype{char}, 8), (\ctype{double}, 16),
+   (\ctype{char}, 24), (\ctype{double}, 32), (\ctype{char}, 40) \};
+\end{displaymath}
+i.e., alternating \ctype{double} and \ctype{char} elements, with displacements
+$0, 8, 16, 24, 32, 40$.
+\end{example}
+
+In general,
+assume that the type map of \mpiarg{oldtype} is
+\begin{displaymath}
+\{ (\mword{type}_0,\mword{disp}_0), \ldots , (\mword{type}_{n-1}, \mword{disp}_{n-1}) \} ,
+\end{displaymath}
+with extent $ex$.
+Then \mpiarg{newtype} has a type map with $\mpicode{count} \cdot \mpicode{n}$
+entries defined by:
+\begin{displaymath}
+% The \hskip is to keep the equation within the text margins
+\hskip-1em\{ (\mword{type}_0, \mword{disp}_0), \ldots , (\mword{type}_{n-1}, \mword{disp}_{n-1}), %ALLOWLATEX%
+(\mword{type}_0, \mword{disp}_0 +ex), \ldots ,(\mword{type}_{n-1}, \mword{disp}_{n-1} + ex),\\
+\end{displaymath}
+% This is *not* the way to display a multiline equation - FIXME
+\begin{displaymath}
+\hskip-1em\ldots,(\mword{type}_0, \mword{disp}_0 +ex \cdot(\mpicode{count}-1) ), \ldots ,%ALLOWLATEX%
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + ex \cdot (\mpicode{count}-1)) \} .
+\end{displaymath}
+
+\paraheading{Vector.}
+The procedure
+\mpifunc{MPI\_TYPE\_VECTOR} is a more general constructor that
+allows replication of a datatype
+into locations that consist of equally spaced blocks.  Each block
+is obtained by concatenating the same number of copies of the old datatype.
+The spacing between blocks is a multiple of the extent of the old datatype.
+
+\begin{mpi-binding}
+    function_name("MPI_Type_vector")
+    parameter("count", "POLYDTYPE_NUM_ELEM_NNI", desc=r"number of blocks")
+    parameter(
+        "blocklength",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        desc=r"number of elements in each block",
+    )
+    parameter(
+        "stride",
+        "POLYDTYPE_NUM_ELEM",
+        desc=r"number of elements between start of each block",
+    )
+    parameter("oldtype", "DATATYPE", desc=r"old datatype")
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+\begin{example}
+\label{pt2pt-exT}
+\exindex{Typemap}%
+\Exindex{Neutral}{Typemap for vector}{MPI\_TYPE\_VECTOR}%
+Assume, again, that \mpiarg{oldtype} has type map
+\(
+\{ (\ctype{double}, 0), (\ctype{char}, 8) \} ,
+\)
+with extent 16.
+A call to \mpifunc{MPI\_TYPE\_VECTOR}\mpicode{(2, 3, 4, oldtype, newtype)} will
+create the datatype with type map,
+\begin{displaymath}
+\{
+(\ctype{double}, 0), (\ctype{char}, 8), (\ctype{double}, 16), (\ctype{char},
+24), (\ctype{double}, 32), (\ctype{char}, 40),
+\end{displaymath}
+\begin{displaymath}
+(\ctype{double}, 64), (\ctype{char}, 72), (\ctype{double}, 80), (\ctype{char},
+88), (\ctype{double}, 96), (\ctype{char}, 104)
+\} .
+\end{displaymath}
+That is, two blocks with three copies each of the old
+type, with a stride of 4 elements ($4 \cdot 16$ bytes) between the start of each block.
+\end{example}
+
+\begin{example}
+\label{pt2pt-exTTT}
+\exindex{Typemap}%
+\Exindex{Neutral}{Typemap for vector}{MPI\_TYPE\_VECTOR}%
+A call to \mpifunc{MPI\_TYPE\_VECTOR}\mpicode{(3, 1, -2, oldtype, newtype)} will create
+the datatype,
+\begin{displaymath}
+\{
+(\ctype{double}, 0), (\ctype{char}, 8), (\ctype{double}, -32), (\ctype{char},
+-24), (\ctype{double}, -64), (\ctype{char}, -56)
+\} .
+\end{displaymath}
+\end{example}
+
+In general, assume that \mpiarg{oldtype} has type map,
+\begin{displaymath}
+\{ (\mword{type}_0,\mword{disp}_0), \ldots, (\mword{type}_{n-1}, \mword{disp}_{n-1}) \} ,
+\end{displaymath}
+with extent $ex$.  Let \mpicode{bl} be the \mpicode{blocklength}.
+The newly created  datatype has a type map with
+$\mpicode{count} \cdot \mpicode{bl} \cdot \mpicode{n}$
+entries:
+\begin{displaymath}
+\{
+(\mword{type}_0, \mword{disp}_0), \ldots , (\mword{type}_{n-1} , \mword{disp}_{n-1}),
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 ,\mword{disp}_0 + ex) , \ldots ,
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + ex ), \ldots,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + (\mpicode{bl} -1) \cdot ex
+) , \ldots , (\mword{type}_{n-1} , \mword{disp}_{n-1} + (\mpicode{bl} -1) \cdot ex ) ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 ,\mword{disp}_0 + \mpicode{stride} \cdot ex ) , \ldots ,
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpicode{stride} \cdot ex ), \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + (\mpicode{stride} + \mpicode{bl} -1) \cdot ex ) , \ldots ,
+(\mword{type}_{n-1}, \mword{disp}_{n-1} + (\mpicode{stride} + \mpicode{bl} -1) \cdot
+ex ) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 ,\mword{disp}_0 + \mpicode{stride} \cdot (\mpicode{count}-1) \cdot ex ) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpicode{stride} \cdot (\mpicode{count} -1) \cdot
+ex )
+, \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + (\mpicode{stride} \cdot (\mpicode{count} -1)
++ \mpicode{bl} -1) \cdot ex ) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_{n-1}, \mword{disp}_{n-1} + (\mpicode{stride} \cdot (\mpicode{count} -1)
++ \mpicode{bl} -1) \cdot ex )
+\} .
+\end{displaymath}
+
+A call to \mpifunc{MPI\_TYPE\_CONTIGUOUS}\mpicode{(count, oldtype, newtype)} is
+equivalent to a call to
+\mpifunc{MPI\_TYPE\_VECTOR}\mpicode{(count, 1, 1, oldtype, newtype)}, or to a call to
+\mpifunc{MPI\_TYPE\_VECTOR}\mpicode{(1, count, n, oldtype, newtype)}, where \mpicode{n}
+is an arbitrary integer value.
+
+\paraheading{Hvector.}
+The procedure
+\mpifunc{MPI\_TYPE\_CREATE\_HVECTOR}
+is identical to
+\mpifunc{MPI\_TYPE\_VECTOR}, except that \mpiarg{stride} is given in bytes,
+rather than in elements.  The use for both types of vector
+constructors is illustrated in Section~\ref{subsec:pt2pt-examples}.
+(\mpicode{H} stands for ``heterogeneous'').
+
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Type_create_hvector")
+    parameter("count", "POLYDTYPE_NUM_ELEM_NNI", desc=r"number of blocks")
+    parameter(
+        "blocklength",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        desc=r"number of elements in each block",
+    )
+    parameter(
+        "stride",
+        "POLYDTYPE_STRIDE_BYTES",
+        desc=r"number of bytes between start of each block",
+    )
+    parameter("oldtype", "DATATYPE", desc=r"old datatype")
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+Assume that \mpiarg{oldtype} has type map,
+\begin{displaymath}
+\{ (\mword{type}_0,\mword{disp}_0), \ldots, (\mword{type}_{n-1}, \mword{disp}_{n-1}) \} ,
+\end{displaymath}
+with extent $ex$.  Let \mpicode{bl} be the \mpicode{blocklength}.
+The newly created  datatype has a type map with
+$\mpicode{count} \cdot \mpicode{bl} \cdot n$
+entries:
+\begin{displaymath}
+\{
+(\mword{type}_0, \mword{disp}_0), \ldots , (\mword{type}_{n-1} , \mword{disp}_{n-1}),
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 ,\mword{disp}_0 + ex) , \ldots ,
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + ex ), \ldots,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + (\mpicode{bl} -1) \cdot ex
+) , \ldots , (\mword{type}_{n-1} , \mword{disp}_{n-1} + (\mpicode{bl} -1) \cdot ex ) ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 ,\mword{disp}_0 + \mpicode{stride}  ) , \ldots ,
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpicode{stride} ) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + \mpicode{stride} + ( \mpicode{bl} -1) \cdot ex
+) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_{n-1}, \mword{disp}_{n-1} + \mpicode{stride} + (\mpicode{bl} -1) \cdot
+ex ) ,
+\ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 ,\mword{disp}_0 + \mpicode{stride} \cdot (\mpicode{count}-1) ) , \ldots ,
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpicode{stride} \cdot (\mpicode{count} -1)  )
+, \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + \mpicode{stride} \cdot (\mpicode{count} -1)
++ (\mpicode{bl} -1) \cdot ex ) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_{n-1}, \mword{disp}_{n-1} + \mpicode{stride} \cdot (\mpicode{count} -1)
++ (\mpicode{bl} -1) \cdot ex )
+\} .
+\end{displaymath}
+
+\paraheading{Indexed.}
+The procedure
+\mpifunc{MPI\_TYPE\_INDEXED} allows
+replication of an old datatype into a sequence of blocks (each block is
+a concatenation of the old datatype), where
+each block can contain a different number of copies and have a different
+displacement.  All block displacements are multiples of the old type
+extent.
+
+\begin{mpi-binding}
+    function_name("MPI_Type_indexed")
+    parameter(
+        "count",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        desc=(
+            r"number of blocks---also number of entries in "
+            r"\mpiarg{array_of_displacements} and "
+            r"\mpiarg{array_of_blocklengths}"
+        ),
+    )
+    parameter(
+        "array_of_blocklengths",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        length="count",
+        constant=True,
+        desc=r"number of elements per block",
+    )
+
+    parameter(
+        "array_of_displacements",
+        "POLYDISPLACEMENT_COUNT",
+        length="count",
+        constant=True,
+        desc=r"displacement for each block, in multiples of \mpiarg{oldtype}",
+    )
+    parameter("oldtype", "DATATYPE", desc=r"old datatype")
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+
+\begin{example}
+\label{pt2pt-exU}
+\exindex{Typemap}%
+\Exindex{Neutral}{Typemap for indexed}{MPI\_TYPE\_INDEXED}%
+Let \mpiarg{oldtype} have type map
+\(
+\{ (\ctype{double}, 0), (\ctype{char}, 8) \} ,
+\)
+with extent 16.
+Let  \mpicode{B = (3, 1)} and let \mpicode{D = (4, 0)}.  A call to
+\mpifunc{MPI\_TYPE\_INDEXED}\mpicode{(2, B, D, oldtype, newtype)} returns a datatype with
+type map,
+\begin{displaymath}
+\{
+(\ctype{double}, 64), (\ctype{char}, 72), (\ctype{double}, 80), (\ctype{char},
+88), (\ctype{double}, 96), (\ctype{char}, 104),
+\end{displaymath}
+\begin{displaymath}
+(\ctype{double}, 0), (\ctype{char}, 8)
+\} .
+\end{displaymath}
+That is, three copies of the old type starting at displacement
+64, and one copy starting at displacement 0.
+\end{example}
+
+In general,
+assume that \mpiarg{oldtype} has type map,
+\begin{displaymath}
+\{ (\mword{type}_0,\mword{disp}_0), \ldots, (\mword{type}_{n-1}, \mword{disp}_{n-1}) \} ,
+\end{displaymath}
+with extent \emph{ex}.
+Let \mpiarg{B} be the \mpiarg{array\_of\_blocklengths} argument and
+\mpishortarg{D} be the\flushline
+\mpiarg{array\_of\_displacements} argument. The newly created datatype
+has $n \cdot \sum_{i=0}^{\mscode{count}-1}
+\mpiarg{B[i]}$ entries:
+\begin{displaymath}
+\{
+(\mword{type}_0, \mword{disp}_0 + \mpiarg{D[0]} \cdot ex ) , \ldots ,
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpiarg{D[0]} \cdot ex ) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + (\mpiarg{D[0]} + \mpiarg{B[0]} -1) \cdot ex) ,\ldots,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + (\mpiarg{D[0]} +\mpiarg{B[0]} -1) \cdot ex ) ,
+\ldots,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0, \mword{disp}_0 + \mpiarg{D[count-1]} \cdot ex ) , \ldots ,
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpiarg{D[count-1]} \cdot ex ) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + (\mpiarg{D[count-1]} + \mpiarg{B[count-1]} -1) \cdot ex)
+,\ldots,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + (\mpiarg{D[count-1]} +\mpiarg{B[count-1]} -1)
+\cdot ex )
+\} .
+\end{displaymath}
+
+A call to \mpifunc{MPI\_TYPE\_VECTOR}\mpicode{(count, blocklength, stride, oldtype,
+newtype)} is equivalent to a call to
+\mpifunc{MPI\_TYPE\_INDEXED}\mpicode{(count, B, D, oldtype, newtype)} where
+\begin{displaymath}
+\mpiarg{D[j]} = j \cdot \mpiarg{stride},\ j=0 ,\ldots, \mpicode{count} -1 ,
+\end{displaymath}
+and
+\begin{displaymath}
+\mpiarg{B[j]} = \mpiarg{blocklength},\ j=0 ,\ldots, \mpicode{count} -1 .
+\end{displaymath}
+
+\paraheading{Hindexed.}
+The procedure
+\mpifunc{MPI\_TYPE\_CREATE\_HINDEXED}
+is identical to
+\mpifunc{MPI\_TYPE\_INDEXED}, except that block displacements in
+\mpiarg{array\_of\_displacements} are specified in
+bytes, rather than in multiples of the \mpiarg{oldtype} extent.
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Type_create_hindexed")
+    parameter(
+        "count",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        desc=(
+            "number of blocks---also number of entries in "
+            "\\mpiarg{array_of_displacements} and "
+            "\\mpiarg{array_of_blocklengths}"
+        ),
+    )
+    parameter(
+        "array_of_blocklengths",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        length="count",
+        constant=True,
+        desc=r"number of elements in each block",
+    )
+
+    parameter(
+        "array_of_displacements",
+        "POLYDISPLACEMENT_AINT_COUNT",
+        length="count",
+        constant=True,
+        desc=r"byte displacement of each block",
+    )
+    parameter("oldtype", "DATATYPE", desc=r"old datatype")
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+Assume that \mpiarg{oldtype} has type map,
+\begin{displaymath}
+\{ (\mword{type}_0,\mword{disp}_0), \ldots, (\mword{type}_{n-1}, \mword{disp}_{n-1}) \} ,
+\end{displaymath}
+with extent $ex$.
+Let \mpiarg{B} be the \mpiarg{array\_of\_blocklengths} argument and
+\mpiarg{D} be the
+\mpiarg{array\_of\_displacements} argument. The newly created datatype
+has a type map with
+$n \cdot \sum_{i=0}^{\mscode{count}-1}
+\mpiarg{B[i]}$ entries:
+\begin{displaymath}
+\{
+(\mword{type}_0, \mword{disp}_0 + \mpiarg{D[0]}  ) , \ldots ,
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpiarg{D[0]} ) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + \mpiarg{D[0]} +(\mpiarg{B[0]} -1) \cdot ex) ,\ldots,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpiarg{D[0]} +(\mpiarg{B[0]} -1) \cdot ex ) ,
+\ldots,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0, \mword{disp}_0 + \mpiarg{D[count-1]} ) , \ldots ,
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpiarg{D[count-1]} ) , \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0 , \mword{disp}_0 + \mpiarg{D[count-1]} +(\mpiarg{B[count-1]} -1) \cdot ex)
+,\ldots,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_{n-1} , \mword{disp}_{n-1} + \mpiarg{D[count-1]} +(\mpiarg{B[count-1]} -1)
+\cdot ex )
+\} .
+\end{displaymath}
+
+\paraheading{Indexed\_block.}
+This procedure is the same as \mpifunc{MPI\_TYPE\_INDEXED} except that the
+blocklength is the same for all blocks.
+There are many codes using indirect addressing arising from
+unstructured grids where the blocksize is always 1 (gather/scatter).  The
+following convenience procedure allows for constant blocksize and arbitrary
+displacements.
+
+
+\begin{mpi-binding}
+    function_name("MPI_Type_create_indexed_block")
+    parameter(
+        "count",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        desc=r"number of blocks---also number of entries in "
+            r"\mpiarg{array_of_displacements}",
+    )
+    parameter(
+         "blocklength", "POLYDTYPE_NUM_ELEM_NNI",
+         desc=r"number of elements in each block")
+    parameter(
+        "array_of_displacements",
+        "POLYDISPLACEMENT_COUNT",
+        length="count",
+        constant=True,
+        desc=r"array of displacements, in multiples of \mpiarg{oldtype}",
+    )
+    parameter("oldtype", "DATATYPE", desc=r"old datatype")
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+\paraheading{Hindexed\_block.}
+The procedure \mpifunc{MPI\_TYPE\_CREATE\_HINDEXED\_BLOCK} is identical
+to \mpifunc{MPI\_TYPE\_CREATE\_INDEXED\_BLOCK}, except that block
+displacements in \mpiarg{array\_of\_displacements} are specified in
+bytes, rather than in multiples of the \mpiarg{oldtype} extent.
+
+\begin{mpi-binding}
+    function_name("MPI_Type_create_hindexed_block")
+    parameter(
+        "count",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        desc=r"number of blocks---also number of entries in "
+            r"\mpiarg{array_of_displacements}",
+    )
+    parameter("blocklength", "POLYDTYPE_NUM_ELEM_NNI",
+        desc=r"number of elements in each block"
+    )
+
+    parameter(
+        "array_of_displacements",
+        "POLYDISPLACEMENT_AINT_COUNT",
+        length="count",
+        constant=True,
+        desc=r"byte displacement of each block",
+    )
+    parameter("oldtype", "DATATYPE", desc=r"old datatype")
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+\paraheading{Struct.}
+\mpifunc{MPI\_TYPE\_CREATE\_STRUCT} is the most general type constructor.
+It further generalizes
+\mpifunc{MPI\_TYPE\_CREATE\_HINDEXED}
+in that it allows each block to consist of replications of
+different datatypes.
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Type_create_struct")
+    parameter(
+        "count",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        desc=(
+            "number of blocks---also number of entries in arrays "
+            r"\mpiarg{array_of_types}, \mpiarg{array_of_displacements}, "
+            r"and \mpiarg{array_of_blocklengths}"
+        ),
+    )
+    parameter(
+        "array_of_blocklengths",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        length="count",
+        constant=True,
+        desc=r"number of elements in each block",
+    )
+
+    parameter(
+        "array_of_displacements",
+        "POLYDISPLACEMENT_AINT_COUNT",
+        length="count",
+        constant=True,
+        desc=r"byte displacement of each block",
+    )
+
+    parameter(
+        "array_of_types",
+        "DATATYPE",
+        constant=True,
+        length="count",
+        desc=r"type of elements in each block",
+    )
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+\begin{example}
+\label{pt2pt-exV}
+\exindex{Typemap}%
+\Exindex{Neutral}{Typemap for create struct}{MPI\_TYPE\_CREATE\_STRUCT}%
+Let \mpiarg{type1} have type map,
+\[
+\{ (\ctype{double}, 0), (\ctype{char}, 8) \} ,
+\]
+with extent 16.
+Let \mpicode{B = (2, 1, 3)}, \mpicode{D = (0, 16, 26)},
+and \mpicode{T = (MPI\_FLOAT, type1, MPI\_CHAR)}.  Then a call to
+\mpiskipfunc{MPI\_TYPE\_CREATE\_STRUCT(3, B, D, T, newtype)}\mpifuncindex{MPI\_TYPE\_CREATE\_STRUCT} returns
+a datatype with type map,
+\begin{displaymath}
+\{
+(\ctype{float}, 0), (\ctype{float}, 4), (\ctype{double}, 16), (\ctype{char},
+24), (\ctype{char}, 26), (\ctype{char}, 27), (\ctype{char}, 28)
+\} .
+\end{displaymath}
+That is, two copies of \type{MPI\_FLOAT} starting at 0, followed by
+one copy of \mpiarg{type1} starting at 16, followed by three copies of
+\type{MPI\_CHAR}, starting at 26.
+In this example, we assume that a float occupies four bytes.
+\end{example}
+
+In general,
+let \mpiarg{T} be the \mpiarg{array\_of\_types} argument, where \mpiarg{T[i]}
+is a handle to,
+\begin{displaymath}
+\mword{typemap}_i = \{ (\mword{type}_0^i , \mword{disp}_0^i ) , \ldots , (\mword{type}_{n_{i}-1}^i ,
+\mword{disp}_{n_{i}-1}^i ) \} ,
+\end{displaymath}
+with extent $ex_i$.
+Let
+\mpiarg{B} be the \mpiarg{array\_of\_blocklength} argument and \mpiarg{D} be
+the \mpiarg{array\_of\_displacements} argument.  %mansplit
+Let \mpicode{c} be the
+\mpicode{count} argument.
+Then the newly created datatype has a type map with
+$\sum_{i=0}^{\mscode{c}-1}\mpiarg{B[i]} \cdot n_i$
+entries:
+\begin{displaymath}
+\{
+(\mword{type}_0^0 , \mword{disp}_0^0 +\mpiarg{D[0]}) , \ldots , (\mword{type}_{n_0}^0 , \mword{disp}_{n_0}^0 +
+\mpiarg{D[0]} ) ,
+\ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0^0 , \mword{disp}_0^0 + \mpiarg{D[0]} + (\mpiarg{B[0]}-1) \cdot ex_0 ) , \ldots
+,
+(\mword{type}_{n_0}^0 , \mword{disp}_{n_0}^0 + \mpiarg{D[0]} + (\mpiarg{B[0]-1)} \cdot
+ex_0 )
+, \ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0^{\mscode{c}-1} , \mword{disp}_0^{\mscode{c}-1} +\mpiarg{D[c-1]}) , \ldots ,
+(\mword{type}_{{n_{\mscode{c}-1}}-1}^{\mscode{c}-1} ,
+\mword{disp}_{{n_{\mscode{c}-1}}-1}^{\mscode{c}-1} + \mpiarg{D[c-1]} ) ,
+\ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_0^{\mscode{c}-1} , \mword{disp}_0^{\mscode{c}-1} +
+\mpiarg{D[c-1]} + (\mpiarg{B[c-1]}-1) \cdot ex_{\mscode{c}-1} ) ,
+\ldots ,
+\end{displaymath}
+\begin{displaymath}
+(\mword{type}_{{n_{\mscode{c}-1}}-1}^{\mscode{c}-1} ,
+\mword{disp}_{{n_{\mscode{c}-1}}-1}^{\mscode{c}-1} + \mpiarg{D[c-1]} +
+(\mpiarg{B[c-1]-1)} \cdot ex_{\mscode{c}-1} )
+\} .
+\end{displaymath}
+
+A call to
+\mpifunc{MPI\_TYPE\_CREATE\_HINDEXED}\mpicode{(count, B, D, oldtype, newtype)}
+is equivalent to a call to
+\mpifunc{MPI\_TYPE\_CREATE\_STRUCT}\mpicode{(count, B, D, T, newtype)},
+where each entry of \mpiarg{T} is equal to \mpiarg{oldtype}.
+
+\subsection{Subarray Datatype Constructor}
+%----------------------------------------------------------
+\label{sec:io-const-array}
+
+\begin{mpi-binding}
+    function_name("MPI_Type_create_subarray")
+    parameter("ndims", "ARRAY_LENGTH_PI", desc=r"number of array dimensions")
+    parameter(
+        "array_of_sizes",
+        "POLYDTYPE_NUM_ELEM_PI",
+        length="ndims",
+        constant=True,
+        desc=(
+            r"number of elements of type \mpiarg{oldtype} in each dimension "
+            "of the full array"
+        ),
+    )
+    parameter(
+        "array_of_subsizes",
+        "POLYDTYPE_NUM_ELEM_PI",
+        length="ndims",
+        constant=True,
+        desc=(
+            r"number of elements of type \mpiarg{oldtype} in each dimension "
+            "of the subarray"
+        ),
+    )
+    parameter(
+        "array_of_starts",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        length="ndims",
+        constant=True,
+        desc=r"starting coordinates of the subarray in each dimension",
+    )
+    parameter("order", "ORDER", desc=r"array storage order flag")
+    parameter("oldtype", "DATATYPE", desc=r"old datatype")
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+The subarray type constructor creates an \MPI/ datatype
+describing an
+$n$-dimensional
+subarray of an
+$n$-dimensional
+array.
+The subarray may be situated anywhere within the full array,
+and may be of any nonzero size up to the size of the larger array
+as long as it is confined within this array.
+This type constructor facilitates creating filetypes to access
+arrays distributed in blocks among processes to a
+single file that contains the global array,
+see \MPI/ I/O, especially \sectionref{subsec:io-2:definitions}.
+
+This type constructor can handle arrays with an arbitrary number of
+dimensions and works for both C and Fortran ordered matrices
+(i.e., row-major or column-major).  Note that a C program may use Fortran
+order and a Fortran program may use C order.
+
+
+The \mpiarg{ndims} parameter specifies the number of dimensions in the full
+data array and gives the number of elements in
+\mpiarg{array\_of\_sizes}, \mpiarg{array\_of\_subsizes},
+and \mpiarg{array\_of\_starts}.
+
+The number of elements of type \mpiarg{oldtype} in
+each dimension of the
+$n$-dimensional
+array and the
+requested subarray are specified by
+\mpiarg{array\_of\_sizes} and \mpiarg{array\_of\_subsizes},
+respectively.
+For any dimension
+\mpiarg{i},
+it is erroneous to specify
+\mpiarg{array\_of\_subsizes[i]} $<$ 1 or
+\mpiarg{array\_of\_subsizes[i]} $>$ \mpiarg{array\_of\_sizes[i]}.
+
+The \mpiarg{array\_of\_starts} contains the
+starting coordinates of each
+dimension of the subarray.
+Arrays are assumed to be indexed starting from zero.
+For any dimension $i$, it is erroneous to specify
+\mpiarg{array\_of\_starts[i]} $<$ 0 or
+\mpiarg{array\_of\_starts[i]}
+$>$ (\mpiarg{array\_of\_sizes[i]} $-$ \mpiarg{array\_of\_subsizes[i]}).
+
+\begin{users}
+In a Fortran program with arrays indexed starting from 1,
+if the starting coordinate of a particular dimension
+of the subarray is \mpiarg{n},
+then the entry in \mpiarg{array\_of\_starts}
+for that dimension is \mpiarg{n-1}.
+\end{users}
+
+The \mpiarg{order} argument specifies the storage order for the
+subarray as well as the full array.
+It must be set to one
+of the following:
+\begin{constlist}
+\constmainitem{MPI\_ORDER\_C}{The ordering used by C arrays, (i.e., row-major order).}
+\constmainitem{MPI\_ORDER\_FORTRAN}{The ordering used by Fortran arrays,
+(i.e., column-major order).}
+\end{constlist}
+
+A \mpiarg{ndims}-dimensional subarray (\mpiarg{newtype}) with no
+extra padding can be defined by the function Subarray() as
+follows:
+\begin{eqnarray*}
+\mpiarg{newtype} & = &  \mbox{Subarray}( \mword{ndims},
+                        \{\mword{size}_0, \mword{size}_1,\ldots,\mword{size}_{\msword{ndims}-1}\},        \\
+                 &   &  \{\mword{subsize}_0, \mword{subsize}_1,\ldots,\mword{subsize}_{\msword{ndims}-1}\}, \\
+                 &   &  \{\mword{start}_0, \mword{start}_1,\ldots,\mword{start}_{\msword{ndims}-1}\},
+                        {\mpiarg{oldtype}} )
+\end{eqnarray*}
+
+Let the typemap of \mpiarg{oldtype} have the form:
+\begin{displaymath}
+\{(\mword{type}_0,\mword{disp}_0),(\mword{type}_1,\mword{disp}_1),\ldots,(\mword{type}_{n-1},\mword{disp}_{n-1})\}
+\end{displaymath}
+where $\mword{type}_i$ is a predefined \MPI/ datatype, and let $ex$ be the
+extent of \mpiargshort{oldtype}.  Then we define the Subarray() function
+recursively using the following three equations.
+Equation~\ref{eq:subarray-base} defines the base step.
+Equation~\ref{eq:subarray-fortran} defines the recursion step when
+\mpiarg{order} = \mpiconst{MPI\_ORDER\_FORTRAN}, and
+Equation~\ref{eq:subarray-c} defines the recursion step when
+\mpiarg{order} = \mpiconst{MPI\_ORDER\_C}.
+These equations use the conceptual datatypes \mpiublb{lb\_marker}
+and \mpiublb{ub\_marker}; see \sectionref{subsec:pt2pt-markers} for details.
+
+\begin{eqnarray}
+\lefteqn{\mbox{Subarray}(1,\{\mword{size}_0\},\{\mword{subsize}_0\},\{\mword{start}_0\},}
+\label{eq:subarray-base} \\
+& & \quad \{(\mword{type}_0,\mword{disp}_0),(\mword{type}_1,\mword{disp}_1),\ldots,(\mword{type}_{n-1},\mword{disp}_{n-1})\}) \nonumber \\
+& = & \{(\mpiublb{lb\_marker},0), \nonumber \\
+& & (\mword{type}_0,\mword{disp}_0+\mword{start}_0 \times ex),\ldots,(\mword{type}_{n-1},
+        \mword{disp}_{n-1} + \mword{start}_0 \times ex), \nonumber \\
+& & (\mword{type}_0,\mword{disp}_0+(\mword{start}_0 + 1)\times ex),\ldots,(\mword{type}_{n-1},
+\nonumber\\
+& & \hspace{.5in}\mword{disp}_{n-1} + (\mword{start}_0+1) \times ex), \ldots \nonumber \\
+& & (\mword{type}_0,\mword{disp}_0+(\mword{start}_0 + \mword{subsize}_0 - 1)\times ex),\ldots,
+\nonumber \\
+& & \hspace{.5in}(\mword{type}_{n-1},\mword{disp}_{n-1} + (\mword{start}_0+\mword{subsize}_0 - 1) \times ex),
+\nonumber \\
+& & (\mpiublb{ub\_marker}, \mword{size}_0 \times ex) \} \nonumber \\
+& & \nonumber \\
+\lefteqn{\mbox{Subarray}( \mword{ndims},
+\{\mword{size}_0, \mword{size}_1,\ldots,\mword{size}_{\msword{ndims}-1}\},}       \label{eq:subarray-fortran} \\
+& & \quad\{\mword{subsize}_0, \mword{subsize}_1,\ldots,\mword{subsize}_{\msword{ndims}-1}\}, \nonumber \\
+& & \quad \{\mword{start}_0, \mword{start}_1,\ldots,\mword{start}_{\msword{ndims}-1}\},\mpiarg{oldtype} )
+\nonumber \\
+& = & \mbox{Subarray}(ndims-1,\{\mword{size}_1, \mword{size}_2,\ldots,\mword{size}_{\msword{ndims}-1}\},
+\nonumber \\
+& &\quad\{\mword{subsize}_1, \mword{subsize}_2,\ldots,\mword{subsize}_{\msword{ndims}-1}\}, \nonumber\\
+& &\quad\{\mword{start}_1, \mword{start}_2,\ldots,\mword{start}_{\msword{ndims}-1}\}, \nonumber \\
+& & \hspace{.5in}\mbox{Subarray}(1,\{\mword{size}_0\},\{\mword{subsize}_0\},\{\mword{start}_0\},
+        \mpiarg{oldtype}))\nonumber \\
+& & \nonumber \\
+\lefteqn{\mbox{Subarray}( ndims,
+\{\mword{size}_0, \mword{size}_1,\ldots,\mword{size}_{\msword{ndims}-1}\},} \label{eq:subarray-c}         \\
+& & \quad\{\mword{subsize}_0, \mword{subsize}_1,\ldots,\mword{subsize}_{\msword{ndims}-1}\}, \nonumber \\
+& & \quad\{\mword{start}_0, \mword{start}_1,\ldots,\mword{start}_{\msword{ndims}-1}\},\mpiarg{oldtype} )
+\nonumber  \\
+& = & \mbox{Subarray}(\mword{ndims}-1,\{\mword{size}_0, \mword{size}_1,\ldots,\mword{size}_{\msword{ndims}-2}\},
+\nonumber \\
+& &\quad\{\mword{subsize}_0, \mword{subsize}_1,\ldots,\mword{subsize}_{\msword{ndims}-2}\}, \nonumber \\
+& &\quad\{\mword{start}_0, \mword{start}_1,\ldots,\mword{start}_{\msword{ndims}-2}\}, \nonumber \\
+& & \hspace{.5in}\mbox{Subarray}(1,\{\mword{size}_{\msword{ndims}-1}\},\{\mword{subsize}_{\msword{ndims}-1}\},
+        \{\mword{start}_{\msword{ndims}-1}\},\mpiarg{oldtype})) \nonumber
+\end{eqnarray}
+For an example use of \mpifunc{MPI\_TYPE\_CREATE\_SUBARRAY} in the
+context of I/O see Section~\ref{sec:io-ex-subarray}.
+
+\subsection{Distributed Array Datatype Constructor}
+%---------------------------------------------------
+\label{sec:io-const-darray}
+
+The distributed array type constructor supports
+HPF-like \cite{hpf-handbook} data distributions.
+However, unlike in HPF, the storage order may be specified for C arrays
+as well as for Fortran arrays.
+
+\begin{users}
+One can create an HPF-like file view using this type constructor
+as follows.
+Complementary filetypes are created by having every process of a group
+call this constructor with identical arguments
+(with the exception of \mpiarg{rank} which should be set appropriately).
+These filetypes (along with identical \mpiarg{disp} and \mpiarg{etype})
+are then used to define the view (via \mpifunc{MPI\_FILE\_SET\_VIEW}),
+see \MPI/ I/O, especially \sectionref{subsec:io-2:definitions}
+and \sectionref{sec:io-view}.
+Using this view,
+a collective data access operation (with identical offsets)
+will yield an HPF-like distribution pattern.
+\end{users}
+
+\begin{mpi-binding}
+    function_name("MPI_Type_create_darray")
+    parameter("size", "COMM_SIZE_PI", desc=r"size of process group")
+    parameter("rank", "RANK_NNI", desc=r"rank in process group")
+    parameter(
+        "ndims",
+        "ARRAY_LENGTH_PI",
+        desc=r"number of array dimensions as well as process grid dimensions",
+    )
+    parameter(
+        "array_of_gsizes",
+        "POLYDTYPE_NUM_ELEM_PI",
+        constant=True,
+        length="ndims",
+        desc=(
+            r"number of elements of type \mpiarg{oldtype} in each dimension "
+            r"of global array"
+        ),
+    )
+    parameter(
+        "array_of_distribs",
+        "DISTRIB_ENUM",
+        constant=True,
+        length="ndims",
+        desc=r"distribution of array in each dimension",
+    )
+    parameter(
+        "array_of_dargs",
+        "DTYPE_DISTRIBUTION",
+        constant=True,
+        length="ndims",
+        desc=r"distribution argument in each dimension",
+    )
+    parameter(
+        "array_of_psizes",
+        "PROCESS_GRID_SIZE",
+        constant=True,
+        length="ndims",
+        desc=r"size of process grid in each dimension",
+    )
+    parameter("order", "ORDER", desc=r"array storage order flag")
+    parameter("oldtype", "DATATYPE", desc=r"old datatype")
+    parameter("newtype", "DATATYPE", direction="out", desc=r"new datatype")
+\end{mpi-binding}
+
+\mpifunc{MPI\_TYPE\_CREATE\_DARRAY} can be used to generate
+the datatypes corresponding to the distribution
+of an \mpiarg{ndims}-dimensional array of \mpiarg{oldtype} elements
+onto
+an \mpiarg{ndims}-dimensional grid of logical processes.
+Unused dimensions of \mpiarg{array\_of\_psizes} should be set to \mpicode{1}
+(see \namedref{Example}{ex:io-hpf}).
+For a call to \mpifunc{MPI\_TYPE\_CREATE\_DARRAY} to be correct,
+the equation \( \prod_{i=0}^{ndims-1} array\_of\_psizes[i] = size \)
+must be satisfied.
+The ordering of processes in the process grid is assumed to be
+row-major, as in the case of virtual Cartesian process topologies.
+\begin{users}
+For both Fortran and C arrays, the ordering of processes in the
+process grid is assumed to be row-major. This is consistent with the
+ordering used in virtual Cartesian process topologies in
+\MPI/.
+To create such virtual process topologies, or to find the coordinates
+of a process in the process grid, etc., users may use the corresponding
+process topology procedures,
+see \namedref{Chapter}{chap:topol}.
+\end{users}
+
+Each dimension of the array
+can be
+distributed in one of three ways:
+\begin{constlist}
+\constmainitem{MPI\_DISTRIBUTE\_BLOCK}{Block distribution.}
+\constmainitem{MPI\_DISTRIBUTE\_CYCLIC}{Cyclic distribution.}
+\constmainitem{MPI\_DISTRIBUTE\_NONE}{Dimension not distributed.}
+\end{constlist}
+
+The constant \mpiconstmain{MPI\_DISTRIBUTE\_DFLT\_DARG} specifies
+a default distribution argument.
+The distribution argument for a dimension that is not distributed
+is ignored.
+For any dimension
+\mpiarg{i}
+in which the distribution
+is \mpiconst{MPI\_DISTRIBUTE\_BLOCK},
+it is erroneous
+to specify
+\mpiarg{array\_of\_dargs[i]} $*$ \mpiarg{array\_of\_psizes[i]}
+$<$ \mpiarg{array\_of\_gsizes[i]}.
+
+For example, the HPF layout \code{ARRAY(CYCLIC(15))}
+corresponds to \mpiconst{MPI\_DISTRIBUTE\_CYCLIC}
+with a distribution argument of 15, and the HPF layout \gb\code{ARRAY(BLOCK)}
+corresponds to
+\mpiconst{MPI\_DISTRIBUTE\_BLOCK} with a distribution argument of
+\mpiconst{MPI\_DISTRIBUTE\_DFLT\_DARG}.
+
+The \mpiarg{order} argument is used as in \mpifunc{MPI\_TYPE\_CREATE\_SUBARRAY} to
+specify the storage order.
+Therefore, arrays described by this type constructor may be
+stored in Fortran (column-major) or C (row-major) order.
+Valid values for \mpiarg{order} are
+\mpiconst{MPI\_ORDER\_FORTRAN} and \mpiconst{MPI\_ORDER\_C}.
+
+This routine creates a new \MPI/ datatype with a typemap defined in
+terms of a function called ``\mpicode{cyclic()}'' (see below).
+
+Without loss of generality, it suffices to define the typemap
+for the \mpiconst{MPI\_DISTRIBUTE\_CYCLIC} case where
+\mpiconst{MPI\_DISTRIBUTE\_DFLT\_DARG} is not used.
+
+\mpiconst{MPI\_DISTRIBUTE\_BLOCK} and \mpiconst{MPI\_DISTRIBUTE\_NONE}
+can be reduced to the \mpiconst{MPI\_DISTRIBUTE\_CYCLIC} case
+for dimension
+\mpiarg{i}
+as follows.
+
+\mpiconst{MPI\_DISTRIBUTE\_BLOCK} with
+\mpiarg{array\_of\_dargs[i]} equal to \mpiconst{MPI\_DISTRIBUTE\_DFLT\_DARG}
+is equivalent to
+\mpiconst{MPI\_DISTRIBUTE\_CYCLIC}
+with \mpiarg{array\_of\_dargs[i]} set to
+\[
+(\mpiarg{array\_of\_gsizes[i]} + \mpiarg{array\_of\_psizes[i]} - 1)
+        / \mpiarg{array\_of\_psizes[i]}.
+\]
+If \mpiarg{array\_of\_dargs[i]} is not \mpiconst{MPI\_DISTRIBUTE\_DFLT\_DARG},
+then \mpiconst{MPI\_DISTRIBUTE\_BLOCK} and \mpiconst{MPI\_DISTRIBUTE\_CYCLIC}
+are equivalent.
+
+\mpiconst{MPI\_DISTRIBUTE\_NONE} is equivalent to
+\mpiconst{MPI\_DISTRIBUTE\_CYCLIC}
+with \mpiarg{array\_of\_dargs[i]} set to \mpiarg{array\_of\_gsizes[i]}.
+
+Finally,
+\mpiconst{MPI\_DISTRIBUTE\_CYCLIC} with
+\mpiarg{array\_of\_dargs[i]} equal to \mpiconst{MPI\_DISTRIBUTE\_DFLT\_DARG}
+is equivalent to
+\mpiconst{MPI\_DISTRIBUTE\_CYCLIC} with
+\mpiarg{array\_of\_dargs[i]} set to 1.
+
+For \mpiconst{MPI\_ORDER\_FORTRAN},
+an \mpiarg{ndims}-dimensional distributed array (\mpiargshort{newtype})
+is defined by the following code fragment:
+
+%%HEADER
+%%FRAGMENT
+%%DECL: MPI_Datatype oldtypes[10], oldtype, newtype;
+%%DECL: int i, ndims, r[10], array_of_psizes[10];
+%%DECL: int array_of_dargs[10], array_of_gsizes[10];
+%%DECL: extern MPI_Datatype cyclic(int,int,int,int,MPI_Datatype);
+%%TAIL: if (!newtype) abort();
+%%ENDHEADER
+\begin{lstlisting}[language=C]
+oldtypes[0] = oldtype;
+for (i = 0; i < ndims; i++) {
+    oldtypes[i+1] = cyclic(array_of_dargs[i],
+                           array_of_gsizes[i],
+                           r[i],
+                           array_of_psizes[i],
+                           oldtypes[i]);
+}
+newtype = oldtypes[ndims];
+\end{lstlisting}
+
+For \mpiconst{MPI\_ORDER\_C}, the code is:
+
+%%HEADER
+%%FRAGMENT
+%%DECL: MPI_Datatype oldtypes[10], oldtype, newtype;
+%%DECL: int i, ndims, r[10], array_of_psizes[10];
+%%DECL: int array_of_dargs[10], array_of_gsizes[10];
+%%DECL: extern MPI_Datatype cyclic(int,int,int,int,MPI_Datatype);
+%%TAIL: if (!newtype) abort();
+%%ENDHEADER
+\begin{lstlisting}[language=C]
+oldtypes[0] = oldtype;
+for (i = 0; i < ndims; i++) {
+    oldtypes[i+1] = cyclic(array_of_dargs[ndims - i - 1],
+                           array_of_gsizes[ndims - i - 1],
+                           r[ndims - i - 1],
+                           array_of_psizes[ndims - i - 1],
+                           oldtypes[i]);
+}
+newtype = oldtypes[ndims];
+\end{lstlisting}
+where \code{r[i]} is the position of the process (with rank \mpiarg{rank})
+in the process grid at dimension \code{i}.
+The values of \code{r[i]} are given by the following code fragment:
+
+%%HEADER
+%%FRAGMENT
+%%DECL: int t_rank, rank, t_size, i, ndims, array_of_psizes[10], r[10];
+%%ENDHEADER
+\begin{lstlisting}[language=C]
+t_rank = rank;
+t_size = 1;
+for (i = 0; i < ndims; i++)
+    t_size *= array_of_psizes[i];
+for (i = 0; i < ndims; i++) {
+    t_size = t_size / array_of_psizes[i];
+    r[i] = t_rank / t_size;
+    t_rank = t_rank % t_size;
+}
+\end{lstlisting}
+
+\noindent Let the typemap of \mpiarg{oldtype} have the form:
+\begin{displaymath}
+\{(\mword{type}_0,\mword{disp}_0),(\mword{type}_1,\mword{disp}_1),\ldots,(\mword{type}_{n-1},\mword{disp}_{n-1})\}
+\end{displaymath}
+where $\mword{type}_i$ is a predefined \MPI/ datatype, and let $ex$ be the
+extent of \mpiargshort{oldtype}.
+The following function uses the conceptual datatypes \mpiublb{lb\_marker}
+and \mpiublb{ub\_marker}, see \sectionref{subsec:pt2pt-markers} for details.
+
+Given the above, the function cyclic() is defined as follows:
+\begin{eqnarray*}
+\lefteqn{\mbox{cyclic}(\mword{darg}, gsize, r, \mword{psize}, \mpiarg{oldtype})} \\
+&=& \{ (\mpiublb{lb\_marker}, 0), \\
+& &  (\mword{type}_0, \mword{disp}_0 + r \times \mword{darg} \times ex), \ldots , \\
+& & \hspace{.5in}  (\mword{type}_{n-1}, \mword{disp}_{n-1} + r \times \mword{darg} \times ex), \\
+& &  (\mword{type}_0, \mword{disp}_0 + (r \times \mword{darg} + 1) \times ex), \ldots , \\
+& & \hspace{.5in} (\mword{type}_{n-1}, \mword{disp}_{n-1} + (r \times \mword{darg} + 1)\times ex), \\
+& & \ldots \\
+& &  (\mword{type}_0, \mword{disp}_0 + ((r+1) \times \mword{darg} -1) \times ex), \ldots , \\
+& & \hspace{.5in} (\mword{type}_{n-1}, \mword{disp}_{n-1} + ((r+1)
+                        \times \mword{darg} - 1)\times ex), \\
+& & \\
+& &  (\mword{type}_0, \mword{disp}_0 + r \times \mword{darg} \times ex + \mword{psize} \times \mword{darg} \times ex),
+        \ldots , \\
+& & \hspace{.5in} (\mword{type}_{n-1}, \mword{disp}_{n-1} + r \times \mword{darg} \times ex
+                + \mword{psize} \times \mword{darg} \times ex), \\
+& &  (\mword{type}_0, \mword{disp}_0 + (r \times \mword{darg} + 1) \times ex
+         + \mword{psize} \times \mword{darg} \times ex),
+        \ldots , \\
+& & \hspace{.5in} (\mword{type}_{n-1}, \mword{disp}_{n-1} + (r \times \mword{darg} + 1) \times ex
+                + \mword{psize} \times \mword{darg} \times ex), \\
+& & \ldots \\
+& &  (\mword{type}_0, \mword{disp}_0 + ((r+1) \times \mword{darg} -1) \times ex
+                 + \mword{psize} \times \mword{darg} \times ex), \ldots , \\
+& & \hspace{.5in} (\mword{type}_{n-1}, \mword{disp}_{n-1} + ((r+1) \times \mword{darg} - 1)\times ex
+                 + \mword{psize} \times \mword{darg} \times ex), \\
+& & \hspace{.5in}\vdots \\
+& &  (\mword{type}_0, \mword{disp}_0 + r \times \mword{darg} \times ex + \mword{psize} \times \mword{darg} \times ex
+                \times (count - 1)),
+        \ldots , \\
+& & \hspace{.5in} (\mword{type}_{n-1}, \mword{disp}_{n-1} + r \times \mword{darg} \times ex
+                + \mword{psize} \times \mword{darg} \times ex \times (count - 1)), \\
+& &  (\mword{type}_0, \mword{disp}_0 + (r \times \mword{darg} + 1) \times ex
+         + \mword{psize} \times \mword{darg} \times ex \times (count - 1)),
+        \ldots , \\
+& & \hspace{.5in} (\mword{type}_{n-1}, \mword{disp}_{n-1} + (r \times \mword{darg} + 1) \times ex \\
+& & \hspace{1in} + \mword{psize} \times \mword{darg} \times ex \times (count - 1)), \\
+& & \ldots \\
+& &  (\mword{type}_0, \mword{disp}_0 + (r \times \mword{darg} + \mword{darg}_{\msword{last}}-1) \times ex \\
+& & \hspace{1in} + \mword{psize} \times \mword{darg} \times ex \times (count-1)),
+        \ldots , \\
+& & \hspace{.5in} (\mword{type}_{n-1}, \mword{disp}_{n-1} + (r \times \mword{darg} + \mword{darg}_{\msword{last}} - 1)
+                \times ex \\
+& & \hspace{1in} + \mword{psize} \times \mword{darg} \times ex \times (count - 1)), \\
+& &   (\mpiublb{ub\_marker}, gsize * ex) \}
+\end{eqnarray*}
+where $count$ is defined by this code fragment:
+%%HEADER
+%%FRAGMENT
+%%DECL: int nblocks, gsize, darg, count, psize, left_over, r;
+%%ENDHEADER
+\begin{lstlisting}[language=C]
+nblocks = (gsize + (darg - 1)) / darg;
+count = nblocks / psize;
+left_over = nblocks - count * psize;
+if (r < left_over)
+    count = count + 1;
+\end{lstlisting}
+Here, \code{nblocks} is the number of blocks that must be
+distributed among the processors.
+Finally, $\mword{darg}_{\msword{last}}$ is defined by this code fragment:
+%%HEADER
+%%FRAGMENT
+%%DECL: int r, num_in_last_cyclic, gsize, psize, darg, darg_last;
+%%ENDHEADER
+\begin{lstlisting}[language=C]
+if ((num_in_last_cyclic = gsize % (psize * darg)) == 0)
+    darg_last = darg;
+else {
+    darg_last = num_in_last_cyclic - darg * r;
+    if (darg_last > darg)
+        darg_last = darg;
+    if (darg_last <= 0)
+        darg_last = darg;
+}
+\end{lstlisting}
+
+\begin{example}
+Consider generating the filetypes corresponding to the HPF distribution:
+\label{ex:io-hpf}
+\exindex{Typemap}%
+\Exindex{Fortran}{Datatypes for distributed arrays}{MPI\_Type\_create\_darray}%
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}[language={[HPF]Fortran}]
+      <oldtype> FILEARRAY(100, 200, 300)
+!HPF$ PROCESSORS PROCESSES(2, 3)
+!HPF$ DISTRIBUTE FILEARRAY(CYCLIC(10), *, BLOCK) ONTO PROCESSES
+\end{lstlisting}
+This can be achieved by the following Fortran code,
+assuming there will be six processes attached to the run:
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%DECL: integer array_of_gsizes(3), array_of_distribs(3), array_of_dargs(3)
+%%DECL: integer ierr, size, rank, oldtype, newtype, ndims
+%%DECL: integer array_of_psizes(3)
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+ndims = 3
+array_of_gsizes(1) = 100
+array_of_distribs(1) = MPI_DISTRIBUTE_CYCLIC
+array_of_dargs(1) = 10
+array_of_gsizes(2) = 200
+array_of_distribs(2) = MPI_DISTRIBUTE_NONE
+array_of_dargs(2) = 0
+array_of_gsizes(3) = 300
+array_of_distribs(3) = MPI_DISTRIBUTE_BLOCK
+array_of_dargs(3) = MPI_DISTRIBUTE_DFLT_DARG
+array_of_psizes(1) = 2
+array_of_psizes(2) = 1
+array_of_psizes(3) = 3
+call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierr)
+call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+call MPI_TYPE_CREATE_DARRAY(size, rank, ndims, array_of_gsizes, &
+     array_of_distribs, array_of_dargs, array_of_psizes,        &
+     MPI_ORDER_FORTRAN, oldtype, newtype, ierr)
+\end{lstlisting}
+\end{example}
+
+
+\subsection{Address and Size Procedures}
+\label{subsec:pt2pt-addfunc}
+
+The displacements in a general datatype are relative to some initial buffer
+address.
+\mpitermdefni{Absolute addresses}\mpitermdefindex{absolute addresses}\mpitermdefindex{addresses!absolute}
+can be substituted for these
+displacements: we treat them as displacements relative to ``address
+zero,'' the start of the address space.  This initial address zero is
+indicated by the constant \mpiconstmain{MPI\_BOTTOM}.  Thus, a datatype can
+specify the absolute address of the entries in the communication
+buffer, in which case the \mpiarg{buf} argument is passed the value
+\mpiconst{MPI\_BOTTOM}.
+Note that in Fortran \mpiconst{MPI\_BOTTOM} is not usable for initialization or
+assignment, see Section~\ref{subsec:named-constants}.
+
+The address of a location in memory can be found by invoking the
+procedure\flushline
+\mpifunc{MPI\_GET\_ADDRESS}.
+The \mpitermdef{relative displacement}\mpitermdefindex{addresses!relative displacement}
+between two absolute addresses
+can be calculated with the procedure \mpifunc{MPI\_AINT\_DIFF}. A new absolute
+address as sum of an absolute base address and a relative displacement can be
+calculated with the procedure \mpifunc{MPI\_AINT\_ADD}. To ensure portability,
+arithmetic on absolute addresses should not be performed with the intrinsic
+operators ``-'' and ``+''. See also Sections~\ref{subsec:displacement}
+and~\ref{subsec:pt2pt-segmented} on pages \pageref{subsec:displacement} and
+\pageref{subsec:pt2pt-segmented}.
+
+\begin{rationale}
+Address sized integer values, i.e., \mpictype{MPI\_Aint} or
+\vlgb\mpiftypekind{ADDRESS} values, are signed integers, while
+absolute addresses are unsigned quantities. Direct arithmetic on addresses
+stored in address sized signed variables can cause overflows, resulting in
+undefined behavior.
+\end{rationale}
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Get_address")
+    parameter(
+        "location",
+        "BUFFER",
+        constant=True,
+        asynchronous=True,
+        suppress="f08_intent",
+        desc=r"location in caller memory",
+    )
+    parameter(
+        "address", "DISPLACEMENT", direction="out", desc=r"address of location"
+    )
+\end{mpi-binding}
+
+Returns the (byte) address of \mpiarg{location}.
+
+\begin{rationale}
+In the \code{mpi\_f08} module, the \mpiarg{location} argument is not defined
+with \ftype{INTENT(IN)} because existing applications may use
+\mpifunc{MPI\_GET\_ADDRESS} as a
+substitute for \mpifunc{MPI\_F\_SYNC\_REG}, which was not defined before \MPIIIIDOTO/.
+\end{rationale}
+
+\begin{example}
+\label{pt2pt-exW}
+\Exindex{Fortran}{Get\_address}{MPI\_Get\_address}%
+Using \mpifunc{MPI\_GET\_ADDRESS} for an array.
+
+%%HEADER
+%%FRAGMENT
+%%LANG: FORTRAN
+%%DECL: INTEGER IERROR
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+REAL A(100,100)
+INTEGER(KIND=MPI_ADDRESS_KIND) I1, I2, DIFF
+CALL MPI_GET_ADDRESS(A(1,1), I1, IERROR)
+CALL MPI_GET_ADDRESS(A(10,10), I2, IERROR)
+DIFF = MPI_AINT_DIFF(I2, I1)
+! The value of DIFF is 909*SIZEOF(REAL); the values of I1 and I2 are
+! implementation dependent.
+\end{lstlisting}
+\end{example}
+
+\begin{users}
+C users may be tempted to avoid the usage of
+\mpifunc{MPI\_GET\_ADDRESS}
+and rely on
+the availability of the address operator \code{\&}.  Note, however, that
+\code{\&}~\emph{cast-expression} is a pointer, not an
+address.
+ISO C
+does not require that the value of a pointer
+(or the pointer cast to \ctype{int}) be
+the absolute address of the object pointed at---although this is
+commonly the case.
+Furthermore, referencing may not have a unique
+definition on machines with a segmented address space.
+The use of
+\mpifunc{MPI\_GET\_ADDRESS}
+to ``reference'' C
+variables guarantees portability to such machines as well.
+\end{users}
+
+%% See notes in pt2pt on why the commented out text is both wrong and
+%% unnecessary
+\begin{users}
+  To prevent problems with the argument copying and register optimization done
+  by Fortran compilers, please note the hints in
+Sections~\ref{sec:misc-problems}--\ref{sec:f90-problems:comparison-with-C}.
+%% In particular, refer to
+%% %
+%% Sections~\ref{sec:misc-sequence} and~\ref{sec:f90-problems:vector-subscripts}
+%% on pages~\pageref{sec:misc-sequence}-\pageref{sec:f90-problems:vector-subscripts}
+%% about ``{\sf Problems Due to Data Copying and Sequence Association with Subscript Triplets}''
+%% and ``{\sf Vector Subscripts}'',
+%% and Sections~\ref{sec:misc-register}-\ref{sec:f90-problems:perm-data-movements}
+%% on pages~\pageref{sec:misc-register}-\pageref{sec:f90-problems:perm-data-movements}
+%% about ``{\sf Optimization Problems}'', ``{\sf Code Movements and Register Optimization}'',
+%% ``{\sf Temporary Data Movements}'' and ``{\sf Permanent Data Movements}''.
+\end{users}
+
+To ensure portability, arithmetic on \MPI/ addresses must be
+performed using the \mpifunc{MPI\_AINT\_ADD}
+and \mpifunc{MPI\_AINT\_DIFF} procedures.
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Aint_add")
+    no_ierror()
+    return_type("LOCATION_SMALL")
+    parameter("base", "LOCATION_SMALL", desc=r"base address")
+    parameter("disp", "DISPLACEMENT", desc=r"displacement")
+\end{mpi-binding}
+
+\mpifunc{MPI\_AINT\_ADD} produces a new \mpictype{MPI\_Aint} value that is
+equivalent to the sum of the \mpiarg{base} and \mpiarg{disp} arguments, where
+\mpiarg{base} represents a base address returned by a call to
+\mpifunc{MPI\_GET\_ADDRESS} and \mpiarg{disp} represents a signed integer
+displacement. The resulting address is valid only at the process that generated
+\mpiarg{base}, and it must correspond to a location in the same object
+referenced by \mpiarg{base}, as described in
+Section~\ref{subsec:pt2pt-segmented}. The addition is performed in a manner
+that results in the correct \mpictype{MPI\_Aint} representation of the output
+address, as if the process that originally produced \mpiarg{base} had called:
+%%HEADER
+%%FRAGMENT
+%%LANG: C
+%%DECL: MPI_Aint disp, result; char *base;
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+MPI_Get_address((char *) base + disp, &result);
+\end{lstlisting}
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Aint_diff")
+    no_ierror()
+    return_type("DISPLACEMENT")
+    parameter("addr1", "LOCATION_SMALL", desc=r"minuend address")
+    parameter("addr2", "LOCATION_SMALL", desc=r"subtrahend address")
+\end{mpi-binding}
+
+\mpifunc{MPI\_AINT\_DIFF} produces a new \mpictype{MPI\_Aint} value that is
+equivalent to the difference between \mpiarg{addr1} and \mpiarg{addr2}
+arguments, where \mpiarg{addr1} and \mpiarg{addr2} represent addresses returned
+by calls to \mpifunc{MPI\_GET\_ADDRESS}.  The resulting address is valid only
+at the process that generated \mpiarg{addr1} and \mpiarg{addr2}, and
+\mpiarg{addr1} and \mpiarg{addr2} must correspond to locations in the same
+object in the same process, as described in
+Section~\ref{subsec:pt2pt-segmented}. The difference is calculated in a manner
+that results in
+the signed difference from \mpiarg{addr1} to \mpiarg{addr2}, as if
+the process that originally produced the addresses had called
+\code{(char *) addr1 - (char *) addr2}
+on the addresses initially passed to \mpifunc{MPI\_GET\_ADDRESS}.
+
+The following auxiliary procedures provide useful information on
+derived datatypes.
+
+\begin{mpi-binding}
+    function_name("MPI_Type_size")
+    parameter("datatype", "DATATYPE", desc=r"datatype to get information on")
+    parameter(
+        "size", "POLYXFER_NUM_ELEM", direction="out", desc=r"datatype size"
+    )
+\end{mpi-binding}
+
+\mpifunc{MPI\_TYPE\_SIZE}
+set the value of \mpiarg{size} to the total size, in bytes, of the entries in
+the type signature
+associated with \mpiarg{datatype}; i.e., the total size of
+the data in a message that would be created with this datatype.  Entries that
+occur multiple times in the datatype are counted with their multiplicity.
+%
+For both procedures, if the \OUT\ parameter cannot express the value to
+be returned (e.g., if the parameter is too small to hold the output
+value), it is set to \mpiconst{MPI\_UNDEFINED}.
+
+\subsection{Lower-Bound and Upper-Bound Markers}
+\mpitermtitleindex{lower-bound markers}
+\mpitermtitleindex{upper-bound markers}
+\label{subsec:pt2pt-markers}
+
+It is often convenient to define explicitly the lower bound and upper
+bound of a type map, and override the definition given
+on page~\pageref{eq:pt2pt-extent}.
+This allows one to define a datatype that
+has ``holes'' at its beginning or its end, or a datatype with
+entries that extend above the upper bound or below the lower bound.
+Examples of
+such usage are provided in Section~\ref{subsec:pt2pt-examples}.
+Also, the user may want to override the alignment rules that are
+used to compute upper bounds and extents.  E.g., a C compiler may allow
+the user to override default alignment rules for some of the
+structures within
+a program.  The user has to specify explicitly the bounds of the datatypes
+that match these structures.
+
+To achieve this, we add two additional conceptual datatypes,
+\mpitermdef{lb\_marker} and\flushline
+\mpitermdef{ub\_marker}, that represent the lower
+bound and upper
+bound of a datatype.  These conceptual datatypes occupy no space
+($extent(\mpiublb{lb\_marker}) = extent(\mpiublb{ub\_marker}) =0$).
+They do not
+affect the size or count of a datatype, and do not affect the
+ content of a message created with this datatype.  However, they do
+affect the definition of the
+extent of a datatype and, therefore, affect the outcome of a replication of
+this datatype by a datatype constructor.
+
+\begin{example}
+\label{pt2pt-exX}
+\Exindex{Neutral}{Typemap of nested datatypes}{MPI\_TYPE\_CREATE\_STRUCT,MPI\_TYPE\_CONTIGUOUS}%
+A call to
+\mpifunc{MPI\_TYPE\_CREATE\_RESIZED}\mpicode{(MPI\_INT, -3, 9, type1)}
+creates a new datatype that has an
+extent of 9 (from -3 to 5, 5 included), and contains an integer at
+displacement 0.   This is the datatype defined by the typemap
+\{(\mpiublb{lb\_marker}, -3), (int, 0), (\mpiublb{ub\_marker}, 6)\}.
+If this type is replicated twice by a call to
+\mpifunc{MPI\_TYPE\_CONTIGUOUS}\mpicode{(2, type1, type2)} then the newly created
+type can
+be described by the typemap
+\{(\mpiublb{lb\_marker}, -3), (int, 0), (int,9), (\mpiublb{ub\_marker}, 15)\}.
+(An entry of type
+\mpiublb{ub\_marker}
+can be deleted if there is another entry of type \mpiublb{ub\_marker} with a
+higher
+displacement; an entry of type \mpiublb{lb\_marker} can be deleted if there
+is another
+entry of type \mpiublb{lb\_marker} with a lower displacement.)
+\end{example}
+
+In general, if
+\begin{displaymath}
+Typemap = \{ (\mword{type}_0 , \mword{disp}_0 ) , \ldots , (\mword{type}_{n-1} , \mword{disp}_{n-1}) \} ,
+\end{displaymath}
+then the \mpitermdef{lower bound} of $Typemap$ is defined to be
+\[
+lb(Typemap) = \left\{ \begin{array}{ll}
+\min_j \mword{disp}_j & \parbox{1.5in}{\raggedright if no entry has type
+\mpiublb{lb\_marker}} \\
+\min_j \{ \mword{disp}_j \ \mbox{such that}\ \mword{type}_j = \mpiublb{lb\_marker} \} & \mbox{otherwise}
+\end{array}
+\right. \]
+Similarly,
+the \mpitermdef{upper bound} of $Typemap$ is defined to be
+\[
+ub(Typemap) = \left\{ \begin{array}{ll}
+\max_j(\mword{disp}_j + \mpicode{sizeof}(\mword{type}_j)) + \epsilon & \parbox{1.4in}{\raggedright if no entry has type
+\mpiublb{ub\_marker}}
+\\ \max_j \{ \mword{disp}_j \ \mbox{such that}\ \mword{type}_j = \mpiublb{ub\_marker} \} & \mbox{otherwise}
+\end{array}
+\right. \]
+Then
+\pagelabel{eq:pt2pt-extent}
+\[
+extent(Typemap) = ub(Typemap) - lb(Typemap)
+\]
+If $\mword{type}_i$ requires alignment to a byte address that is a multiple of $k_i$,
+then $\epsilon$ is the least nonnegative increment needed to round
+$extent(Typemap)$ to the next multiple of $\max_i k_i$.
+In Fortran, it is implementation dependent whether the \MPI/ implementation computes the alignments $k_i$ according to the alignments
+used by the compiler in common blocks, \ftype{SEQUENCE} derived types, \ftype{BIND(C)} derived types,
+or derived types that are neither \ftype{SEQUENCE} nor \ftype{BIND(C)}.
+
+The formal definitions given for the various datatype constructors
+apply now, with the amended definition of \mpitermdefni{extent}\mpitermdefindex{extent of datatypes}.
+
+\begin{rationale}
+Before Fortran 2003, \mpifunc{MPI\_TYPE\_CREATE\_STRUCT} could be applied to Fortran common blocks and
+\ftype{SEQUENCE} derived types. With Fortran 2003, this list was extended by \ftype{BIND(C)} derived types
+and \MPI/ implementors have implemented the alignments $k_i$ differently, i.e., some based on
+the alignments used in \ftype{SEQUENCE} derived types, and others according to \ftype{BIND(C)} derived types.
+\end{rationale}
+
+\begin{implementors}
+In Fortran, it is generally recommended to use \ftype{BIND(C)} derived types instead of
+common blocks or \ftype{SEQUENCE} derived types. Therefore it is recommended to calculate the
+alignments $k_i$ based on \ftype{BIND(C)} derived types.
+\end{implementors}
+
+\begin{users}
+Structures combining different basic datatypes should be defined so that there will
+be no gaps based on alignment rules.  If such a datatype is used to create an array of structures, users
+should also avoid an alignment-gap at the end of the structure.
+In \MPI/ communication, the content of such gaps would not be communicated
+into the receiver's buffer.
+For example, such an alignment-gap may occur between an odd number of
+\ctype{float}s or \ftype{REAL}s before a \ctype{double} or
+\ftype{DOUBLE PRECISION} data.  Such gaps
+may be added explicitly to both the structure and the \MPI/ derived
+datatype handle because the communication of a contiguous derived
+datatype may be significantly faster than the communication of one
+that is noncontiguous because of such alignment-gaps.
+
+As an example, instead of
+
+%%HEADER
+%%FRAGMENT
+%%LANG: FORTRAN08
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI08]Fortran}]
+TYPE, BIND(C) :: my_data
+  REAL, DIMENSION(3) :: x
+  ! there may be a gap of the size of one REAL
+  ! if the alignment of a DOUBLE PRECISION is
+  ! two times the size of a REAL
+  DOUBLE PRECISION :: p
+END TYPE
+\end{lstlisting}
+
+one should define
+
+%%HEADER
+%%FRAGMENT
+%%LANG: FORTRAN08
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI08]Fortran}]
+TYPE, BIND(C) :: my_data
+  REAL, DIMENSION(3) :: x
+  REAL :: gap1
+  DOUBLE PRECISION :: p
+END TYPE
+\end{lstlisting}
+
+and also include \mpiarg{gap1} in the matching \MPI/ derived datatype.
+It is required that all processes in a communication add the same
+gaps, i.e., defined with the same basic datatype.
+Both the original and the modified structures are portable,
+but may have different performance implications for the
+communication and memory accesses during computation on
+systems with different alignment values.
+
+In principle, a compiler may define an additional alignment rule
+for structures, e.g., to use at least 4 or 8 byte alignment, although
+the content may have a $\max_i k_i$ alignment less than this structure
+alignment. To maintain portability, users should
+always resize structure derived datatype handles
+if used in an array of structures, see the Example in
+\sectionref{sec:f90-problems:derived-types}.
+\end{users}
+
+\subsection{Extent and Bounds of Datatypes}
+\mpitermtitleindex{extent of datatypes}
+\mpitermtitleindex{bounds of datatypes}
+\label{subsec:pt2pt-extent}
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Type_get_extent")
+    parameter("datatype", "DATATYPE", desc=r"datatype to get information on")
+    parameter(
+        "lb",
+        "POLYDISPLACEMENT_AINT_COUNT",
+        direction="out",
+        desc=r"lower bound of datatype",
+    )
+    parameter(
+        "extent",
+        "POLYDISPLACEMENT_AINT_COUNT",
+        direction="out",
+        desc=r"extent of datatype",
+    )
+\end{mpi-binding}
+
+Returns the lower bound and the extent of
+\mpiarg{datatype}
+(as defined in \namedref{Equation}{soft-lb-ub-definition}).
+
+If either \OUT\ parameter cannot express the value
+to be returned (e.g., if the parameter is too small to hold the output
+value), it is set to \mpiconst{MPI\_UNDEFINED}.
+
+
+\MPI/ allows one to change the extent of a datatype, using lower bound
+and upper bound markers.  This provides control over the stride of successive
+datatypes that are replicated by datatype constructors, or are
+replicated by the \mpiarg{count} argument in a send or receive
+call.
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Type_create_resized")
+    parameter("oldtype", "DATATYPE", desc=r"input datatype")
+    parameter(
+        "lb", "POLYDISPLACEMENT_AINT_COUNT", desc=r"new lower bound of datatype"
+    )
+    parameter(
+        "extent", "POLYDISPLACEMENT_AINT_COUNT", desc=r"new extent of datatype"
+    )
+    parameter("newtype", "DATATYPE", direction="out", desc=r"output datatype")
+\end{mpi-binding}
+
+Returns in \mpiarg{newtype} a handle to a new datatype that is
+identical to \mpiarg{oldtype}, except that the lower bound of this new
+datatype is set to be \mpiarg{lb}, and its upper bound is set to be
+\mpiarg{lb}\mpicode{ + }\mpiarg{extent}.
+Any previous \mpitermdefni{lb}\mpitermdefindex{lb\_marker!erased}
+and \mpitermdefni{ub}\mpitermdefindex{ub\_marker!erased} markers are erased,
+and a new pair of lower bound and upper bound markers are put in the
+positions indicated by the \mpiarg{lb} and \mpiarg{extent} arguments.
+This affects the behavior of the datatype when used in communication
+operations, with  \mpiarg{count} $>1$,  and when used in the
+construction of new derived datatypes.
+
+\subsection{True Extent of Datatypes}
+\mpitermtitleindex{true extent of datatypes}
+\mpitermtitleindex{extent of datatypes!true extent}
+\label{subsec:pt2pt-true-extent}
+
+Suppose we implement gather
+(see also \sectionref{sec:coll-gather})
+as a spanning tree implemented on top of
+point-to-point routines.  Since the receive buffer is only valid on the
+root process, one will need to allocate some temporary space for
+receiving data on intermediate nodes.  However, the datatype extent
+cannot be used as an estimate of the amount of space that needs to be
+allocated, if the user has modified the extent, for example by
+using \mpifunc{MPI\_TYPE\_CREATE\_RESIZED}.
+The procedure \mpifunc{MPI\_TYPE\_GET\_TRUE\_EXTENT} returns
+the true extent of the datatype.
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Type_get_true_extent")
+    parameter("datatype", "DATATYPE", desc=r"datatype to get information on")
+    parameter(
+        "true_lb",
+        "POLYDISPLACEMENT_AINT_COUNT",
+        direction="out",
+        desc=r"true lower bound of datatype",
+    )
+    parameter(
+        "true_extent",
+        "POLYDISPLACEMENT_AINT_COUNT",
+        direction="out",
+        desc=r"true extent of datatype",
+    )
+\end{mpi-binding}
+
+\mpiarg{true\_lb} returns the offset of the lowest unit of storage that
+is addressed by the datatype, i.e., the lower bound of the
+corresponding typemap, ignoring explicit lower bound markers.
+\mpiarg{true\_extent} returns the
+true size of
+the datatype, i.e., the extent of the corresponding typemap, ignoring
+explicit lower bound and upper bound markers, and performing no
+rounding for alignment.  If the typemap associated with
+\mpiarg{datatype} is
+\[
+\mword{Typemap} = \{ (\mword{type}_0, \mword{disp}_0), \ldots , (\mword{type}_{n-1}, \mword{disp}_{n-1})\}
+\]
+Then
+\[
+true\_lb(\mword{Typemap}) = \min_j  \{ \mword{disp}_j ~:~ \mword{type}_j \ne \mpiublb{lb\_marker}, \mpiublb{ub\_marker} \},
+\]
+\[
+true\_ub (\mword{Typemap}) = \max_j \{\mword{disp}_j + \mpicode{sizeof}(\mword{type}_j) ~:~ \mword{type}_j \ne
+\mpiublb{lb\_marker}, \mpiublb{ub\_marker}\} ,
+\]
+and
+\[
+true\_extent (\mword{Typemap}) = true\_ub(\mword{Typemap}) - true\_lb(\mword{Typemap}).
+\]
+(Readers should compare this with the definitions in
+\sectionref{subsec:pt2pt-markers} and
+\sectionref{subsec:pt2pt-extent},
+which describe the procedure
+\mpifunc{MPI\_TYPE\_GET\_EXTENT}.)
+
+The \mpiarg{true\_extent} is the minimum number of bytes of
+memory necessary to hold a datatype, uncompressed.
+
+If either \OUT\ parameter cannot express the value to
+be returned (e.g., if the parameter is too small to hold the output
+value), it is set to \mpiconst{MPI\_UNDEFINED}.
+
+\subsection{Commit and Free}
+\label{subsec:pt2pt-comfree}
+
+A datatype object has to be \mpitermdefni{committed}\mpitermdefindex{commit} before it can be used in a
+communication.
+As an argument in datatype constructors, uncommitted and also
+committed datatypes can be used.
+There is no need to commit basic datatypes. They are ``pre-committed.''
+
+\begin{mpi-binding}
+    function_name("MPI_Type_commit")
+    parameter(
+        "datatype",
+        "DATATYPE",
+        direction="inout",
+        desc=r"datatype that is committed",
+    )
+\end{mpi-binding}
+
+The commit operation commits the datatype, that is, the formal description of
+a communication buffer, not the content of that buffer.  Thus, after a datatype
+has been committed, it can be repeatedly reused to communicate the changing
+content
+of a buffer or, indeed, the content of different buffers, with different
+starting addresses.
+
+\begin{implementors}
+The system may ``compile'' at commit time an internal
+representation for the datatype that facilitates
+communication, e.g.,
+change from a compacted representation to a flat representation of the
+datatype, and select the most convenient transfer mechanism.
+
+The optimizations chosen during \mpifunc{MPI\_TYPE\_COMMIT} may no longer be optimal
+if a session (or the \wpm{}) is initialized or finalized.
+\end{implementors}
+
+\mpifunc{MPI\_TYPE\_COMMIT}
+will accept a committed datatype;
+in this case, it is equivalent to a no-op.
+
+
+\begin{example}
+\label{datatype-exY}
+\Exindex{Fortran}{Type\_commit}{MPI\_Type\_commit}%
+The following code fragment gives examples of using
+\mpifunc{MPI\_TYPE\_COMMIT}.
+%%HEADER
+%%FRAGMENT
+%%LANG: FORTRAN
+%%DECL: INTEGER ierr
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+INTEGER type1, type2
+CALL MPI_TYPE_CONTIGUOUS(5, MPI_REAL, type1, ierr)
+              ! new type object created
+CALL MPI_TYPE_COMMIT(type1, ierr)
+              ! now type1 can be used for communication
+type2 = type1
+              ! type2 can be used for communication
+              ! (it is a handle to same object as type1)
+CALL MPI_TYPE_VECTOR(3, 5, 4, MPI_REAL, type1, ierr)
+              ! new uncommitted type object created
+CALL MPI_TYPE_COMMIT(type1, ierr)
+              ! now type1 can be used anew for communication
+\end{lstlisting}
+\end{example}
+
+\begin{mpi-binding}
+    function_name("MPI_Type_free")
+    parameter(
+        "datatype", "DATATYPE", direction="inout", desc=r"datatype that is freed"
+    )
+\end{mpi-binding}
+
+Marks the datatype object associated with \mpiarg{datatype} for
+deallocation and sets \mpiarg{datatype} to \mpiconstmain{MPI\_DATATYPE\_NULL}.
+Any communication that is currently using this datatype will complete
+normally.
+%
+Freeing a datatype does not affect any other datatype that was
+built from the freed datatype.  The system behaves as if
+input datatype arguments to derived datatype constructors are passed by value.
+
+\begin{implementors}
+The implementation may keep a reference count of active communications
+that use the datatype, in order to decide when to free it.
+Also, one may implement constructors of derived datatypes so that they keep
+pointers to their datatype arguments, rather than copying them.  In this
+case, one needs to keep track of active datatype definition references in order
+to know when a datatype object can be freed.
+\end{implementors}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Duplicating a Datatype}
+\label{sec:ei-dupdata}
+
+\begin{mpi-binding}
+    function_name("MPI_Type_dup")
+    parameter("oldtype", "DATATYPE", desc=r"datatype")
+    parameter(
+        "newtype", "DATATYPE", direction="out", desc=r"copy of \mpiarg{oldtype}"
+    )
+\end{mpi-binding}
+
+\mpifunc{MPI\_TYPE\_DUP} is
+a type constructor
+that duplicates the existing \mpishortarg{oldtype}
+with associated key values.
+For each key value, the respective copy
+callback function determines the attribute value associated with this
+key in the new datatype; one particular action that a copy
+callback may take is to delete the attribute from the new datatype.
+Returns in \mpiarg{newtype} a new datatype with exactly the same
+properties as \mpiarg{oldtype} and any copied cached
+information, see \sectionref{subsec:caching:datatypes}.
+The new datatype has identical
+upper bound and lower bound and yields the same net result when fully
+decoded with the procedures in Section~\ref{subsec:ei-dataaccess}.
+The
+\mpiarg{newtype} has the same committed state as the old
+\mpiarg{oldtype}.
+
+\subsection{Use of General Datatypes in Communication}
+\label{subsec:pt2pt-datatypeuse}
+
+Handles to derived datatypes can be passed to a communication call wherever a
+datatype argument is required.
+A call of the form \mpifunc{MPI\_SEND}\mpicode{(buf, count, datatype, ...)}, where
+$\mpicode{count} > 1$, is interpreted as if the call was passed a new datatype
+that is the
+concatenation of \mpiarg{count} copies of \mpiarg{datatype}.
+Thus,
+\mpifunc{MPI\_SEND}\mpicode{(buf, count, datatype, dest, tag, comm)} is equivalent to,
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+MPI_TYPE_CONTIGUOUS(count, datatype, newtype)
+MPI_TYPE_COMMIT(newtype)
+MPI_SEND(buf, 1, newtype, dest, tag, comm)
+MPI_TYPE_FREE(newtype).
+\end{lstlisting}
+Similar statements apply to all other communication procedures that have a
+\mpiarg{count} and \mpiarg{datatype} argument.
+
+Suppose that a send operation \mpifunc{MPI\_SEND}\mpicode{(buf, count,
+datatype, dest, tag, comm)} is executed, where
+\mpiarg{datatype} has type map,
+\[
+\{(\mword{type}_0, \mword{disp}_0),\ldots,(\mword{type}_{n-1}, \mword{disp}_{n-1})\},
+\]
+and extent $extent$.  (Explicit lower bound and upper bound markers are not listed in the type map, but
+they affect the value of $extent$.)
+The send
+operation sends $n \cdot \mpicode{count}$ entries, where entry $i
+\cdot n + j$ is at location
+$addr_{i,j} = \mpicode{buf} + extent \cdot i + \mword{disp}_j$
+and has type $\mword{type}_j$,
+for $i = 0 ,\ldots, \mpicode{count}-1$ and $j = 0 ,\ldots, n-1$.
+These entries need not be contiguous, nor distinct; their order can be
+arbitrary.
+
+The variable stored at address $addr_{i,j}$ in the calling program
+should be of a type that matches $\mword{type}_j$, where
+type matching is defined as in Section~\ref{subsec:pt2pt-typematch}.
+The message sent contains $n \cdot \mpicode{count}$ entries, where entry
+$i \cdot n +j$ has type $\mword{type}_j$.
+
+Similarly, suppose that a receive operation
+\mpifunc{MPI\_RECV}\mpicode{(buf, count, datatype, source, tag, comm, status)} is
+executed, where \mpiarg{datatype} has type map,
+\begin{displaymath}
+\{(\mword{type}_0, \mword{disp}_0) ,\ldots,(\mword{type}_{n-1}, \mword{disp}_{n-1}) \},
+\end{displaymath}
+\noindent
+with extent $extent$.  (Again,  explicit lower bound and upper bound markers are not listed in the type map, but
+they affect the value of $extent$.)
+This receive operation receives
+$n \cdot \mpicode{count}$ entries, where entry $i \cdot n + j$ is at location
+$\mpicode{buf} + extent \cdot i + \mword{disp}_j$
+and has type $\mword{type}_j$.  If the incoming message consists of $k$
+elements, then we must have $k \le n \cdot \mpicode{count}$; the $i \cdot n +
+j$-th element of the message should have a type that matches $\mword{type}_j$.
+
+\mpitermdefni{Type matching}\mpitermdefindex{type matching}\mpitermdefindex{matching!type}
+is defined according to the type signature of
+the corresponding datatypes, that is, the sequence of basic type
+components.  Type matching does not depend on some aspects of the
+datatype definition, such as the displacements (layout in memory) or the
+intermediate types used.
+
+\begin{example}
+\label{pt2pt-exAA}
+\Exindex{Fortran}{Matching type with datatypes}{MPI\_Type\_contiguous,MPI\_Send,MPI\_Recv}%
+\exindex{Datatype!matching type}%
+This example shows that type matching is defined in terms of
+the basic types that a derived type consists of.
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+...
+CALL MPI_TYPE_CONTIGUOUS(2, MPI_REAL, type2, ...)
+CALL MPI_TYPE_CONTIGUOUS(4, MPI_REAL, type4, ...)
+CALL MPI_TYPE_CONTIGUOUS(2, type2, type22, ...)
+...
+CALL MPI_SEND(a, 4, MPI_REAL, ...)
+CALL MPI_SEND(a, 2, type2, ...)
+CALL MPI_SEND(a, 1, type22, ...)
+CALL MPI_SEND(a, 1, type4, ...)
+...
+CALL MPI_RECV(a, 4, MPI_REAL, ...)
+CALL MPI_RECV(a, 2, type2, ...)
+CALL MPI_RECV(a, 1, type22, ...)
+CALL MPI_RECV(a, 1, type4, ...)
+\end{lstlisting}
+Each of the sends matches any of the receives.
+\end{example}
+
+A datatype may specify overlapping entries. The use of such a
+datatype in any communication in association with a buffer updated by
+the operation is erroneous. (This is erroneous even
+if the actual message received is short enough not to write any entry
+more than once.)
+
+Suppose that
+\mpifunc{MPI\_RECV}\mpicode{(buf, count, datatype, dest, tag, comm, status)} is
+executed, where \mpiarg{datatype} has type map,
+\begin{displaymath}
+\{(\mword{type}_0, \mword{disp}_0) ,\ldots,(\mword{type}_{n-1}, \mword{disp}_{n-1}) \}.
+\end{displaymath}
+The received message need not fill all the receive buffer, nor does it
+need to fill a number of locations that is a multiple of $n$.
+Any number, $k$, of basic
+elements can be received, where $0 \le k \le \mpicode{count} \cdot n$.
+The number of basic elements received can be retrieved from
+\mpiarg{status} using the query procedure \mpifunc{MPI\_GET\_ELEMENTS}.
+
+\cdeclindex{MPI\_Status}%
+\begin{mpi-binding}
+    function_name("MPI_Get_elements")
+    parameter(
+        "status", "STATUS", desc=r"return status of receive operation", constant=True
+    )
+    parameter("datatype", "DATATYPE", desc=r"datatype used by receive operation")
+    parameter(
+        "count",
+        "POLYDTYPE_NUM_ELEM",
+        direction="out",
+        desc=r"number of received basic elements",
+    )
+\end{mpi-binding}
+
+The \mpiarg{datatype} argument should match the argument provided by the
+receive call that set the \mpiarg{status} variable.
+For both procedures, if the \OUT\ parameter cannot express the value to
+be returned (e.g., if the parameter is too small to hold the output
+value), it is set to \mpiconst{MPI\_UNDEFINED}.
+
+The previously defined procedure
+\mpifunc{MPI\_GET\_COUNT}
+(Section~\ref{subsec:pt2pt-status}),
+has a different behavior.
+It returns the number of ``top-level
+entries'' received, i.e., the number of ``copies'' of type
+\mpiarg{datatype}.
+In the previous example, \mpifunc{MPI\_GET\_COUNT}
+may return any integer value $k$, where $0 \le k \le \mpicode{count}$.
+If \mpifunc{MPI\_GET\_COUNT} returns $k$, then the number of basic
+elements received (and the value returned by
+\mpifunc{MPI\_GET\_ELEMENTS})
+is $n \cdot k$.   If the number of basic elements received is not a
+multiple of $n$, that is, if the receive operation has not received an
+integral number of \mpiarg{datatype} ``copies,'' then
+\mpifunc{MPI\_GET\_COUNT} sets the value of \mpiarg{count} to \mpiconst{MPI\_UNDEFINED}.
+
+\begin{example}
+\label{pt2pt-exBB}
+\Exindex{Fortran}{Using Get\_count and Get\_elements}{MPI\_Get\_count,MPI\_Get\_elements,MPI\_Type\_contiguous}%
+Usage of \mpifunc{MPI\_GET\_COUNT} and
+\mpifunc{MPI\_GET\_ELEMENTS}.
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%DECL: integer Type2, ierr, comm, stat(MPI_STATUS_SIZE), i, rank
+%%DECL: real a(10)
+%%SKIPELIPSIS
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran},basicstyle=\lstsmall]
+...
+CALL MPI_TYPE_CONTIGUOUS(2, MPI_REAL, Type2, ierr)
+CALL MPI_TYPE_COMMIT(Type2, ierr)
+...
+CALL MPI_COMM_RANK(comm, rank, ierr)
+IF (rank .EQ. 0) THEN
+   CALL MPI_SEND(a, 2, MPI_REAL, 1, 0, comm, ierr)
+   CALL MPI_SEND(a, 3, MPI_REAL, 1, 0, comm, ierr)
+ELSE IF (rank .EQ. 1) THEN
+   CALL MPI_RECV(a, 2, Type2, 0, 0, comm, stat, ierr)
+   CALL MPI_GET_COUNT(stat, Type2, i, ierr)     ! returns i=1
+   CALL MPI_GET_ELEMENTS(stat, Type2, i, ierr)  ! returns i=2
+   CALL MPI_RECV(a, 2, Type2, 0, 0, comm, stat, ierr)
+   CALL MPI_GET_COUNT(stat, Type2, i, ierr)     ! returns i=MPI_UNDEFINED
+   CALL MPI_GET_ELEMENTS(stat, Type2, i, ierr)  ! returns i=3
+END IF
+\end{lstlisting}
+\end{example}
+
+The procedure \mpifunc{MPI\_GET\_ELEMENTS}
+can also be used after a probe
+to find the number of elements in the probed message.
+Note that the
+\mpifunc{MPI\_GET\_COUNT} and
+\mpifunc{MPI\_GET\_ELEMENTS}
+return the same values when they are used
+with basic datatypes as long as the limits of their respective \mpiarg{count} arguments are not exceeded.
+
+
+\begin{rationale}
+The extension given to the definition of \mpifunc{MPI\_GET\_COUNT} seems
+natural: one would expect this procedure to return the value of the
+\mpiarg{count} argument, when the receive buffer is filled.
+Sometimes \mpiarg{datatype} represents
+a basic unit of data one wants to transfer,
+for example, a record in an array of records (structures).
+One should be able to find out how many components were received
+without bothering to divide by the number of elements in each
+component.   However, on other occasions, \mpiarg{datatype} is used to
+define a complex layout of data in the receiver memory, and does not represent
+a basic unit of data for transfers.  In such cases, one needs to use
+the procedure \mpifunc{MPI\_GET\_ELEMENTS}.
+\end{rationale}
+
+\begin{implementors}
+The definition implies that a receive cannot change the value of
+storage outside the entries defined to compose the communication
+buffer.
+In particular, the definition implies that padding space in a structure
+should not be modified when such a structure is copied from one process to
+another. This would
+prevent the obvious optimization of copying the structure, together
+with the padding, as one contiguous block.
+The implementation is free to do this optimization when it does not
+impact the outcome of the computation.
+The user can ``force'' this optimization by explicitly including
+padding as part of the message.
+\end{implementors}
+
+\subsection{Correct Use of Addresses}
+\mpitermtitleindex{addresses!correct use}
+\label{subsec:pt2pt-segmented}
+
+Successively declared variables in C or Fortran are not necessarily
+stored at contiguous locations.  Thus, care must be exercised
+that displacements do not cross from one variable
+to another.  Also, in machines with a segmented address space,
+addresses are not unique and address arithmetic has some peculiar
+properties.   Thus, the use of \mpitermdef{addresses},
+that is, displacements relative to the
+start address \mpiconst{MPI\_BOTTOM}, has to be restricted.
+
+Variables belong
+to the same \mpitermdef{sequential storage} if they belong to the same
+array,
+to the same \code{COMMON} block in Fortran, or to the same structure in C.
+Valid addresses are defined recursively as follows:
+
+\begin{enumerate}
+\item
+The procedure
+\mpifunc{MPI\_GET\_ADDRESS}
+returns a valid address, when
+passed as argument a variable of the calling program.
+\item
+The \mpiarg{buf} argument of a communication procedure evaluates to a
+valid address, when passed as argument a variable of the calling program.
+\item
+If \mpiarg{v} is a valid address, and \mpiarg{i} is an
+integer, then \mpiarg{v+i} is a valid address, provided \mpiarg{v} and
+\mpiarg{v+i} are in the same sequential storage.
+\end{enumerate}
+
+A correct program uses only valid addresses to identify the
+locations of entries in communication buffers.
+Furthermore, if \mpiarg{u} and \mpiarg{v} are two valid addresses, then
+the (integer)
+difference $\mpiarg{u}-\mpiarg{v}$ can be computed only if both \mpiarg{u} and \mpiarg{v}
+are in the same sequential storage.
+No other arithmetic operations can be meaningfully executed on addresses.
+
+The rules above impose no constraints on the use of derived
+datatypes, as long as they are used to define a communication buffer
+that is wholly contained within the same sequential storage.
+However, the construction of a communication buffer that contains
+variables that are not within the same sequential storage must obey
+certain restrictions.  Basically, a communication buffer with
+variables that are not within the same sequential storage can be used
+only by specifying in the communication call \mpiarg{buf}\mpicode{ = }%
+\mpiconst{MPI\_BOTTOM}, \mpiarg{count}\mpicode{ = 1}, and using a \mpiarg{datatype}
+argument where all displacements are valid (absolute) addresses.
+
+\begin{users}
+It is not expected that \MPI/ implementations will be able to detect
+erroneous, ``out of bound'' displacements---unless those overflow the
+user address space---since the \MPI/ call may not know the extent of the
+arrays and records in the host program.
+\end{users}
+
+
+
+\begin{implementors}
+There is no need to distinguish (absolute) addresses and (relative)
+displacements on a machine with contiguous address space:
+\mpiconst{MPI\_BOTTOM} is
+zero, and both addresses and displacements are integers.  On machines where the
+distinction is required, addresses are recognized as expressions that involve
+\mpiconst{MPI\_BOTTOM}.
+\end{implementors}
+
+% Note that in Fortran, Fortran INTEGERs may be too small to contain an
+% address (e.g., 32 bit INTEGERs on a machine with 64bit pointers).
+% Because of this, in Fortran, implementations may restrict the use of
+% absolute addresses to only part of the process memory, and restrict the
+% use of relative displacements to subranges of the process memory where they
+% are constrained by the size of Fortran INTEGERs.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Decoding a Datatype}
+\label{subsec:typeaccess}
+\label{subsec:ei-dataaccess}
+
+\MPI/
+datatype objects
+allow users to specify
+an arbitrary layout of data in memory.
+There are several cases
+where accessing the layout information in
+opaque datatype objects would be useful.
+The opaque datatype
+object has found a number of uses outside \mpi/.  Furthermore, a
+number of tools wish to display internal information about a datatype.
+To achieve this, datatype decoding procedures are provided.
+The two procedures in this section are used together to decode datatypes
+to recreate the calling sequence used in their initial definition.
+These can be used to allow a user to determine the type map and type
+signature of a datatype.
+
+\begin{mpi-binding}
+    function_name("MPI_Type_get_envelope")
+    parameter("datatype", "DATATYPE", desc=r"datatype to decode")
+    parameter(
+        "num_integers",
+        "POLYNUM_PARAM_VALUES",
+        direction="out",
+        desc=r"number of input integers used in call constructing \mpiarg{combiner}",
+    )
+    parameter(
+        "num_addresses",
+        "POLYNUM_PARAM_VALUES",
+        direction="out",
+        desc=r"number of input addresses used in call constructing \mpiarg{combiner}",
+    )
+    parameter(
+        "num_large_counts",
+        "POLYNUM_PARAM_VALUES",
+        direction="out",
+        desc=r"number of input large counts used in call constructing \mpiarg{combiner}",
+        large_only=True
+    )
+    parameter(
+        "num_datatypes",
+        "POLYNUM_PARAM_VALUES",
+        direction="out",
+        desc=r"number of input datatypes used in call constructing \mpiarg{combiner}",
+    )
+    parameter("combiner", "COMBINER", direction="out", desc=r"combiner")
+\end{mpi-binding}
+
+For the given \mpiarg{datatype},
+\mpifunc{MPI\_TYPE\_GET\_ENVELOPE} returns information on the
+number and type of input arguments used in the call that created the
+\mpiarg{datatype}.  The number-of-arguments values returned can be
+used to provide sufficiently large arrays in the decoding routine
+\mpifunc{MPI\_TYPE\_GET\_CONTENTS}.  This call and the meaning of the
+returned values is described below.  The \mpiarg{combiner} reflects
+the \mpi/ datatype constructor call that was used in creating
+\mpiarg{datatype}.
+
+\begin{rationale}
+By requiring that the \mpiarg{combiner} reflect the constructor used
+in the creation
+of the \mpiarg{datatype}, the decoded information can be used
+to effectively recreate the calling sequence used in the original
+creation.
+This is the most useful information and
+was
+felt to be reasonable even though it constrains implementations to
+remember the original constructor sequence even if the internal
+representation is different.
+
+The decoded information keeps track of datatype duplications.  This is
+important as one needs to distinguish between a predefined datatype
+and a dup of a predefined datatype.  The former is a constant object
+that cannot be freed, while the latter is a derived datatype that can
+be freed.
+\end{rationale}
+
+The list of values that can be returned from \mpiskipfunc{MPI\_TYPE\_GET\_ENVELOPE} in
+\mpiarg{combiner} (on the left) and the call associated with them (on the right) are as follows:
+\begin{constlist}[180pt]
+\constitem{MPI\_COMBINER\_NAMED}{a named predefined datatype}
+\constitem{MPI\_COMBINER\_DUP}{\mpifunc{MPI\_TYPE\_DUP}}
+\constitem{MPI\_COMBINER\_CONTIGUOUS}{\mpifunc{MPI\_TYPE\_CONTIGUOUS}}
+\constitem{MPI\_COMBINER\_VECTOR}{\mpifunc{MPI\_TYPE\_VECTOR}}
+\constitem{MPI\_COMBINER\_HVECTOR}{\mpifunc{MPI\_TYPE\_CREATE\_HVECTOR}}
+\constitem{MPI\_COMBINER\_INDEXED}{\mpifunc{MPI\_TYPE\_INDEXED}}
+\constitem{MPI\_COMBINER\_HINDEXED}{\mpifunc{MPI\_TYPE\_CREATE\_HINDEXED}}
+\constitem{MPI\_COMBINER\_INDEXED\_BLOCK}{\mpifunc{MPI\_TYPE\_CREATE\_INDEXED\_BLOCK}}
+\constitem{MPI\_COMBINER\_HINDEXED\_BLOCK}{\mpifunc{MPI\_TYPE\_CREATE\_HINDEXED\_BLOCK}}
+\constitem{MPI\_COMBINER\_STRUCT}{\mpifunc{MPI\_TYPE\_CREATE\_STRUCT}}
+\constitem{MPI\_COMBINER\_SUBARRAY}{\mpifunc{MPI\_TYPE\_CREATE\_SUBARRAY}}
+\constitem{MPI\_COMBINER\_DARRAY}{\mpifunc{MPI\_TYPE\_CREATE\_DARRAY}}
+\constitem{MPI\_COMBINER\_F90\_REAL}{\mpifunc{MPI\_TYPE\_CREATE\_F90\_REAL}}
+\constitem{MPI\_COMBINER\_F90\_COMPLEX}{\mpifunc{MPI\_TYPE\_CREATE\_F90\_COMPLEX}}
+\constitem{MPI\_COMBINER\_F90\_INTEGER}{\mpifunc{MPI\_TYPE\_CREATE\_F90\_INTEGER}}
+\constitem{MPI\_COMBINER\_RESIZED}{\mpifunc{MPI\_TYPE\_CREATE\_RESIZED}}
+\constitem{MPI\_COMBINER\_VALUE\_INDEX}{\mpifunc{MPI\_TYPE\_GET\_VALUE\_INDEX}}
+\end{constlist}
+
+If \mpiarg{combiner} is \mpiconst{MPI\_COMBINER\_NAMED} then \mpiarg{datatype} is a
+named predefined datatype.
+
+If the \mpifunc{MPI\_TYPE\_GET\_ENVELOPE} variant without
+\mpiarg{num\_large\_counts} is invoked with a \mpiarg{datatype} that
+requires an output value of \mpiarg{num\_large\_counts} $>0$,
+then an error of class \errormain{MPI\_ERR\_TYPE} is raised.
+
+\begin{rationale}
+  The large count variant of this \MPI/ procedure was added in \MPIIV/.
+  It contains a new \mpiarg{num\_large\_counts} parameter.  The
+  other variant---the variant that existed before \MPIIV/---was
+  not changed in order to preserve backwards compatibility.
+\end{rationale}
+
+The actual arguments used in the creation call for a \mpiarg{datatype}
+can be obtained using \mpifunc{MPI\_TYPE\_GET\_CONTENTS}.
+
+\mpifunc{MPI\_TYPE\_GET\_ENVELOPE} and \mpifunc{MPI\_TYPE\_GET\_CONTENTS} also support large \gb{}count types in
+separate additional \MPI/ procedures in C (suffixed with the ``\code{\_c}'') and interface
+polymorphism  in Fortran when using \code{USE mpi\_f08}.
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Type_get_contents")
+    parameter("datatype", "DATATYPE", desc=r"datatype to decode")
+
+    parameter(
+        "max_integers",
+        "POLYNUM_PARAM_VALUES",
+        desc=r"number of elements in \mpiarg{array_of_integers}",
+    )
+    parameter(
+        "max_addresses",
+        "POLYNUM_PARAM_VALUES",
+        desc=r"number of elements in \mpiarg{array_of_addresses}",
+    )
+    parameter(
+        "max_large_counts",
+        "POLYNUM_PARAM_VALUES",
+        desc=r"number of elements in \mpiarg{array_of_large_counts}",
+        large_only=True,
+    )
+    parameter(
+        "max_datatypes",
+        "POLYNUM_PARAM_VALUES",
+        desc=r"number of elements in \mpiarg{array_of_datatypes}",
+    )
+
+    parameter(
+        "array_of_integers",
+        "GENERIC_DTYPE_INT",
+        direction="out",
+        length="max_integers",
+        desc=r"contains integer arguments used in constructing \mpiarg{datatype}",
+    )
+    parameter(
+        "array_of_addresses",
+        "DISPLACEMENT",
+        direction="out",
+        length="max_addresses",
+        desc=r"contains address arguments used in constructing \mpiarg{datatype}",
+    )
+    parameter(
+        "array_of_large_counts",
+        "GENERIC_DTYPE_COUNT",
+        direction="out",
+        length="max_large_counts",
+        desc=r"contains large count arguments used in constructing \mpiarg{datatype}",
+        large_only=True,
+    )
+    parameter(
+        "array_of_datatypes",
+        "DATATYPE",
+        direction="out",
+        length="max_datatypes",
+        desc=r"contains datatype arguments used in constructing \mpiarg{datatype}",
+    )
+\end{mpi-binding}
+
+\mpiarg{datatype} must be a predefined unnamed or a derived datatype;
+the call is erroneous if \mpiarg{datatype} is a predefined named
+datatype.
+
+The values given for \mpiarg{max\_integers}, \mpiarg{max\_addresses},
+\mpiarg{max\_large\_counts},
+and \mpiarg{max\_datatypes}
+must be at least as large as the value
+returned in \mpiarg{num\_integers}, \mpiarg{num\_addresses},
+\mpiarg{num\_large\_counts},
+and \mpiarg{num\_datatypes},
+respectively, in the call \mpifunc{MPI\_TYPE\_GET\_ENVELOPE}
+for the same \mpiarg{datatype} argument.
+
+\begin{rationale}
+The arguments \mpiarg{max\_integers}, \mpiarg{max\_addresses},
+\mpiarg{max\_large\_counts},
+and
+\mpiarg{max\_datatypes} allow for error checking in the
+call.
+\end{rationale}
+
+If the \mpifunc{MPI\_TYPE\_GET\_CONTENTS} variant without
+\mpiarg{max\_large\_counts} is invoked with a \mpiarg{datatype} that
+requires $>0$ values in \mpiarg{array\_of\_large\_counts},
+then an error of class \error{MPI\_ERR\_TYPE} is raised.
+
+\begin{rationale}
+  The large count variant of this \MPI/ procedure was added in \MPIIV/.
+  It contains new \mpiarg{max\_large\_counts} and
+  \mpiarg{array\_of\_large\_counts} parameters.  The
+  other variant---the variant that existed before \MPIIV/---was
+  not changed in order to preserve backwards compatibility.
+\end{rationale}
+
+The datatypes returned in \mpiarg{array\_of\_datatypes} are handles to
+datatype objects that are equivalent to the datatypes used in the
+original construction call.  If these were derived datatypes, then
+the returned datatypes are new datatype objects, and the
+user is responsible for freeing these datatypes with
+\mpifunc{MPI\_TYPE\_FREE}.
+If these were predefined datatypes, then
+the returned datatype is equal to that (constant) predefined datatype
+and cannot be freed.
+
+The committed state of returned derived datatypes is undefined,
+i.e., the datatypes may or
+may not be committed.  Furthermore, the content of attributes of
+returned datatypes is undefined.
+
+Note that \mpifunc{MPI\_TYPE\_GET\_CONTENTS} can be invoked with a
+\mpishortarg{datatype} argument that was constructed using
+\mpifunc{MPI\_TYPE\_CREATE\_F90\_REAL},\flushline
+\mpifunc{MPI\_TYPE\_CREATE\_F90\_INTEGER}, or
+\mpifunc{MPI\_TYPE\_CREATE\_F90\_COMPLEX}  (an unnamed predefined datatype).
+In such a case, an empty \mpiarg{array\_of\_datatypes} is returned.
+
+\begin{rationale}
+The definition of datatype equivalence implies that equivalent
+predefined datatypes are equal.
+By requiring the same handle for named predefined datatypes, it is
+possible to use the \code{==} or \code{.EQ.} comparison operator to determine the
+datatype involved.
+\end{rationale}
+
+\begin{implementors}
+The datatypes returned in \mpiarg{array\_of\_datatypes} must appear to the
+user as if each is an equivalent copy of the datatype used in the type
+constructor call.
+Whether this is done by
+creating a new datatype or via another mechanism such as a reference
+count mechanism is up to the implementation as long as the semantics
+are preserved.
+\end{implementors}
+
+\begin{rationale}
+The committed state and attributes of the returned datatype is
+deliberately left vague.  The datatype used in the original
+construction may have been modified since its use in the constructor
+call.  Attributes can be added, removed, or modified as well as having
+the datatype committed.  The semantics given allow for a
+reference count implementation without having to track these changes.
+\end{rationale}
+
+In the
+deprecated
+ datatype constructor calls, the address arguments in Fortran are of
+type \ftype{INTEGER}.  In the
+preferred
+calls, the address arguments are of
+type \mpiftypekind{ADDRESS}.  The call
+\mpifunc{MPI\_TYPE\_GET\_CONTENTS} returns all addresses in an argument
+of type \mpiftypekind{ADDRESS}.  This is true even if the
+deprecated
+ calls were used.  Thus, the location of values returned can
+be thought of as being returned by the C bindings.  It can also be
+determined by examining the
+preferred
+ calls for datatype constructors
+for the
+deprecated
+calls that involve addresses.
+
+\begin{rationale}
+By having all address arguments returned in the
+\mpiarg{array\_of\_addresses} argument, the result from a C and Fortran
+decoding of a \mpiarg{datatype} gives the result in the same
+argument.  It is assumed that an integer
+of type \mpiftypekind{ADDRESS} will be at least as large as
+the \ftype{INTEGER} argument used in datatype construction with the old \mpii/
+calls so no loss of information will occur.
+\end{rationale}
+
+The following defines what values are placed in each entry of the
+returned arrays depending on the datatype constructor used for
+\mpiarg{datatype}.  It also specifies the size of the arrays needed,
+which is the values returned by \mpifunc{MPI\_TYPE\_GET\_ENVELOPE}.
+In Fortran, the following calls were made:
+
+% Note: in Fortran, ``TYPE'' is a keyword. While it can be used as a
+% variable name, for clarity, a unique name, dtype (for DataTYPE) is
+% used instead.
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%DECL: INTEGER LARGE
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+PARAMETER (LARGE = 1000)
+INTEGER DTYPE, NI, NA, ND, COMBINER, I(LARGE), D(LARGE), IERROR
+INTEGER(KIND=MPI_ADDRESS_KIND) A(LARGE)
+! CONSTRUCT DATATYPE DTYPE (NOT SHOWN)
+CALL MPI_TYPE_GET_ENVELOPE(DTYPE, NI, NA, ND, COMBINER, IERROR)
+IF ((NI .GT. LARGE) .OR. (NA .GT. LARGE) .OR. (ND .GT. LARGE)) THEN
+   WRITE (*, *) "NI, NA, OR ND = ", NI, NA, ND, &
+   " RETURNED BY MPI_TYPE_GET_ENVELOPE IS LARGER THAN LARGE = ", LARGE
+   CALL MPI_ABORT(MPI_COMM_WORLD, 99, IERROR)
+ENDIF
+CALL MPI_TYPE_GET_CONTENTS(DTYPE, NI, NA, ND, I, A, D, IERROR)
+\end{lstlisting}
+
+\noindent
+or in C the analogous calls of:
+
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#define LARGE 1000
+int ni, na, nd, combiner, i[LARGE];
+MPI_Aint a[LARGE];
+MPI_Datatype dtype, d[LARGE];
+/* construct datatype dtype (not shown) */
+MPI_Type_get_envelope(dtype, &ni, &na, &nd, &combiner);
+if ((ni > LARGE) || (na > LARGE) || (nd > LARGE)) {
+   fprintf(stderr, "ni, na, or nd = %d %d %d returned by ", ni, na, nd);
+   fprintf(stderr, "MPI_Type_get_envelope is larger than LARGE = %d\n",
+           LARGE);
+   MPI_Abort(MPI_COMM_WORLD, 99);
+}
+MPI_Type_get_contents(dtype, ni, na, nd, i, a, d);
+\end{lstlisting}
+
+\noindent
+The following describes the values of the arguments for each combiner.
+The lower case name of arguments is used.
+Also, the descriptions below refer to \MPI/ datatypes created by
+procedures without large count arguments.
+\begin{description}[style=unboxed,leftmargin=0cm]
+
+\item[\mpiconstmain{MPI\_COMBINER\_NAMED}]
+the \mpiarg{datatype} represents a predefined type and therefore
+it is erroneous to call \mpifuncshort{MPI\_TYPE\_GET\_CONTENTS}.
+
+\item[\mpiconstmain{MPI\_COMBINER\_DUP}]
+\code{ni = 0}, \code{na = 0}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &  C &    Fortran location                \\
+\hline
+oldtype &               d[0] &          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_CONTIGUOUS}]
+\code{ni = 1}, \code{na = 0}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &  C &    Fortran location                \\
+\hline
+count &                 i[0] &          I(1)                            \\
+oldtype &               d[0] &          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\filbreak %%ALLOWLATEX%% % Intended to mark this as a good place to insert
+% a page break
+\item[\mpiconstmain{MPI\_COMBINER\_VECTOR}]
+\code{ni = 3}, \code{na = 0}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &  C &    Fortran location                \\
+\hline
+count &                 i[0] &          I(1)                            \\
+blocklength &           i[1] &          I(2)                            \\
+stride &                i[2] &          I(3)                            \\
+oldtype &               d[0] &          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_HVECTOR}]
+\code{ni = 2}, \code{na = 1}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &  C &    Fortran location                \\
+\hline
+count &                 i[0] &          I(1)                            \\
+blocklength &           i[1] &          I(2)                            \\
+stride &                a[0] &          A(1)                            \\
+oldtype &               d[0] &          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_INDEXED}]
+\code{ni = 2*count+1}, \code{na = 0}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+count                   &       i[0] &                          I(1)                            \\
+array\_of\_blocklengths &       i[1] to i[i[0]] &               I(2) to I(I(1)+1)               \\
+array\_of\_displacements &      i[i[0]+1] to i[2*i[0]] &        I(I(1)+2) to I(2*I(1)+1)        \\
+oldtype &                       d[0] &                          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_HINDEXED}]
+\code{ni = count+1}, \code{na = count}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+count                   &       i[0] &                          I(1)                            \\
+array\_of\_blocklengths &       i[1] to i[i[0]] &               I(2) to I(I(1)+1)               \\
+array\_of\_displacements &      a[0] to a[i[0]-1] &             A(1) to A(I(1))                 \\
+oldtype &                       d[0] &                          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_INDEXED\_BLOCK}]
+\code{ni = count+2}, \code{na = 0}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+count                   &       i[0] &                          I(1)                            \\
+blocklength             &       i[1] &                          I(2)                            \\
+array\_of\_displacements &      i[2] to i[i[0]+1] &             I(3) to I(I(1)+2)    \\
+oldtype &                       d[0] &                          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_HINDEXED\_BLOCK}]
+\code{ni = 2}, \code{na = count}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+count                   &       i[0] &                          I(1)                            \\
+blocklength             &       i[1] &                          I(2)                            \\
+array\_of\_displacements &      a[0] to a[i[0]-1] &             A(1) to A(I(1))                 \\
+oldtype &                       d[0] &                          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_STRUCT}]
+\code{ni = count+1}, \code{na = count}, \code{nd = count}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+count &                         i[0] &                          I(1)                            \\
+array\_of\_blocklengths &       i[1] to i[i[0]] &               I(2) to I(I(1)+1)               \\
+array\_of\_displacements &      a[0] to a[i[0]-1] &             A(1) to A(I(1))                 \\
+array\_of\_types &              d[0] to d[i[0]-1] &             D(1) to D(I(1))                 \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_SUBARRAY}]
+\code{ni = 3*ndims+2}, \code{na = 0}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+ndims &                         i[0] &                          I(1)                            \\
+array\_of\_sizes &              i[1] to i[i[0]] &               I(2) to I(I(1)+1)               \\
+array\_of\_subsizes &           i[i[0]+1] to i[2*i[0]] &        I(I(1)+2) to I(2*I(1)+1)        \\
+array\_of\_starts &             i[2*i[0]+1] to i[3*i[0]] &      I(2*I(1)+2) to I(3*I(1)+1)      \\
+order &                         i[3*i[0]+1] &                   I(3*I(1)+2]                     \\
+oldtype &                       d[0] &                          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\filbreak %%ALLOWLATEX%% % Intended to mark this as a good place to insert
+% a page break
+\item[\mpiconstmain{MPI\_COMBINER\_DARRAY}]
+\code{ni = 4*ndims+4}, \code{na = 0}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+size &                          i[0] &                          I(1)                            \\
+rank &                          i[1] &                          I(2)                            \\
+ndims &                         i[2] &                          I(3)                            \\
+array\_of\_gsizes &             i[3] to i[i[2]+2] &             I(4) to I(I(3)+3)               \\
+array\_of\_distribs &           i[i[2]+3] to i[2*i[2]+2] &      I(I(3)+4) to I(2*I(3)+3)        \\
+array\_of\_dargs &              i[2*i[2]+3] to i[3*i[2]+2] &    I(2*I(3)+4) to I(3*I(3)+3)      \\
+array\_of\_psizes &             i[3*i[2]+3] to i[4*i[2]+2] &    I(3*I(3)+4) to I(4*I(3)+3)      \\
+order &                         i[4*i[2]+3] &                   I(4*I(3)+4)                     \\
+oldtype &                       d[0] &                          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_F90\_REAL}]
+\code{ni = 2}, \code{na = 0}, \code{nd = 0}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+p &                             i[0] &                          I(1)                            \\
+r &                             i[1] &                          I(2)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_F90\_COMPLEX}]
+\code{ni = 2}, \code{na = 0}, \code{nd = 0}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+p &                             i[0] &                          I(1)                            \\
+r &                             i[1] &                          I(2)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_F90\_INTEGER}]
+\code{ni = 1}, \code{na = 0}, \code{nd = 0}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+r &                             i[0] &                          I(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_RESIZED}]
+\code{ni = 0}, \code{na = 2}, \code{nd = 1}, and
+
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+lb &                            a[0] &                          A(1)                            \\
+extent &                        a[1] &                          A(2)                            \\
+oldtype &                       d[0] &                          D(1)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\item[\mpiconstmain{MPI\_COMBINER\_VALUE\_INDEX}]
+\code{ni = 0}, \code{na = 0}, \code{nd = 2}, and
+
+\smallskip%ALLOWLATEX%
+\begin{center}
+\begin{tabular}{l c c}
+\hline
+Constructor argument &          C &                    Fortran location                \\
+\hline
+value\_type &                   d[0] &                          D(1)                            \\
+index\_type &                   d[1] &                          D(2)                            \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{description}
+
+\subsection{Examples}
+\label{subsec:pt2pt-examples}
+
+The following examples illustrate the use of derived datatypes.
+
+\begin{example}
+\label{pt2pt-exCC}
+\Exindex{Fortran}{Send/receive of a 3D array}{MPI\_Type\_get\_extent,MPI\_Type\_vector,MPI\_Type\_create\_hvector,MPI\_Sendrecv,MPI\_Type\_commit}%
+\exindex{Datatype!3D array}%
+Send and receive a section of a 3D array.
+
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+REAL a(100,100,100), e(9,9,9)
+INTEGER oneslice, twoslice, threeslice, myrank, ierr
+INTEGER(KIND=MPI_ADDRESS_KIND) lb, sizeofreal
+INTEGER status(MPI_STATUS_SIZE)
+
+! extract the section a(1:17:2, 3:11, 2:10)
+! and store it in e(:,:,:).
+
+CALL MPI_COMM_RANK(MPI_COMM_WORLD, myrank, ierr)
+
+CALL MPI_TYPE_GET_EXTENT(MPI_REAL, lb, sizeofreal, ierr)
+
+! create datatype for a 1D section
+CALL MPI_TYPE_VECTOR(9, 1, 2, MPI_REAL, oneslice, ierr)
+
+! create datatype for a 2D section
+CALL MPI_TYPE_CREATE_HVECTOR(9, 1, 100*sizeofreal, oneslice, &
+                             twoslice, ierr)
+
+! create datatype for the entire section
+CALL MPI_TYPE_CREATE_HVECTOR(9, 1, 100*100*sizeofreal, twoslice, &
+                             threeslice, ierr)
+
+CALL MPI_TYPE_COMMIT(threeslice, ierr)
+CALL MPI_SENDRECV(a(1,3,2), 1, threeslice, myrank, 0, e, 9*9*9, &
+                  MPI_REAL, myrank, 0, MPI_COMM_WORLD, status, ierr)
+\end{lstlisting}
+\end{example}
+
+
+\begin{example}
+\label{pt2pt-exDD}
+\Exindex{Fortran}{Using indexed datatype}{MPI\_Type\_indexed,MPI\_Sendrecv,MPI\_Type\_commit}%
+Copy the (strictly) lower triangular part of a matrix.
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%DECL: integer i
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+REAL a(100,100), b(100,100)
+INTEGER  disp(100), blocklen(100), ltype, myrank, ierr
+INTEGER status(MPI_STATUS_SIZE)
+
+! copy lower triangular part of array a
+! onto lower triangular part of array b
+
+CALL MPI_COMM_RANK(MPI_COMM_WORLD, myrank, ierr)
+
+! compute start and size of each column
+DO i=1,100
+   disp(i) = 100*(i-1) + i
+   blocklen(i) = 100-i
+END DO
+
+! create datatype for lower triangular part
+CALL MPI_TYPE_INDEXED(100, blocklen, disp, MPI_REAL, ltype, ierr)
+
+CALL MPI_TYPE_COMMIT(ltype, ierr)
+CALL MPI_SENDRECV(a, 1, ltype, myrank, 0, b, 1, &
+                  ltype, myrank, 0, MPI_COMM_WORLD, status, ierr)
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+\label{pt2pt-exEE}
+\Exindex{Fortran}{Nested vector datatypes}{MPI\_Type\_get\_extent,MPI\_Type\_vector,MPI\_Type\_create\_hvector,MPI\_Sendrecv,MPI\_Type\_commit}%
+\exindex{Datatype!matrix transpose}%
+Transpose a matrix.
+
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+REAL a(100,100), b(100,100)
+INTEGER row, xpose, myrank, ierr
+INTEGER(KIND=MPI_ADDRESS_KIND) lb, sizeofreal
+INTEGER status(MPI_STATUS_SIZE)
+
+! transpose matrix a onto b
+
+CALL MPI_COMM_RANK(MPI_COMM_WORLD, myrank, ierr)
+
+CALL MPI_TYPE_GET_EXTENT(MPI_REAL, lb, sizeofreal, ierr)
+
+! create datatype for one row
+CALL MPI_TYPE_VECTOR(100, 1, 100, MPI_REAL, row, ierr)
+
+! create datatype for matrix in row-major order
+CALL MPI_TYPE_CREATE_HVECTOR(100, 1, sizeofreal, row, xpose, ierr)
+
+CALL MPI_TYPE_COMMIT(xpose, ierr)
+
+! send matrix in row-major order and receive in column major order
+CALL MPI_SENDRECV(a, 1, xpose, myrank, 0, b, 100*100, &
+                  MPI_REAL, myrank, 0, MPI_COMM_WORLD, status, ierr)
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+\label{pt2pt-exFF}
+\Exindex{Fortran}{Transpose with datatypes}{MPI\_Type\_get\_extent,MPI\_Type\_vector,MPI\_Type\_create\_struct,MPI\_Sendrecv,MPI\_Type\_commit}%
+\exindex{Datatype!matrix transpose}%
+Another approach to the transpose problem:
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+REAL a(100,100), b(100,100)
+INTEGER row, row1
+INTEGER(KIND=MPI_ADDRESS_KIND) lb, sizeofreal
+INTEGER myrank, ierr
+INTEGER status(MPI_STATUS_SIZE)
+
+CALL MPI_COMM_RANK(MPI_COMM_WORLD, myrank, ierr)
+
+! transpose matrix a onto b
+
+CALL MPI_TYPE_GET_EXTENT(MPI_REAL, lb, sizeofreal, ierr)
+
+! create datatype for one row
+CALL MPI_TYPE_VECTOR(100, 1, 100, MPI_REAL, row, ierr)
+
+! create datatype for one row, with the extent of one real number
+lb = 0
+CALL MPI_TYPE_CREATE_RESIZED(row, lb, sizeofreal, row1, ierr)
+
+CALL MPI_TYPE_COMMIT(row1, ierr)
+
+! send 100 rows and receive in column major order
+CALL MPI_SENDRECV(a, 100, row1, myrank, 0, b, 100*100, &
+                  MPI_REAL, myrank, 0, MPI_COMM_WORLD, status, ierr)
+\end{lstlisting}
+\end{example}
+
+
+\begin{example}
+\label{pt2pt-exGG}
+\Exindex{C}{Using datatypes with array of structures}{d:MPI\_Aint,MPI\_Get\_address,MPI\_Type\_create\_struct,MPI\_Type\_indexed,MPI\_Send,MPI\_Type\_get\_extent,MPI\_Type\_create\_hvector,MPI\_Type\_commit}%
+\exindex{Datatype!array of structures}%
+Use of \MPI/ datatypes to manipulate an array of structures.
+
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+struct Partstruct
+{
+   int    type;   /* particle type */
+   double d[6];   /* particle coordinates */
+   char   b[7];   /* some additional information */
+};
+
+struct Partstruct    particle[1000];
+
+int          i, dest, tag;
+MPI_Comm     comm;
+
+
+/* build datatype describing structure */
+
+MPI_Datatype Particlestruct, Particletype;
+MPI_Datatype type[3] = {MPI_INT, MPI_DOUBLE, MPI_CHAR};
+int          blocklen[3] = {1, 6, 7};
+MPI_Aint     disp[3];
+MPI_Aint     base, lb, sizeofentry;
+
+
+/* compute displacements of structure components */
+
+MPI_Get_address(particle, disp);
+MPI_Get_address(particle[0].d, disp+1);
+MPI_Get_address(particle[0].b, disp+2);
+base = disp[0];
+for (i=0; i < 3; i++) disp[i] = MPI_Aint_diff(disp[i], base);
+
+MPI_Type_create_struct(3, blocklen, disp, type, &Particlestruct);
+
+/* Since the compiler may pad the structure, it is best to explicitly
+   set the extent of the MPI datatype for a structure element using
+   MPI_Type_create_resized */
+
+/* compute extent of the structure */
+MPI_Get_address(particle+1, &sizeofentry);
+sizeofentry = MPI_Aint_diff(sizeofentry, base);
+
+/* build datatype describing structure */
+MPI_Type_create_resized(Particlestruct, 0, sizeofentry, &Particletype);
+
+
+/* 4.1: send the entire array */
+
+MPI_Type_commit(&Particletype);
+MPI_Send(particle, 1000, Particletype, dest, tag, comm);
+
+
+/* 4.2: send only the entries of type zero particles,
+        preceded by the number of such entries */
+
+MPI_Datatype Zparticles;   /* datatype describing all particles
+                              with type zero (needs to be recomputed
+                              if types change) */
+MPI_Datatype Ztype;
+
+int          zdisp[1000];
+int          zblock[1000], j, k;
+int          zzblock[2] = {1,1};
+MPI_Aint     zzdisp[2];
+MPI_Datatype zztype[2];
+
+/* compute displacements of type zero particles */
+j = 0;
+for (i=0; i < 1000; i++)
+   if (particle[i].type == 0)
+      {
+        zdisp[j] = i;
+        zblock[j] = 1;
+        j++;
+      }
+
+/* create datatype for type zero particles  */
+MPI_Type_indexed(j, zblock, zdisp, Particletype, &Zparticles);
+
+/* prepend particle count */
+MPI_Get_address(&j, zzdisp);
+MPI_Get_address(particle, zzdisp+1);
+zztype[0] = MPI_INT;
+zztype[1] = Zparticles;
+MPI_Type_create_struct(2, zzblock, zzdisp, zztype, &Ztype);
+
+MPI_Type_commit(&Ztype);
+MPI_Send(MPI_BOTTOM, 1, Ztype, dest, tag, comm);
+
+
+/* A probably more efficient way of defining Zparticles */
+
+/* consecutive particles with index zero are handled as one block */
+j=0;
+for (i=0; i < 1000; i++)
+   if (particle[i].type == 0)
+      {
+         for (k=i+1; (k < 1000)&&(particle[k].type == 0); k++);
+         zdisp[j] = i;
+         zblock[j] = k-i;
+         j++;
+         i = k;
+      }
+MPI_Type_indexed(j, zblock, zdisp, Particletype, &Zparticles);
+
+
+/* 4.3: send the first two coordinates of all entries */
+
+MPI_Datatype Allpairs;      /* datatype for all pairs of coordinates */
+
+MPI_Type_get_extent(Particletype, &lb, &sizeofentry);
+
+/* sizeofentry can also be computed by subtracting the address
+   of particle[0] from the address of particle[1] */
+
+MPI_Type_create_hvector(1000, 2, sizeofentry, MPI_DOUBLE, &Allpairs);
+MPI_Type_commit(&Allpairs);
+MPI_Send(particle[0].d, 1, Allpairs, dest, tag, comm);
+
+/* an alternative solution to 4.3 */
+
+MPI_Datatype Twodouble;
+
+MPI_Type_contiguous(2, MPI_DOUBLE, &Twodouble);
+
+MPI_Datatype Onepair;   /* datatype for one pair of coordinates, with
+                          the extent of one particle entry */
+
+MPI_Type_create_resized(Twodouble, 0, sizeofentry, &Onepair );
+MPI_Type_commit(&Onepair);
+MPI_Send(particle[0].d, 1000, Onepair, dest, tag, comm);
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+\label{pt2pt-exHH}
+\Exindex{C}{Using datatypes with array of structures with absolute addresses}{MPI\_Get\_address,MPI\_Type\_create\_struct,MPI\_Type\_indexed,MPI\_Send,MPI\_Type\_create\_hvector,MPI\_Type\_commit}%
+\exindex{Datatype!absolute addresses}%
+The same manipulations as in the previous example, but use absolute
+addresses in datatypes.
+
+%%HEADER
+%%LANG: C
+%%DECL: int dest, tag, i, j, k;
+%%DECL: MPI_Comm comm;
+%%SUBST:\/\* 5.2:}void testroutine2(void){/* 5.2
+%%SUBST:MPI_Datatype Particletype;:MPI_Datatype Particletype;void testroutine(void){
+%%TAIL: }
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+struct Partstruct
+{
+    int    type;
+    double d[6];
+    char   b[7];
+};
+
+struct Partstruct particle[1000];
+
+/* build datatype describing first array entry */
+
+MPI_Datatype Particletype;
+MPI_Datatype type[3] = {MPI_INT, MPI_DOUBLE, MPI_CHAR};
+int          block[3] = {1, 6, 7};
+MPI_Aint     disp[3];
+
+MPI_Get_address(particle, disp);
+MPI_Get_address(particle[0].d, disp+1);
+MPI_Get_address(particle[0].b, disp+2);
+MPI_Type_create_struct(3, block, disp, type, &Particletype);
+
+/* Particletype describes first array entry -- using absolute
+   addresses */
+
+/* 5.1: send the entire array */
+
+MPI_Type_commit(&Particletype);
+MPI_Send(MPI_BOTTOM, 1000, Particletype, dest, tag, comm);
+
+
+/* 5.2: send the entries of type zero,
+        preceded by the number of such entries */
+
+MPI_Datatype Zparticles, Ztype;
+
+int          zdisp[1000];
+int          zblock[1000], i, j, k;
+int          zzblock[2] = {1,1};
+MPI_Datatype zztype[2];
+MPI_Aint     zzdisp[2];
+
+j=0;
+for (i=0; i < 1000; i++)
+    if (particle[i].type == 0)
+        {
+            for (k=i+1; (k < 1000)&&(particle[k].type == 0); k++);
+            zdisp[j] = i;
+            zblock[j] = k-i;
+            j++;
+            i = k;
+        }
+MPI_Type_indexed(j, zblock, zdisp, Particletype, &Zparticles);
+/* Zparticles describe particles with type zero, using
+   their absolute addresses*/
+
+/* prepend particle count */
+MPI_Get_address(&j, zzdisp);
+zzdisp[1] = (MPI_Aint)0;
+zztype[0] = MPI_INT;
+zztype[1] = Zparticles;
+MPI_Type_create_struct(2, zzblock, zzdisp, zztype, &Ztype);
+
+MPI_Type_commit(&Ztype);
+MPI_Send(MPI_BOTTOM, 1, Ztype, dest, tag, comm);
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+\label{pt2pt-exII}
+\Exindex{C}{Using datatypes with unions}{MPI\_Get\_address,MPI\_Type\_create\_resized,MPI\_Send,MPI\_Type\_commit}%
+\exindex{Datatype!union}%
+This example shows how datatypes can be used to handle unions.
+
+%%HEADER
+%%FRAGMENT
+%%DECL: int dest, tag; MPI_Comm comm;
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+union {
+   int     ival;
+   float   fval;
+      } u[1000];
+
+int     i, utype;
+
+/* All entries of u have identical type; variable
+   utype keeps track of their current type */
+
+MPI_Datatype   mpi_utype[2];
+MPI_Aint       ubase, extent;
+
+/* compute an MPI datatype for each possible union type;
+   assume values are left-aligned in union storage. */
+
+MPI_Get_address(u, &ubase);
+MPI_Get_address(u+1, &extent);
+extent = MPI_Aint_diff(extent, ubase);
+
+MPI_Type_create_resized(MPI_INT, 0, extent, &mpi_utype[0]);
+
+MPI_Type_create_resized(MPI_FLOAT, 0, extent, &mpi_utype[1]);
+
+for(i=0; i<2; i++) MPI_Type_commit(&mpi_utype[i]);
+
+/* actual communication */
+MPI_Send(u, 1000, mpi_utype[utype], dest, tag, comm);
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+\Exindex{C}{Decoding a datatype}{MPI\_Type\_get\_envelope,MPI\_Type\_get\_contents}%
+This
+example shows how a datatype can be decoded.  The routine
+\gb\code{printdatatype} prints out the elements of the datatype.  Note the use
+of \cfunc{MPI\_Type\_free} for datatypes that are not predefined.
+%%WDG - MPI_Aint may not be a long, thus it is necessary to cast an
+%% MPI_Aint value to (long) in order to use %ld to print the value.  This
+%% is likely to be sufficient in most cases, though some systems may require
+%% a different type for printing an MPI_Aint value.
+%% The line that ends with ``array_of_dtypes);'' was indented slightly to
+%% avoid an overfull (too long) line.  Do not ``fix'' the indentation; if
+%% you must line up the argument list with the line above, you *must*
+%% break that second line into two lines.
+%%HEADER
+%%LANG: C
+%%SKIPELIPSIS
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+/*
+  Example of decoding a datatype.
+
+  Returns 0 if the datatype is predefined, 1 otherwise
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include "mpi.h"
+int printdatatype(MPI_Datatype datatype)
+{
+    int *array_of_ints;
+    MPI_Aint *array_of_adds;
+    MPI_Datatype *array_of_dtypes;
+    int num_ints, num_adds, num_dtypes, combiner;
+    int i;
+
+    MPI_Type_get_envelope(datatype,
+                          &num_ints, &num_adds, &num_dtypes, &combiner);
+    switch (combiner) {
+    case MPI_COMBINER_NAMED:
+        printf("Datatype is named:");
+        /* To print the specific type, we can match against the
+           predefined forms. We can NOT use a switch statement here
+           We could also use MPI_TYPE_GET_NAME if we prefered to use
+           names that the user may have changed.
+         */
+        if      (datatype == MPI_INT)    printf("MPI_INT\n");
+        else if (datatype == MPI_DOUBLE) printf("MPI_DOUBLE\n");
+        ... else test for other types ...
+        return 0;
+        break;
+    case MPI_COMBINER_STRUCT:
+        printf("Datatype is struct containing");
+        array_of_ints   = (int *)malloc(num_ints * sizeof(int));
+        array_of_adds   =
+                   (MPI_Aint *) malloc(num_adds * sizeof(MPI_Aint));
+        array_of_dtypes = (MPI_Datatype *)
+            malloc(num_dtypes * sizeof(MPI_Datatype));
+        MPI_Type_get_contents(datatype, num_ints, num_adds, num_dtypes,
+                         array_of_ints, array_of_adds, array_of_dtypes);
+        printf(" %d datatypes:\n", array_of_ints[0]);
+        for (i=0; i<array_of_ints[0]; i++) {
+            printf("blocklength %d, displacement %ld, type:\n",
+                   array_of_ints[i+1], (long)array_of_adds[i]);
+            if (printdatatype(array_of_dtypes[i])) {
+                /* Note that we free the type ONLY if it
+                   is not predefined */
+                MPI_Type_free(&array_of_dtypes[i]);
+            }
+        }
+        free(array_of_ints);
+        free(array_of_adds);
+        free(array_of_dtypes);
+        break;
+        ... other combiner values ...
+    default:
+        printf("Unrecognized combiner type\n");
+    }
+    return 1;
+}
+\end{lstlisting}
+\end{example}
+
+
+
+\section{Pack and Unpack}
+\mpitermtitleindex{pack}
+\mpitermtitleindex{unpack}
+\label{sec:pt2pt-packing}
+
+Some existing communication libraries provide pack/unpack procedures for sending
+noncontiguous data. In these, the user explicitly packs
+data into a contiguous buffer
+before sending it, and unpacks it from a contiguous buffer after receiving it.
+Derived datatypes, which are described in
+Section~\ref{sec:pt2pt-datatype}, allow one, in most cases, to avoid
+explicit packing and unpacking.  The user specifies the layout of
+the data to be sent or received, and the communication library directly
+accesses a noncontiguous buffer.  The pack/unpack routines are provided for
+compatibility with previous libraries.   Also, they provide some functionality
+that is not otherwise available in \MPI/.
+For instance, a message can be received in several
+parts, where the receive operation done on
+a later part may depend on the content of a former part.
+Another use is that outgoing messages
+may be explicitly buffered in user supplied space, thus overriding the system
+buffering policy.   Finally, the availability of pack and unpack operations
+facilitates the development of additional communication libraries layered on top
+of \MPI/.
+
+\begin{mpi-binding}
+    function_name("MPI_Pack")
+    parameter("inbuf", "BUFFER", constant=True, desc=r"input buffer start")
+    parameter(
+        "incount", "POLYDTYPE_NUM_ELEM_NNI", desc=r"number of input data items"
+    )
+    parameter("datatype", "DATATYPE", desc=r"datatype of each input data item")
+    parameter("outbuf", "BUFFER", direction="out", desc=r"output buffer start")
+    parameter(
+        "outsize", "POLYNUM_BYTES_NNI", desc=r"output buffer size, in bytes"
+    )
+    parameter(
+        "position",
+        "POLYDISPLACEMENT_COUNT",
+        direction="inout",
+        desc=r"current position in buffer, in bytes",
+    )
+    parameter("comm", "COMMUNICATOR", desc=r"communicator for packed message")
+\end{mpi-binding}
+
+Packs the message in the send buffer specified by \mpiarg{inbuf, incount,
+datatype} into the buffer
+space specified by \mpiarg{outbuf} and
+\mpiarg{outsize}.  The
+input buffer can
+be any communication buffer allowed in \mpifunc{MPI\_SEND}.  The output buffer
+is a contiguous storage area containing \mpiarg{outsize} bytes, starting at
+the address \mpiarg{outbuf} (length is counted in \emph{bytes}, not elements,
+as if it were a communication buffer for a message of type \type{MPI\_PACKED}).
+
+The input value of \mpiarg{position} is the first
+location in the output buffer to be used for packing.  \mpiarg{position} is
+incremented by the size of the packed message, and the output value of
+\mpiarg{position} is the first location in the output buffer
+following the locations occupied by the packed message.
+The \mpiarg{comm} argument
+is the communicator that will be subsequently used for sending the packed
+message.
+
+\begin{mpi-binding}
+    function_name("MPI_Unpack")
+    parameter("inbuf", "BUFFER", constant=True, desc=r"input buffer start")
+    parameter(
+        "insize", "POLYNUM_BYTES_NNI", desc=r"size of input buffer, in bytes"
+    )
+    parameter(
+        "position",
+        "POLYDISPLACEMENT_COUNT",
+        direction="inout",
+        desc=r"current position in bytes",
+    )
+    parameter("outbuf", "BUFFER", direction="out", desc=r"output buffer start")
+    parameter(
+        "outcount", "POLYDTYPE_NUM_ELEM", desc=r"number of items to be unpacked"
+    )
+    parameter("datatype", "DATATYPE", desc=r"datatype of each output data item")
+    parameter("comm", "COMMUNICATOR", desc=r"communicator for packed message")
+\end{mpi-binding}
+
+Unpacks a message into the receive buffer specified by \mpiarg{outbuf,
+outcount,
+datatype} from the buffer
+space specified by \mpiarg{inbuf} and \mpiarg{insize}.  The output buffer can
+be any communication buffer allowed in \mpifunc{MPI\_RECV}.  The input
+buffer is a contiguous storage area containing \mpiarg{insize} bytes,
+starting at address \mpiarg{inbuf}.
+The input value of \mpiarg{position} is the first location in
+the input buffer occupied by the packed message.
+\mpiarg{position} is incremented
+by the size of the packed message, so that the output value of
+\mpiarg{position} is the first location in the input buffer
+after the locations occupied by the message that was unpacked.
+\mpiarg{comm} is the communicator used to receive the packed message.
+
+\begin{users}
+Note the difference between \mpifunc{MPI\_RECV} and \mpifunc{MPI\_UNPACK}:  in
+\mpifunc{MPI\_RECV}, the \mpiarg{count} argument specifies the maximum
+number of
+items that can be received.  The actual number of items received is determined
+by the length of the incoming message.  In \mpifunc{MPI\_UNPACK}, the
+\mpiarg{count} argument specifies the actual number
+of items that are unpacked;
+the ``size'' of the corresponding message is the increment in
+\mpiarg{position}.
+The reason for this change is that the ``incoming message size'' is not
+predetermined since the user decides how much to unpack; nor is it easy to
+determine
+the ``message size'' from the number of items to be unpacked.  In fact, in a
+heterogeneous system, this number may not be determined \emph{a priori}.
+\end{users}
+
+To understand the behavior of pack and unpack, it is convenient to think of the
+data part of a message as being the sequence obtained by concatenating the
+successive values sent in that message.   The pack operation stores this
+sequence in the buffer space, as if sending the message to that buffer.  The
+unpack operation retrieves this sequence from buffer space, as if receiving a
+message from that buffer.  (It is helpful to think of internal Fortran files or
+\code{sscanf} in C, for a similar function.)
+
+Several messages can be successively packed into one \mpitermdef{packing unit}.
+This
+is effected by several successive \mpitermdef{related} calls to \mpifunc{MPI\_PACK},
+where the first
+call provides \mpiarg{position}\mpicode{ = 0}, and each successive call inputs the value
+of \mpiarg{position} that was output by the previous call, and the same values
+for \mpiarg{outbuf, outcount} and \mpiarg{comm}.   This packing unit
+now contains
+the equivalent information that would have been stored in a message by one send
+call with a send buffer that is the ``concatenation'' of the individual send
+buffers.
+
+A  packing unit can
+be sent using type \mpidtypemain{MPI\_PACKED}.  Any point-to-point
+or collective communication operation can be used to move the sequence of bytes
+that forms the packing unit from one process to another.  This packing unit
+can now be
+received using any receive operation, with any datatype:  the
+type matching rules are relaxed for messages sent with type \type{MPI\_PACKED}.
+
+A message sent with any type (including \type{MPI\_PACKED}) can be
+received using the type \type{MPI\_PACKED}.  Such a message can then be
+unpacked by calls to \mpifunc{MPI\_UNPACK}.
+
+A packing unit (or a message created by a regular, ``typed'' send)
+can be unpacked into several successive messages.  This is
+effected by several successive related calls to \mpifunc{MPI\_UNPACK}, where
+the first
+call provides \mpiarg{position}\mpicode{ = 0}, and each successive call inputs the value
+of \mpiarg{position} that was output by the previous call, and the same values
+for \mpiarg{inbuf, insize} and \mpiarg{comm}.
+
+
+The concatenation of two packing units is not necessarily a packing unit; nor is
+a substring of a packing unit necessarily a packing unit.  Thus, one cannot
+concatenate two packing units and then unpack the result as one packing
+unit; nor can one unpack a substring of a packing unit as a separate
+packing unit.  Each packing unit, that was created by a related
+sequence of pack
+calls, or by a regular send,
+must be unpacked as a unit, by a sequence of related unpack calls.
+
+
+
+\begin{rationale}
+The restriction on ``atomic'' packing and unpacking of packing units allows
+the implementation to add at the head of packing units additional
+information, such as
+a description of the sender architecture (to be used for type conversion, in a
+heterogeneous environment)
+\end{rationale}
+
+
+
+The following call allows the user to find out how much space is
+needed to pack a message and, thus, manage space allocation for
+buffers.
+
+\begin{mpi-binding}
+    function_name("MPI_Pack_size")
+    parameter(
+        "incount",
+        "POLYDTYPE_NUM_ELEM_NNI",
+        desc=r"count argument to packing call",
+    )
+    parameter("datatype", "DATATYPE", desc=r"datatype argument to packing call")
+    parameter(
+        "comm", "COMMUNICATOR", desc=r"communicator argument to packing call"
+    )
+    parameter(
+        "size",
+        "POLYNUM_BYTES_NNI",
+        direction="out",
+        desc=r"upper bound on size of packed message, in bytes",
+    )
+\end{mpi-binding}
+
+A call to \mpifunc{MPI\_PACK\_SIZE}\mpicode{(incount, datatype, comm, size)}
+returns in \mpiarg{size} an upper bound on the increment in \mpiarg{position}
+that is effected by a call to \mpifunc{MPI\_PACK}\mpicode{(inbuf, incount, datatype,
+outbuf, outcount, position, comm)}.
+If the packed size of the datatype cannot be expressed by the \mpiarg{size}
+parameter, then \mpifunc{MPI\_PACK\_SIZE} sets the value of \mpiarg{size} to
+\mpiconst{MPI\_UNDEFINED}.
+
+\begin{rationale}
+The call returns an upper bound, rather than an exact bound, since the
+exact amount of space needed to pack the message may depend on the
+context (e.g., first message packed in a packing unit may take more
+space).
+\end{rationale}
+
+
+\begin{example}
+\label{pt2pt-exJJ}
+\Exindex{C}{Using Pack}{MPI\_Pack}%
+An example using \mpifunc{MPI\_PACK}.
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%DECL: int myrank;
+%%SKIPELIPSIS
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+int        position, i, j, a[2];
+char       buff[1000];
+
+MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+if (myrank == 0)
+{
+    /* SENDER CODE */
+    position = 0;
+    MPI_Pack(&i, 1, MPI_INT, buff, 1000, &position, MPI_COMM_WORLD);
+    MPI_Pack(&j, 1, MPI_INT, buff, 1000, &position, MPI_COMM_WORLD);
+    MPI_Send(buff, position, MPI_PACKED, 1, 0, MPI_COMM_WORLD);
+}
+else  /* RECEIVER CODE */
+    MPI_Recv(a, 2, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+\end{lstlisting}
+\end{example}
+
+
+
+\begin{example}
+\label{pt2pt-exKK}
+\Exindex{C}{Pack/Unpack with struct datatype}{MPI\_Pack,MPI\_Unpack,MPI\_Get\_address,MPI\_Type\_create\_struct,MPI\_Send,MPI\_Type\_commit}%
+\exindex{Datatype!elaborate example}%
+An elaborate example.
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%DECL: int myrank;
+%%SKIPELIPSIS
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+int   position, i = 200;
+float a[200];
+char  buff[1000]; /* larger than or equal to the size returned
+                     from MPI_PACK_SIZE for 1,newtype */
+MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+if (myrank == 0)
+{
+    /* SENDER CODE */
+    int len[2];
+    MPI_Aint disp[2];
+    MPI_Datatype type[2], newtype;
+
+    /* build datatype for i followed by a[0]...a[i-1] */
+    len[0] = 1;
+    len[1] = i;
+    MPI_Get_address(&i, disp);
+    MPI_Get_address(a, disp+1);
+    type[0] = MPI_INT;
+    type[1] = MPI_FLOAT;
+    MPI_Type_create_struct(2, len, disp, type, &newtype);
+    MPI_Type_commit(&newtype);
+
+    /* Pack i followed by a[0]...a[i-1]*/
+    position = 0;
+    MPI_Pack(MPI_BOTTOM, 1, newtype, buff, 1000, &position,
+             MPI_COMM_WORLD);
+
+    /* Send */
+    MPI_Send(buff, position, MPI_PACKED, 1, 0,
+             MPI_COMM_WORLD);
+
+/* *****
+   One can replace the last three lines with
+   MPI_Send(MPI_BOTTOM, 1, newtype, 1, 0, MPI_COMM_WORLD);
+   ***** */
+}
+else if (myrank == 1)
+{
+    /* RECEIVER CODE */
+    MPI_Status status;
+
+    /* Receive */
+    MPI_Recv(buff, 1000, MPI_PACKED, 0, 0, MPI_COMM_WORLD, &status);
+
+    /* Unpack i */
+    position = 0;
+    MPI_Unpack(buff, 1000, &position, &i, 1, MPI_INT, MPI_COMM_WORLD);
+
+    /* Unpack a[0]...a[i-1] */
+    MPI_Unpack(buff, 1000, &position, a, i, MPI_FLOAT, MPI_COMM_WORLD);
+}
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+\label{pt2pt-exLL}
+\Exindex{C}{Pack and Pack\_size}{MPI\_Pack,MPI\_Unpack,MPI\_Pack\_size,MPI\_Gather,MPI\_Gatherv}%
+\exindex{Datatype!elaborate example}%
+Each process sends a count, followed by count characters to the root;
+the root
+concatenates
+all characters into one string.
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%DECL: MPI_Comm comm; int myrank, root, i;
+%%SKIPELIPSIS
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+int  count, gsize, counts[64], totalcount, k1, k2, k,
+     displs[64], position, concat_pos;
+char chr[100], *lbuf, *rbuf, *cbuf;
+
+MPI_Comm_size(comm, &gsize);
+MPI_Comm_rank(comm, &myrank);
+
+      /* allocate local pack buffer */
+MPI_Pack_size(1, MPI_INT, comm, &k1);
+MPI_Pack_size(count, MPI_CHAR, comm, &k2);
+k = k1+k2;
+lbuf = (char *)malloc(k);
+
+      /* pack count, followed by count characters */
+position = 0;
+MPI_Pack(&count, 1, MPI_INT, lbuf, k, &position, comm);
+MPI_Pack(chr, count, MPI_CHAR, lbuf, k, &position, comm);
+
+if (myrank != root) {
+    /* gather at root sizes of all packed messages */
+    MPI_Gather(&position, 1, MPI_INT, NULL, 0,
+               MPI_DATATYPE_NULL, root, comm);
+
+    /* gather at root packed messages */
+    MPI_Gatherv(lbuf, position, MPI_PACKED, NULL,
+                NULL, NULL, MPI_DATATYPE_NULL, root, comm);
+
+} else {   /* root code */
+    /* gather sizes of all packed messages */
+    MPI_Gather(&position, 1, MPI_INT, counts, 1,
+               MPI_INT, root, comm);
+
+    /* gather all packed messages */
+    displs[0] = 0;
+    for (i=1; i < gsize; i++)
+        displs[i] = displs[i-1] + counts[i-1];
+    totalcount = displs[gsize-1] + counts[gsize-1];
+    rbuf = (char *)malloc(totalcount);
+    cbuf = (char *)malloc(totalcount);
+    MPI_Gatherv(lbuf, position, MPI_PACKED, rbuf,
+                counts, displs, MPI_PACKED, root, comm);
+
+    /* unpack all messages and concatenate strings */
+    concat_pos = 0;
+    for (i=0; i < gsize; i++) {
+        position = 0;
+        MPI_Unpack(rbuf+displs[i], totalcount-displs[i],
+                   &position, &count, 1, MPI_INT, comm);
+        MPI_Unpack(rbuf+displs[i], totalcount-displs[i],
+                   &position, cbuf+concat_pos, count, MPI_CHAR, comm);
+        concat_pos += count;
+    }
+    cbuf[concat_pos] = '\0';
+}
+\end{lstlisting}
+\end{example}
+
+\section{Canonical \texorpdfstring{\mpifuncskip{MPI\_PACK}}{MPI\_PACK} and \texorpdfstring{\mpifuncskip{MPI\_UNPACK}}{MPI\_UNPACK}}
+\mpitermtitleindex{canonical pack and unpack}
+\mpitermtitleindex{pack!canonical}
+\mpitermtitleindex{unpack!canonical}
+\label{canonical_pack}
+
+These procedures read/write data to/from the buffer in the
+\mpistring{external32} data
+format specified in Section~\ref{subsec:ext32}, and calculate the size needed
+for packing.  Their first arguments specify the data format, for future
+extensibility, but
+currently
+the only valid value of the \mpiarg{datarep}
+argument is \mpistring{external32}.
+\begin{users}
+  These procedures could be used, for example, to send typed data in a portable
+  format from one \MPI/ implementation to another.
+\end{users}
+
+The buffer will contain exactly the packed data, without headers.
+\type{MPI\_BYTE} should be used to send and receive data that is packed
+using \mpifunc{MPI\_PACK\_EXTERNAL}.
+
+\begin{rationale}
+\mpifunc{MPI\_PACK\_EXTERNAL} specifies that there is no header on the message
+and further
+specifies the exact format of the data.  Since \mpifunc{MPI\_PACK} may (and is
+allowed
+to) use a header, the datatype \type{MPI\_PACKED} cannot be used for data
+packed with
+\mpifunc{MPI\_PACK\_EXTERNAL}.
+\end{rationale}
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Pack_external")
+    parameter(
+        "datarep",
+        "STRING",
+        constant=True,
+        desc=r"data representation",
+        length="*",
+    )
+    parameter("inbuf", "BUFFER", constant=True, desc=r"input buffer start")
+    parameter(
+        "incount", "POLYDTYPE_NUM_ELEM", desc=r"number of input data items"
+    )
+    parameter("datatype", "DATATYPE", desc=r"datatype of each input data item")
+    parameter("outbuf", "BUFFER", direction="out", desc=r"output buffer start")
+
+    parameter(
+        "outsize", "POLYDTYPE_PACK_SIZE", desc=r"output buffer size, in bytes"
+    )
+
+    parameter(
+        "position",
+        "POLYLOCATION",
+        direction="inout",
+        desc=r"current position in buffer, in bytes",
+    )
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Unpack_external")
+    parameter(
+        "datarep",
+        "STRING",
+        constant=True,
+        desc=r"data representation",
+        length="*",
+        pointer=False,
+    )
+    parameter("inbuf", "BUFFER", constant=True, desc=r"input buffer start")
+
+    parameter(
+        "insize", "POLYDTYPE_PACK_SIZE", desc=r"input buffer size, in bytes"
+    )
+
+    parameter(
+        "position",
+        "POLYLOCATION",
+        direction="inout",
+        desc=r"current position in buffer, in bytes",
+    )
+    parameter("outbuf", "BUFFER", direction="out", desc=r"output buffer start")
+    parameter(
+        "outcount", "POLYDTYPE_NUM_ELEM", desc=r"number of output data items"
+    )
+    parameter("datatype", "DATATYPE", desc=r"datatype of output data item")
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Pack_external_size")
+    parameter(
+        "datarep",
+        "STRING",
+        constant=True,
+        desc=r"data representation",
+        length="*",
+    )
+    parameter(
+        "incount", "POLYDTYPE_NUM_ELEM", desc=r"number of input data items"
+    )
+    parameter("datatype", "DATATYPE", desc=r"datatype of each input data item")
+
+    parameter(
+        "size",
+        "POLYDTYPE_PACK_SIZE",
+        direction="out",
+        desc=r"output buffer size, in bytes",
+    )
+\end{mpi-binding}

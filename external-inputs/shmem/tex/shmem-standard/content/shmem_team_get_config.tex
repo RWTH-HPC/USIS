@@ -1,0 +1,45 @@
+\apisummary{
+  Return the configuration parameters of a given team
+}
+
+\begin{apidefinition}
+
+\begin{Csynopsis}
+int @\FuncDecl{shmem\_team\_get\_config}@(shmem_team_t team, long config_mask, shmem_team_config_t *config);
+\end{Csynopsis}
+
+\begin{apiarguments}
+  \apiargument{IN}{team}{An \openshmem team handle.}
+  \apiargument{IN}{config\_mask}{
+    The bitwise mask representing the set of configuration parameters to fetch from the given team.
+    }
+  \apiargument{OUT}{config}{
+    A pointer to the configuration parameters for the given team.}
+\end{apiarguments}
+
+\apidescription{
+\FUNC{shmem\_team\_get\_config} returns through the \VAR{config} argument
+the configuration parameters as described by the mask, which were assigned according
+to input configuration parameters when the team was created.
+The output \VAR{config} argument indicates the \openshmem library's
+parameter values at the time \FUNC{shmem\_team\_get\_config} is called.
+These values may differ from the parameter values that were assigned at the
+time of the team's creation.
+
+If \VAR{team} compares equal to \LibConstRef{SHMEM\_TEAM\_INVALID},
+then no operation is performed.
+If \VAR{team} is otherwise invalid, the behavior is undefined.
+If \VAR{config\_mask} is 0, then \VAR{shmem\_team\_get\_config} performs no action
+and \VAR{config} may or may not be a null pointer.
+If \VAR{config} is a null pointer, then \VAR{config\_mask} must be 0, otherwise
+the behavior is undefined.
+}
+
+\apireturnvalues{
+  If \VAR{team} does not compare equal to
+  \LibConstRef{SHMEM\_TEAM\_INVALID}, then
+  \FUNC{shmem\_team\_get\_config} returns \CONST{0};
+  otherwise, it returns nonzero.
+}
+
+\end{apidefinition}

@@ -1,0 +1,252 @@
+{
+  "cudaDeviceSynchronize": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "Complete on return: everything issued before it has finished.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "Touches only the calling process's own host and device memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "The calling host thread waits; the work it waits for is the device's, not this call's.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "The CUDA runtime API may be called concurrently from multiple host threads; NVIDIA's API synchronization-behavior page notes only that such calls can contend for internal resources.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "multiple"
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "Introduced with CUDA 4.0's device-centric runtime API, replacing cudaThreadSynchronize. cuda_runtime_api.h carries no per-routine version marker.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "CUDA-4.0"
+    }
+  },
+  "cudaFree": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "A freeing call, as nvshmem_free and mpi_request_free are.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "f"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "Touches only the calling process's own host and device memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "Freed by whoever calls it, as for cudaMalloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu+gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "The CUDA runtime API may be called concurrently from multiple host threads; NVIDIA's API synchronization-behavior page notes only that such calls can contend for internal resources.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "multiple"
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "Part of the original CUDA 1.0 (2007) runtime memory API. cuda_runtime_api.h carries no per-routine version marker.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "CUDA-1.0"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "condensed",
+      "note": "Stated in cudaFree's doxygen block in the vendored header.",
+      "retrieved": null,
+      "source_url": "external-inputs/cuda/implementation/cuda-13.1.0/include/cuda_runtime_api.h",
+      "value": [
+        {
+          "default_value": true,
+          "depends_on": [
+            "how devPtr was allocated (cudaMallocAsync/cudaMallocFromPoolAsync memory is freed without implicit synchronization)"
+          ],
+          "field": "execution.blocking",
+          "note": "May synchronize implicitly for ordinarily allocated memory; never for stream-ordered allocations."
+        }
+      ]
+    }
+  },
+  "cudaMalloc": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "Nothing is left outstanding on return.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "Touches only the calling process's own host and device memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "The allocation is made by whoever calls it: the driver for a host call, the device heap for a call from device code (the two are separate: memory from one cannot be freed by the other).",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu+gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "The CUDA runtime API may be called concurrently from multiple host threads; NVIDIA's API synchronization-behavior page notes only that such calls can contend for internal resources.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "multiple"
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "Part of the original CUDA 1.0 (2007) runtime memory API. cuda_runtime_api.h carries no per-routine version marker.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "CUDA-1.0"
+    }
+  },
+  "cudaMemcpy": {
+    "execution.completion": {
+      "method": "condensed",
+      "note": "Complete on return for the host-involving directions, per the same page; a device-to-device copy is instead stream-ordered -- see tool_integration.context_dependencies.",
+      "retrieved": null,
+      "source_url": "external-inputs/cuda/docs/13.1/md/api-sync-behavior.md",
+      "value": "c"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "Touches only the calling process's own host and device memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "The GPU's copy engines perform host-device and device-device copies; a host-to-host copy runs on the CPU.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu+gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "The CUDA runtime API may be called concurrently from multiple host threads; NVIDIA's API synchronization-behavior page notes only that such calls can contend for internal resources.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "multiple"
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "Part of the original CUDA 1.0 (2007) runtime memory API. cuda_runtime_api.h carries no per-routine version marker.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "CUDA-1.0"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "condensed",
+      "note": "Both dependencies are stated by NVIDIA's API synchronization-behavior page ('Memcpy -- Synchronous').",
+      "retrieved": null,
+      "source_url": "external-inputs/cuda/docs/13.1/md/api-sync-behavior.md",
+      "value": [
+        {
+          "default_value": true,
+          "depends_on": [
+            "the kind argument (cudaMemcpyDeviceToDevice, or cudaMemcpyDefault between two device pointers, performs no host-side synchronization)",
+            "whether the host buffer is pageable or pinned"
+          ],
+          "field": "execution.blocking",
+          "note": "Host-involving copies block the caller (a pageable host-to-device copy only until the data is staged for DMA); a device-to-device copy returns immediately and completes in stream order."
+        },
+        {
+          "default_value": "c",
+          "depends_on": [
+            "the kind argument, as for execution.blocking"
+          ],
+          "field": "execution.completion",
+          "note": "'c' for the host-involving directions; 'stream_ordered' for a device-to-device copy."
+        }
+      ]
+    }
+  },
+  "cudaMemset": {
+    "execution.completion": {
+      "method": "condensed",
+      "note": "Asynchronous with respect to the host, so completion is implied by the order of the default stream -- the case 'stream_ordered' exists for.",
+      "retrieved": null,
+      "source_url": "external-inputs/cuda/docs/13.1/md/api-sync-behavior.md",
+      "value": "stream_ordered"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "Touches only the calling process's own host and device memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "The device fills the memory; the call only enqueues the work.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "The CUDA runtime API may be called concurrently from multiple host threads; NVIDIA's API synchronization-behavior page notes only that such calls can contend for internal resources.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "multiple"
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "Part of the original CUDA 1.0 (2007) runtime memory API. cuda_runtime_api.h carries no per-routine version marker.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "CUDA-1.0"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "condensed",
+      "note": "Stated by NVIDIA's API synchronization-behavior page ('Memset').",
+      "retrieved": null,
+      "source_url": "external-inputs/cuda/docs/13.1/md/api-sync-behavior.md",
+      "value": [
+        {
+          "default_value": false,
+          "depends_on": [
+            "whether devPtr points to pinned host memory"
+          ],
+          "field": "execution.blocking",
+          "note": "Synchronous with respect to the host when the target is pinned host memory; asynchronous otherwise."
+        },
+        {
+          "default_value": "stream_ordered",
+          "depends_on": [
+            "whether devPtr points to pinned host memory"
+          ],
+          "field": "execution.completion",
+          "note": "'c' when the target is pinned host memory; 'stream_ordered' otherwise."
+        }
+      ]
+    }
+  }
+}

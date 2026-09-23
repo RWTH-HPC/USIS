@@ -1,0 +1,498 @@
+% Definitions from the mpi-sys-macs file
+
+% Definitions from the mpi-user-macs file
+% And the definitions that we need as a result
+\def\MPI/{\textsf{MPI}}    % MPI macro -- see TEX Book, pg 8,204 bloody TEX!!
+\def\mpi/{\textsf{MPI}}    % MPI macro
+\def\MPII/{\textsf{MPI-1}} % MPI-1 macro -- can't easily do MPI1
+\def\mpii/{\textsf{MPI-1}} % MPI-1 macro
+\def\MPIIDOTO/{\textsf{MPI-1.0}}   % MPI-1.0 macro - NOTE it has a O (Oh)
+                                % not 0 (zero)
+\def\mpiidoto/{\textsf{MPI-1.0}}   % MPI-1.0 macro - NOTE it has a O (Oh)
+                                % not 0 (zero)
+\def\MPIIDOTI/{\textsf{MPI-1.1}}   % MPI-1.1 macro
+\def\mpiidoti/{\textsf{MPI-1.1}}   % MPI-1.1 macro
+\def\MPIIDOTII/{\textsf{MPI-1.2}}  % MPI-1.2 macro
+\def\mpiidotii/{\textsf{MPI-1.2}}  % MPI-1.2 macro
+\def\MPIIDOTIII/{\textsf{MPI-1.3}}  % MPI-1.3 macro
+\def\mpiidotiii/{\textsf{MPI-1.3}}  % MPI-1.3 macro
+\def\MPIII/{\textsf{MPI-2}}        % MPI-2 macro -- can't easily do MPI2
+\def\mpiii/{\textsf{MPI-2}}        % MPI-2 macro
+\def\MPIIIDOTO/{\textsf{MPI-2.0}}  % MPI-2.0 macro - NOTE it has a O (Oh)
+                                % not 0 (zero)
+\def\mpiiidoto/{\textsf{MPI-2.0}}  % MPI-2.0 macro - NOTE it has a O (Oh)
+                                % not 0 (zero)
+\def\MPIIIDOTI/{\textsf{MPI-2.1}}  % MPI-2.1 macro
+\def\mpiiidoti/{\textsf{MPI-2.1}}  % MPI-2.1 macro
+\def\MPIIIDOTII/{\textsf{MPI-2.2}} % MPI-2.2 macro
+\def\mpiiidotii/{\textsf{MPI-2.2}} % MPI-2.2 macro
+\def\MPIIII/{\textsf{MPI-3}}       % MPI-3 macro -- can't easily do MPI3
+\def\mpiiii/{\textsf{MPI-3}}       % MPI-3 macro
+\def\MPIJOD/{\textsf{MPI-JOD}}     % MPI-JOD macro
+\def\mpijod/{\textsf{MPI-JOD}}     % MPI-JOD macro
+\def\MPIRT/{\textsf{MPI/RT}}       % RT MPI macros.
+\def\MPIIII/{\textsf{MPI-3}}       % MPI-3 macro -- can't easily do MPI3
+\def\mpiiii/{\textsf{MPI-3}}       % MPI-3 macro
+\def\MPIIIIDOTO/{\textsf{MPI-3.0}}  % MPI-3.0 macro
+\def\mpiiiidoto/{\textsf{MPI-3.0}}  % MPI-3.0 macro
+\def\MPIIIIDOTI/{\textsf{MPI-3.1}}  % MPI-3.1 macro
+\def\mpiiiidoti/{\textsf{MPI-3.1}}  % MPI-3.1 macro
+\def\MPIIV/{\textsf{MPI-4}}          % MPI-4 macro
+\def\mpiiv/{\textsf{MPI-4}}          % MPI-4 macro
+\def\MPIIVDOTO/{\textsf{MPI-4.0}}    % MPI-4.0 macro
+\def\mpiivdoto/{\textsf{MPI-4.0}}    % MPI-4.0 macro
+\def\MPIIVDOTI/{\textsf{MPI-4.1}}    % MPI-4.1 macro
+\def\mpiivdoti/{\textsf{MPI-4.1}}    % MPI-4.1 macro
+\def\MPIV/{\textsf{MPI-5}}           % MPI-5 macro
+\def\mpiv/{\textsf{MPI-5}}           % MPI-5 macro
+\def\MPIVDOTO/{\textsf{MPI-5.0}}     % MPI-5.0 macro
+\def\mpivdoto/{\textsf{MPI-5.0}}     % MPI-5.0 macro
+
+\def\RMA/{\textsf{RMA}}    % RMA macro -- see TEX Book, pg 8,204 bloody TEX!!
+
+\def\OnlyForAutomaticAnnexGeneration#1{}% deleting the content were the macro is used; but preserving it for the Annex
+
+% pagelabel is used to get a label that is hyperlinked to the correct
+% page in the PDF version. Here we can just use label
+\newcommand{\pagelabel}[1]{\label{#1}}
+
+\newcommand{\func}[1]{\textsf{#1}\mpifuncindex{#1}}
+\newcommand{\mpifunc}[1]{\textsf{#1}\mpifuncindex{#1}}  % for MPI functions - language independent
+% for ones that don't go in index:
+\newcommand{\mpiskipfunc}[1]{\textsf{#1}}               % ... same, but not in the Function Index
+\newcommand{\cfunc}[1]{\textsf{#1}}
+\newcommand{\ffunc}[1]{\textsf{#1}}
+\newcommand{\constskip}[1]{{\textsf{\small #1}}}
+% for ones from  MPI-1
+\newcommand{\consti}[1]{{\textsf{\small #1}}\index{CONST:#1}} % constants/handles - language independent
+\newcommand{\constiskip}[1]{{\textsf{\small #1}}}             % ... same, but not in the Constant Index
+\newcommand{\constitem}[2]{\item[\mpiconst{#1}\hfill]{#2}}
+\newcommand{\constitemtwo}[3]{\item[\mpiconst{#1}, \mpiconst{#2}\hfill]{#3}}
+\newcommand{\constitemthree}[4]{\item[\mpiconst{#1}, \mpiconst{#2}, \mpiconst{#3}\hfill]{#4}}
+% for ones that don't go in index
+\newcommand{\constskipitem}[2]{\item[\constskip{#1}\hfill]{#2}}
+\newcommand{\mpiarg}[1]{\textsf{#1}}                % argument in the argument list of an MPI routine, language independent
+\newcommand{\mpishortarg}[1]{\textsf{#1}}                % ... same but without \gb penalty
+\newcommand{\type}[1]{\textsf{#1}\index{CONST:#1}}  % datatype handles
+%
+\newcommand{\gtype}[1]{\textsf{#1}} % generic (language independent) type
+\newcommand{\shorttype}[1]{\textsf{#1}\index{CONST:#1}}  % ... same but without \gb panelty
+\newcommand{\ctype}[1]{\texttt{#1}}                 % - and corresponding C type
+\newcommand{\ftype}[1]{\texttt{#1}}                 % - and corresponding Fortran type
+%
+% Info is for MPI_Info predefined strings.  \infokey{keyname} and
+% \infoval{keyvaluename}
+\newcommand{\info}[1]{{\small\sf #1}\index{CONST:#1}}
+\newcommand{\infoval}[1]{{\small\sf #1}\index{CONST:#1}}
+\newcommand{\infovalshort}[1]{\infoval{#1}}
+\let\infokey=\infoval
+\newcommand{\infoskip}[1]{{\small\sf #1}}
+\newcommand{\infokeymain}[1]{\infokeyskip{#1}\IIstringmainidx[INFOCONST=KEY]{#1}}
+\newcommand{\infovalmain}[1]{\infovalskip{#1}\IIstringmainidx[INFOCONST=VAL]{#1}}
+\newcommand{\infokeyskip}[1]{\IIfmatstring{#1}}
+\newcommand{\infovalskip}[1]{\IIfmatstring{#1}}
+%
+\newcommand{\error}[1]{{\small\sf #1}\index{CONST:#1}}
+\newcommand{\errorskip}[1]{{\small\sf #1}}
+\newcommand{\errori}[1]{{\small\sf #1}}
+
+\newcommand{\mpiconstfunc}[1]{\IImpifuncfmt{#1}\IIconstidx{#1}\mpifuncindex{#1}}
+\newcommand{\mpiconstfuncskip}[1]{\IImpifuncfmt{#1}}
+\newcommand{\mpiconstfuncmain}[1]{\IImpifuncfmt{#1}\IIconstmainidx{#1}\mpifuncmainindex{#1}}
+\newcommand{\mpiconstfuncindex}[1]{\IIconstidx{#1}\mpifuncindex{#1}}
+
+\newcommand{\IN}[0]{{\small IN}}
+\newcommand{\OUT}[0]{{\small OUT}}
+\newcommand{\INOUT}[0]{{\small INOUT}}
+
+\newcommand{\exindex}[1]{\index{EXAMPLES:#1}}
+
+\def\class{$\langle$CLASS$\rangle$}
+
+\newcommand{\uu}[1]{\underline{\hyperpage{#1}}}
+\newcommand{\mpifuncmainindex}[1]{\index{#1|uu}}
+\newcommand{\mpifuncindex}[1]{\index{#1}}
+\newcommand{\typedefindex}[1]{\index{TYPEDEF:#1}}
+\newcommand{\cdeclindex}[1]{\index{CONST:#1}}        %  for index entry of C declarations like MPI_Comm
+\newcommand{\cdeclmainindex}[1]{\index{CONST:#1|uu}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%macros for language binding: mpibind, mpifnewbind, mpifbind, and fargs:
+% The binding headings can be turned on and off
+% with \bindingheadingtrue and \bindingbheadingfalse. This is useful
+% when all bindings are for a single language, and the heading is not needed.
+\newif\ifbindingheading
+\bindingheadingtrue
+\newcommand{\IIbindingheading}[1]{\ifbindingheading{\noindent\textbf{#1}\par\nobreak}\fi}
+
+\def\IIbindingcname{C binding}
+\def\IIbindingfname{Fortran binding}
+\def\IIbindingfnamespecial{Fortran binding (the following procedure is not available with mpif.h)}
+\def\IIbindingfnewname{Fortran 2008 binding}
+
+% This if controls whether there is a heading
+\newif\ifbindinglabel
+\bindinglabelfalse
+
+% Because of how these are used in the \if tests, these definitions
+% need to be a single character.
+% Special case: ``s'' is really a subset of f
+\def\IIbindingc{c}
+\def\IIbindingf{f}
+\def\IIbindingfspecial{s}
+\def\IIbindingfnew{F}
+\def\IIbindingdef{N}
+\def\IIbindingcurlang{\IIbindingdef}
+\def\IIbindingissue#1#2{\ifbindinglabel\if\IIbindingcurlang#1\else
+\if\IIbindingfspecial#1\gdef\IIbindingcurlang{\IIbindingf}\else
+\gdef\IIbindingcurlang{#1}\fi#2\fi\fi}
+%% Use the following to reset the binding language to ``NEW'' binding
+%% - E.g., A new binding will generate a heading in the correct
+%% language, even if the last binding was in the same language.  Use,
+%% for example, when all bindings are in C - but blocks of bindings
+%% are separated in the text.
+\newcommand{\bindinglangreset}{\gdef\IIbindingcurlang{N}}
+%% Use \bindingislisttrue to turn *off* the spacing after the binding body
+%% This is needed when there are consecutive binding blocks with no
+%% intervening text. This occurs in the bindings chapter for the list
+%% of handle conversion routines.
+\newif\ifbindingislist \bindingislistfalse
+\newcommand{\IIbindingbody}[1]{{\raggedright \hangindent 7em\hangafter=1\tt
+#1 \par \ifbindingislist\else\medskip\fi}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% IMPORTANT!
+% Any changes to the binding macros must be coordinated with changes
+% to the binding tools (in binding-tool), buildapplang, and buildindices
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\mpibind}[2]{{\IIbindingissue\IIbindingc{\IIbindingheading{\IIbindingcname}}%
+\IIbindingbody{int #1#2}}}
+% mpibindmain is used for a target as the main definition. Ignore for now
+\newcommand{\mpibindmain}[2]{\mpibind{#1}{#2}}
+
+\newcommand{\mpibindnotint}[3]{{\IIbindingissue\IIbindingc{\IIbindingheading{\IIbindingcname}}%
+\IIbindingbody{#1 #2#3}}}
+\newcommand{\mpibindnotintmain}[3]{{\IIbindingissue\IIbindingc{\IIbindingheading{\IIbindingcname}}%
+\IIbindingbody{#1 #2#3}}}
+
+%
+% This version indexes the name
+% \mpiemptybindidx{routine}{returnvalue}{indexed name}
+\newcommand{\mpiemptybindidx}[3]{{\par\medskip
+\IIbindingissue\IIbindingc{\IIbindingheading{\IIbindingcname}}%
+\IIbindingbody{#2 #1\mpifuncmainindex{#3}}}}
+%
+% This version does not index the name, but has same argument list
+%% Used only in appLang-CNames.tex, generated ONLY by MAKE-APPLANG
+\newcommand{\mpiemptybindNOidx}[3]{{\IIbindingissue\IIbindingc{\IIbindingheading{\IIbindingcname}}%
+\IIbindingbody{#2 #1}}}
+
+% special macro that avoids the int in front
+% should be used for routines where don't want in index
+%% UNUSED
+%\newcommand{\mpiskipemptybind}[2]{{\IIbindingissue\IIbindingc{\IIbindingheading{\IIbindingcname}}%
+%\IIbindingbody{#2 #1}}}
+
+% special macro for typedef int in front of SUBROUTINE in C
+%
+% Note that this is indexed.
+\newcommand{\mpitypedefbindmain}[2]{{\IIbindingbody{typedef int #1#2;\mpiccallbackdefindex{#1#2}}}}
+\newcommand{\mpitypedefbindvoidmain}[2]{{\IIbindingbody{typedef void #1#2;\mpiccallbackdefindex{#1#2}}}}
+\newcommand{\mpitypedefbind}[1]{{\IIbindingbody{typedef int #1;\mpiccallbackdefindex{#1}}}}
+\newcommand{\mpitypedefbindvoid}[1]{{\IIbindingbody{typedef void #1;\mpiccallbackdefindex{#1}}}}
+%
+% special macro for callback prototype definitions in Fortran
+\newcommand{\mpifsubbindmain}[2]{{\IIbindingbody{SUBROUTINE #1#2}\mpicallbackmainindex{#1}}}
+\newcommand{\mpifsubbind}[2]{{\IIbindingbody{SUBROUTINE #1#2}}\mpifcallbackdefindex{#1}}
+%
+% Use \tt because we format more than a single paragraph, and \texttt
+% will complain
+\newcommand{\mpifnewsubbind}[2]{{\tt\noindent ABSTRACT INTERFACE\par\noindent\quad\IIbindingbody{SUBROUTINE #1#2}}\mpifcallbackdefindex{#1}}
+
+% special macro for normal SUBROUTINE and FUNCTION definitions in Fortran
+\newcommand{\mpifbind}[2]{{\IIbindingissue\IIbindingf{\IIbindingheading{\IIbindingfname}}%
+\IIbindingbody{#1#2}}}
+% bind should have a link to the main entry; bindmain does not
+\newcommand{\mpifbindmain}[2]{\mpifbind{#1}{#2}}
+
+% Fortran functions returning a value
+\newcommand{\mpifbindret}[3]{{\IIbindingissue\IIbindingf{\IIbindingheading{\IIbindingfname}}%
+\IIbindingbody{#1 #2#3}}}
+% the main macro does not define a new hyperref label
+\newcommand{\mpifbindretmain}[3]{\mpifbindret{#1}{#2}{#3}}
+
+% special macro for MPI_Status_f082f | f2f08, which uses the
+% "Fortran binding (the following procedure is not available with mpif.h)" label
+\newcommand{\mpifbindspecial}[2]{{\IIbindingissue\IIbindingfspecial{\IIbindingheading{\IIbindingfnamespecial}}%
+\IIbindingbody{#1#2}}}
+
+\newcommand{\mpifnewbind}[2]{{\IIbindingissue{\IIbindingfnew}{\IIbindingheading{\IIbindingfnewname}}%
+\IIbindingbody{#1#2}}}
+% special macro for text instead of a binding; used for routines that were deprecated until MPI-2.2:
+\newcommand{\mpifnewnonebind}[1]{{\IIbindingbody{\textrm{#1}}}}
+% Like mpibindmain
+\newcommand{\mpifnewbindmain}[2]{\mpifnewbind{#1}{#2}}
+\newcommand{\mpifnewbindmainref}[2]{{\IIbindingissue{\IIbindingfnew}{\IIbindingheading{\IIbindingfnewname}}%
+\IIbindingbody{#1#2}}}
+% special case for Fortran functions returning a value (e.g., MPI_WTIME)
+\newcommand{\mpifnewbindret}[3]{{\IIbindingissue{\IIbindingfnew}{\IIbindingheading{\IIbindingfnewname}}%
+\IIbindingbody{#1 #2#3}}}
+\newcommand{\mpifnewbindretmain}[3]{\mpifnewbindret{#1}{#2}{#3}}
+
+
+% special macro to skip fortran binding in index
+%% UNUSED
+%\newcommand{\mpifskipbind}[1]{{\IIbindingbody{#1}}}
+
+\def\fargs{\\\advance\leftskip 2em\hangindent5em\hangafter=1}
+\def\fnarg{\par\hangindent5em\hangafter=1}
+\def\fnfinalarg{\par\nobreak\hangindent5em\hangafter=1}
+
+%% Use \bindindent/ to end a line and start a new line with a consistent
+%% indent.  This replaces the recommendation to use
+%%  \\\ \ \ \   (that last \ is followed by a space)
+%% when continuing a declaration line.  This is mostly used in the Fortran
+%% bindings.
+%% The 7em indent is the same as for the c bindings - 5+2 (2 already for
+%% fargs)
+\def\bindindent/{\\\hskip5em}
+
+\newenvironment{rationale}{\begin{list}{}{}\item[]{\it Rationale.}
+}{{\rm ({\it End of rationale.})} \end{list}}
+
+\newenvironment{implementors}{\begin{list}{}{}\item[]{\it Advice
+        to implementors.}
+}{{\rm ({\it End of advice to implementors.})} \end{list}}
+
+\newenvironment{users}{\begin{list}{}{}\item[]{\it Advice to users.}
+}{{\rm ({\it End of advice to users.})} \end{list}}
+
+\newcommand{\missing}[1]{}
+
+\newcommand{\alter}[1]{}
+
+\newcommand{\status}[1]{}
+
+\newcommand{\commentOut}[1]{{}}
+
+\newcommand{\startchap}[0]{}
+\newcommand{\withlinenumbers}[0]{}
+\def\pdfbookmark{\eatbrack}
+\def\eatbrack[{\eatnum}
+\def\eatnum#1{\eatclosebrack}
+\def\eatclosebrack]{\eattwo}
+\def\eattwo#1#2{\relax}
+
+\newtheorem{example}{Example}[chapter]
+
+%\usepackage{graphicx}
+
+%% MPI-3.1
+\def\namedref#1#2{#1 \ref{#2}}
+\def\sectionref#1{\namedref{Section}{#1}}
+\def\textTitleFont#1{\textrm{#1}}
+
+\def\IItermIndex#1{\IImpiindex{TERM:#1}}
+\def\IItermMainIndex#1{\IImpimainindex{TERM:#1}}
+
+\def\mpiterm#1{\IItermIndex{#1}\emph{#1}}
+\def\mpitermni#1{\emph{#1}}
+\def\mpitermindex#1{\IItermIndex{#1}}
+\def\mpitermdef#1{\textbf{#1}\IItermMainIndex{#1}}
+\def\mpitermdefni#1{\textbf{#1}}
+\def\mpitermdefindex#1{\IItermMainIndex{#1}}
+% Sometimes a term needs a more complex index entry; e.g., a subentry
+\def\mpitermsub#1#2{\IItermIndex{#2}\emph{#1}}
+
+% This needs to be implemented differently in HTML because the current
+% implementation of list in tohtml is too simple
+\newenvironment{constlist}{
+    \begin{tabular}{ll}
+}{\end{tabular}}
+
+\newcommand{\noconstitem}[2]{#1&#2\\}
+\newcommand{\constitem}[2]{\mpiconst{#1}&#2\\}
+\newcommand{\constmainitem}[2]{\constmain{#1}&#2\\}
+\newcommand{\constitemtwo}[3]{\mpiconst{#1}, \mpiconst{#2}&#3\\}
+\newcommand{\constitemthree}[4]{\mpiconst{#1}, \mpiconst{#2}, \mpiconst{#3}&#4\\}
+\newcommand{\constitemonly}[1]{\constitem{#1}&\\}
+
+% mpidtypeitem is like constitem, but for MPI datatypes
+\newcommand{\mpidtypeitem}[2]{\mpidtype{#1}&#2\\}
+\newcommand{\mpidtypeitemonly}[1]{\mpidtypeitem{#1}&\\}
+\newcommand{\mpidtypemainitem}[2]{\mpidtypemain{#1}&#2\\}
+
+\def\mpicode#1{\textsf{#1}}
+\def\mpiublb#1{\textsf{#1}\IItermIndex{#1}}
+
+\def\mpitermtitleindex#1{\IImpiindex{TERM:#1|bold}}
+\def\mpitermtitleindexmainsub#1#2{\IImpiindex{TERM:#1!#2|bold}\IImpiindex{TERM:#2|bold}}
+\def\mpitermtitleindexsubmain#1#2{\IImpiindex{TERM:#1 #2|bold}\IImpiindex{TERM:#2!#1|bold}}
+
+\def\XXX/{\textsf{XXX}}
+\def\nameref#1{\ref{#1}}
+\def\hyperlink#1#2{#2}
+\def\url#1{\href{#1}{#1}}
+\newcommand{\textoutargs}[2]{%
+\funcarg{\OUT}{#1}{buffer to return the string containing #2 (string)}
+\funcarg{\INOUT}{{#1}\_len}{length of the string and/or buffer for \mpiarg{#1} (integer)}
+}
+\newcommand{\textoutdesc}[2]{%
+The arguments \mpiarg{#1} and \mpiarg{{#1}\_len} are used to return #2
+as described in Section~\ref{sec:mpit:strings}.%
+}
+\newcommand{\sectionrange}[2]{Sections~\ref{#1} to \ref{#2}}
+
+% MPI 4 defintions
+\def\IIfontsize#1{}% Ignore fontsize control
+\newcommand{\IIconstfmt}[2][0]{\textsf{\IIfontsize{#1}#2}}
+\newcommand{\IImpifmt}[1]{\textsf{#1}}
+%% May have to replace these, as newcommand implementation may not
+%% handle this case
+\newcommand{\IIconstidx}[2][CONST]{\IImpiindex{#1:#2@\IIconstfmt{#2}}}
+\newcommand{\IIconstmainidx}[2][CONST]{\IImpimainindex{#1:#2@\IIconstfmt{#2}}}
+\newcommand{\mpiconst}[2][0]{\mpiconstshort[#1]{#2}}
+\newcommand{\mpiconstmain}[2][0]{\IIconstfmt[#1]{#2}\IIconstmainidx{#2}}
+\newcommand{\mpiconstmainshort}[2][0]{\IIconstfmt[#1]{#2}\IIconstmainidx{#2}}
+\newcommand{\mpiconstshort}[2][0]{\IIconstfmt[#1]{#2}\IIconstidx{#2}}
+\newcommand{\mpiconstskip}[2][0]{\IIconstfmt[#1]{#2}}
+\newcommand{\mpiconstmainindex}[1]{{\IIconstmainidx{#1}}}
+\newcommand{\constmain}[1]{\mpiconstmain{#1}}
+\newcommand{\constshortmain}[1]{\IIconstfmt[0]{#1}\IIconstmainidx{#1}}
+
+\def\mpilegend#1{\textsf{#1}}
+
+% MPI Datatypes - e.g., MPI_DOUBLE
+% Note this is a change from the previous macros - to use the same
+% font size (\small) as the other constants.
+\newcommand{\mpidtype}[1]{\mpidtypeshort{#1}}
+\newcommand{\mpidtypeindex}[1]{\IIconstidx{#1}}
+\newcommand{\mpidtypemain}[1]{\IIconstfmt{#1}\IIconstmainidx{#1}}
+\newcommand{\mpidtypemainshort}[1]{\IIconstfmt{#1}\IIconstmainidx[DATATYPE]{#1}}
+\newcommand{\mpidtypeshort}[1]{\IIconstfmt{#1}\IIconstidx{#1}}
+\newcommand{\mpidtypeskip}[1]{\IIconstfmt{#1}}
+
+% MPI C types - e.g., MPI_Comm, MPI_Aint or TYPE(MPI_Status)
+\newcommand{\mpictype}[1]{\IIconstfmt{#1}\IIconstidx{#1}}
+\newcommand{\mpictypeshort}[1]{\IIconstfmt{#1}\IIconstidx{#1}}
+\newcommand{\mpictypemain}[1]{\IIconstfmt{#1}\IIconstmainidx{#1}}
+\newcommand{\mpictypeindex}[1]{\IIconstidx{#1}}
+\newcommand{\mpictypemainindex}[1]{\IIconstmainidx{#1}}
+\newcommand{\mpictypeskip}[1]{\IIconstfmt{#1}}
+\newcommand{\mpiftype}[1]{\IIconstfmt{#1}\IIconstidx{#1}}
+\newcommand{\mpiftypemain}[1]{\IIconstfmt{#1}\IIconstmainidx{#1}}
+% MPI Fortran Integer kind reference.  Use \mpiftypekind{OFFSET} for
+% INTEGER(KIND=MPI_OFFSET_KIND); this will index the use under
+% MPI_OFFSET_KIND instead of under INTEGER(...)
+% Note that this is new for MPI 4.0, and will need to be updated in
+% the document.
+\newcommand{\mpiftypekindshort}[1]{\IIconstfmt{INTEGER(KIND=MPI\_#1\_KIND)}%
+\IIconstidx{MPI\_#1\_KIND}}
+\newcommand{\mpiftypekind}[1]{\mpiftypekindshort{#1}}
+\newcommand{\mpiftypekindmain}[1]{\code{INTEGER(KIND=MPI\_#1\_KIND)}%
+\IIconstmainidx{MPI\_#1\_KIND}}
+
+\newcommand{\typemain}[1]{\mpidtypemain{#1}}
+
+\newcommand{\mpiargshort}[1]{\IImpifuncfmt{#1}}
+\newcommand{\errormain}[1]{\errorskip{#1}\IIconstmainidx{#1}}
+\newcommand{\errorweak}[1]{\errorskip{#1}}
+
+\newcommand{\wpm}{World Model}
+\newcommand{\spm}{Sessions Model}
+
+\def\MPIisinitialized/{\MPI/ is \mpifuncindex{MPI\_INIT}\mpifuncindex{MPI\_INIT\_THREAD}initialized}
+\def\MPIisfinalized/{\MPI/ is \mpifuncindex{MPI\_FINALIZE}finalized}
+% Use these for parameters to C or Fortran functions respectively,
+% esspecially MPI C and Fortran routine bindings.
+\newcommand{\carg}[1]{\code{#1}}
+\newcommand{\farg}[1]{\code{#1}}
+
+%% Starter scripts like mpirun and mpiexec
+\newcommand{\mpilaunch}[1]{\code{#1}\mpitermindex{#1}}
+\newcommand{\mpilaunchskip}[1]{\code{#1}}
+\newcommand{\mpilaunchmain}[1]{\code{#1}\IItermMainIndex{#1}}
+
+% Miscellaneous strings, including (when fixed in the document)
+% external32 and native for data representations.
+\newcommand{\mpistring}[1]{\mpistringshort{#1}}
+\newcommand{\mpistringshort}[1]{\IIfmatstring{#1}\IIstringidx[STRINGCONST]{#1}}
+\newcommand{\mpistringskip}[1]{\IIfmatstring{#1}}
+\newcommand{\mpistringmain}[1]{\IIfmatstring{#1}\IIstringmainidx[STRINGCONST]{#1}}
+
+\def\dq{{\small\tt\char`"}}
+\newcommand{\IIfmatstring}[1]{\IIconstfmt{\dq{}#1\dq}}
+
+\newcommand{\MPIbindindex}[1]{\IImpimainindex{BCFUNCTION:#1}}
+\newcommand{\MPIBCfunc}[1]{\IImpifuncfmt{#1}\IImpiindex{BCFUNCTION:#1}}
+\newcommand{\MPIbindindexuse}[1]{\IImpiindex{BCFUNCTION:#1}}
+
+% This is a temporary fix to make add some space between deprecated items
+% for use in the chapter on deprecated features.
+\def\deprecatedsep{\bigskip}
+
+\newcommand{\mpicallback}[1]{\mpicallbackskip{#1}\mpicallbackindex{#1}}
+\newcommand{\mpicallbackmain}[1]{\mpicallbackskip{#1}\mpicallbackmainindex{#1}}
+\newcommand{\mpicallbackskip}[1]{\textsf{#1}}
+\newcommand{\mpicallbackindex}[1]{\IImpiindex{TYPEDEF:#1@\textsf{#1}}}
+\newcommand{\mpicallbackmainindex}[1]{\IImpimainindex{TYPEDEF:#1@\textsf{#1}}}
+
+%% C definition (typedef) for callbacks
+% As a function name, uses the default size, not \small, for the text.
+% These are the MAIN (defining) index entries for these callbacks
+\newcommand{\mpiccallbackdefindex}[1]{\IImpimainindexA{TYPEDEF:#1@\textsf{#1}}}
+%% Fortran definition for callbacks
+\newcommand{\mpifcallbackdefindex}[1]{\IImpimainindexA{TYPEDEF:#1@\textsf{#1}}}
+
+%% References to language-specific callbacks
+\newcommand{\mpiccallback}[1]{\code{#1}\mpicallbackindex{#1}}
+\newcommand{\mpifcallback}[1]{\code{#1}\mpicallbackindex{#1}}
+\newcommand{\mpifcallbackskip}[1]{\code{#1}}
+
+\newcommand{\typeindex}[1]{\mpidtypeindex{#1}}
+\newcommand{\ctypeshort}[1]{\texttt{#1}}
+\newcommand{\constsmall}[1]{\mpiconst[1]{#1}}
+
+\def\IImpiindex#1{\index{#1}}
+\def\IImpimainindex#1{\index{#1|uu}}
+% This version indexes the item in the main index UNLESS it is in the annex
+% (e.g., the binding summaries)
+\def\IImpimainindexA#1{\ifmpiInAnnex\IImpiindex{#1}\else\IImpimainindex{#1}\fi}
+
+\newcommand{\ftypeshort}[1]{\texttt{#1}}
+\newcommand{\mpishortfunc}[1]{\IImpifuncfmt{#1}}
+\newcommand{\IIstringidx}[2][CONST]{\IImpiindex{#1:#2@\IIfmatstring{#2}}}
+\newcommand{\IIstringmainidx}[2][CONST]{\IImpimainindex{#1:#2@\IIfmatstring{#2}}}
+% This sets a location as a discrectionary hyphen. For HTML, ignore
+\def\hyphen/{}
+\newcommand{\mpifuncmain}[1]{\IImpifuncfmt{#1}\IImpimainindex{#1}}
+\newcommand{\mpifuncshort}[1]{\IImpifuncfmt{#1}\IImpiindex{#1}}
+\newcommand{\IImpifuncfmt}[1]{\textsf{#1}}
+\newcommand{\mpifuncskip}[1]{\IImpifuncfmt{#1}}
+
+%\newcommand{\mpifbindspecial}[1]{{\IIbindingissue\IIbindingfspecial{\IIbindingheading{\IIbindingfnamespecial}}%
+%\IIbindingbody{#1}}}
+\newcommand{\mpifbindspecial}[1]{{\tt #1\par\vspace{0.1in}}}
+
+\newcommand{\paraheading}[1]{\vspace{3.0ex}\noindent\textbf{#1}}
+
+\newcommand{\textoutoptinfo}[2]{
+\MPI/ can optionally return an info object containing the default hints set
+for #2.  If the
+argument to \mpiarg{#1} provided by the user is the \code{NULL} pointer,
+this argument is ignored, otherwise an \MPI/
+implementation is required to return all hints that are supported by the
+implementation for #2 and have default values specified; any user-supplied
+hints that were not ignored by the implementation; and any additional hints
+that were set by the implementation. If no such hints exist, a handle to a
+newly created info object is returned that contains no key/value pair. The
+user is responsible for freeing \mpiarg{#1} via \mpifunc{MPI\_INFO\_FREE}.
+}
+
+\newcommand{\constshort}[1]{\mpiconstshort{#1}}
+
+\usepackage{listings}
+
+\def\fixupbackrefformatting{}
+\def\lstsmall{\relax}

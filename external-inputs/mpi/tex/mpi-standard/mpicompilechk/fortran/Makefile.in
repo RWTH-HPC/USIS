@@ -1,0 +1,20 @@
+ALL: all-redirect
+
+FC        = @FC@
+FCFLAGS   = @FCFLAGS@
+MODSUFFIX = @FC_MODEXT@
+
+.SUFFIXES:
+.SUFFIXES: .@FC_MODEXT@ .f90
+
+all-redirect: mpi.$(MODSUFFIX)
+
+mpi.mod: mpi.f90 mpi_constants.$(MODSUFFIX) mpi_sizeofs.$(MODSUFFIX) \
+	 mpi_base.$(MODSUFFIX) mpifnoext.h
+	$(FC) -c $(FCFLAGS) mpi.f90
+
+.f90.mod:
+	$(FC) -c $(FCFLAGS) $<
+
+clean:
+	-rm -f *.mod *.o

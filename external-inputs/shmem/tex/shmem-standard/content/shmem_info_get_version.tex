@@ -1,0 +1,27 @@
+\apisummary{
+    Returns the major and minor version of the library implementation.
+}
+
+\begin{apidefinition}
+
+\begin{Csynopsis}
+void @\FuncDecl{shmem\_info\_get\_version}@(int *major, int *minor);
+\end{Csynopsis}
+
+\begin{apiarguments}
+    \apiargument{OUT}{major}{The major version of the \openshmem Specification in use.}
+    \apiargument{OUT}{minor}{The minor version of the \openshmem Specification in use.}
+\end{apiarguments}
+
+\apidescription{
+    This routine returns the major and minor version of the \openshmem Specification
+    in use.  For a given library implementation, the major and minor version
+    returned by these calls are consistent with the library constants
+    \CONST{SHMEM\_MAJOR\_VERSION} and \CONST{SHMEM\_MINOR\_VERSION}.
+}
+
+\apireturnvalues{
+    None.
+}
+
+\end{apidefinition}

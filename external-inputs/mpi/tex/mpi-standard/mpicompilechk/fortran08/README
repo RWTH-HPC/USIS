@@ -1,0 +1,12 @@
+This implementation of the use_mpi module file is drawn from the MPICH
+implementation in MPI 3.4.2, Copyright Argonne National Laboratory.
+
+Values in the source files are valid for a particular system but should not
+be used for any MPI implementation - please see the MPICH implemenation (or
+any other standard-conforming implementation of MPI) for a Fortran
+support for an MPI implementation.  These are provided only to provide
+checking of Fortran examples in the MPI standard that use the mpi_f08
+module.
+
+As the MPI standard is changed and extended, these files will be modified
+and will diverge from the MPICH 3.4.2 version.

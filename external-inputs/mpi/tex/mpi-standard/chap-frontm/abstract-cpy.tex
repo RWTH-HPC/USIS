@@ -1,0 +1,107 @@
+% MPI-1.1:
+%  -- no abstract --
+% MPI-2.0:
+%  This document describes the \mpiidotii/ and \mpiii/ standards.  They
+%  are both extensions to the \mpiidoti/ standard.  The
+%  \mpiidotii/ part of the document contains clarifications and corrections to
+%  the \mpiidoti/ standard and defines \mpiidotii/.  The \mpiii/ part of the document describes
+%  additions to the \mpii/ standard and defines \mpiii/.  These include miscellaneous
+%  topics, process creation and management, one-sided communications,
+%  extended collective operations, external interfaces, I/O, and
+%  additional language bindings.
+\ifdraftspec
+   This document describes the 202X Draft Specification of the
+   Message-Passing Interface
+   (\mpi/) standard, intended for comment.
+   This is a working document; the \MPI/ Forum continues to work on
+   \mpivdoti/ and expects additional changes before \mpivdoti/ is
+   finalized.
+   It is not an official version of the standard.\par
+\else
+\fi
+   This document describes the Message-Passing Interface (\mpi/)
+   standard, version 5.1.
+
+   The \mpi/ standard includes point-to-point message-passing,
+   collective communications, group and communicator concepts,
+   process topologies, environmental management,
+   process creation and management, one-sided communications,
+   extended collective operations, external interfaces, I/O,
+   some miscellaneous topics, and multiple tool interfaces.
+   Language bindings for C and Fortran are defined.
+
+Historically, the evolution of the standard is:
+\begin{itemize}
+\item \MPIIDOTO/ (May 5, 1994): Initial release.
+\item \MPIIDOTI/ (June 12, 1995): Minor updates and bug fixes.
+\item \MPIIDOTII/ (July 18, 1997): Several clarifications and additions.
+\item \MPIIIDOTO/ (July 18, 1997): New functionality and all the
+      clarifications and additions from \MPIIDOTII/.
+\item \MPIIDOTIII/ (May 30, 2008): For historical reasons, combining the
+      \MPIIDOTI/, \MPIIDOTII/, and several errata documents into one combined
+       document.
+\item \MPIIIDOTI/ (June 23, 2008): Combining the previous documents.
+\item \MPIIIDOTII/ (September 4, 2009): Additional clarifications and seven
+       new routines.
+\item \MPIIIIDOTO/ (September 21, 2012): Extension of \MPIIIDOTII/.
+\item \MPIIIIDOTI/ (June 4, 2015): Clarifications and minor extensions to
+      \MPIIIIDOTO/.
+\item \MPIIVDOTO/ (June 9, 2021): Significant new features beyond \MPIIIIDOTI/.
+\item \MPIIVDOTI/ (November 2, 2023): Clarifications and minor extensions
+to \MPIIVDOTO/.
+\item \MPIVDOTO/ (June 5, 2025): Significant new features beyond \MPIIVDOTI/.
+\end{itemize}
+
+\paragraph*{Comments.}
+Please send comments on \MPI/ to the \MPI/ Forum as follows:
+\begin{enumerate}
+\item Subscribe to \url{https://lists.mpi-forum.org/mailman/listinfo/mpi-comments}
+\item Send your comment to:
+    \href{mailto:mpi-comments@lists.mpi-forum.org}{mpi-comments@lists.mpi-forum.org},
+    together with the version of the \MPI/ standard and the
+    page and line numbers on which you are commenting.
+\ifdraft\else
+    Only use the official versions.
+\fi
+
+
+     Your comment will be forwarded to \MPI/ Forum committee members for
+ consideration.
+ Messages sent from an unsubscribed
+ e-mail address will not be considered.
+\end{enumerate}
+
+\ifbookprinting
+\vspace{13mm}%%ALLOWLATEX%
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Title:    & MPI: A Message-Passing Interface Standard, Version 4.1 \\[2pt]
+Author:   & Message Passing Interface Forum \\[2pt]
+Publisher:& High-Performance Computing Center Stuttgart \\
+          & (H\"{o}chstleistungsrechenzentrum Stuttgart, HLRS) \\
+          & University of Stuttgart \\
+          & Nobelstr. 19 \\
+          & D-70550 Stuttgart \\
+          & Germany \\[2pt]
+\multicolumn{2}{|l|}{Printed in Germany on acid-free paper.} \\[2pt]
+\multicolumn{2}{|l|}{See \url{http://www.mpi-forum.org} for official \MPI/ document releases.} \\[2pt]
+%-2.1: \multicolumn{2}{|r|}{\tiny This box is the only modification added to the official standard.} \\
+%-2.2: \multicolumn{2}{|r|}{\tiny This box and a {\it publisher's comment} on page \pageref{publishercomment:i} are} \\[-5pt]
+%-2.2: \multicolumn{2}{|r|}{\tiny the only modifications added to the official standard.} \\
+%-3.0: \multicolumn{2}{|r|}{\tiny This box is the only modification added to the official standard.} \\
+\multicolumn{2}{|r|}{\tiny This box is the only modification added to the official standard.} \\%%ALLOWLATEX%
+\hline
+\end{tabular}
+\end{center}
+\fi % \ifbookprinting
+
+\vfill%%ALLOWLATEX%
+
+\noindent \copyright 1993, 1994, 1995, 1996, 1997,
+2008, 2009, 2012, 2015, 2021, 2023, 2025
+University of Tennessee, Knoxville, Tennessee.
+Permission to copy without fee all or part of this material is
+granted, provided the University of Tennessee copyright notice and the
+title of this document appear, and notice is given that copying is by
+permission of the University of Tennessee.

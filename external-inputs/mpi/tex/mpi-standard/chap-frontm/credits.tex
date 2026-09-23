@@ -1,0 +1,1790 @@
+
+%Version of April 24, 1993 -- Steve Otto, Oregon Graduate Institute
+%
+
+%ALLOWLATEX:medskip%
+%ALLOWLATEX:vspace%
+
+\chapter*{Acknowledgements}
+% Unnumbered chapters aren't added to the ToC by default
+\addcontentsline{toc}{chapter}{Acknowledgments}
+
+This document is the product of a number of
+  distinct efforts in five distinct phases: one for each of \MPII/,
+  \MPIII/, \MPIIII/, \MPIIV/, and \MPIV/.
+  This section describes these in historical
+  order, starting with \MPII/.  Some efforts, particularly parts of
+  \MPIII/, had distinct groups of individuals associated with them,
+  and these efforts are detailed separately.
+
+\vspace{0.5in}
+
+This document represents the work of many people who have served on
+the \MPI/ Forum.  The meetings have been attended by dozens of people
+from many parts of the world.  It is the hard and dedicated work of
+this group that has led to the \MPI/ standard.
+
+The technical development was carried out by subgroups, whose work was
+reviewed by the full committee.  During the period of development of
+the Message-Passing Interface (\MPI/), many people helped with this
+effort.  
+
+Those who served as primary coordinators in \mpiidoto/ and \mpiidoti/ are:
+
+\begin{itemize}
+\item Jack Dongarra, David Walker, Conveners and Meeting Chairs
+\item Ewing Lusk, Bob Knighten, Minutes
+\item Marc Snir, William Gropp, Ewing Lusk, Point-to-Point Communication
+\item Al Geist, Marc Snir, Steve Otto, Collective Communication
+\item Steve Otto, Editor
+\item Rolf Hempel, Process Topologies
+\item Ewing Lusk, Language Binding
+\item William Gropp, Environmental Management
+\item James Cownie, Profiling
+\item Tony Skjellum, Lyndon Clarke, Marc Snir, Richard Littlefield, Mark Sears, 
+Groups, Contexts, and Communicators 
+\item Steven Huss-Lederman, Initial Implementation Subset
+\end{itemize}
+
+The following list includes some of the active participants in
+the \MPIIDOTO/ and \MPIIDOTI/ process not mentioned above.
+
+\begin{center}
+\begin{tabular}{llll}
+Ed Anderson	&
+Robert Babb     &
+Joe Baron	&
+Eric Barszcz	\\
+Scott Berryman  &
+Rob Bjornson	&
+Nathan Doss     &
+Anne Elster	\\
+Jim Feeney	&
+Vince Fernando	&
+Sam Fineberg		&
+Jon Flower		\\
+Daniel Frye		&
+Ian Glendinning	&
+Adam Greenberg			&
+Robert Harrison		\\
+Leslie Hart		&
+Tom Haupt		&
+Don Heller			&
+Tom Henderson		\\
+Alex Ho			&
+C.T. Howard Ho		&
+Gary Howell             &
+John Kapenga       	\\
+James Kohl		&
+Susan Krauss		&
+Bob Leary	  		&
+Arthur Maccabe   	\\
+Peter Madams		&
+Alan Mainwaring		&
+Oliver McBryan	&
+Phil McKinley	\\
+Charles Mosher		&
+Dan Nessett	&
+Peter Pacheco	&
+Howard Palmer		\\
+Paul Pierce	&
+Sanjay Ranka		&
+Peter Rigsbee	&
+Arch Robison	\\
+Erich Schikuta	&
+Ambuj Singh	&
+Alan Sussman		&
+Robert Tomlinson	\\
+Robert G. Voigt		&
+Dennis Weeks	&
+Stephen Wheat	&
+Steve Zenith
+\end{tabular}
+\end{center}
+
+%amm@think.com & & \\
+%bob@lanl.gov & & \\
+%ccm@arco.com & & \\
+%danielf@kgnvmt.vnet.ibm.com & & \\
+%eca@cray.com & & \\
+%fernando@cs.berkeley.edu & & \\
+%hep@ncube.com & & \\
+%leary@sdsc.edu & & \\
+%mckinley@cps.msu.edu & & \\
+
+The University of Tennessee and Oak Ridge National Laboratory
+made the draft available by anonymous FTP 
+mail servers and were instrumental in distributing 
+the document.
+ 
+The work on the \MPII/ standard was supported in part by ARPA and NSF
+under grant ASC-9310330,  
+the National Science Foundation Science and
+Technology Center Cooperative Agreement No. CCR-8809615,
+and by the Commission of the European Community through Esprit project
+P6643 (PPPE).
+
+\medskip
+
+\subsection*{\MPIIDOTII/ and \MPIIIDOTO/:} 
+
+Those who served as primary coordinators in \mpiidotii/ and \mpiiidoto/ are:
+
+\begin{itemize}
+\item Ewing Lusk, Convener and Meeting Chair
+\item Steve Huss-Lederman, Editor
+\item Ewing Lusk, Miscellany
+\item Bill Saphir, Process Creation and Management
+\item Marc Snir, One-Sided Communications
+\item William Gropp and Anthony Skjellum, Extended Collective Operations
+\item Steve Huss-Lederman, External Interfaces
+\item Bill Nitzberg, I/O
+\item Andrew Lumsdaine, Bill Saphir, and Jeffrey M.~Squyres, Language Bindings
+\item Anthony Skjellum and Arkady Kanevsky, Real-Time
+\end{itemize}
+
+The following list includes some of the active participants who
+attended \MPIII/ Forum meetings and are not mentioned above.
+
+\begin{center}
+\begin{tabular}{llll}
+Greg Astfalk &
+Robert Babb &
+Ed Benson &
+Rajesh Bordawekar \\
+Pete Bradley &
+Peter Brennan &
+Ron Brightwell &
+Maciej Brodowicz \\
+Eric Brunner &
+Greg Burns &
+Margaret Cahir &
+Pang Chen \\
+Ying Chen &
+Albert Cheng &
+Yong Cho &
+Joel Clark \\
+Lyndon Clarke &
+Laurie Costello &
+Dennis Cottel &
+Jim Cownie \\
+Zhenqian Cui &
+\multicolumn{2}{l}{Suresh Damodaran-Kamal} &
+Raja Daoud \\
+Judith Devaney &
+David DiNucci &
+Doug Doefler &
+Jack Dongarra \\
+Terry Dontje &
+Nathan Doss &
+Anne Elster &
+Mark Fallon \\
+Karl Feind &
+Sam Fineberg &
+Craig Fischberg &
+Stephen Fleischman \\
+Ian Foster &
+Hubertus Franke &
+Richard Frost &
+Al Geist \\
+Robert George &
+David Greenberg &
+%Bill Gropp
+John Hagedorn &
+Kei Harada \\
+Leslie Hart &
+Shane Hebert &
+Rolf Hempel &
+Tom Henderson \\
+Alex Ho &
+Hans-Christian Hoppe &
+%Steve Huss-Lederman
+Joefon Jann &
+Terry Jones \\
+%Arkady Kanevsky
+Karl Kesselman &
+Koichi Konishi &
+Susan Kraus &
+Steve Kubica \\
+Steve Landherr &
+Mario Lauria &
+Mark Law &
+Juan Leon \\
+Lloyd Lewins &
+
+Ziyang Lu &
+%Andrew Lumsdaine 
+%Ewing Lusk
+Bob Madahar &
+Peter Madams 
+\\
+%\end{tabular}
+%\end{centering}
+% 
+%\begin{centering}
+%\begin{tabular}{llll}
+John May &
+Oliver McBryan &
+Brian McCandless &
+Tyce McLarty \\
+Thom McMahon &
+Harish Nag &
+Nick Nevin &
+Jarek Nieplocha \\
+%Bill Nitzberg
+Ron Oldfield &
+Peter Ossadnik &
+Steve Otto &
+Peter Pacheco \\
+Yoonho Park &
+Perry Partow &
+Pratap Pattnaik &
+Elsie Pierce \\
+Paul Pierce &
+Heidi Poxon &
+Jean-Pierre Prost &
+Boris Protopopov \\
+James Pruyve &
+Rolf Rabenseifner &
+Joe Rieken &
+Peter Rigsbee \\
+Tom Robey &
+Anna Rounbehler &
+Nobutoshi Sagawa &
+Arindam Saha \\
+Eric Salo &
+Darren Sanders &
+%Bill Saphir
+Eric Sharakan &
+Andrew Sherman \\
+Fred Shirley &
+Lance Shuler &
+%Anthony Skjellum
+A. Gordon Smith &
+%Marc Snir
+Ian Stockdale \\
+%Jeffrey M.~Squyres
+David Taylor &
+Stephen Taylor &
+Greg Tensa &
+Rajeev Thakur \\
+Marydell Tholburn &
+Dick Treumann &
+Simon Tsang &
+Manuel Ujaldon \\
+David Walker &
+Jerrell Watts &
+Klaus Wolf &
+Parkson Wong \\
+Dave Wright
+\end{tabular}
+\end{center}
+
+The \MPI/ Forum also acknowledges and appreciates the valuable input
+from people via e-mail and in person.
+
+The following institutions supported the \MPIII/ effort through
+time and travel support for the people listed above.
+
+\medskip
+
+\begin{obeylines}
+Argonne National Laboratory
+Bolt, Beranek, and Newman
+California Institute of Technology
+Center for Computing Sciences
+Convex Computer Corporation
+Cray Research
+Digital Equipment Corporation
+Dolphin Interconnect Solutions, Inc.
+Edinburgh Parallel Computing Centre
+General Electric Company
+German National Research Center for Information Technology
+Hewlett-Packard
+Hitachi
+Hughes Aircraft Company
+Intel Corporation
+International Business Machines
+Khoral Research
+Lawrence Livermore National Laboratory
+Los Alamos National Laboratory
+MPI Software Techology, Inc.
+Mississippi State University
+NEC Corporation
+National Aeronautics and Space Administration
+National Energy Research Scientific Computing Center
+National Institute of Standards and Technology
+National Oceanic and Atmospheric Adminstration
+Oak Ridge National Laboratory
+The Ohio State University
+PALLAS GmbH
+Pacific Northwest National Laboratory
+Pratt \& Whitney
+San Diego Supercomputer Center
+Sanders, A Lockheed-Martin Company
+Sandia National Laboratories
+Schlumberger
+Scientific Computing Associates, Inc.
+Silicon Graphics Incorporated
+Sky Computers
+Sun Microsystems Computer Corporation
+Syracuse University
+The MITRE Corporation
+Thinking Machines Corporation
+United States Navy
+University of Colorado
+University of Denver
+University of Houston
+University of Illinois
+University of Maryland
+University of Notre Dame
+University of San Fransisco
+University of Stuttgart Computing Center
+University of Wisconsin
+\end{obeylines}
+
+\medskip
+
+\MPIII/ operated on a very tight budget (in reality, it had no budget when
+the first meeting was announced).  Many institutions helped the
+\MPIII/ effort by supporting the efforts and travel of the members of
+the \MPI/ Forum.  Direct support was given by NSF and DARPA under NSF
+contract CDA-9115428 for travel by U.S. academic participants and
+Esprit under project HPC Standards (21111) for European participants.
+
+\medskip
+
+\subsection*{\MPIIDOTIII/ and \MPIIIDOTI/:} 
+ 
+The editors and organizers of the combined documents have been:
+\begin{itemize} 
+\item Richard Graham, Convener and Meeting Chair
+\item Jack Dongarra, Steering Committee
+\item Al Geist, Steering Committee 
+\item William Gropp, Steering Committee 
+\item Rainer Keller, Merge of \MPIIDOTIII/
+\item Andrew Lumsdaine, Steering Committee
+\item Ewing Lusk, Steering Committee, \MPIIDOTI/-Errata (Oct. 12, 1998) \MPIIIDOTI/-Errata Ballots 1, 2 (May 15, 2002)
+\item Rolf Rabenseifner, Steering Committee, Merge of \MPIIIDOTI/ and \MPIIIDOTI/-Errata Ballots 3, 4 (2008)
+\end{itemize} 
+
+All chapters have been revisited to achieve a consistent \MPIIIDOTI/ text.
+Those who served as authors for the necessary modifications are:
+\begin{itemize} 
+\item William Gropp, Front Matter, Introduction, and Bibliography 
+\item Richard Graham, Point-to-Point Communication
+\item Adam Moody, Collective Communication
+\item Richard Treumann, Groups, Contexts, and Communicators
+\item Jesper Larsson Tr\"aff, Process Topologies, 
+%      Miscellany, 
+      Info-Object,
+      and One-Sided Communications
+\item George Bosilca, Environmental Management
+\item David Solt, Process Creation and Management
+\item Bronis R.~de Supinski, External Interfaces, and Profiling
+\item Rajeev Thakur, I/O
+\item Jeffrey M.~Squyres, Language Bindings and \MPIIIDOTI/ Secretary
+\item Rolf Rabenseifner, Deprecated Functions and Annex Change-Log 
+\item Alexander Supalov and Denis Nagorny, Annex Language
+Bindings
+\end{itemize} 
+
+The following list includes some of the active participants who
+attended \MPIII/ Forum meetings and in the e-mail discussions
+of the errata items and are not mentioned above.
+ 
+\begin{center}
+\begin{tabular}{lll}
+Pavan Balaji&
+Purushotham V.~Bangalore&
+Brian Barrett\\
+Richard Barrett&
+Christian Bell&
+Robert Blackmore\\
+Gil Bloch&
+Ron Brightwell&
+Jeffrey Brown\\
+Darius Buntinas&
+Jonathan Carter&
+Nathan DeBardeleben\\
+Terry Dontje &
+Gabor Dozsa &
+Edric Ellis\\
+Karl Feind&
+Edgar Gabriel&
+Patrick Geoffray\\
+David Gingold&
+Dave Goodell&
+Erez Haba\\
+Robert Harrison&
+Thomas Herault&
+Steve Hodson\\
+Torsten Hoefler &
+Joshua Hursey &
+Yann Kalemkarian\\
+Matthew Koop&
+Quincey Koziol&
+Sameer Kumar\\
+Miron Livny&
+Kannan Narasimhan&
+Mark Pagel\\
+Avneesh Pant&
+Steve Poole&
+Howard Pritchard\\
+Craig Rasmussen&
+Hubert Ritzdorf&
+Rob Ross\\
+Tony Skjellum&
+Brian Smith&
+Vinod Tipparaju\\
+Jesper Larsson Tr\"aff&
+Keith Underwood& 
+\end{tabular}
+\end{center}
+
+The \MPI/ Forum also acknowledges and appreciates the valuable input
+from people via e-mail and in person.
+
+The following institutions supported the \MPIII/ effort through
+time and travel support for the people listed above.
+
+\medskip
+
+\begin{obeylines}
+Argonne National Laboratory
+Bull 
+Cisco Systems, Inc.
+Cray Inc.
+The HDF Group
+Hewlett-Packard
+IBM T.J. Watson Research
+Indiana University
+Institut National de Recherche en Informatique et Automatique (Inria)
+Intel Corporation
+Lawrence Berkeley National Laboratory
+Lawrence Livermore National Laboratory
+Los Alamos National Laboratory
+Mathworks
+Mellanox Technologies
+Microsoft
+Myricom
+NEC Laboratories Europe, NEC Europe Ltd.
+Oak Ridge National Laboratory
+The Ohio State University
+Pacific Northwest National Laboratory
+QLogic Corporation
+Sandia National Laboratories
+SiCortex
+Silicon Graphics Incorporated
+Sun Microsystems, Inc.
+University of Alabama at Birmingham
+University of Houston
+University of Illinois at Urbana-Champaign
+University of Stuttgart, High Performance Computing Center Stuttgart (HLRS)
+University of Tennessee, Knoxville
+University of Wisconsin
+\end{obeylines}
+
+\medskip
+
+Funding for the \MPI/ Forum meetings was partially supported by award
+\#CCF-0816909 from the National Science Foundation.   
+In addition, the HDF Group provided travel support for one
+U.S. academic.
+
+\medskip
+ 
+\subsection*{\MPIIIDOTII/:} 
+All chapters have been revisited to achieve a consistent \MPIIIDOTII/ text.
+Those who served as authors for the necessary modifications are:
+\begin{itemize} 
+\item William Gropp, Front Matter, Introduction, and Bibliography; 
+\MPIIIDOTII/ Chair. 
+\item Richard Graham, Point-to-Point Communication and Datatypes
+\item Adam Moody, Collective Communication
+\item Torsten Hoefler, Collective Communication and Process Topologies
+\item Richard Treumann, Groups, Contexts, and Communicators
+\item Jesper Larsson Tr\"aff, Process Topologies, Info-Object
+      and One-Sided Communications
+\item George Bosilca, Datatypes and Environmental Management
+\item David Solt, Process Creation and Management
+\item Bronis R.~de Supinski, External Interfaces, and Profiling
+\item Rajeev Thakur, I/O
+\item Jeffrey M.~Squyres, Language Bindings and \MPIIIDOTII/ Secretary
+\item Rolf Rabenseifner, Deprecated Functions, Annex Change-Log, and Annex 
+Language Bindings 
+\item Alexander Supalov, Annex Language Bindings
+\end{itemize} 
+
+The following list includes some of the active participants who
+attended \MPIII/ Forum meetings and in the e-mail discussions
+of the errata items and are not mentioned above.
+
+% NOTE THAT NAMES MENTIONED ABOVE ARE NOT TO BE INCLUDED IN THIS LIST
+\begin{center}
+\begin{tabular}{lll}
+Pavan Balaji &
+Purushotham V.~Bangalore &
+Brian Barrett \\
+Richard Barrett&
+Christian Bell &
+Robert Blackmore\\
+Gil Bloch &
+%George Bosilca
+Ron Brightwell&
+Greg Bronevetsky\\
+Jeff Brown &
+Darius Buntinas&
+Jonathan Carter\\
+%Bronis R.~de Supinski&
+Nathan DeBardeleben&
+Terry Dontje&
+Gabor Dozsa\\
+Edric Ellis&
+Karl Feind&
+Edgar Gabriel\\
+Patrick Geoffray &
+Johann George&
+David Gingold\\
+David Goodell&
+%Richard Graham&
+%William Gropp&
+Erez Haba &
+Robert Harrison\\
+Thomas Herault &
+Marc-Andr\'e Hermanns&
+Steve Hodson\\
+%Torsten Hoefler
+Joshua Hursey&
+Yutaka Ishikawa&
+Bin Jia\\
+Hideyuki Jitsumoto&
+Terry Jones&
+Yann Kalemkarian\\
+Ranier Keller&
+Matthew Koop&
+Quincey Koziol\\
+Manojkumar Krishnan&
+Sameer Kumar &
+Miron Livny\\
+Andrew Lumsdaine&
+Miao Luo&
+Ewing Lusk\\
+Timothy I.~Mattox&
+%Adam Moody&
+Kannan Narasimhan&
+Mark Pagel\\
+Avneesh Pant&
+Steve Poole &
+Howard Pritchard\\
+%Rolf Rabenseifner&
+Craig Rasmussen&
+Hubert Ritzdorf&
+Rob Ross\\
+Martin Schulz&
+Pavel Shamis&
+Galen Shipman\\
+Christian Siebert&
+Anthony Skjellum&
+Brian Smith\\
+%David Solt&
+%Jeffrey M.~Squyres&
+Naoki Sueyasu&
+%Alexander Supalov\\
+%Rajeev Thakur&
+Vinod Tipparaju &
+%Jesper Larsson Tr\"aff &
+%Richard Treumann\\
+Keith Underwood\\
+Rolf Vandevaart&
+Abhinav Vishnu & 
+Weikuan Yu
+\end{tabular}
+\end{center}
+
+The \MPI/ Forum also acknowledges and appreciates the valuable input
+from people via e-mail and in person.
+
+The following institutions supported the \MPIIIDOTII/ effort through
+time and travel support for the people listed above.
+
+\medskip
+
+\begin{obeylines}
+Argonne National Laboratory
+Auburn University
+Bull 
+Cisco Systems, Inc.
+Cray Inc.
+Forschungszentrum J\"ulich
+Fujitsu
+The HDF Group
+Hewlett-Packard
+International Business Machines
+Indiana University
+Institut National de Recherche en Informatique et Automatique (Inria)
+Institute for Advanced Science \& Engineering Corporation
+Intel Corporation
+Lawrence Berkeley National Laboratory
+Lawrence Livermore National Laboratory
+Los Alamos National Laboratory
+Mathworks
+Mellanox Technologies
+Microsoft
+Myricom
+NEC Corporation
+Oak Ridge National Laboratory
+The Ohio State University
+Pacific Northwest National Laboratory
+QLogic Corporation
+RunTime Computing Solutions, LLC
+Sandia National Laboratories
+SiCortex, Inc.
+Silicon Graphics Inc.
+Sun Microsystems, Inc.
+Tokyo Institute of Technology
+University of Alabama at Birmingham
+University of Houston
+University of Illinois at Urbana-Champaign
+University of Stuttgart, High Performance Computing Center Stuttgart (HLRS)
+University of Tennessee, Knoxville
+University of Tokyo
+University of Wisconsin
+\end{obeylines}
+
+\medskip
+
+Funding for the \MPI/ Forum meetings was partially supported by
+awards 
+\#CCF-0816909 and \#CCF-1144042 from the National Science Foundation.   
+In addition, the HDF Group provided travel support for one
+U.S. academic.
+
+\subsection*{\mpiiiidoto/:}
+\mpiiiidoto/ is a significant effort to extend and modernize the \MPI/
+standard.
+
+\noindent The editors and organizers of the \mpiiiidoto/ have been:
+%\emph{Taken from \MPIIIDOTII/ with minor corrections.  Need to
+%  separate the working groups list (which is currently reviewers) from
+%  the primary authors .  Also, did I miss active steering committee members?}
+\begin{itemize} 
+\item William Gropp, Steering Committee, Front Matter, Introduction,
+Groups, Contexts, and 
+  Communicators, One-Sided Communications, and Bibliography
+\item Richard Graham, Steering Committee, Point-to-Point Communication, Meeting
+Convener, and \mpiiiidoto/ Chair
+\item Torsten Hoefler, Collective Communication, One-Sided
+Communications, and Process Topologies  
+\item George Bosilca, Datatypes and Environmental Management
+\item David Solt, Process Creation and Management
+\item Bronis R.~de Supinski, External Interfaces and Tool Support
+\item Rajeev Thakur, I/O and One-Sided Communications
+\item Darius Buntinas, Info Object
+\item Jeffrey M.~Squyres, Language Bindings and \mpiiiidoto/ Secretary
+\item Rolf Rabenseifner, Steering Committee, Terms and Definitions, and
+  Fortran Bindings,
+  Deprecated Functions, Annex Change-Log, and Annex Language Bindings  
+\item Craig Rasmussen, Fortran Bindings
+\end{itemize} 
+
+The following list includes some of the active participants who
+attended \MPIIII/ Forum meetings or participated in the e-mail
+discussions and who are not mentioned above. 
+
+% NOTE THAT NAMES MENTIONED ABOVE ARE NOT TO BE INCLUDED IN THIS LIST
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\begin{tabular}{lll}
+Tatsuya Abe &
+Tomoya Adachi &
+Sadaf Alam \\
+Reinhold Bader &
+Pavan Balaji &
+Purushotham V.~Bangalore \\
+Brian Barrett & 
+Richard Barrett&
+Robert Blackmore\\
+%George Bosilca
+Aur\'elien Bouteiller &
+Ron Brightwell& 
+Greg Bronevetsky \\ 
+Jed Brown &
+Darius Buntinas &
+Devendar Bureddy \\
+Arno Candel &
+George Carr &
+Mohamad Chaarawi \\
+Raghunath Raja Chandrasekar &
+%Bronis R.~de Supinski
+James Dinan&
+Terry Dontje \\
+%Gabor Dozsa (No participation in MPI-3)
+Edgar Gabriel &
+Balazs Gerofi &
+Brice Goglin \\
+David Goodell&
+Manjunath Gorentla &
+%Richard Graham&
+%William Gropp&
+Erez Haba \\
+Jeff Hammond &
+Thomas Herault &
+Marc-Andr\'e Hermanns \\
+Jennifer Herrett-Skjellum &
+Nathan Hjelm &
+%Torsten Hoefler
+Atsushi Hori \\
+Joshua Hursey &
+Marty Itzkowitz&
+Yutaka Ishikawa\\
+Nysal Jan&
+Bin Jia&
+Hideyuki Jitsumoto \\
+Yann Kalemkarian& 
+Krishna Kandalla &
+Takahiro Kawashima \\
+Chulho Kim &
+Dries Kimpe &
+Christof Klausecker \\
+Alice Koniges &
+Quincey Koziol &
+Dieter Kranzlmueller \\
+Manojkumar Krishnan&
+Sameer Kumar &
+Eric Lantz \\
+Jay Lofstead &
+Bill Long &
+Andrew Lumsdaine \\
+Miao Luo &
+Ewing Lusk &
+Adam Moody \\
+Nick M. Maclaren &
+Amith Mamidala &
+Guillaume Mercier \\
+Scott McMillan &
+Douglas Miller &
+Kathryn Mohror \\
+Tim Murray &
+Tomotake Nakamura &
+Takeshi Nanri \\
+Steve Oyanagi &
+Mark Pagel &
+Swann Perarnau \\
+%Steve Poole (no participation in MPI-3)
+Sreeram Potluri &
+Howard Pritchard &
+%Rolf Rabenseifner
+%Craig Rasmussen
+%John Reid (some email particiption on Fortran?)\\
+Rolf Riesen \\
+Hubert Ritzdorf &
+Kuninobu Sasaki &
+Timo Schneider \\
+Martin Schulz &
+Gilad Shainer&
+Christian Siebert \\
+Anthony Skjellum &
+Brian Smith &
+Marc Snir \\
+Raffaele Giuseppe Solca &
+%David Solt
+%Jeffrey M.~Squyres
+Shinji Sumimoto &
+Alexander Supalov \\
+Sayantan Sur &
+Masamichi Takagi &
+%Rajeev Thakur
+Fabian Tillier   \\
+Vinod Tipparaju &
+Jesper Larsson Tr\"aff &
+Richard Treumann \\
+Keith Underwood &
+Rolf Vandevaart &
+Anh Vo \\
+Abhinav Vishnu &
+Min Xie&
+Enqiang Zhou\\
+\end{tabular}
+\end{center}
+
+The \MPI/ Forum also acknowledges and appreciates the valuable input
+from people via e-mail and in person.
+
+% People who provided significant input during the public comment
+The \MPI/ Forum also thanks those that provided feedback during the
+public comment period.  In particular, the Forum would like to thank
+Jeremiah Wilcock for providing detailed comments on the entire draft
+standard. 
+
+The following institutions supported the \MPIIII/ effort through
+time and travel support for the people listed above.
+
+\medskip
+
+\begin{obeylines}
+Argonne National Laboratory
+Bull 
+Cisco Systems, Inc.
+Cray Inc.
+CSCS
+ETH Zurich
+%Forschungszentrum J\"ulich
+Fujitsu Ltd.
+German Research School for Simulation Sciences
+The HDF Group
+Hewlett-Packard
+International Business Machines
+IBM India Private Ltd
+Indiana University
+Institut National de Recherche en Informatique et Automatique (Inria)
+Institute for Advanced Science \& Engineering Corporation
+Intel Corporation
+Lawrence Berkeley National Laboratory
+Lawrence Livermore National Laboratory
+Los Alamos National Laboratory
+%Ludwig-Maximilians Universit\"at M\"unchen
+% Also an LRZ Munich?
+Mellanox Technologies, Inc.
+Microsoft Corporation
+NEC Corporation
+National Oceanic and Atmospheric Administration, Global Systems Division
+NVIDIA Corporation
+Oak Ridge National Laboratory
+The Ohio State University
+Oracle America
+%Pacific Northwest National Laboratory
+Platform Computing
+%QLogic Corporation
+RIKEN AICS
+RunTime Computing Solutions, LLC
+Sandia National Laboratories
+Technical University of Chemnitz
+Tokyo Institute of Technology
+University of Alabama at Birmingham
+University of Chicago
+University of Houston
+University of Illinois at Urbana-Champaign
+University of Stuttgart, High Performance Computing Center Stuttgart (HLRS)
+University of Tennessee, Knoxville
+University of Tokyo
+\end{obeylines}
+
+\medskip
+
+Funding for the \MPI/ Forum meetings was partially supported by
+awards 
+\#CCF-0816909 and \#CCF-1144042 from the National
+Science Foundation. 
+In addition, the HDF Group and Sandia National Laboratories provided
+travel support for one U.S. academic each.
+
+\subsection*{\MPIIIIDOTI/:}
+\MPIIIIDOTI/ is a minor update to the \MPI/ standard.
+
+\noindent The editors and organizers of the \MPIIIIDOTI/ have been:
+\begin{itemize}
+\item Martin Schulz, \MPIIIIDOTI/ Chair
+\item William Gropp, Steering Committee, Front Matter, Introduction,
+One-Sided Communications, and Bibliography; Overall Editor
+\item Rolf Rabenseifner, Steering Committee, Terms and Definitions, and
+  Fortran Bindings,
+  Deprecated Functions, Annex Change-Log, and Annex Language Bindings
+\item Richard L.~Graham,  Steering Committee, Meeting Convener
+\item Jeffrey M.~Squyres, Language Bindings and \MPIIIIDOTI/ Secretary
+\item Daniel Holmes, Point-to-Point Communication
+\item George Bosilca, Datatypes and Environmental Management
+\item Torsten Hoefler, Collective Communication and Process Topologies
+\item Pavan Balaji, Groups, Contexts, and Communicators, and External Interfaces
+\item Jeff Hammond, The Info Object
+\item David Solt, Process Creation and Management
+\item Quincey Koziol, I/O
+\item Kathryn Mohror, Tool Support
+\item Rajeev Thakur, One-Sided Communications
+\end{itemize}
+
+The following list includes some of the active participants who
+attended \MPI/ Forum meetings or participated in the e-mail
+discussions. % and who are not mentioned above.
+
+\begin{center}
+\begin{tabular}{lll}
+Charles	Archer&
+Pavan	Balaji&
+Purushotham V.~Bangalore\\
+Brian	Barrett&
+Wesley	Bland&
+Michael	Blocksome\\
+George	Bosilca&
+Aur\'elien	Bouteiller&
+Devendar	Bureddy\\
+Yohann	Burette &
+Mohamad	Chaarawi&
+Alexey	Cheptsov\\
+James	Dinan&
+Dmitry	Durnov&
+Thomas	Francois\\
+Edgar	Gabriel&
+Todd	Gamblin&
+Balazs	Gerofi\\
+Paddy	Gillies&
+David	Goodell&
+Manjunath	Gorentla Venkata\\
+Richard L.~Graham&
+Ryan E.~Grant&
+William	Gropp\\
+Khaled	Hamidouche&
+Jeff	Hammond&
+Amin	Hassani\\
+Marc-Andr\'e	Hermanns&
+Nathan	Hjelm&
+Torsten	Hoefler\\
+Daniel	Holmes&
+Atsushi	Hori&
+Yutaka	Ishikawa\\
+Hideyuki	Jitsumoto&
+Jithin	Jose&
+Krishna	Kandalla\\
+Christos	Kavouklis&
+Takahiro	Kawashima&
+Chulho	Kim\\
+Michael	Knobloch&
+Alice	Koniges&
+Quincey	Koziol\\
+Sameer	Kumar&
+Joshua	Ladd&
+Ignacio	Laguna\\
+Huiwei	Lu&
+Guillaume	Mercier&
+Kathryn	Mohror\\
+Adam	Moody&
+Tomotake	Nakamura&
+Takeshi	Nanri\\
+Steve	Oyanagi&
+Antonio J.~P\~ena&
+Sreeram	Potluri\\
+Howard	Pritchard&
+Rolf	Rabenseifner&
+Nicholas	Radcliffe\\
+Ken	Raffenetti&
+Raghunath	Raja&
+Craig	Rasmussen\\
+Davide	Rossetti&
+Kento	Sato&
+Martin	Schulz\\
+Sangmin	Seo&
+Christian	Siebert&
+Anthony	Skjellum\\
+Brian	Smith&
+David	Solt&
+Jeffrey M.~Squyres\\
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tabular}{lll}
+Hari	Subramoni&
+Shinji	Sumimoto&
+Alexander	Supalov\\
+Bronis R.~de Supinski&
+Sayantan	Sur&
+Masamichi	Takagi\\
+Keita	Teranishi&
+Rajeev	Thakur&
+Fabian	Tillier\\
+Yuichi	Tsujita&
+Geoffroy	Vall\'ee&
+Rolf	vandeVaart\\
+Akshay	Venkatesh&
+Jerome	Vienne&
+Venkat	Vishwanath\\
+Anh	Vo&
+Huseyin S.~Yildiz&
+Junchao	Zhang\\
+Xin	Zhao
+\end{tabular}
+\end{center}
+
+The \MPI/ Forum also acknowledges and appreciates the valuable input
+from people via e-mail and in person.
+
+% People who provided significant input during the public comment
+%The \MPI/ Forum also thanks those that provided feedback during the
+%public comment period.
+
+The following institutions supported the \MPIIIIDOTI/ effort through
+time and travel support for the people listed above.
+
+\medskip
+
+\begin{obeylines}
+Argonne National Laboratory
+Auburn University
+Cisco Systems, Inc.
+Cray
+EPCC, The University of Edinburgh
+ETH Zurich
+Forschungszentrum J\"ulich
+Fujitsu
+German Research School for Simulation Sciences
+The HDF Group
+International Business Machines
+Institut National de Recherche en Informatique et Automatique (Inria)
+Intel Corporation
+% Per Michael Knobloch, only use Forschungszentrum Julich, already in list above
+%J\"ulich Aachen Research Alliance, High-Performance Computing (JARA-HPC)
+Kyushu University
+Lawrence Berkeley National Laboratory
+Lawrence Livermore National Laboratory
+Lenovo
+Los Alamos National Laboratory
+Mellanox Technologies, Inc.
+Microsoft Corporation
+NEC Corporation
+NVIDIA Corporation
+Oak Ridge National Laboratory
+The Ohio State University
+RIKEN AICS
+Sandia National Laboratories
+Texas Advanced Computing Center
+Tokyo Institute of Technology
+University of Alabama at Birmingham
+University of Houston
+University of Illinois at Urbana-Champaign
+University of Oregon
+University of Stuttgart, High Performance Computing Center Stuttgart (HLRS)
+University of Tennessee, Knoxville
+University of Tokyo
+\end{obeylines}
+
+\subsection*{\MPIIVDOTO/:}
+\MPIIVDOTO/ is a major update to the \MPI/ standard.
+
+\noindent The editors and organizers of the \MPIIVDOTO/ have been:
+\begin{itemize}
+\item Martin Schulz, \MPIIVDOTO/ Chair, Info Object, External Interfaces
+\item Richard Graham, \MPIIVDOTO/ Treasurer
+\item Wesley Bland, \MPIIVDOTO/ Secretary, Backward Incompatibilities
+\item William Gropp, \MPIIVDOTO/ Editor, Steering Committee, Front Matter,
+      Introduction, One-Sided Communications, and Bibliography
+\item Rolf Rabenseifner, Steering Committee,
+  Process Topologies, Deprecated Functions, Removed Interfaces,
+  Annex Language Bindings Summary, and Annex Change-Log
+
+% Make sure these are alphabetized by last name
+\item Purushotham V.~Bangalore, Language Bindings
+\item Claudia Blaas-Schenner, Terms and Conventions
+\item George Bosilca, Datatypes and Environmental Management
+\item Ryan E.~Grant, Partitioned Communication
+\item Marc-Andr\'e Hermanns, Tool Support
+\item Daniel Holmes, Point-to-Point Communication, Sessions
+\item Guillaume Mercier, Groups, Contexts, Communicators, Caching
+\item Howard Pritchard, Process Creation and Management
+\item Anthony Skjellum, Collective Communication, I/O
+\end{itemize}
+
+% These people served as chapter chairs for part of the MPI-4.0 development,
+% but were not chairs at the end. There were a few other changes above.
+%\item Torsten Hoefler, Collective Communication and Process Topologies
+%\item Pavan Balaji, Groups, Contexts, Communicators, and External Interfaces
+%\item Kathryn Mohror, Tools
+
+
+\noindent As part of the development of \MPIIVDOTO/, a number of
+working groups were established.
+In some cases, the work for these groups overlapped with multiple
+chapters.
+The following describes the major working groups and the leaders of
+those groups:
+%% The following includes both active and inactive (as of Nov 2020) groups,
+%% as all were involved in the development of MPI 4.0
+
+{\raggedright
+\begin{description}
+\item[Collective Communication, Topology, Communicators:]Torsten
+Hoefler, Andrew Lumsdaine, and Anthony Skjellum
+\item[Fault Tolerance:]Wesley Bland, Aur\'elien Bouteiller, and Richard
+Graham
+\item[Hardware-Topologies:]Guillaume Mercier
+\item[Hybrid \& Accelerator:]Pavan Balaji and James Dinan
+\item[Large Counts:]Jeff Hammond
+\item[Persistence:]Anthony Skjellum
+\item[Point to Point Communication:]Daniel Holmes and Richard Graham
+\item[Remote Memory Access:]William Gropp and Rajeev Thakur
+\item[Semantic Terms:]Purushotham V.~Bangalore and Rolf Rabenseifner
+\item[Sessions:]Daniel Holmes and Howard Pritchard
+\item[Tools:]Kathryn Mohror and Marc-Andr\'e Hermanns
+\end{description}
+}
+
+The following list includes some of the active participants who
+attended \MPI/ Forum meetings or participated in the e-mail
+discussions. % and who are not mentioned above.
+
+\begin{center}
+\begin{tabular}{lll}
+Julien Adam\EE
+Abdelhalim Amer\EE
+Charles Archer\EE
+Ammar Ahmad Awan\EE
+Pavan Balaji\EE
+Purushotham V.~Bangalore\EE
+Mohammadreza Bayatpour\EE
+Jean-Baptiste Besnard\EE
+Claudia Blaas-Schenner\EE
+Wesley Bland\EE
+Gil Bloch\EE
+George Bosilca\EE
+Aur\'elien Bouteiller\EE
+Ben Bratu\EE
+Alexander Calvert\EE
+Nicholas Chaimov\EE
+Sourav Chakraborty\EE
+Steffen Christgau\EE
+Ching-Hsiang Chu\EE
+Mikhail Chuvelev\EE
+James Clark\EE
+Carsten Clauss\EE
+\multicolumn{2}{l}{Isaias Alberto Comprés Ureña}\EEi\EE
+Giuseppe Congiu\EE
+Brandon Cook\EE
+James Custer\EE
+Anna Daly\EE
+Hoang-Vu Dang\EE
+James Dinan\EE
+Matthew Dosanjh\EE
+Murali Emani\EE
+Christian Engelmann\EE
+Noah Evans\EE
+Ana Gainaru\EE
+Esthela Gallardo\EE
+Marc Gamell Balmana\EE
+Balazs Gerofi\EE
+Salvatore Di Girolamo\EE
+Brice Goglin\EE
+\multicolumn{2}{l}{Manjunath Gorentla Venkata}\EEi\EE
+Richard Graham\EE
+Ryan E.~Grant\EE
+Stanley Graves\EE
+William Gropp\EE
+Siegmar Gross\EE
+Taylor Groves\EE
+Yanfei Guo\EE
+Khaled Hamidouche\EE
+Jeff Hammond\EE
+Marc-Andr\'e Hermanns\EE
+Nathan Hjelm\EE
+Torsten Hoefler\EE
+Daniel Holmes\EE
+Atsushi Hori\EE
+Josh Hursey\EE
+Ilya Ivanov\EE
+Julien Jaeger\EE
+Emmanuel Jeannot\EE
+Sylvain Jeaugey\EE
+Jithin Jose\EE
+Krishna Kandalla\EE
+Takahiro Kawashima\EE
+Chulho Kim\EE
+Michael Knobloch\EE
+Alice Koniges\EE
+Sameer Kumar\EE
+Kim Kyunghun\EE
+Ignacio Laguna Peralta\EE
+Stefan Lankes\EE
+Tonglin Li\EE
+Xioyi Lu\EE
+Kavitha Madhu\EE
+Alexey Malhanov\EE
+Ryan Marshall\EE
+William Marts\EE
+Guillaume Mercier\EE
+Ali Mohammed\EE
+Kathryn Mohror\EE
+Takeshi Nanri\EE
+Thomas Naughton\EE
+Christoph Niethammer\EE
+Takafumi Nose\EE
+Lena Oden\EE
+Steve Oyanagi\EE
+Guillaume Papaur\'e\EE
+Ivy Peng\EE
+Antonio Pe\~na\EE
+Simon Pickartz\EE
+Artem Polyakov\EE
+Sreeram Potluri\EE
+Howard Pritchard\EE
+Martina Prugger\EE
+Marc P\'erache\EE
+Rolf Rabenseifner\EE
+Nicholas Radcliffe\EE
+Ken Raffenetti\EE
+Craig Rasmussen\EE
+Soren Rasmussen\EE
+Hubert Ritzdorf\EE
+Sergio Rivas-Gomez\EE
+Davide Rossetti\EE
+Martin Ruefenacht\EE
+Amit Ruhela\EE
+Whit Schonbein\EE
+Joseph Schuchart\EE
+Martin Schulz\EE
+Sangmin Seo\EE
+Sameh Sharkawi\EE
+Sameer Shende\EE
+Min Si\EE
+Anthony Skjellum\EE
+Brian Smith\EE
+David Solt\EE
+Jeffrey M.~Squyres\EE
+Srinivas Sridharan\EE
+Hari Subramoni\EE
+Nawrin Sultana\EE
+Shinji Sumimoto\EE
+Sayantan Sur\EE
+Hugo Taboada\EE
+Keita Teranishi\EE
+\FlushEntries
+\end{tabular}
+\end{center}
+%% Manually break across pages (!)
+\begin{center}
+\begin{tabular}{lll}
+Rajeev Thakur\EE
+Keith Underwood\EE
+Geoffroy Vallee\EE
+Akshay Venkatesh\EE
+Jerome Vienne\EE
+Anh Vo\EE
+Justin Wozniak\EE
+Junchao Zhang\EE
+Dong Zhong\EE
+Hui Zhou\EE
+\FlushEntries
+\end{tabular}
+\end{center}
+
+The \MPI/ Forum also acknowledges and appreciates the valuable input
+from people via e-mail and in person.
+
+% People who provided significant input during the public comment
+%The \MPI/ Forum also thanks those that provided feedback during the
+%public comment period.
+
+The following institutions supported the \MPIIVDOTO/ effort through
+time and travel support for the people listed above.
+
+\medskip
+
+% From Wesley 9/1/19, with minor edits
+\begin{obeylines}\leftskip=\parindent\parindent=0pt %ALLOWLATEX%
+ATOS
+Argonne National Laboratory
+Arm
+Auburn University
+Barcelona Supercomputing Center
+CEA
+Cisco Systems Inc.
+Cray Inc.
+EPCC, The University of Edinburgh
+ETH Z\"urich
+Fujitsu
+Fulda University of Applied Sciences
+German Research School for Simulation Sciences
+Hewlett Packard Enterprise
+International Business Machines
+Institut National de Recherche en Informatique et Automatique (Inria)
+Intel Corporation
+% Per Michael Knobloch, only use Forschungszentrum Julich, already in list above
+%J\"ulich Aachen Research Alliance, High-Performance Computing (JARA-HPC),
+% and use the Supercomnputing center
+J\"ulich Supercomputing Center, Forschungszentrum J\"ulich
+KTH Royal Institute of Technology
+Kyushu University
+Lawrence Berkeley National Laboratory
+Lawrence Livermore National Laboratory
+Lenovo
+Los Alamos National Laboratory
+Mellanox Technologies, Inc.
+Microsoft Corporation
+NEC Corporation
+NVIDIA Corporation
+Oak Ridge National Laboratory
+PAR-TEC
+Paratools, Inc.
+RIKEN AICS (R-CCS as of 2017)
+RWTH Aachen University
+Rutgers University
+Sandia National Laboratories
+Silicon Graphics, Inc.
+Technical University of Munich
+The HDF Group
+The Ohio State University
+Texas Advanced Computing Center
+Tokyo Institute of Technology
+University of Alabama at Birmingham
+University of Basel, Switzerland
+University of Houston
+University of Illinois at Urbana-Champaign and the National Center for Supercomputing Applications
+University of Innsbruck
+University of Oregon
+University of Potsdam
+University of Stuttgart, High Performance Computing Center Stuttgart (HLRS)
+University of Tennessee, Chattanooga
+University of Tennessee, Knoxville
+University of Texas at El Paso
+University of Tokyo
+VSC Research Center, TU Wien
+\end{obeylines}
+
+\subsection*{\MPIIVDOTI/:}
+\MPIIVDOTI/ is a minor update to the \MPI/ standard.
+
+\noindent The editors and organizers of the \MPIIVDOTI/ have been:
+\begin{itemize}
+\item Martin Schulz, \MPIIVDOTI/ Chair, Info Object, External Interfaces
+\item Brian Smith, \MPIIVDOTI/ Treasurer
+\item Wes Bland, \MPIIVDOTI/ Secretary, Semantic Changes and Warnings
+\item William Gropp, \MPIIVDOTI/ Editor, Steering Committee, Front Matter,
+      Introduction, One-Sided Communications, and Bibliography
+\item Rolf Rabenseifner, Steering Committee,
+  Process Topologies, Deprecated Functions, Removed Interfaces,
+  Annex Language Bindings Summary, and Annex Change-Log
+
+% Make sure these are alphabetized by last name
+\item Purushotham V.~Bangalore, Language Bindings
+\item Claudia Blaas-Schenner, Terms and Conventions
+\item George Bosilca, Datatypes and Environmental Management
+\item Ryan E.~Grant, Partitioned Communication
+\item Marc-Andr\'e Hermanns, Tool Support
+\item Dan Holmes, Point-to-Point Communication, Sessions
+\item Guillaume Mercier, Groups, Contexts, Communicators, Caching
+\item Howard Pritchard, Process Creation and Management
+\item Anthony Skjellum, Collective Communication, I/O
+\end{itemize}
+
+\noindent As part of the development of \MPIIVDOTI/, a number of
+working groups were established or continued from \MPIIVDOTO/.
+In some cases, the work for these groups overlapped with multiple
+chapters.
+The following describes the major working groups and the leaders of
+those groups:
+
+{\raggedright
+\begin{description}
+\item[Application Binary Interface (ABI):]Jeff Hammond and Quincey Koziol
+\item[Collective Communication, Topology, Communicators:]Torsten
+Hoefler, Andrew Lumsdaine, and Anthony Skjellum
+\item[Fault Tolerance:]Aur\'elien Bouteiller and Ignacio Laguna
+\item[Hardware \& Virtual Topologies:]Guillaume Mercier
+\item[Hybrid \& Accelerator:]James Dinan
+\item[Languages:]Martin Ruefenacht and Tony Skjellum
+\item[Remote Memory Access:]William Gropp, Joseph Schuchart, and Rajeev Thakur
+\item[Semantic Terms:]Purushotham V.~Bangalore and Rolf Rabenseifner
+\item[Sessions:]Dan Holmes and Howard Pritchard
+\item[Tools:]Marc-Andr\'e Hermanns
+\end{description}
+}
+
+The following list includes some of the active participants who
+attended \MPI/ Forum meetings or participated in the e-mail
+discussions. % and who are not mentioned above.
+
+\begin{center}
+\begin{tabular}{lll}
+Julien Adam\EE
+Charles Archer\EE
+Christian Nicole Avans\EE
+Purushotham V.~Bangalore\EE
+Wolfgang Bangerth\EE
+Jean-Baptiste Besnard\EE
+Claudia Blaas-Schenner\EE
+Wes Bland\EE
+George Bosilca\EE
+Aur\'elien Bouteiller\EE
+Emmanuel Brelle\EE
+Patrick Bridges\EE
+Alex Brooks\EE
+Jed Brown\EE
+Oliver Thomson Brown\EE
+Simon Byrne\EE
+Paul Canat\EE
+Ludovic Capelli\EE
+Ondřej Čertík\EE
+Steffen Christgau\EE
+Brandon Cook\EE
+Alfredo Correa\EE
+Pedro Costa\EE
+Lisandro Dalcin\EE
+Ali Can Demiralp\EE
+Bronis de Supinski\EE
+James Dinan\EE
+Matthew G.~F.~Dosanjh\EE
+Joe Downs\EE
+Julien Duprat\EE
+Dmitry Durnov\EE
+Victor Eijkhout\EE
+Ahmed Eleliemy\EE
+Kyle Gerard Felker\EE
+Edgar Gabriel\EE
+Maria J.~Garzaran\EE
+Florent Germain\EE
+Sayan Ghosh\EE
+Thomas Gillis\EE
+Ryan Grant\EE
+William Gropp\EE
+Yanfei Guo\EE
+Samuel K.~Gutierrez\EE
+Tobias Haas\EE
+Jeff Hammond\EE
+Marc-Andr\'e Hermanns\EE
+Thomas Hines\EE
+Mark Hoemmen\EE
+Dan Holmes\EE
+Atsushi Hori\EE
+Dominik Huber\EE
+Joshua Hursey\EE
+Dan Ibanez\EE
+Nusrat Islam\EE
+Julien Jaeger\EE
+Nysal Jan K A\EE
+Joachim Jenke\EE
+Vivek Kale\EE
+Michael Klemm\EE
+Michael Knobloch\EE
+Quincey Koziol\EE
+Donald Kruse\EE
+Ignacio Laguna\EE
+Pierre Lemarinier\EE
+Ben Lynam\EE
+W.~Pepper Marts\EE
+Guillaume Mercier\EE
+Jacob Merson\EE
+\FlushEntries
+\end{tabular}
+\end{center}
+%% Manually break across pages (!)
+\begin{center}
+\begin{tabular}{lll}
+\multicolumn{2}{l}{Pedram Mohammadalizadehbakhtevari}\EEi\EE
+Ali Mohammed\EE
+\multicolumn{2}{l}{Ali Omar Abdelazim Mohammed}\EEi\EE
+Benson Muite\EE
+Evelyn Namugwanya\EE
+Grace Nansamba\EE
+Thomas Naughton\EE
+Christoph Niethammer\EE
+William Okuno\EE
+Guillaume Papauré\EE
+Nick Papior\EE
+Sri Raj Paul\EE
+Howard Pritchard\EE
+Rolf Rabenseifner\EE
+Nick Radcliffe\EE
+Ken Raffenetti\EE
+\multicolumn{2}{l}{Naveen Ravichandrasekaran}\EEi\EE
+Florian Reynier\EE
+Martin Ruefenacht\EE
+Amit Ruhela\EE
+Derek Schafer\EE
+Erik Schnetter\EE
+Whit Schonbein\EE
+Martin Schreiber\EE
+Thorsten Sch\"utt\EE
+Joseph Schuchart\EE
+Martin Schulz\EE
+Amir Shehata\EE
+Nat Shineman\EE
+Riley Shipley\EE
+Anthony Skjellum\EE
+Brian Smith\EE
+AmirHossein Sojoodi\EE
+Jeff Squyres\EE
+Christopher Subich\EE
+Shinji Sumimoto\EE
+Hugo Taboada\EE
+Daniel Taylor\EE
+Yiltan Hassan Temucin\EE
+Keita Teranishi\EE
+Rajeev Thakur\EE
+Tim Thompson\EE
+Jesper Larsson Tr\"aff\EE
+Ehsan Totoni\EE
+\EE\multicolumn{2}{l}{Isaías Alberto Comprés Ureña}\EEi\EE
+Josef Weidendorfer\EE
+Bill Williams\EE
+Andrew Worley\EE
+Hui Zhou\EE
+
+
+\FlushEntries
+\end{tabular}
+\end{center}
+
+The \MPI/ Forum also acknowledges and appreciates the valuable input
+from people via e-mail and in person.
+
+% People who provided significant input during the public comment
+%The \MPI/ Forum also thanks those that provided feedback during the
+%public comment period.
+
+The following institutions supported the \MPIIVDOTI/ effort through
+time and travel support for the people listed above.
+
+\medskip
+
+\begin{obeylines}\leftskip=\parindent\parindent=0pt %ALLOWLATEX%
+Advanced Micro Devices, Inc.
+Amazon.com, Inc
+Argonne National Laboratory
+Atos
+CEA
+Cisco Systems Inc.
+Collis-Holmes Innovations Limited
+Cornelis Networks
+EPCC, The University of Edinburgh
+Forschungszentrum J\"ulich
+Fujitsu
+HLRS, University of Stuttgart
+Hewlett Packard Enterprise
+Institut National de Recherche en Informatique et Automatique (Inria)
+Intel Corporation
+International Business Machines
+Kichakato Kizito
+Lawrence Berkeley National Laboratory
+Lawrence Livermore National Laboratory
+Leibniz Supercomputing Centre
+Los Alamos National Laboratory
+Meta Platforms Inc.
+NVIDIA Corporation
+Oak Ridge National Laboratory
+ParaTools SAS
+Queen's University
+RWTH Aachen University
+Sandia National Laboratory
+Technical University of Munich
+Tennessee Technological University
+Texas Advanced Computing Center
+The Ohio State University
+University of Alabama
+University of Alabama at Birmingham
+University of Basel
+University of Illinois Urbana-Champaign
+University of New Mexico
+University of Tennessee, Chattanooga
+University of Tennessee, Knoxville
+University of Tokyo
+Université Grenoble Alpes
+VSC Research Center, TU Wien
+ZIH, TU Dresden
+\end{obeylines}
+
+\subsection*{\MPIVDOTO/:}
+\MPIVDOTO/ is a major update to the \MPI/ standard.
+
+\noindent The editors and organizers of the \MPIVDOTO/ have been:
+\begin{itemize}
+\item Martin Schulz, \MPIVDOTO/ Chair, Info Object, External Interfaces
+\item Brian Smith, \MPIVDOTO/ Treasurer
+\item Wes Bland, \MPIVDOTO/ Secretary, Deprecated Functions, Removed Interfaces, Semantic Changes and Warnings
+\item William Gropp, \MPIVDOTO/ Editor, Steering Committee, Front Matter,
+      Introduction, One-Sided Communications, and Bibliography
+
+% Make sure these are alphabetized by last name
+\item Purushotham V.~Bangalore, Language Bindings
+\item Claudia Blaas-Schenner, Terms and Conventions
+\item George Bosilca, Datatypes and Environmental Management
+\item Ryan E.~Grant, Partitioned Communication
+\item Marc-Andr\'e Hermanns, Tool Support
+\item Tobias Haas, Change-Log
+\item Jeff Hammond, ABI
+\item Dan Holmes, Point-to-Point Communication, Sessions
+\item Guillaume Mercier, Groups, Contexts, Communicators, Caching
+\item Christoph Niethammer, Process Topologies
+\item Howard Pritchard, Process Creation and Management
+\item Anthony Skjellum, Collective Communication, I/O
+\end{itemize}
+
+\noindent As part of the development of \MPIVDOTO/, a number of
+working groups were established or continued from \MPIIVDOTI/.
+In some cases, the work for these groups overlapped with multiple
+chapters.
+The following describes the major working groups and the leaders of
+those groups:
+
+{\raggedright
+\begin{description}
+\item[Application Binary Interface (ABI):]Jeff Hammond and Quincey Koziol
+\item[Collective Communication, Topology, Communicators:]Anthony Skjellum
+\item[Fault Tolerance:]Aur\'elien Bouteiller and Ignacio Laguna
+\item[Fortran:]Jeff Hammond, Purushotham V.~Bangalore, and Anthony Skjellum
+\item[Hardware \& Virtual Topologies:]Guillaume Mercier
+\item[Hybrid \& Accelerator:]James Dinan
+\item[I/O:]Quincey Koziol
+\item[Languages:]Purushotham V.~Bangalore, Jeff Hammond, and Tony Skjellum
+\item[Remote Memory Access:]Joseph Schuchart and William Gropp
+\item[Sessions:]Howard Pritchard and Dan Holmes
+\item[Tools:]Marc-Andr\'e Hermanns, Bill Williams and Joachim Jenke
+\end{description}
+}
+
+The following list includes some of the active participants who
+attended \MPI/ Forum meetings or participated in the virtual
+discussions.
+
+\begin{center}
+\begin{tabular}{lll}
+Julien Adam\EE
+Purushotham V.~Bangalore\EE
+Jean-Baptiste Besnard\EE
+Claudia Blaas-Schenner\EE
+Wes Bland\EE
+David Boehme\EE
+George Bosilca\EE
+Aurélien Bouteiller\EE
+Patrick Bridges\EE
+Jed Brown\EE
+Ludovic Capelli\EE
+Pranav Chachara\EE
+Jacob Chisholm\EE
+Gene Cooperman\EE
+Gregor Corbin\EE
+Lisandro Dalcin\EE
+Anton Daumen\EE
+James Dinan\EE
+Matthew G.~F.~Dosanjh\EE
+Victor Eijkhout\EE
+Ali Farazdaghi\EE
+Edgar Gabriel\EE
+Maria J.~Garzaran\EE
+Florent Germain\EE
+Ryan E.~Grant\EE
+William Gropp\EE
+Philipp Gschwandtner\EE
+Samuel K.~Gutierrez\EE
+Tobias Haas\EE
+Jeff Hammond\EE
+Nathan Hanford\EE
+Sonja Happ\EE
+Marc-Andr\'e Hermanns\EE
+Torsten Hoefler\EE
+Dan Holmes\EE
+Julien Jaeger\EE
+Michael Klemm\EE
+Michael Knobloch\EE
+Quincey Koziol\EE
+Donald Kruse\EE
+Ignacio Laguna\EE
+W.~Pepper Marts\EE
+Edric Matwiejew\EE
+Guillaume Mercier\EE
+% Swap order of these two so Pedram doesn't hang over the edge
+Benson Muite\EE
+\multicolumn{2}{l}{Pedram Mohammadalizadehbakhtevari}\EEi\EE
+Thomas Naughton\EE
+Christoph Niethammer\EE
+K.~A.~Nysal Jan\EE
+William Okuno\EE
+
+% Manually break across pages (!)
+\FlushEntries
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tabular}{lll}
+
+Ted Peters\EE
+Howard Pritchard\EE
+Joachim Jenke\EE
+Rolf Rabenseifner\EE
+Ken Raffenetti\EE
+Amirreza Rastegari\EE
+Naveen Ravichandrasekaran\EE
+Florian Reynier\EE
+Martin Ruefenacht\EE
+Amit Ruhela\EE
+Derek Schafer\EE
+Erik Schnetter\EE
+Martin Schreiber\EE
+Joseph Schuchart\EE
+Martin Schulz\EE
+Nat Shineman\EE
+Riley Shipley\EE
+Anthony Skjellum\EE
+Brian Smith\EE
+Marc Snir\EE
+AmirHossein Sojoodi\EE
+Jeff Squyres\EE
+Evan Suggs\EE
+Shinji Sumimoto\EE
+Hugo Taboada\EE
+Yiltan Hassan Temucin\EE
+Jesper Larsson Tr\"aff\EE
+Tim Niklas Uhl\EE
+Garrett Weil\EE
+Bill Williams\EE
+Andrew Worley\EE
+Yao Xu\EE
+Yuang Yan\EE
+Chelne Yu\EE
+Rohit Zambre\EE
+Hui Zhou\EE
+\FlushEntries
+\end{tabular}
+\end{center}
+
+The following institutions supported the \MPIVDOTO/ effort through
+time and travel support for the people listed above.
+
+\medskip
+
+\begin{obeylines}\leftskip=\parindent\parindent=0pt %ALLOWLATEX%
+Advanced Micro Devices, Inc.
+Amazon.com, Inc
+Argonne National Laboratory
+Atos
+Barcelona Supercomputing Center
+CEA
+Collis-Holmes Innovations Limited
+Cornelis Networks
+EPCC, The University of Edinburgh
+ETH Z\"urich
+Eviden
+HLRS, University of Stuttgart
+Hewlett Packard Enterprise
+Institut National de Recherche en Informatique et Automatique (Inria)
+Intel Corporation
+International Business Machines
+JSC, Forschungszentrum J\"ulich
+KAUST
+Karlsruhe Institute of Technology (KIT)
+Kichakato Kizito
+Lawrence Livermore National Laboratory
+Los Alamos National Laboratory
+Meta Platforms Inc.
+Microsoft
+NVIDIA Corporation
+Northeastern University
+Oak Ridge National Laboratory
+ParTec
+ParaTools SAS
+Pawsey Supercomputing Centre
+Queen's University
+RWTH Aachen University
+Sandia National Laboratory
+Stony Brook University
+Technical University of Munich
+Tennessee Technological University
+Texas Advanced Computing Center
+The Ohio State University
+University of Alabama
+University of Edinburgh
+University of Illinois Urbana-Champaign
+University of Innsbruck
+University of New Mexico
+University of Tennessee, Knoxville
+University of Tokyo
+Université Grenoble Alpes
+VSC Research Center, TU Wien
+ZIH, TU Dresden
+\end{obeylines}

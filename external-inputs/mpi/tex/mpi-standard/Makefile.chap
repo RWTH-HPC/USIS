@@ -1,0 +1,102 @@
+#
+#
+LATEX = pdflatex
+# ECHO should be an echo command that does NOT try to turn \b into backspace
+ECHO = /bin/echo
+TEXINPUTS := $(shell kpsepath tex):..
+
+ifdef V
+BINDING_TOOL_VERBOSE := --log INFO
+else
+BINDING_TOOL_VERBOSE :=
+endif
+
+CHAPEXTRA_RENDERED = $(CHAPEXTRAFILES:.tex=-rendered.tex)
+
+chapfiles:
+	@echo $(CHAP)
+
+APIS_FILE = ../apis.json
+
+# Allow people to override the default location of Python, if necessary.
+PYTHON := python3
+
+#---------------------------------------------------------------
+
+default: $(CHAP).pdf
+
+.PHONY: binding-prepass
+binding-prepass:
+	@$(PYTHON) ../binding-tool/binding_prepass.py ../ $(APIS_FILE)
+
+$(CHAPEXTRA_RENDERED): $(CHAPEXTRAFILES) binding-prepass
+	for destfile in $(CHAPEXTRA_RENDERED); do \
+	    srcfile=`echo $$destfile | sed -e's/-rendered//'` ; \
+	    rm -f $$destfile; \
+	    $(PYTHON) ../binding-tool/binding_emitter.py $(APIS_FILE) $$srcfile > $$destfile; \
+	done
+
+$(CHAP)-rendered.tex: $(CHAP).tex binding-prepass
+	@rm -f $(CHAP)-rendered.tex
+	$(PYTHON) ../binding-tool/binding_emitter.py $(BINDING_TOOL_VERBOSE) $(APIS_FILE) $(CHAP).tex > $(CHAP)-rendered.tex
+
+$(CHAP).pdf: $(CHAP)-rendered.tex $(CHAPEXTRA_RENDERED) \
+	     ../Makefile.chap ../chap-changes/changes.tex
+	@rm -f temp.tex
+	@$(ECHO) '\setcounter{chapter}'"{$(CHAPNUM)}" | \
+	cat ../chapter-head.tex - $(CHAP)-rendered.tex > temp.tex
+	@if [ x$(CHAP) != xchanges -a "x$(INCLUDE_CHANGES)" = "xyes" ] ; then  \
+	    $(ECHO) '\appendix' >> temp.tex ; \
+	    $(ECHO) '\setcounter{chapter}{1}' >> temp.tex ; \
+	    cat ../chap-changes/changes.tex >> temp.tex ; \
+	fi
+	@if grep \\cite $(CHAP).tex 1>/dev/null 2>&1 ; then \
+	    $(ECHO) '\fixupbackrefformatting' >> temp.tex ; \
+	    $(ECHO) '\bibliographystyle{plain}' >> temp.tex ; \
+	    $(ECHO) '\bibliography{../refs}' >> temp.tex ; \
+	fi
+	@$(ECHO) '\include{temp-index}' >> temp.tex
+	@$(ECHO) '\end{document}' >> temp.tex
+	@rm -f temp.
+	export TEXINPUTS=$(TEXINPUTS) && $(LATEX) temp.tex </dev/null
+	-bibtex temp
+	makeindex temp
+	@rm -f temp.needed temp2.refs
+	grep 'Reference.*undefined' temp.log | sed 's/.*Reference `\(.*\)'"'"'.*/\1/g' > temp.needed
+	@if [ -s temp.needed ] ; then \
+	    for item in `cat temp.needed` ; do \
+	        grep -h $$item ../chap-*/*.aux >> temp2.refs ;  \
+	    done ; \
+	    cat temp2.refs >> temp.aux ; \
+	fi
+	@mv temp.ind temp-index.tex
+	export TEXINPUTS=$(TEXINPUTS) && $(LATEX) temp.tex </dev/null >/dev/null
+	@if [ -s temp2.refs ] ; then  \
+	    cat temp2.refs >> temp.aux ; \
+	fi
+	export TEXINPUTS=$(TEXINPUTS) && $(LATEX) temp.tex
+	mv temp.pdf $(CHAP).pdf
+
+clean:
+	rm -f $(CHAP)-rendered.tex $(CHAPEXTRA_RENDERED)
+	rm -f temp.tex temp-index.tex temp.pdf *.aux *.ind *.log *.blg
+	rm -f temp.bbl temp.brf temp.idx temp.ilg temp.out
+	rm -f temp2.refs temp.needed
+
+checklatex:
+	../getlatex --allowpageref --noquotechk --noeolspacechk *.tex
+	-@for file in $(wildcard *.tex) ; do \
+	    if grep 'mpibind{' $$file | grep '[A-Za-z] [A-Za-z]' >/dev/null ; then \
+	        echo "$$file : mpibind missing tie :" ; \
+	        grep 'mpibind{' $$file | grep '[A-Za-z] [A-Za-z]' ; \
+	    fi ; \
+	    if grep 'section{' $$file | sed -e 's/.*section{//g' | sed -e 's/\\texorpdfstring{.*}//g' | sed -e 's/\\#//g' | sed -e 's/\\ //g' -e 's/\\_/_/g' | grep '\\' > /dev/null ; then \
+	        echo "$$file : section with unprotected LaTeX command :" ; \
+		grep 'section{' $$file | sed -e 's/.*section{//g' | sed -e 's/\\texorpdfstring{.*}//g' | sed -e 's/\\#//g' | sed -e 's/\\ //g' -e 's/\\_/_/g' | grep '\\' ; \
+	    fi ;\
+	done
+errorsummary: temp.log
+	../errorsum --noexindex --inputfile temp.log
+	@if test -s warnindex.txt ; then \
+	    echo "Warnings from buildindices:" ; \
+	    cat warnindex.txt ; fi

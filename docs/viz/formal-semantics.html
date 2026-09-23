@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inside semantics.formal — Unified Semantic Interface Specification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/eighties.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+<style>
+  :root{
+    --bg:#EEF1EC;
+    --panel:#FBFCFA;
+    --panel-2:#F3F5F1;
+    --ink:#161B1A;
+    --ink-soft:#4C554F;
+    --line:#D6DBD2;
+    --indigo:#2E3B45;
+    --teal:#0E7A82;
+    --teal-soft:#DCEEEE;
+    --amber:#A8631F;
+    --amber-soft:#F3E6D3;
+    --code-bg:#161C1C;
+    --code-ink:#DCE4E0;
+    --radius:6px;
+    --maxw:820px;
+    --sidebar-w:270px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:16px;
+    line-height:1.6;
+  }
+  h1,h2,h3,h4{
+    font-family:'Space Grotesk',sans-serif;
+    color:var(--indigo);
+    line-height:1.2;
+    margin:0 0 .5em 0;
+  }
+  code, pre, .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:var(--teal);}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--teal);
+    font-weight:600;
+  }
+  p{margin:0 0 1em 0;}
+
+  /* ---------- layout ---------- */
+  .shell{display:flex; max-width:1240px; margin:0 auto;}
+  nav.sidebar{
+    width:var(--sidebar-w);
+    flex:0 0 var(--sidebar-w);
+    position:sticky;
+    top:0;
+    align-self:flex-start;
+    height:100vh;
+    overflow-y:auto;
+    padding:28px 18px 40px 28px;
+    border-right:1px solid var(--line);
+  }
+  nav.sidebar .brand{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:1.05rem;
+    color:var(--indigo);
+    margin-bottom:2px;
+  }
+  nav.sidebar .brand-sub{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.68rem;
+    color:var(--ink-soft);
+    letter-spacing:.06em;
+    margin-bottom:24px;
+    display:block;
+  }
+  nav.sidebar ul{list-style:none; margin:0; padding:0;}
+  nav.sidebar li{margin:0;}
+  nav.sidebar a{
+    display:block;
+    padding:6px 8px;
+    border-radius:4px;
+    color:var(--ink-soft);
+    text-decoration:none;
+    font-size:.86rem;
+  }
+  nav.sidebar a:hover{background:var(--panel-2); color:var(--ink);}
+  nav.sidebar a.top{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    color:var(--indigo);
+    margin-top:14px;
+  }
+  nav.sidebar a.top .hex{color:var(--teal); margin-right:6px;}
+  nav.sidebar a.sub{padding-left:26px; font-size:.8rem;}
+  #navToggle{display:none;}
+
+  main{flex:1; min-width:0; padding:0 0 100px 0;}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 40px;}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 40px 40px 40px; max-width:var(--maxw); margin:0 auto;}
+  .hero h1{font-size:2.6rem; margin-bottom:.3em;}
+  .hero h1 .accent{color:var(--teal);}
+  .hero .lede{font-size:1.12rem; color:var(--ink-soft); max-width:640px;}
+  .stat-strip{
+    display:flex; gap:0; margin-top:32px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .stat{padding:14px 22px 14px 0; margin-right:22px;}
+  .stat:not(:last-child){border-right:1px solid var(--line); padding-right:22px;}
+  .stat b{display:block; font-family:'Space Grotesk',sans-serif; font-size:1.5rem; color:var(--indigo);}
+  .stat span{font-size:.76rem; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;}
+
+  /* ---------- schematic ---------- */
+  .schematic{margin:40px 0 8px 0;}
+  .schematic svg{width:100%; height:auto; display:block;}
+
+  /* ---------- sections ---------- */
+  section.block{padding:56px 0; border-top:1px solid var(--line);}
+  section.block:first-of-type{border-top:none;}
+  .sec-head{display:flex; align-items:baseline; gap:14px; margin-bottom:8px;}
+  .sec-hex{
+    font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--teal);
+    font-size:1rem; border:1px solid var(--teal); border-radius:4px; padding:2px 8px;
+  }
+  h2.sec-title{font-size:1.7rem; margin:0;}
+  .sec-dek{color:var(--ink-soft); margin-bottom:28px; max-width:640px;}
+
+  h3{font-size:1.18rem; margin-top:1.8em;}
+  h4{font-size:1rem; margin-top:1.4em; color:var(--ink);}
+
+  /* ---------- code ---------- */
+  pre{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    overflow-x:auto;
+    font-size:.82rem;
+    line-height:1.55;
+    margin:14px 0 20px 0;
+  }
+  pre code{font-family:'IBM Plex Mono',monospace; background:none;}
+  code.inline, .ref{
+    font-family:'IBM Plex Mono',monospace;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:.86em;
+    color:var(--indigo);
+  }
+
+  /* ---------- tables ---------- */
+  table{width:100%; border-collapse:collapse; margin:14px 0 24px 0; font-size:.88rem;}
+  th, td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{font-family:'IBM Plex Mono',monospace; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); font-weight:600;}
+  td code{font-size:.85em;}
+  .yes{color:var(--teal); font-weight:600;}
+
+  /* ---------- callouts ---------- */
+  .callout{
+    background:var(--panel-2);
+    border-left:3px solid var(--teal);
+    border-radius:0 6px 6px 0;
+    padding:14px 18px;
+    margin:20px 0;
+    font-size:.92rem;
+  }
+  .callout.open{border-left-color:var(--amber); background:var(--amber-soft);}
+  .callout b{color:var(--indigo);}
+
+  /* ---------- badges ---------- */
+  .badge{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.7rem;
+    background:var(--teal-soft);
+    color:var(--teal);
+    border:1px solid var(--teal);
+    border-radius:3px;
+    padding:2px 7px;
+    margin-right:6px;
+  }
+  .badge.amber{background:var(--amber-soft); color:var(--amber); border-color:var(--amber);}
+
+  /* ---------- examples ---------- */
+  .tabs{display:flex; gap:8px; margin:0 0 20px 0; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:0;}
+  .tab-btn{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.82rem;
+    background:none; border:none; cursor:pointer;
+    padding:10px 4px; margin-right:22px;
+    color:var(--ink-soft);
+    border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{color:var(--indigo); border-bottom-color:var(--teal); font-weight:600;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .tab-count{color:var(--ink-soft); font-weight:400;}
+
+  details.example{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:10px;
+    background:var(--panel);
+  }
+  details.example summary{
+    cursor:pointer;
+    padding:12px 16px;
+    list-style:none;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  details.example summary::-webkit-details-marker{display:none;}
+  details.example summary::before{
+    content:"›";
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--teal);
+    transform:rotate(0deg);
+    transition:transform .15s ease;
+    font-size:1.1rem;
+    width:14px;
+  }
+  details.example[open] summary::before{transform:rotate(90deg);}
+  details.example summary .fname{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--indigo); font-size:.92rem;}
+  details.example summary .desc{color:var(--ink-soft); font-size:.85rem; flex:1;}
+  details.example .body{padding:0 16px 16px 16px;}
+  details.example .body p.note{color:var(--ink-soft); font-size:.86rem; margin:8px 0 0 0;}
+
+  /* ---------- demo ---------- */
+  .demo{
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--panel);
+    padding:20px;
+    margin:20px 0 30px 0;
+  }
+  .demo-controls{display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;}
+  .demo-controls label{font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:var(--ink-soft);}
+  .demo-controls select{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.85rem;
+    padding:6px 10px;
+    border-radius:5px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--ink);
+  }
+  .demo-grid{display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:stretch;}
+  .demo-col h5{
+    font-family:'IBM Plex Mono',monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink-soft); margin:0 0 8px 0;
+  }
+  .demo-arrow{align-self:center; color:var(--teal); font-size:1.4rem; padding-top:20px;}
+  .demo-col pre{margin:0; max-height:420px; overflow:auto;}
+  @media (max-width:760px){
+    .demo-grid{grid-template-columns:1fr;}
+    .demo-arrow{display:none;}
+  }
+
+  /* ---------- schema explorer ---------- */
+  .explorer{display:grid; grid-template-columns:220px 1fr; min-height:460px;}
+  .explorer-list{
+    border-right:1px solid var(--line);
+    background:var(--panel-2);
+    padding:14px 0;
+    max-height:560px;
+    overflow-y:auto;
+  }
+  .explorer-list .grp-label{
+    font-family:'IBM Plex Mono',monospace; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-soft); padding:10px 16px 4px 16px;
+  }
+  .explorer-list button{
+    display:block; width:100%; text-align:left; background:none; border:none; cursor:pointer;
+    font-family:'IBM Plex Mono',monospace; font-size:.82rem; color:var(--ink);
+    padding:6px 16px; border-left:2px solid transparent;
+  }
+  .explorer-list button:hover{background:var(--panel);}
+  .explorer-list button.active{border-left-color:var(--teal); color:var(--teal); font-weight:600; background:var(--panel);}
+  .explorer-detail{padding:20px 22px;}
+  .explorer-detail pre{max-height:480px; overflow:auto;}
+  @media (max-width:760px){
+    .explorer{grid-template-columns:1fr;}
+    .explorer-list{max-height:220px; border-right:none; border-bottom:1px solid var(--line);}
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    max-width:var(--maxw); margin:0 auto; padding:40px 40px 80px 40px;
+    color:var(--ink-soft); font-size:.85rem; border-top:1px solid var(--line);
+  }
+
+  /* ---------- mobile ---------- */
+  .mobile-bar{display:none;}
+  @media (max-width:920px){
+    .shell{display:block;}
+    nav.sidebar{
+      position:relative; height:auto; width:100%; flex:none;
+      border-right:none; border-bottom:1px solid var(--line);
+      padding:16px 20px;
+      display:none;
+    }
+    nav.sidebar.open{display:block;}
+    .mobile-bar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px; border-bottom:1px solid var(--line); background:var(--panel);
+      position:sticky; top:0; z-index:10;
+    }
+    .mobile-bar .brand{font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--indigo);}
+    .mobile-bar button{
+      font-family:'IBM Plex Mono',monospace; background:var(--panel-2); border:1px solid var(--line);
+      border-radius:5px; padding:6px 12px; cursor:pointer;
+    }
+    .hero{padding:36px 24px 24px 24px;}
+    .wrap{padding:0 24px;}
+    .hero h1{font-size:1.9rem;}
+    .demo-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="mobile-bar">
+  <span class="brand">semantics.formal</span>
+  <button id="navBtn" onclick="document.querySelector('nav.sidebar').classList.toggle('open')">Contents ☰</button>
+</div>
+
+<div class="shell">
+  <nav class="sidebar">
+    <span class="brand">semantics.formal</span>
+    <span class="brand-sub">USIS · SUPPLEMENT B</span>
+    <ul>
+      <li><a class="top" href="#sec0"><span class="hex">0x0</span>Why This Layer Exists</a></li>
+      <li><a class="top" href="#sec1"><span class="hex">0x1</span>Anatomy of formal</a></li>
+      <li><a class="sub" href="#participants">participants</a></li>
+      <li><a class="sub" href="#dataflow">data_flow</a></li>
+      <li><a class="sub" href="#sync">sync</a></li>
+      <li><a class="sub" href="#lifecycle-field">handle_lifecycle</a></li>
+      <li><a class="sub" href="#grammar">reference grammar</a></li>
+      <li><a class="top" href="#sec2"><span class="hex">0x2</span>Epochs &amp; Lifecycle</a></li>
+      <li><a class="top" href="#sec3"><span class="hex">0x3</span>The Shape Catalog</a></li>
+      <li><a class="sub" href="#demo">live expansion</a></li>
+      <li><a class="sub" href="#catalog-table">catalog table</a></li>
+      <li><a class="top" href="#sec4"><span class="hex">0x4</span>schema.json</a></li>
+      <li><a class="top" href="#sec5"><span class="hex">0x5</span>Walking formal</a></li>
+      <li><a class="top" href="#sec6"><span class="hex">0x6</span>Worked Examples</a></li>
+      <li><a class="sub" href="#ex-mpi">MPI</a></li>
+      <li><a class="sub" href="#ex-shmem">SHMEM</a></li>
+      <li><a class="sub" href="#ex-nccl">NCCL</a></li>
+      <li><a class="sub" href="#ex-nvshmem">NVSHMEM</a></li>
+      <li><a class="top" href="#sec7"><span class="hex">0x7</span>Open Questions</a></li>
+      <li><a class="top" href="#sec8"><span class="hex">0x8</span>GPU Memory Spaces</a></li>
+      <li><a class="sub" href="#mem-motivation">why it's not derivable</a></li>
+      <li><a class="sub" href="#mem-field">memory_space field</a></li>
+      <li><a class="sub" href="#mem-nongoals">non-goals</a></li>
+      <li><a class="top" href="#sec9"><span class="hex">0x9</span>Schema Explorer</a></li>
+      <li><a class="top" href="#secA"><span class="hex">0xA</span>Complete Entries</a></li>
+      <li><a class="sub" href="#entry-mpisend">mpi:mpi_send</a></li>
+      <li><a class="sub" href="#entry-nvshmemput">nvshmem:nvshmem_{T}_put</a></li>
+      <li><a class="sub" href="#entry-ncclallreduce">nccl:ncclAllReduce</a></li>
+      <li><a class="top" href="#secB"><span class="hex">0xB</span>Full MPI Cross-Check</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <div class="hero">
+      <span class="eyebrow">Unified Semantic Interface Specification — Supplement B</span>
+      <h1>Inside <span class="accent">semantics.formal</span></h1>
+      <p class="lede">An operational data-flow and synchronization layer, added underneath the existing classification fields, precise enough that a code generator can emit an actual transfer from it and a verifier can turn it into a proof obligation — including <em>where the data actually lives</em> — without either one parsing a sentence of prose.</p>
+      <div class="stat-strip">
+        <div class="stat"><b>4</b><span>PPMs COVERED</span></div>
+        <div class="stat"><b>19</b><span>REUSABLE SHAPES</span></div>
+        <div class="stat"><b>60</b><span>WORKED ENTRIES</span></div>
+        <div class="stat"><b>5</b><span>MEMORY SPACES A BUFFER CAN NAME</span></div>
+        <div class="stat"><b>&lt;15</b><span>VOCABULARY TOKENS A CONSUMER MUST KNOW</span></div>
+      </div>
+      <div class="schematic">
+        <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+          <rect x="370" y="120" width="160" height="60" rx="6" fill="none" stroke="#2E3B45" stroke-width="1.6"/>
+          <text x="450" y="145" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="#161B1A" font-weight="600">semantics.</text>
+          <text x="450" y="163" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="#0E7A82" font-weight="700">formal</text>
+
+          <g font-family="IBM Plex Mono" font-size="11.5">
+            <rect x="30" y="20" width="190" height="58" rx="5" fill="#DCEEEE" stroke="#0E7A82"/>
+            <text x="125" y="42" text-anchor="middle" fill="#161B1A" font-weight="600">participants</text>
+            <text x="125" y="60" text-anchor="middle" fill="#4C554F" font-size="10">who plays what role</text>
+            <line x1="150" y1="78" x2="400" y2="120" stroke="#B9C5BE" stroke-width="1.2"/>
+
+            <rect x="680" y="20" width="190" height="58" rx="5" fill="#DCEEEE" stroke="#0E7A82"/>
+            <text x="775" y="42" text-anchor="middle" fill="#161B1A" font-weight="600">data_flow</text>
+            <text x="775" y="60" text-anchor="middle" fill="#4C554F" font-size="10">who reads / writes / reduces what</text>
+            <line x1="750" y1="78" x2="500" y2="120" stroke="#B9C5BE" stroke-width="1.2"/>
+
+            <rect x="30" y="222" width="190" height="58" rx="5" fill="#F3E6D3" stroke="#A8631F"/>
+            <text x="125" y="244" text-anchor="middle" fill="#161B1A" font-weight="600">sync</text>
+            <text x="125" y="262" text-anchor="middle" fill="#4C554F" font-size="10">ordering, matching, events</text>
+            <line x1="150" y1="222" x2="400" y2="180" stroke="#B9C5BE" stroke-width="1.2"/>
+
+            <rect x="680" y="222" width="190" height="58" rx="5" fill="#F3E6D3" stroke="#A8631F"/>
+            <text x="775" y="244" text-anchor="middle" fill="#161B1A" font-weight="600">handle_lifecycle</text>
+            <text x="775" y="262" text-anchor="middle" fill="#4C554F" font-size="10">create / use / destroy per handle</text>
+            <line x1="750" y1="222" x2="500" y2="180" stroke="#B9C5BE" stroke-width="1.2"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="wrap">
+
+    <!-- =================== 0x0 =================== -->
+    <section class="block" id="sec0">
+      <div class="sec-head"><span class="sec-hex">0x0</span><h2 class="sec-title">Why This Layer Exists</h2></div>
+      <p class="sec-dek">The existing eight sections tell a tool <em>what kind</em> of call something is. They don't say <em>who touches what memory, in what order, relative to whom</em> — and that second thing is what a code generator or a verifier actually needs.</p>
+
+      <p><code class="inline">semantics.collective.type = "broadcast"</code> is enough for a human reading documentation. It is not enough for a tool to emit the actual transfer, or to write down the obligation that a race detector checks. Compare the two states of knowledge for <code class="inline">mpi:mpi_bcast</code>:</p>
+
+      <table>
+        <tr><th>Before — classification only</th><th>After — semantics.formal</th></tr>
+        <tr>
+          <td>"This is a collective, type broadcast, root involved, not in-place."</td>
+          <td>"The root reads <code class="inline">count</code> elements of <code class="inline">datatype</code> from <code class="inline">buffer</code>; every non-root participant writes the same extent into its own <code class="inline">buffer</code>, and that write's value is exactly the root's read; no participant returns until every participant has entered."</td>
+        </tr>
+      </table>
+
+      <p>The right-hand column is a sentence a tool can act on: a code generator lowers it directly into a transfer primitive, a verifier lowers it directly into a data-equality obligation plus a collective-matching check. <code class="inline">semantics.formal</code> is that column, formalized as JSON instead of prose — added as a fourth field alongside the existing <code class="inline">operation_class</code>/collective/point_to_point/one_sided/atomic/memory fields, and left <code class="inline">null</code> wherever an entry doesn't need it (query calls, most <code class="inline">management</code> ops — their correctness is already fully carried by <code class="inline">execution.stages</code> and <code class="inline">tool_integration.invariants</code>).</p>
+
+      <div class="callout"><b>Design constraint carried over from the rest of the spec:</b> everything below stays inside a closed, enumerable vocabulary — no predicate parser, no quantifiers, no embedded logic language. A consumer implements against a fixed set of field names and a fixed set of enum values, once, regardless of how many PPM entries populate <code class="inline">formal</code>.</div>
+    </section>
+
+    <!-- =================== 0x1 =================== -->
+    <section class="block" id="sec1">
+      <div class="sec-head"><span class="sec-hex">0x1</span><h2 class="sec-title">Anatomy of semantics.formal</h2></div>
+      <p class="sec-dek">Four sub-fields. Each one answers a different question about a call.</p>
+
+      <table>
+        <tr><th>Field</th><th>Question it answers</th><th>Present when</th></tr>
+        <tr><td><code class="inline">participants</code></td><td>Who is involved, and does each one actually invoke the function?</td><td>Always, whenever <code class="inline">formal</code> is non-null</td></tr>
+        <tr><td><code class="inline">data_flow</code></td><td>Who reads, writes, or reduces which memory, and where does a written value come from?</td><td>Communication ops; empty array for pure-sync ops (barrier)</td></tr>
+        <tr><td><code class="inline">sync</code></td><td>What ordering must hold between participant instances, and how are separate call instances matched to each other?</td><td>Always, whenever <code class="inline">formal</code> is non-null</td></tr>
+        <tr><td><code class="inline">handle_lifecycle</code></td><td>Does this call create, use, or destroy a long-lived handle (request, window, communicator, symmetric-heap allocation)?</td><td>Handle-bound ops; empty array otherwise</td></tr>
+      </table>
+
+      <h3 id="participants">participants</h3>
+      <p>A list of roles a single call instance can be decomposed into. <code class="inline">calls_function</code> matters more than it looks: it's <code class="inline">false</code> for the passive side of a one-sided operation — the target of an <code class="inline">mpi_put</code> never calls anything, and a static analyzer that assumes every participant has a matching call site will misfire on exactly this case.</p>
+      <pre><code class="language-json">{
+  "id": "root",
+  "role_kind": "initiator",
+  "calls_function": true,
+  "cardinality": "one",
+  "selector": "rank == param:root"
+}</code></pre>
+      <table>
+        <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+        <tr><td><code class="inline">id</code></td><td>String</td><td>Referenced by <code class="inline">data_flow[].participant</code> and <code class="inline">sync.events[].participant</code></td></tr>
+        <tr><td><code class="inline">role_kind</code></td><td>Enum</td><td><code class="inline">"initiator"｜"member"｜"passive_target"</code></td></tr>
+        <tr><td><code class="inline">calls_function</code></td><td>Boolean</td><td><code class="inline">false</code> for RMA/atomic targets</td></tr>
+        <tr><td><code class="inline">cardinality</code></td><td>Enum</td><td><code class="inline">"one"｜"many"</code></td></tr>
+        <tr><td><code class="inline">selector</code></td><td>String</td><td>Predicate in the shared reference grammar, see below</td></tr>
+      </table>
+
+      <h3 id="dataflow">data_flow</h3>
+      <p>One entry per memory access. Four <code class="inline">op</code> values cover every case seen so far: <code class="inline">"read"</code>, <code class="inline">"write"</code>, <code class="inline">"reduce"</code> (an aggregation node with no single participant — its <code class="inline">inputs</code> is a scoped set of sibling reads), and <code class="inline">"read_modify_write"</code> (atomics). The field that actually carries verification/codegen value is <code class="inline">source</code> — a tagged object saying where a written value provably came from:</p>
+      <table>
+        <tr><th><code class="inline">source.kind</code></th><th>Means</th><th>Example op</th></tr>
+        <tr><td><code class="inline">structural</code></td><td>Copy from a named sibling <code class="inline">data_flow</code> entry in the <em>same</em> call instance</td><td>bcast, put</td></tr>
+        <tr><td><code class="inline">reduced</code></td><td>Aggregation over a scoped set of sibling reads across <em>all</em> participant instances</td><td>allreduce, scan</td></tr>
+        <tr><td><code class="inline">matched</code></td><td>Resolved at runtime by a <code class="inline">sync.matching</code> rule against a <em>separate</em> call instance</td><td>irecv</td></tr>
+        <tr><td><code class="inline">null</code></td><td>Comes from implementation/runtime state — not modeled</td><td>query calls</td></tr>
+      </table>
+      <pre><code class="language-json">{ "id": "df_write", "participant": "non_root", "op": "write",
+  "buffer": "param:buffer",
+  "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+  "offset": null,
+  "source": { "kind": "structural", "ref": "df_read" } }</code></pre>
+      <p><code class="inline">offset</code> is <code class="inline">null</code> for uniform-copy shapes (bcast) and a reference-grammar expression for indexed shapes (scatter — each participant's slice is offset by its rank).</p>
+
+      <div class="callout">Notice <code class="inline">data_flow</code> says <em>what</em> gets read or written but nothing about <em>which kind of memory</em> — host RAM, device memory, a symmetric heap. That's a property of the referenced parameter, not of the access, so it lives on <code class="inline">parameters[].memory_space</code> instead of being duplicated here. See <a href="#sec8">0x8 — GPU Memory Spaces</a>.</div>
+
+      <h3 id="sync">sync</h3>
+      <p>Three parts. <code class="inline">events</code> are named points (or interval endpoints — see epochs, next section) tied to a participant and optionally <code class="inline">bound_to</code> a handle parameter. <code class="inline">ordering</code> states happens-before relationships between events, scoped to <code class="inline">same_participant_instance</code>, <code class="inline">all_participant_instances</code>, or <code class="inline">cross_call</code>. <code class="inline">matching</code> states how separate call instances pair up:</p>
+      <table>
+        <tr><th><code class="inline">matching.kind</code></th><th>Pairs instances by</th><th>Used by</th></tr>
+        <tr><td><code class="inline">collective_rendezvous</code></td><td>Every instance in the participant group, no key needed</td><td>bcast, barrier, allreduce</td></tr>
+        <tr><td><code class="inline">tag_match</code></td><td>comm + tag + source/dest, non-overtaking</td><td>MPI isend/irecv</td></tr>
+        <tr><td><code class="inline">peer_match</code></td><td>comm + peer rank, program order within a group, no tag</td><td>NCCL send/recv</td></tr>
+        <tr><td><code class="inline">group_match</code></td><td>set equality/overlap of an explicit process group</td><td>MPI PSCW epochs</td></tr>
+        <tr><td><code class="inline">epoch_scoped</code></td><td>deferred to an enclosing epoch — no matching at this call site</td><td>RMA put/get inside a lock/fence region</td></tr>
+      </table>
+
+      <h3 id="lifecycle-field">handle_lifecycle</h3>
+      <p>Tracks a handle (request, window, communicator, symmetric-heap allocation) across its create → use → destroy interval. Covered in full in the next section, since it's what makes RMA epochs and resource lifecycle work under one mechanism instead of two.</p>
+
+      <h3 id="grammar">reference &amp; selector grammar</h3>
+      <p>One small, closed grammar, reused everywhere a predicate or a reference is needed — the same expression style <code class="inline">tool_integration.invariants</code> already uses, just formalized once instead of ad hoc per field.</p>
+      <table>
+        <tr><th>Token</th><th>Meaning</th></tr>
+        <tr><td><code class="inline">param:name</code></td><td>Reference to a <code class="inline">parameters[]</code> entry by name</td></tr>
+        <tr><td><code class="inline">rank</code></td><td>The calling process/PE's rank</td></tr>
+        <tr><td><code class="inline">self</code></td><td>Shorthand selector for "the calling thread of execution, cardinality one"</td></tr>
+        <tr><td><code class="inline">rank_in(comm_ref)</code></td><td>This rank's index within a communicator/team</td></tr>
+        <tr><td><code class="inline">is_neighbor(rank, comm_ref)</code></td><td>True if <code class="inline">rank</code> is a topology neighbor under <code class="inline">comm_ref</code>'s attached graph/Cartesian topology</td></tr>
+        <tr><td><code class="inline">extent_size(count_ref, datatype_ref)</code></td><td>Byte size of an extent, for offset arithmetic</td></tr>
+        <tr><td><code class="inline">== != in &amp;&amp; || !</code></td><td>Comparison and boolean composition</td></tr>
+      </table>
+    </section>
+
+    <!-- =================== 0x2 =================== -->
+    <section class="block" id="sec2">
+      <div class="sec-head"><span class="sec-hex">0x2</span><h2 class="sec-title">Epochs &amp; Resource Lifecycle</h2></div>
+      <p class="sec-dek">One generalization — from a point event to an interval — turns out to cover three things that looked unrelated: request completion, RMA epochs, and handle lifecycle tracking.</p>
+
+      <p><code class="inline">mpi_isend</code> → <code class="inline">mpi_wait</code> only needed a <em>point</em> event bound to a handle: <code class="inline">local_complete</code>, closed by one later call. RMA epochs (<code class="inline">MPI_Win_start</code>/<code class="inline">post</code>/<code class="inline">complete</code>/<code class="inline">wait</code>) need an <em>interval</em>: an unbounded number of <code class="inline">Put</code>/<code class="inline">Get</code> calls happen inside the bracket, none of them named at authoring time, and a transfer inside the bracket is only valid while <strong>both</strong> sides' epochs are open.</p>
+
+      <p>Three additions make that representable, without a predicate language:</p>
+      <ol>
+        <li><code class="inline">sync.events[].event_type</code> — <code class="inline">"open_epoch"</code> / <code class="inline">"close_epoch"</code> (in addition to the plain point events already used for request completion), each optionally carrying <code class="inline">epoch_scope: "access"｜"exposure"</code> and a <code class="inline">group_ref</code>.</li>
+        <li><code class="inline">data_flow[].valid_during</code> — a list of <code class="inline">{epoch_scope, bound_to, role}</code> preconditions a transfer must fall inside.</li>
+        <li><code class="inline">matching.kind: "group_match"</code> — the epoch on one side is only well-formed if it pairs against a matching group on the other side.</li>
+      </ol>
+
+      <table>
+        <tr><th>Epoch kind</th><th>Matching</th><th>Group needed?</th><th>Example</th></tr>
+        <tr><td><code class="inline">epoch.fence</code></td><td><code class="inline">collective_rendezvous</code></td><td>No — implicitly all ranks in the window's communicator</td><td><code class="inline">MPI_Win_fence</code></td></tr>
+        <tr><td><code class="inline">epoch.lock_unlock</code></td><td>trivial pairwise</td><td>No — one origin, one target</td><td><code class="inline">MPI_Win_lock</code> / <code class="inline">unlock</code></td></tr>
+        <tr><td><code class="inline">epoch.pscw</code></td><td><code class="inline">group_match</code></td><td>Yes — explicit process group</td><td><code class="inline">MPI_Win_start/post/complete/wait</code></td></tr>
+      </table>
+
+      <p><b>Resource lifecycle turns out to be the degenerate case of the same mechanism</b> — an interval on a handle with no epoch pairing at all, just <code class="inline">create</code> → (any number of) <code class="inline">use</code> → <code class="inline">destroy</code>:</p>
+
+      <pre><code class="language-json">// mpi:mpi_win_create — semantics.formal.handle_lifecycle
+[ { "handle": "param:win", "handle_kind": "WINDOW", "role": "create" } ]
+
+// mpi:mpi_put — semantics.formal.handle_lifecycle
+[ { "handle": "param:win", "handle_kind": "WINDOW", "role": "use" } ]
+
+// mpi:mpi_win_free — semantics.formal.handle_lifecycle
+[ { "handle": "param:win", "handle_kind": "WINDOW", "role": "destroy" } ]</code></pre>
+
+      <p>Request completion (<code class="inline">isend</code>/<code class="inline">wait</code>) is now just <code class="inline">handle_kind: "REQUEST"</code> with no epoch fields attached — one vocabulary, three use cases (requests, RMA epochs, resource lifecycle), not three separate mechanisms.</p>
+
+      <div class="callout"><b>What this does not do:</b> "was every <code class="inline">create</code> eventually reached by a <code class="inline">destroy</code>" is a whole-program property. A single JSON entry can only supply the raw create/use/destroy facts at each call site — leak detection is the consuming tool's job, the same division of labor already drawn around <code class="inline">tool_integration.invariants</code> (no cross-entry constraints live in a single entry).</div>
+    </section>
+
+    <!-- =================== 0x3 =================== -->
+    <section class="block" id="sec3">
+      <div class="sec-head"><span class="sec-hex">0x3</span><h2 class="sec-title">The Shape Catalog</h2></div>
+      <p class="sec-dek">Most communication ops cluster into a small number of canonical shapes. Reuse is mostly <em>cross-PPM</em>, not within one PPM — MPI's <code class="inline">Bcast</code>, NCCL's <code class="inline">Broadcast</code>, NVSHMEM's <code class="inline">broadcastmem</code>, and SHMEM's <code class="inline">broadcast32</code> are the same shape wearing four different parameter lists.</p>
+
+      <p>A <b>shape</b> is a <code class="inline">formal</code> block with named placeholders (<b>slots</b>) instead of concrete <code class="inline">param:</code> refs. An entry doesn't author <code class="inline">formal</code> directly — it writes <code class="inline">shape_ref</code> plus a <code class="inline">bindings</code> map. A build step expands that against the shape's <code class="inline">template</code> and writes out a fully inlined <code class="inline">formal</code> block, identical in shape to everything shown in section 0x1.</p>
+
+      <div class="callout"><b>Hard boundary:</b> shapes are erased before anything ships. No consumer — not the code generator, not the race detector from section 0x5 — ever sees <code class="inline">shape_ref</code>. It exists purely to reduce what a human authors and diffs. If a consuming tool ever needed to understand <code class="inline">shape_ref</code> itself, that would mean the abstraction had leaked into the wrong layer.</div>
+
+      <h3>Slot kinds</h3>
+      <table>
+        <tr><th>Kind</th><th>Binds to</th></tr>
+        <tr><td><code class="inline">buffer_slot</code></td><td>a <code class="inline">param:</code> ref of <code class="inline">kind: BUFFER</code></td></tr>
+        <tr><td><code class="inline">extent_slot</code></td><td><code class="inline">{count_ref, datatype_ref}</code> pair of <code class="inline">param:</code> refs</td></tr>
+        <tr><td><code class="inline">selector_slot</code></td><td>a predicate in the reference grammar, e.g. <code class="inline">rank == param:root</code></td></tr>
+        <tr><td><code class="inline">operation_slot</code></td><td>a <code class="inline">param:</code> ref of <code class="inline">kind: OPERATION</code></td></tr>
+        <tr><td><code class="inline">handle_slot</code></td><td>a <code class="inline">param:</code> ref of <code class="inline">kind: REQUEST</code> or <code class="inline">WINDOW</code></td></tr>
+        <tr><td><code class="inline">index_slot</code></td><td>an expression describing a per-participant sub-extent (scatter, alltoall)</td></tr>
+        <tr><td><code class="inline">literal_slot</code></td><td>a plain enum/constant chosen at bind time, e.g. <code class="inline">role: "create"</code>, <code class="inline">epoch_scope: "access"</code></td></tr>
+      </table>
+
+      <h4>The escape hatch</h4>
+      <p>Not everything fits a shape cleanly. An entry may combine <code class="inline">shape_ref</code> + <code class="inline">bindings</code> with an <code class="inline">extra</code> block, deep-merged onto the expansion after substitution — this is how <code class="inline">mpi_isend</code> gets its <code class="inline">tag_match</code> matching rule without polluting every other handle-bound shape that doesn't need tag matching:</p>
+      <pre><code class="language-json">{
+  "shape_ref": "handle_bound.post_send",
+  "bindings": { "buffer": "param:buf", "extent": {"count_ref":"param:count","datatype_ref":"param:datatype"}, "handle": "param:request" },
+  "extra": {
+    "sync.matching": { "kind": "tag_match",
+      "match_keys": ["param:comm","param:tag","param:dest","self_rank_as_source"],
+      "matched_across": "paired_call", "program_order_required": false }
+  }
+}</code></pre>
+      <p>If more than a couple of entries need the same <code class="inline">extra</code> patch, that's the signal to promote it into its own shape rather than let <code class="inline">extra</code> quietly become a second place duplication hides.</p>
+
+      <h3 id="demo">Live: watch a shape expand</h3>
+      <p>This runs the actual substitution algorithm the build step runs — pick an entry, watch <code class="inline">shape_ref</code> + <code class="inline">bindings</code> expand into the full inlined block a consumer would actually receive.</p>
+
+      <div class="demo">
+        <div class="demo-controls">
+          <label for="demoSelect">ENTRY</label>
+          <select id="demoSelect" onchange="renderDemo()">
+            <option value="bcast">mpi:mpi_bcast → collective.one_to_all_uniform</option>
+            <option value="scatter">mpi:mpi_scatter → collective.one_to_all_indexed</option>
+            <option value="allreduce">nccl:ncclAllReduce → collective.all_to_all_reduce</option>
+          </select>
+        </div>
+        <div class="demo-grid">
+          <div class="demo-col">
+            <h5>authored</h5>
+            <pre><code id="demoLeft" class="language-json"></code></pre>
+          </div>
+          <div class="demo-arrow">→</div>
+          <div class="demo-col">
+            <h5>shipped (expanded)</h5>
+            <pre><code id="demoRight" class="language-json"></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 id="catalog-table">Catalog</h3>
+      <table>
+        <tr><th>Shape</th><th>MPI</th><th>SHMEM</th><th>NCCL</th><th>NVSHMEM</th></tr>
+        <tr><td><code class="inline">sync_only.rendezvous</code></td><td class="yes">✓</td><td class="yes">✓</td><td>—</td><td class="yes">✓</td></tr>
+        <tr><td><code class="inline">sync_only.local_fence</code></td><td>—</td><td class="yes">✓</td><td>—</td><td class="yes">✓</td></tr>
+        <tr><td><code class="inline">collective.one_to_all_uniform</code></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><code class="inline">collective.one_to_all_indexed</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code class="inline">collective.all_to_one_indexed</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code class="inline">collective.all_to_one_reduce</code></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>—</td></tr>
+        <tr><td><code class="inline">collective.all_to_all_reduce</code></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><code class="inline">collective.scan_prefix</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code class="inline">collective.all_to_all_uniform</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code class="inline">collective.gather_to_all</code></td><td class="yes">✓</td><td>—</td><td class="yes">✓</td><td>—</td></tr>
+        <tr><td><code class="inline">collective.reduce_scatter</code></td><td>—</td><td>—</td><td class="yes">✓</td><td>—</td></tr>
+        <tr><td><code class="inline">handle_bound.post_send</code> / <code class="inline">post_recv</code></td><td class="yes">✓</td><td>—</td><td class="yes">✓</td><td>—</td></tr>
+        <tr><td><code class="inline">handle_bound.wait_on_handle</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code class="inline">rma.put</code> / <code class="inline">rma.get</code></td><td class="yes">✓</td><td class="yes">✓</td><td>—</td><td class="yes">✓</td></tr>
+        <tr><td><code class="inline">rma.atomic</code></td><td>—</td><td class="yes">✓</td><td>—</td><td class="yes">✓</td></tr>
+        <tr><td><code class="inline">epoch.fence</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code class="inline">epoch.lock_unlock</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code class="inline">epoch.pscw</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code class="inline">resource.lifecycle</code></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><code class="inline">rma.accumulate</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td><code class="inline">epoch.file_split_collective</code></td><td class="yes">✓</td><td>—</td><td>—</td><td>—</td></tr>
+      </table>
+      <p style="color:var(--ink-soft); font-size:.85rem;">Two match-only <em>extra</em> patterns ride on top of <code class="inline">handle_bound.post_send/recv</code> rather than being their own shapes: <code class="inline">point_to_point.tag_match</code> (MPI) and <code class="inline">point_to_point.peer_match</code> (NCCL).</p>
+    </section>
+
+    <!-- =================== 0x4 =================== -->
+    <section class="block" id="sec4">
+      <div class="sec-head"><span class="sec-hex">0x4</span><h2 class="sec-title">schema.json — the two-layer pipeline</h2></div>
+      <p class="sec-dek">Shapes only exist at authoring time. Two schemas, one build step between them.</p>
+
+      <pre><code class="language-text">shapes.json  ──┐
+               ├──▶  [expander]  ──▶  api-schema.json
+authored.json ─┘                     (formal always fully inlined — shape_ref never appears)</code></pre>
+
+      <table>
+        <tr><th>File</th><th>Who reads it</th><th>Permits <code class="inline">shape_ref</code>?</th></tr>
+        <tr><td><code class="inline">shapes.schema.json</code></td><td>The expander, and humans authoring/reviewing shapes</td><td>n/a — this <em>is</em> the shape definitions</td></tr>
+        <tr><td><code class="inline">entries-authored.schema.json</code> (planned)</td><td>Not written yet — meant for CI validation of source entries pre-build; until then an assignment is checked by validating its expansion</td><td>Yes — <code class="inline">formal</code> may be <code class="inline">{shape_ref, bindings, extra?}</code> or a full inline block</td></tr>
+        <tr><td><code class="inline">api-schema.json</code></td><td>Every downstream consumer — SPMD IR, MUST, any future tool</td><td>No — <code class="inline">formal</code> is always the fully expanded shape</td></tr>
+      </table>
+
+      <p>The race detector in section 0x5 only ever validates against the third file. It never learns shapes exist.</p>
+
+      <h3>$defs fragments</h3>
+      <pre><code class="language-json">"formal": {
+  "type": ["object", "null"],
+  "required": ["participants", "data_flow", "sync", "handle_lifecycle"],
+  "additionalProperties": false,
+  "properties": {
+    "participants":     { "type": "array", "items": { "$ref": "#/$defs/participant" } },
+    "data_flow":         { "type": "array", "items": { "$ref": "#/$defs/data_flow_entry" } },
+    "sync":              { "$ref": "#/$defs/sync" },
+    "handle_lifecycle":  { "type": "array", "items": { "$ref": "#/$defs/handle_lifecycle_entry" } }
+  }
+}</code></pre>
+      <pre><code class="language-json">"participant": {
+  "type": "object",
+  "required": ["id", "role_kind", "calls_function", "cardinality", "selector"],
+  "additionalProperties": false,
+  "properties": {
+    "id":             { "type": "string" },
+    "role_kind":      { "type": "string", "enum": ["initiator", "member", "passive_target"] },
+    "calls_function": { "type": "boolean" },
+    "cardinality":    { "type": "string", "enum": ["one", "many"] },
+    "selector":       { "type": "string" }
+  }
+}</code></pre>
+      <pre><code class="language-json">"data_flow_entry": {
+  "type": "object",
+  "required": ["id", "op", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "id":            { "type": "string" },
+    "participant":   { "type": ["string", "null"] },
+    "op":            { "type": "string", "enum": ["read", "write", "reduce", "read_modify_write"] },
+    "buffer":        { "type": ["string", "null"] },
+    "extent":        { "type": ["object", "null"], "properties": {
+                          "count_ref": {"type": "string"}, "datatype_ref": {"type": "string"} } },
+    "offset":        { "type": ["string", "null"] },
+    "inputs":        { "type": "array", "items": { "type": "object", "properties": {
+                          "ref": {"type": "string"}, "scope": {"type": "string"} } } },
+    "operation_ref": { "type": ["string", "null"] },
+    "valid_during":  { "type": ["array", "null"], "items": { "type": "object", "properties": {
+                          "epoch_scope": {"type": "string", "enum": ["access","exposure"]},
+                          "bound_to": {"type": "string"}, "role": {"type": "string"} } } },
+    "source": {
+      "oneOf": [
+        { "type": "null" },
+        { "properties": { "kind": {"const": "structural"}, "ref": {"type":"string"}, "offset": {"type":["string","null"]} } },
+        { "properties": { "kind": {"const": "reduced"},    "ref": {"type":"string"} } },
+        { "properties": { "kind": {"const": "matched"},    "via": {"type":"string"} } }
+      ]
+    }
+  }
+}</code></pre>
+      <pre><code class="language-json">"sync": {
+  "type": "object",
+  "required": ["events", "ordering", "matching"],
+  "additionalProperties": false,
+  "properties": {
+    "events": { "type": "array", "items": { "type": "object", "properties": {
+        "id": {"type": "string"}, "participant": {"type": "string"},
+        "event_type": {"type": "string", "enum": ["point", "open_epoch", "close_epoch"]},
+        "epoch_scope": {"type": ["string","null"], "enum": ["access","exposure", null]},
+        "bound_to": {"type": ["string","null"]}, "group_ref": {"type": ["string","null"]}
+    } } },
+    "ordering": { "type": "array", "items": { "type": "object", "properties": {
+        "before": {}, "after": {},
+        "scope": {"type": "string", "enum": ["same_participant_instance","all_participant_instances","cross_call"]},
+        "note": {"type": "string"}
+    } } },
+    "matching": { "type": ["object", "null"], "properties": {
+        "kind": {"type": "string", "enum": ["collective_rendezvous","tag_match","peer_match","group_match","epoch_scoped"]},
+        "match_keys": {"type": "array", "items": {"type":"string"}},
+        "matched_across": {"type": "string"},
+        "program_order_required": {"type": ["boolean","null"]}
+    } }
+  }
+}</code></pre>
+      <pre><code class="language-json">"handle_lifecycle_entry": {
+  "type": "object",
+  "required": ["handle", "handle_kind", "role"],
+  "additionalProperties": false,
+  "properties": {
+    "handle":      { "type": "string" },
+    "handle_kind": { "type": "string", "enum": ["REQUEST","WINDOW","COMMUNICATOR","DATATYPE","SYMMETRIC_ALLOCATION","FILE","SESSION"] },
+    "role":        { "type": "string", "enum": ["create", "use", "destroy"] }
+  }
+}</code></pre>
+      <pre><code class="language-json">"shape_template": {
+  "type": "object",
+  "required": ["id", "slots", "template"],
+  "properties": {
+    "id":    { "type": "string" },
+    "slots": { "type": "array", "items": { "type": "object", "properties": {
+        "name": {"type": "string"},
+        "kind": {"type": "string", "enum": ["buffer_slot","extent_slot","selector_slot","operation_slot","handle_slot","index_slot","literal_slot"]},
+        "optional": {"type": "boolean"}
+    } } },
+    "template": { "$ref": "#/$defs/formal" }
+  }
+}</code></pre>
+      <div class="callout"><b>Versioning note:</b> adding <code class="inline">"reduce"</code> to <code class="inline">data_flow[].op</code>'s enum, or a new <code class="inline">source.kind</code>, is additive at the data level but not at schema-validation level under a closed <code class="inline">enum</code> — a validator built against an older <code class="inline">$id</code> rejects a newer document even though nothing it depended on changed. The <code class="inline">$id</code> is bumped on every such change — it currently points at the <code class="inline">v0.1.0</code> release tag — and consumers are expected to validate against the schema version an instance actually declares. See <code class="inline">docs/schema/schema-versioning.md</code> for the versioning policy.</div>
+    </section>
+
+    <!-- =================== 0x5 =================== -->
+    <section class="block" id="sec5">
+      <div class="sec-head"><span class="sec-hex">0x5</span><h2 class="sec-title">Walking formal — a race detector, step by step</h2></div>
+      <p class="sec-dek">Grounded in one concrete consumer: the SPMD IR tool's data-race detector, catching a classic MBI-style bug — writing into a send buffer while a nonblocking send is still in flight.</p>
+
+      <pre><code class="language-c">MPI_Request req;
+MPI_Isend(buf, count, MPI_INT, dest, tag, comm, &amp;req);
+buf[0] = 42;              // race: buf is still "owned" by the in-flight send
+MPI_Wait(&amp;req, &amp;status);</code></pre>
+
+      <p><code class="inline">buf[0] = 42</code> is ordinary local code — nothing in the schema describes it, and it shouldn't. What the schema describes is how long <code class="inline">Isend</code> keeps a claim on <code class="inline">buf</code>, and which call releases that claim.</p>
+
+      <h3>The five-step walk</h3>
+      <ol>
+        <li>Walk the IR; for each call to a modeled function, look up its <code class="inline">semantics.formal</code>. If <code class="inline">null</code>, skip — nothing to check.</li>
+        <li>Evaluate <code class="inline">participants[].selector</code> to resolve which role this call site plays (usually trivial — a call the code itself makes is always <code class="inline">self</code>).</li>
+        <li>For each <code class="inline">data_flow</code> entry belonging to that role, resolve <code class="inline">buffer</code>/<code class="inline">extent</code> to an IR value and size, and note the access kind. The access window <em>opens</em> here.</li>
+        <li>Find where the window <em>closes</em>: if a <code class="inline">sync</code> event is <code class="inline">bound_to</code> a handle, dataflow-track that handle value in the IR until the call that consumes it and reaches its matching <code class="inline">sync.ordering</code> event. Otherwise the window closes at return.</li>
+        <li>Flag a conflict if any IR memory access overlapping that buffer region falls inside the open window with no ordering edge to it, and at least one side is a write.</li>
+      </ol>
+
+      <h3>The trace</h3>
+      <table>
+        <tr><th>#</th><th>Program point</th><th>What the tool does</th><th>Window on <code class="inline">buf</code></th></tr>
+        <tr><td>1</td><td><code class="inline">MPI_Isend(buf, ...)</code></td><td>Looks up <code class="inline">mpi:mpi_isend.formal</code>. One <code class="inline">data_flow</code> entry: read, <code class="inline">param:buf</code>. Opens a window.</td><td><b>open</b>: read</td></tr>
+        <tr><td>2</td><td>same call</td><td><code class="inline">handle_lifecycle</code> shows <code class="inline">param:request</code>, role <code class="inline">create</code> — tags the window with the IR value written into <code class="inline">req</code>.</td><td>tagged with <code class="inline">req</code></td></tr>
+        <tr><td>3</td><td><code class="inline">buf[0] = 42;</code></td><td>Ordinary IR store to <code class="inline">buf</code>. Is <code class="inline">buf</code> inside a currently open window? Yes.</td><td>conflict candidate</td></tr>
+        <tr><td>4</td><td>(window still open)</td><td>Access kind = write; open window's kind = read; no ordering edge exists to this store.</td><td><b>race flagged</b></td></tr>
+        <tr><td>5</td><td><code class="inline">MPI_Wait(&amp;req, ...)</code></td><td><code class="inline">handle_lifecycle</code> shows <code class="inline">role: destroy</code> for <code class="inline">param:request</code>; the tool matches <code class="inline">req</code> by dataflow and closes the window here.</td><td>closes</td></tr>
+      </table>
+
+      <p>The diagnostic — which buffer, which call opened the claim, which call closes it — comes straight out of <code class="inline">data_flow</code> and <code class="inline">handle_lifecycle</code>; the tool never special-cased <code class="inline">Isend</code>/<code class="inline">Wait</code> by name. Move the store after <code class="inline">Wait</code> and step 3 happens outside every open window — no conflict candidate is even generated.</p>
+
+      <div class="callout">One honest boundary: step 5 above still needs the compiler's own alias/points-to analysis to decide whether <code class="inline">buf[0]</code> really overlaps <code class="inline">param:buf</code>'s extent. The schema's job stops at telling the tool <em>when</em> a window is open and <em>on what region</em> — it doesn't replace the tool's own memory model.</div>
+    </section>
+
+    <!-- =================== 0x6 =================== -->
+    <section class="block" id="sec6">
+      <div class="sec-head"><span class="sec-hex">0x6</span><h2 class="sec-title">Worked Examples</h2></div>
+      <p class="sec-dek">52 entries across four PPMs. Most are <code class="inline">shape_ref</code> + <code class="inline">bindings</code> — a handful are shown fully inlined where the shape alone doesn't tell the interesting part of the story.</p>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="mpi" onclick="showTab('mpi')">MPI <span class="tab-count">(26)</span></button>
+        <button class="tab-btn" data-tab="shmem" onclick="showTab('shmem')">SHMEM <span class="tab-count">(12)</span></button>
+        <button class="tab-btn" data-tab="nccl" onclick="showTab('nccl')">NCCL <span class="tab-count">(10)</span></button>
+        <button class="tab-btn" data-tab="nvshmem" onclick="showTab('nvshmem')">NVSHMEM <span class="tab-count">(12)</span></button>
+      </div>
+
+      <!-- ============ MPI ============ -->
+      <div class="tab-panel active" id="ex-mpi">
+
+        <details class="example" open>
+          <summary><span class="fname">mpi:mpi_bcast</span><span class="badge">collective.one_to_all_uniform</span><span class="desc">Root's buffer copied identically to every non-root.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.one_to_all_uniform",
+  "bindings": {
+    "buffer": "param:buffer",
+    "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "root_selector": "rank == param:root",
+    "scope_selector": "rank in param:comm"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_scatter</span><span class="badge">collective.one_to_all_indexed</span><span class="desc">Root's buffer sliced by rank; root also receives its own slice.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.one_to_all_indexed",
+  "bindings": {
+    "source_buffer": "param:sendbuf", "dest_buffer": "param:recvbuf",
+    "extent": { "count_ref": "param:recvcount", "datatype_ref": "param:recvtype" },
+    "root_selector": "rank == param:root", "scope_selector": "rank in param:comm",
+    "index_expr": "rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)"
+  } }</code></pre><p class="note">Simplified for exposition: root's own recv slice is folded into the generic <code class="inline">dest_buffer</code> write rather than modeled as a separate entry.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_gather</span><span class="badge">collective.all_to_one_indexed</span><span class="desc">Mirror of scatter — every rank's slice lands in a distinct offset of root's buffer.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.all_to_one_indexed",
+  "bindings": {
+    "source_buffer": "param:sendbuf", "dest_buffer": "param:recvbuf",
+    "extent": { "count_ref": "param:sendcount", "datatype_ref": "param:sendtype" },
+    "root_selector": "rank == param:root", "scope_selector": "rank in param:comm",
+    "index_expr": "rank_in(param:comm) * extent_size(param:sendcount, param:sendtype)"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_reduce</span><span class="badge">collective.all_to_one_reduce</span><span class="desc">Every rank's send buffer aggregated by param:op; only root's recv buffer is written.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.all_to_one_reduce",
+  "bindings": {
+    "sendbuf": "param:sendbuf", "recvbuf": "param:recvbuf",
+    "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "op": "param:op", "root_selector": "rank == param:root", "scope_selector": "rank in param:comm"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_allreduce</span><span class="badge">collective.all_to_all_reduce</span><span class="desc">Same reduction as reduce, but every rank's recv buffer gets the result.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.all_to_all_reduce",
+  "bindings": {
+    "sendbuf": "param:sendbuf", "recvbuf": "param:recvbuf",
+    "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "op": "param:op", "scope_selector": "rank in param:comm"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_scan</span><span class="badge">collective.scan_prefix</span><span class="desc">Same reduce node, scoped to ranks ordered before self instead of all ranks.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.scan_prefix",
+  "bindings": {
+    "sendbuf": "param:sendbuf", "recvbuf": "param:recvbuf",
+    "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "op": "param:op", "scope_selector": "rank in param:comm"
+  } }</code></pre><p class="note"><code class="inline">mpi_exscan</code> reuses this same shape with an <code class="inline">extra</code> patch that excludes self from its own inclusive result.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_alltoall</span><span class="badge">collective.all_to_all_uniform</span><span class="desc">Every pair of ranks exchanges a distinct fixed-size block.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.all_to_all_uniform",
+  "bindings": {
+    "sendbuf": "param:sendbuf", "recvbuf": "param:recvbuf",
+    "extent": { "count_ref": "param:sendcount", "datatype_ref": "param:sendtype" },
+    "scope_selector": "rank in param:comm",
+    "send_index_expr": "dest_rank_in(param:comm) * extent_size(param:sendcount, param:sendtype)",
+    "recv_index_expr": "source_rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_allgather</span><span class="badge">collective.gather_to_all</span><span class="desc">Gather, but every rank ends up with the full assembled buffer.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.gather_to_all",
+  "bindings": {
+    "sendbuf": "param:sendbuf", "recvbuf": "param:recvbuf",
+    "extent": { "count_ref": "param:sendcount", "datatype_ref": "param:sendtype" },
+    "scope_selector": "rank in param:comm",
+    "index_expr": "rank_in(param:comm) * extent_size(param:sendcount, param:sendtype)"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_barrier</span><span class="badge">sync_only.rendezvous</span><span class="desc">No data_flow at all — pure rendezvous.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "sync_only.rendezvous",
+  "bindings": { "scope_selector": "rank in param:comm" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_isend</span><span class="badge">handle_bound.post_send</span><span class="badge amber">+ extra</span><span class="desc">Shown fully inlined — the shape alone doesn't carry the tag-matching rule.</span></summary>
+          <div class="body"><pre><code class="language-json">{
+  "participants": [ { "id": "sender", "role_kind": "initiator", "calls_function": true, "cardinality": "one", "selector": "self" } ],
+  "data_flow": [ { "id": "df_send_read", "participant": "sender", "op": "read", "buffer": "param:buf",
+      "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" }, "source": null } ],
+  "sync": {
+    "events": [ { "id": "local_complete", "participant": "sender", "event_type": "point", "bound_to": "param:request" } ],
+    "ordering": [],
+    "matching": { "kind": "tag_match", "match_keys": ["param:comm","param:tag","param:dest","self_rank_as_source"],
+      "matched_across": "paired_call", "program_order_required": false }
+  },
+  "handle_lifecycle": [ { "handle": "param:request", "handle_kind": "REQUEST", "role": "create" } ]
+}</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_irecv</span><span class="badge">handle_bound.post_recv</span><span class="desc">Write whose source is resolved by the matching rule, not a sibling entry.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "handle_bound.post_recv",
+  "bindings": {
+    "buffer": "param:buf", "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "handle": "param:request"
+  },
+  "extra": { "sync.matching": { "kind": "tag_match",
+      "match_keys": ["param:comm","param:tag","param:source"], "matched_across": "paired_call" } } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_wait</span><span class="badge">handle_bound.wait_on_handle</span><span class="desc">Closes whichever window was opened by the isend/irecv that posted this request.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "handle_bound.wait_on_handle",
+  "bindings": { "handle": "param:request" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_put</span><span class="badge">rma.put</span><span class="desc">Origin reads locally, a non-calling target writes remotely.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.put",
+  "bindings": {
+    "origin_buffer": "param:origin_addr", "target_buffer": "param:target_addr",
+    "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "target_selector": "rank == param:target_rank"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_get</span><span class="badge">rma.get</span><span class="desc">Mirror of put — a non-calling target's memory is read, origin writes locally.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.get",
+  "bindings": {
+    "origin_buffer": "param:origin_addr", "target_buffer": "param:target_addr",
+    "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "target_selector": "rank == param:target_rank"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_win_fence</span><span class="badge">epoch.fence</span><span class="desc">Collective epoch — every rank in the window's group opens and closes together.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "epoch.fence",
+  "bindings": { "window": "param:win", "scope_selector": "rank in window_comm(param:win)" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_win_lock / mpi_win_unlock</span><span class="badge">epoch.lock_unlock</span><span class="desc">Pairwise epoch — no group matching needed, just one origin and one target.</span></summary>
+          <div class="body"><pre><code class="language-json">// mpi_win_lock
+{ "shape_ref": "epoch.lock_unlock", "bindings": { "window": "param:win", "target_selector": "rank == param:rank", "role": "open" } }
+// mpi_win_unlock
+{ "shape_ref": "epoch.lock_unlock", "bindings": { "window": "param:win", "target_selector": "rank == param:rank", "role": "close" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_win_start / post / complete / wait</span><span class="badge">epoch.pscw</span><span class="desc">Shown fully inlined — the four calls only make sense together, and the group-matching is the whole point.</span></summary>
+          <div class="body"><pre><code class="language-json">// mpi_win_post (target side — opens exposure epoch)
+"sync": { "events": [ { "id": "exposure_open", "participant": "target", "event_type": "open_epoch",
+  "epoch_scope": "exposure", "bound_to": "param:win", "group_ref": "param:group" } ] }
+
+// mpi_win_start (origin side — opens access epoch)
+"sync": { "events": [ { "id": "access_open", "participant": "origin", "event_type": "open_epoch",
+  "epoch_scope": "access", "bound_to": "param:win", "group_ref": "param:group" } ] }
+
+// mpi_put used inside the bracket — valid only while both epochs are open
+"data_flow": [ { "id": "df_write", "participant": "target", "op": "write", "buffer": "param:target_addr",
+  "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+  "source": { "kind": "structural", "ref": "df_read" },
+  "valid_during": [
+    { "epoch_scope": "access",   "bound_to": "param:win", "role": "origin" },
+    { "epoch_scope": "exposure", "bound_to": "param:win", "role": "target" }
+  ] } ]
+
+// mpi_win_complete (origin side — closes access epoch)
+"sync": { "events": [ { "id": "access_close", "participant": "origin", "event_type": "close_epoch",
+  "epoch_scope": "access", "bound_to": "param:win" } ],
+  "matching": { "kind": "group_match", "match_keys": ["param:win"], "matched_across": "epoch_participants" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_win_create / mpi_win_free</span><span class="badge">resource.lifecycle</span><span class="desc">Plain handle interval — create, any number of uses in between, destroy.</span></summary>
+          <div class="body"><pre><code class="language-json">// mpi_win_create
+{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "param:win", "handle_kind": "WINDOW", "role": "create" } }
+// mpi_win_free
+{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "param:win", "handle_kind": "WINDOW", "role": "destroy" } }</code></pre></div>
+        </details>
+
+      </div>
+
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_bcast_init</span><span class="badge">collective.one_to_all_uniform</span><span class="badge amber">persistent</span><span class="desc">Same data_flow as mpi_bcast — the new part is a handle_lifecycle interval that can be opened and closed more than once.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.one_to_all_uniform",
+  "bindings": {
+    "buffer": "param:buffer", "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "root_selector": "rank == param:root", "scope_selector": "rank in param:comm"
+  },
+  "extra": { "handle_lifecycle[]": { "handle": "param:request", "handle_kind": "REQUEST", "role": "create" } } }</code></pre><p class="note">Unlike <code class="inline">mpi_isend</code>, this <code class="inline">REQUEST</code> is never destroyed after one use — <code class="inline">mpi_start</code> re-opens the same handle's epoch and <code class="inline">mpi_wait</code> re-closes it, any number of times, until an explicit <code class="inline">mpi_request_free</code> finally issues <code class="inline">role: "destroy"</code>. The interval mechanism from 0x2 already covers this: repeatable open/close was never actually restricted to once.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_iallreduce</span><span class="badge">collective.all_to_all_reduce</span><span class="badge amber">+ extra</span><span class="desc">A collective shape and a handle-bound request are independent axes — this composes both via the same extra-patch mechanism used for tag_match.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.all_to_all_reduce",
+  "bindings": {
+    "sendbuf": "param:sendbuf", "recvbuf": "param:recvbuf",
+    "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "op": "param:op", "scope_selector": "rank in param:comm"
+  },
+  "extra": { "handle_lifecycle[]": { "handle": "param:request", "handle_kind": "REQUEST", "role": "create" } } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_accumulate</span><span class="badge amber">rma.accumulate (new)</span><span class="desc">A reduce node whose two inputs are the origin's read and the target's own pre-call value — the reduce mechanism generalizes from "all participants" down to a single remote pair.</span></summary>
+          <div class="body"><pre><code class="language-json">{
+  "participants": [
+    { "id": "origin", "role_kind": "initiator", "calls_function": true, "cardinality": "one", "selector": "self" },
+    { "id": "target", "role_kind": "passive_target", "calls_function": false, "cardinality": "one", "selector": "rank == param:target_rank" }
+  ],
+  "data_flow": [
+    { "id": "df_origin_read", "participant": "origin", "op": "read", "buffer": "param:origin_addr",
+      "extent": { "count_ref": "param:origin_count", "datatype_ref": "param:origin_datatype" }, "source": null },
+    { "id": "df_target_reduce", "op": "reduce",
+      "inputs": [ { "ref": "df_origin_read", "scope": "single_instance" }, { "ref": "target_prior_value", "scope": "rma_target_prior" } ],
+      "operation_ref": "param:op", "source": null },
+    { "id": "df_target_write", "participant": "target", "op": "write", "buffer": "param:target_disp",
+      "extent": { "count_ref": "param:target_count", "datatype_ref": "param:target_datatype" },
+      "source": { "kind": "reduced", "ref": "df_target_reduce" } }
+  ],
+  "sync": { "events": [ {"id":"issue","participant":"origin","event_type":"point"}, {"id":"local_complete","participant":"origin","event_type":"point"} ],
+    "ordering": [ {"before":"issue","after":"local_complete","scope":"same_participant_instance"} ], "matching": null },
+  "handle_lifecycle": []
+}</code></pre><p class="note">New here: <code class="inline">inputs[].scope: "rma_target_prior"</code> — a reduce input that isn't a sibling call-instance read but the target's own resident value at that address, independent of who else is calling anything. Worth watching whether <code class="inline">get_accumulate</code>/<code class="inline">fetch_and_op</code> need a third variant (they also return the pre-update value to the origin) before locking this into the catalog as <code class="inline">rma.accumulate</code>.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_compare_and_swap</span><span class="badge amber">partial fit</span><span class="desc">A stress test that fails cleanly: MPI's CAS takes its operands as three separate local buffers, not by-value parameters — rma.atomic's slot vocabulary doesn't cover this without extension.</span></summary>
+          <div class="body"><pre><code class="language-json">{
+  "participants": [
+    { "id": "origin", "role_kind": "initiator", "calls_function": true, "cardinality": "one", "selector": "self" },
+    { "id": "target", "role_kind": "passive_target", "calls_function": false, "cardinality": "one", "selector": "rank == param:target_rank" }
+  ],
+  "data_flow": [
+    { "id": "df_read_origin",  "participant": "origin", "op": "read",  "buffer": "param:origin_addr",  "source": null },
+    { "id": "df_read_compare", "participant": "origin", "op": "read",  "buffer": "param:compare_addr", "source": null },
+    { "id": "df_target_rmw",   "participant": "target",  "op": "read_modify_write", "buffer": "param:target_disp", "source": null },
+    { "id": "df_write_result", "participant": "origin", "op": "write", "buffer": "param:result_addr",
+      "source": { "kind": "structural", "ref": "df_target_rmw" } }
+  ],
+  "sync": { "events": [], "ordering": [], "matching": null },
+  "handle_lifecycle": []
+}</code></pre><p class="note">Compare with the SHMEM/NVSHMEM compare-swap examples in their own tabs — same operation, structurally different parameter shape. <code class="inline">rma.atomic</code> as sketched only covers the by-value case; a general version needs an optional <code class="inline">compare_source</code>/<code class="inline">result_target</code> pair of local buffer slots. Logged here rather than quietly reusing the shape and losing the difference.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_neighbor_allgather</span><span class="badge">collective.gather_to_all</span><span class="desc">Same shape as mpi_allgather — the only thing that changes is the selector, via the new is_neighbor() grammar built-in.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.gather_to_all",
+  "bindings": {
+    "sendbuf": "param:sendbuf", "recvbuf": "param:recvbuf",
+    "extent": { "count_ref": "param:sendcount", "datatype_ref": "param:sendtype" },
+    "scope_selector": "is_neighbor(rank, param:comm)",
+    "index_expr": "neighbor_index(rank, param:comm) * extent_size(param:sendcount, param:sendtype)"
+  } }</code></pre><p class="note">Zero new shapes needed for the whole neighborhood-collective family (<code class="inline">Neighbor_allgather</code>, <code class="inline">Neighbor_alltoall</code>, their <code class="inline">v</code>/<code class="inline">w</code>/nonblocking/persistent variants) — every one of them is an existing shape with a topology-aware <code class="inline">scope_selector</code>.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_file_write_at_all_begin / _end</span><span class="badge amber">epoch.file_split_collective (new)</span><span class="desc">Split collective I/O is the interval mechanism again, this time on a FILE handle instead of REQUEST or WINDOW.</span></summary>
+          <div class="body"><pre><code class="language-json">// mpi_file_write_at_all_begin — opens the epoch
+"sync": { "events": [ { "id": "io_open", "participant": "self", "event_type": "open_epoch",
+  "epoch_scope": "access", "bound_to": "param:fh" } ] }
+
+// mpi_file_write_at_all_end — closes it and is where the actual byte transfer is deemed complete
+"data_flow": [ { "id": "df_write", "participant": "self", "op": "write", "buffer": "file:param:fh",
+  "extent": { "count_ref": "implicit_from_begin_call", "datatype_ref": "implicit_from_begin_call" },
+  "valid_during": [ { "epoch_scope": "access", "bound_to": "param:fh", "role": "self" } ], "source": { "kind": "structural", "ref": "param:buf" } } ],
+"sync": { "events": [ { "id": "io_close", "participant": "self", "event_type": "close_epoch",
+  "epoch_scope": "access", "bound_to": "param:fh" } ] }</code></pre><p class="note">Exactly one such epoch may be open on a given <code class="inline">fh</code> at a time — no <code class="inline">group_match</code> needed, unlike PSCW, since there's only ever one caller per file handle per rank. <code class="inline">handle_kind: "FILE"</code> was added to the enum in 0x4 to support this.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_session_init / mpi_session_finalize</span><span class="badge">resource.lifecycle</span><span class="desc">MPI-4's session model is a fourth handle kind for the same create/destroy interval already used for windows, requests, and communicators.</span></summary>
+          <div class="body"><pre><code class="language-json">// mpi_session_init
+{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "param:session", "handle_kind": "SESSION", "role": "create" } }
+// mpi_session_finalize
+{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "param:session", "handle_kind": "SESSION", "role": "destroy" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">mpi:mpi_psend_init / mpi_pready</span><span class="badge amber">formal: not modeled</span><span class="desc">Partitioned communication — a real, currently unrepresentable gap. See 0xB.</span></summary>
+          <div class="body"><pre><code class="language-json">null</code></pre><p class="note">A single send buffer is split into <code class="inline">partitions</code> that become independently ready (<code class="inline">mpi_pready</code>, <code class="inline">mpi_pready_range</code>, <code class="inline">mpi_pready_list</code>) and independently observable as arrived (<code class="inline">mpi_parrived</code>) on the receive side. Every <code class="inline">data_flow</code> entry so far has described one whole buffer with one completion event; this needs a per-partition sub-extent with its own readiness state, which nothing in the current vocabulary expresses. Left <code class="inline">null</code> rather than pretending a single <code class="inline">read</code>/<code class="inline">write</code> pair covers it.</p></div>
+        </details>
+
+      <!-- ============ SHMEM ============ -->
+      <div class="tab-panel" id="ex-shmem">
+
+        <details class="example" open>
+          <summary><span class="fname">shmem:shmem_broadcast32</span><span class="badge">collective.one_to_all_uniform</span><span class="desc">Fixed 32-bit-width variant — size is encoded in the name, no type_family needed.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.one_to_all_uniform",
+  "bindings": {
+    "buffer": "param:dest", "extent": { "count_ref": "param:nelems", "datatype_ref": "literal:int32" },
+    "root_selector": "rank == param:PE_root", "scope_selector": "true"
+  } }</code></pre><p class="note"><code class="inline">scope_selector: "true"</code> — SHMEM's PE space is flat; there's no communicator argument to scope against unless an explicit team is passed.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_{T}_put</span><span class="badge">rma.put</span><span class="desc">Type-generic via identity.type_family — one entry for shmem_int_put, shmem_long_put, ...</span></summary>
+          <div class="body"><pre><code class="language-json">// identity.type_family: ["int","long","float","double", ...]  — {T} resolved at instantiation
+{ "shape_ref": "rma.put",
+  "bindings": {
+    "origin_buffer": "param:source", "target_buffer": "param:dest",
+    "extent": { "count_ref": "param:nelems", "datatype_ref": "type_family:{T}" },
+    "target_selector": "rank == param:pe"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_{T}_get</span><span class="badge">rma.get</span><span class="desc">Mirror of put, same type-generic mechanism.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.get",
+  "bindings": {
+    "origin_buffer": "param:dest", "target_buffer": "param:source",
+    "extent": { "count_ref": "param:nelems", "datatype_ref": "type_family:{T}" },
+    "target_selector": "rank == param:pe"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_int_p</span><span class="badge">rma.put</span><span class="desc">Scalar single-element put — same shape, extent fixed at one element.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.put",
+  "bindings": {
+    "origin_buffer": "param:value_as_scalar_buffer", "target_buffer": "param:addr",
+    "extent": { "count_ref": "literal:1", "datatype_ref": "literal:int" },
+    "target_selector": "rank == param:pe"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_barrier_all</span><span class="badge">sync_only.rendezvous</span><span class="desc">Rendezvous over every PE — no group argument needed.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "sync_only.rendezvous", "bindings": { "scope_selector": "true" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_int_sum_to_all</span><span class="badge">collective.all_to_all_reduce</span><span class="desc">Same shape as MPI's allreduce and NCCL's ncclAllReduce.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.all_to_all_reduce",
+  "bindings": {
+    "sendbuf": "param:source", "recvbuf": "param:dest",
+    "extent": { "count_ref": "param:nreduce", "datatype_ref": "literal:int" },
+    "op": "literal:sum", "scope_selector": "true"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_int_atomic_add</span><span class="badge">rma.atomic</span><span class="desc">Read-modify-write on a remote PE, no fetch, no compare.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.atomic",
+  "bindings": { "buffer": "param:target", "extent": { "count_ref": "literal:1", "datatype_ref": "literal:int" },
+    "target_selector": "rank == param:pe" } }
+// semantics.atomic already carries: { "operation": "add", "fetch": false, "compare": false }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_int_fetch</span><span class="badge">rma.atomic</span><span class="desc">Same shape, fetch=true adds a second data_flow entry writing the result locally.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.atomic",
+  "bindings": { "buffer": "param:target", "extent": { "count_ref": "literal:1", "datatype_ref": "literal:int" },
+    "target_selector": "rank == param:pe" },
+  "extra": { "data_flow[]": { "id": "df_fetch_result", "participant": "origin", "op": "write",
+    "buffer": "return_value", "source": { "kind": "structural", "ref": "df_rmw" } } } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_int_cswap</span><span class="badge">rma.atomic</span><span class="desc">fetch=true, compare=true — swap only applies if the remote value matches param:cond.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.atomic",
+  "bindings": { "buffer": "param:target", "extent": { "count_ref": "literal:1", "datatype_ref": "literal:int" },
+    "target_selector": "rank == param:pe" } }
+// semantics.atomic: { "operation": "cswap", "fetch": true, "compare": true }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_quiet</span><span class="badge">sync_only.local_fence</span><span class="desc">Local ordering only — no rendezvous, no other participant.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "sync_only.local_fence", "bindings": {} }</code></pre><p class="note">Ensures every put/AMO issued by <code class="inline">self</code> before this call is remote-complete before this call returns. Shared verbatim with NVSHMEM's <code class="inline">nvshmem_quiet</code>.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_int_wait_until</span><span class="badge amber">formal: partial</span><span class="desc">Deliberately left unmodeled — see 0x7.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "participants": [ { "id": "self", "role_kind": "initiator", "calls_function": true, "cardinality": "one", "selector": "self" } ],
+  "data_flow": [ { "id": "df_read", "participant": "self", "op": "read", "buffer": "param:ivar",
+      "extent": { "count_ref": "literal:1", "datatype_ref": "literal:int" }, "source": null } ],
+  "sync": { "events": [], "ordering": [], "matching": null } }</code></pre><p class="note">This call blocks until <code class="inline">*ivar</code> satisfies a runtime predicate (<code class="inline">param:cmp</code>, <code class="inline">param:cmp_value</code>) — a value-dependent condition the current grammar has no vocabulary for. See section 0x7.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">shmem:shmem_malloc / shmem_free</span><span class="badge">resource.lifecycle</span><span class="desc">Symmetric-heap allocation, tracked the same way as a window or a request.</span></summary>
+          <div class="body"><pre><code class="language-json">// shmem_malloc
+{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "return_value", "handle_kind": "SYMMETRIC_ALLOCATION", "role": "create" } }
+// shmem_free
+{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "param:ptr", "handle_kind": "SYMMETRIC_ALLOCATION", "role": "destroy" } }</code></pre></div>
+        </details>
+
+      </div>
+
+      <!-- ============ NCCL ============ -->
+      <div class="tab-panel" id="ex-nccl">
+
+        <details class="example" open>
+          <summary><span class="fname">nccl:ncclBroadcast</span><span class="badge">collective.one_to_all_uniform</span><span class="desc">Same shape as mpi_bcast; runs_on gpu, launch cpu.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.one_to_all_uniform",
+  "bindings": {
+    "buffer": "param:buff", "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "root_selector": "rank == param:root", "scope_selector": "rank in param:comm"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nccl:ncclReduce</span><span class="badge">collective.all_to_one_reduce</span><span class="desc">Same shape as mpi_reduce and shmem's reduce family.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.all_to_one_reduce",
+  "bindings": {
+    "sendbuf": "param:sendbuff", "recvbuf": "param:recvbuff",
+    "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "op": "param:op", "root_selector": "rank == param:root", "scope_selector": "rank in param:comm"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nccl:ncclAllReduce</span><span class="badge">collective.all_to_all_reduce</span><span class="desc">The context_dependencies case from tool_integration — blocking isn't fixed by the symbol alone.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.all_to_all_reduce",
+  "bindings": {
+    "sendbuf": "param:sendbuff", "recvbuf": "param:recvbuff",
+    "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" },
+    "op": "param:op", "scope_selector": "rank in param:comm"
+  } }
+// tool_integration.context_dependencies (unchanged, cross-referenced not duplicated):
+// [{ "field": "execution.blocking", "default_value": true,
+//    "depends_on": ["comm.config.blocking", "ncclGroupStart/ncclGroupEnd nesting"], "note": "..." }]</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nccl:ncclAllGather</span><span class="badge">collective.gather_to_all</span><span class="desc">Same shape as mpi_allgather.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.gather_to_all",
+  "bindings": {
+    "sendbuf": "param:sendbuff", "recvbuf": "param:recvbuff",
+    "extent": { "count_ref": "param:sendcount", "datatype_ref": "param:datatype" },
+    "scope_selector": "rank in param:comm",
+    "index_expr": "rank_in(param:comm) * extent_size(param:sendcount, param:datatype)"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nccl:ncclReduceScatter</span><span class="badge">collective.reduce_scatter</span><span class="desc">Combines the reduce node with per-rank indexed distribution — no other PPM in this catalog needs both at once.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.reduce_scatter",
+  "bindings": {
+    "sendbuf": "param:sendbuff", "recvbuf": "param:recvbuff",
+    "extent": { "count_ref": "param:recvcount", "datatype_ref": "param:datatype" },
+    "op": "param:op", "scope_selector": "rank in param:comm",
+    "index_expr": "rank_in(param:comm) * extent_size(param:recvcount, param:datatype)"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nccl:ncclSend</span><span class="badge">handle_bound.post_send</span><span class="badge amber">+ extra</span><span class="desc">peer_match instead of tag_match — NCCL pairs by peer rank and program order, no tag.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "handle_bound.post_send",
+  "bindings": { "buffer": "param:sendbuff", "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" }, "handle": "implicit_stream_handle" },
+  "extra": { "sync.matching": { "kind": "peer_match",
+    "match_keys": ["param:comm", "param:peer"], "matched_across": "paired_call", "program_order_required": true } } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nccl:ncclRecv</span><span class="badge">handle_bound.post_recv</span><span class="desc">Mirror of ncclSend under the same peer_match rule.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "handle_bound.post_recv",
+  "bindings": { "buffer": "param:recvbuff", "extent": { "count_ref": "param:count", "datatype_ref": "param:datatype" }, "handle": "implicit_stream_handle" },
+  "extra": { "sync.matching": { "kind": "peer_match",
+    "match_keys": ["param:comm", "param:peer"], "matched_across": "paired_call", "program_order_required": true } } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nccl:ncclGroupStart / ncclGroupEnd</span><span class="badge amber">formal: not modeled</span><span class="desc">Open question — see 0x7.</span></summary>
+          <div class="body"><pre><code class="language-json">null</code></pre><p class="note">Brackets a batch of NCCL calls into one logical operation, but the bracket isn't attached to any REQUEST/WINDOW-like handle the way isend/wait or PSCW are — it's thread-local call-stack state, not a value that flows through parameters. Left <code class="inline">null</code> rather than force-fit into <code class="inline">handle_lifecycle</code>.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nccl:ncclCommInitRank</span><span class="badge">resource.lifecycle</span><span class="desc">Creates the COMMUNICATOR-kind handle every other NCCL call in this section binds against.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "param:comm", "handle_kind": "COMMUNICATOR", "role": "create" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nccl:ncclCommDestroy</span><span class="badge">resource.lifecycle</span><span class="desc">Closes the interval opened by ncclCommInitRank.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "param:comm", "handle_kind": "COMMUNICATOR", "role": "destroy" } }</code></pre></div>
+        </details>
+
+      </div>
+
+      <!-- ============ NVSHMEM ============ -->
+      <div class="tab-panel" id="ex-nvshmem">
+
+        <details class="example" open>
+          <summary><span class="fname">nvshmem:nvshmem_int_put</span><span class="badge">rma.put</span><span class="desc">launch: cpu+gpu, runs_on: gpu — one entry covers both callable forms.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.put",
+  "bindings": {
+    "origin_buffer": "param:source", "target_buffer": "param:dest",
+    "extent": { "count_ref": "param:nelems", "datatype_ref": "literal:int" },
+    "target_selector": "rank == param:pe"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmem_int_get</span><span class="badge">rma.get</span><span class="desc">Mirror of put.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.get",
+  "bindings": {
+    "origin_buffer": "param:dest", "target_buffer": "param:source",
+    "extent": { "count_ref": "param:nelems", "datatype_ref": "literal:int" },
+    "target_selector": "rank == param:pe"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmemx_int_put_block</span><span class="badge amber">rma.put + extra</span><span class="desc">Shown inline — the block-collective family needs a real participants change, not just a binding.</span></summary>
+          <div class="body"><pre><code class="language-json">{
+  "participants": [
+    { "id": "origin_threads", "role_kind": "initiator", "calls_function": true, "cardinality": "many",
+      "selector": "thread in current_block" },
+    { "id": "target", "role_kind": "passive_target", "calls_function": false, "cardinality": "one",
+      "selector": "rank == param:pe" }
+  ],
+  "data_flow": [
+    { "id": "df_read",  "participant": "origin_threads", "op": "read",  "buffer": "param:source",
+      "extent": { "count_ref": "param:nelems", "datatype_ref": "literal:int" }, "source": null },
+    { "id": "df_write", "participant": "target", "op": "write", "buffer": "param:dest",
+      "extent": { "count_ref": "param:nelems", "datatype_ref": "literal:int" },
+      "source": { "kind": "structural", "ref": "df_read" } }
+  ],
+  "sync": {
+    "events": [ { "id": "enter", "participant": "origin_threads", "event_type": "point" } ],
+    "ordering": [ { "before": {"event":"enter","instance":"any"}, "after": {"event":"enter","instance":"any"},
+      "scope": "all_participant_instances", "note": "every thread in the block must call this together" } ],
+    "matching": { "kind": "collective_rendezvous", "matched_across": "block_threads", "program_order_required": true }
+  },
+  "handle_lifecycle": []
+}</code></pre><p class="note">A different contract from per-thread <code class="inline">nvshmem_int_put</code> — every thread in the block must call it together — so it gets its own entry rather than reusing <code class="inline">rma.put</code>'s single-caller participant shape.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmem_broadcastmem</span><span class="badge">collective.one_to_all_uniform</span><span class="desc">PE-team broadcast — same shape as mpi_bcast and shmem_broadcast32.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.one_to_all_uniform",
+  "bindings": {
+    "buffer": "param:dest", "extent": { "count_ref": "param:nelems", "datatype_ref": "literal:byte" },
+    "root_selector": "rank == param:PE_root", "scope_selector": "rank in param:team"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmem_int_sum_reduce</span><span class="badge">collective.all_to_all_reduce</span><span class="desc">Team-based reduction, same shape as ncclAllReduce and shmem_int_sum_to_all.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "collective.all_to_all_reduce",
+  "bindings": {
+    "sendbuf": "param:source", "recvbuf": "param:dest",
+    "extent": { "count_ref": "param:nreduce", "datatype_ref": "literal:int" },
+    "op": "literal:sum", "scope_selector": "rank in param:team"
+  } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmem_barrier_all</span><span class="badge">sync_only.rendezvous</span><span class="desc">All PEs, host-callable form.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "sync_only.rendezvous", "bindings": { "scope_selector": "true" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmemx_barrier_all_block</span><span class="badge">sync_only.rendezvous</span><span class="desc">Same shape as nvshmem_barrier_all, participant scope narrowed to a thread block.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "sync_only.rendezvous", "bindings": { "scope_selector": "thread in current_block" } }</code></pre><p class="note">Demonstrates a shape reused across two different <code class="inline">gpu_scope</code> values purely through <code class="inline">scope_selector</code> — no new shape needed.</p></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmem_quiet</span><span class="badge">sync_only.local_fence</span><span class="desc">Identical shape to shmem_quiet — the clearest cross-PPM reuse in this catalog.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "sync_only.local_fence", "bindings": {} }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmem_int_atomic_add</span><span class="badge">rma.atomic</span><span class="desc">No fetch, no compare.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.atomic",
+  "bindings": { "buffer": "param:target", "extent": { "count_ref": "literal:1", "datatype_ref": "literal:int" },
+    "target_selector": "rank == param:pe" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmem_int_atomic_fetch</span><span class="badge">rma.atomic</span><span class="desc">fetch=true.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.atomic",
+  "bindings": { "buffer": "param:target", "extent": { "count_ref": "literal:1", "datatype_ref": "literal:int" },
+    "target_selector": "rank == param:pe" },
+  "extra": { "data_flow[]": { "id": "df_fetch_result", "participant": "origin", "op": "write",
+    "buffer": "return_value", "source": { "kind": "structural", "ref": "df_rmw" } } } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmem_int_atomic_compare_swap</span><span class="badge">rma.atomic</span><span class="desc">fetch=true, compare=true.</span></summary>
+          <div class="body"><pre><code class="language-json">{ "shape_ref": "rma.atomic",
+  "bindings": { "buffer": "param:target", "extent": { "count_ref": "literal:1", "datatype_ref": "literal:int" },
+    "target_selector": "rank == param:pe" } }</code></pre></div>
+        </details>
+
+        <details class="example">
+          <summary><span class="fname">nvshmem:nvshmem_malloc / nvshmem_free</span><span class="badge">resource.lifecycle</span><span class="desc">Symmetric heap — identical mechanism to shmem_malloc/free.</span></summary>
+          <div class="body"><pre><code class="language-json">// nvshmem_malloc
+{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "return_value", "handle_kind": "SYMMETRIC_ALLOCATION", "role": "create" } }
+// nvshmem_free
+{ "shape_ref": "resource.lifecycle", "bindings": { "handle": "param:ptr", "handle_kind": "SYMMETRIC_ALLOCATION", "role": "destroy" } }</code></pre></div>
+        </details>
+
+      </div>
+    </section>
+
+    <!-- =================== 0x7 =================== -->
+    <section class="block" id="sec7">
+      <div class="sec-head"><span class="sec-hex">0x7</span><h2 class="sec-title">Open Questions &amp; Non-Goals</h2></div>
+      <p class="sec-dek">Named plainly rather than quietly force-fit.</p>
+
+      <table>
+        <tr><th>Item</th><th>Status</th><th>Why it's open</th></tr>
+        <tr>
+          <td><code class="inline">shmem_int_wait_until</code> and friends</td>
+          <td><span class="badge amber">not modeled</span></td>
+          <td>Value-dependent blocking — "wait until this memory location satisfies a runtime predicate" — has no representation in the current grammar. Adding it risks reopening the predicate-language door this whole layer was designed to avoid.</td>
+        </tr>
+        <tr>
+          <td><code class="inline">ncclGroupStart</code> / <code class="inline">ncclGroupEnd</code></td>
+          <td><span class="badge amber">not modeled</span></td>
+          <td>A context bracket with no handle attached — thread-local call-stack state rather than a value flowing through a parameter, so <code class="inline">handle_lifecycle</code> doesn't apply as written.</td>
+        </tr>
+        <tr>
+          <td><code class="inline">MPI_Type_commit</code>-style state transition</td>
+          <td><span class="badge amber">undecided</span></td>
+          <td>Doesn't cleanly fit <code class="inline">create</code>/<code class="inline">use</code>/<code class="inline">destroy</code> — the handle stays valid but changes state, and using it before the transition is itself an error. A fourth role (<code class="inline">"transition"</code>) is plausible but only one concrete case has been examined.</td>
+        </tr>
+        <tr>
+          <td>Resource leak / double-free detection</td>
+          <td><span class="badge amber">out of scope for a single entry</span></td>
+          <td>"Was every <code class="inline">create</code> eventually reached by a <code class="inline">destroy</code>" is a whole-program property. The schema supplies the create/use/destroy facts; a consuming tool decides what to do with them across the whole program.</td>
+        </tr>
+        <tr>
+          <td>Overlapping/nested epochs on one window</td>
+          <td><span class="badge amber">not modeled</span></td>
+          <td>What happens if a fence epoch and a lock epoch are (incorrectly) interleaved on the same window isn't represented — <code class="inline">valid_during</code> currently assumes well-nested, non-overlapping epochs.</td>
+        </tr>
+        <tr>
+          <td>Multi-GPU topology &amp; transfer routing</td>
+          <td><span class="badge amber">explicit non-goal</span></td>
+          <td>Which physical device a pointer belongs to, and whether a transfer should go through GPUDirect RDMA versus a staged host copy, are backend/runtime routing decisions — not structural facts about the API symbol. <code class="inline">memory_space</code> (0x8) states <em>what kind</em> of memory; it deliberately stops short of <em>how to move it</em>.</td>
+        </tr>
+      </table>
+
+      <div class="callout open"><b>Not a design flaw:</b> every item above was surfaced by trying to write a concrete example and finding the vocabulary insufficient — which is the same process that produced <code class="inline">reduce</code>, tagged <code class="inline">source</code>, and <code class="inline">handle_lifecycle</code> in the first place. Better to log the gap than paper over it with a predicate language wide enough to swallow anything.</div>
+    </section>
+
+    <!-- =================== 0x8 =================== -->
+    <section class="block" id="sec8">
+      <div class="sec-head"><span class="sec-hex">0x8</span><h2 class="sec-title">GPU Memory Spaces</h2></div>
+      <p class="sec-dek">execution.launch, execution.runs_on, and gpu_scope describe where a call executes. None of them say where the memory it touches actually lives — and that turns out not to be derivable from the others.</p>
+
+      <h3 id="mem-motivation">Why it's not derivable</h3>
+      <p>The counterexample is CUDA-aware MPI. Its execution fields are unambiguous:</p>
+      <pre><code class="language-json">"execution": { "launch": "cpu", "runs_on": "cpu", "gpu_scope": null, "...": "..." }</code></pre>
+      <p>Host-callable only, host-executed progress engine — nothing here suggests a GPU is involved. Yet <code class="inline">buf</code> in <code class="inline">MPI_Send(buf, ...)</code> can legally be a <b>device pointer</b>: a CUDA-aware implementation detects it and routes through GPUDirect RDMA or a staged copy instead of a plain host <code class="inline">memcpy</code>. Same symbol, same <code class="inline">launch</code>/<code class="inline">runs_on</code>, two entirely different data paths depending on what pointer value shows up at the call site. <code class="inline">data_flow</code>'s <code class="inline">buffer: "param:buf"</code> gives a code generator no information about which path to emit.</p>
+
+      <table>
+        <tr><th>Case</th><th>Memory space</th><th>Why</th></tr>
+        <tr><td><code class="inline">nvshmem_int_put</code>'s buffers</td><td>always <code class="inline">symmetric_heap</code></td><td>Only symmetric-heap allocations can participate — structurally guaranteed by the model</td></tr>
+        <tr><td>A CUDA kernel's device-pointer args</td><td>always <code class="inline">device</code></td><td>Device code can't dereference an ordinary host pointer (barring managed memory)</td></tr>
+        <tr><td><code class="inline">MPI_Send</code>'s <code class="inline">buf</code> under CUDA-aware MPI</td><td><code class="inline">host</code> <b>or</b> <code class="inline">device</code></td><td>Genuinely a property of the argument at the call site, not of the symbol</td></tr>
+      </table>
+
+      <h3 id="mem-field">The memory_space field</h3>
+      <p>Added to the <code class="inline">parameter</code> object — not to <code class="inline">data_flow</code>. Duplicating it into <code class="inline">data_flow</code> would create a second place it can drift out of sync with the one already-established rule that <code class="inline">parameters</code> stays the single source of truth for anything about an argument, referenced everywhere else via <code class="inline">param:</code>.</p>
+      <pre><code class="language-json">{ "name": "buf", "kind": "BUFFER", "direction": "in", "...": "...",
+  "memory_space": "host" | "device" | "symmetric_heap" | "unified" | "either" | null }</code></pre>
+      <table>
+        <tr><th>Value</th><th>Meaning</th></tr>
+        <tr><td><code class="inline">host</code></td><td>Ordinary CPU-addressable memory</td></tr>
+        <tr><td><code class="inline">device</code></td><td>GPU-resident memory, not host-addressable</td></tr>
+        <tr><td><code class="inline">symmetric_heap</code></td><td>PGAS symmetric allocation — same logical offset resolves on every PE, no address translation needed the way an arbitrary device pointer would</td></tr>
+        <tr><td><code class="inline">unified</code></td><td>CUDA unified/managed memory, addressable from either side</td></tr>
+        <tr><td><code class="inline">either</code></td><td>Not fixed by the symbol — resolved at the call site; pairs with a <code class="inline">tool_integration.context_dependencies</code> entry</td></tr>
+        <tr><td><code class="inline">null</code></td><td>Not applicable (non-buffer parameters)</td></tr>
+      </table>
+
+      <p>For the fixed cases, that single enum value is the whole story. For <code class="inline">"either"</code>, the existing "not fixed by the symbol alone" mechanism from <a href="#sec4">0x4</a> — already built for NCCL's runtime-dependent <code class="inline">blocking</code> — covers it without new machinery:</p>
+      <pre><code class="language-json">{ "field": "param:buf.memory_space",
+  "default_value": "host",
+  "depends_on": ["pointer provenance of the argument bound to buf", "whether the MPI implementation was built with CUDA-aware support"],
+  "note": "CUDA-aware MPI accepts a host or device pointer for the same symbol. Resolving which one requires the consumer's own pointer-provenance analysis — the same boundary already drawn for buffer-overlap in the race detector (0x5)." }</code></pre>
+
+      <h3 id="mem-nongoals">Non-goals</h3>
+      <p><code class="inline">memory_space</code> states <em>what kind</em> of memory a buffer lives in. It deliberately does not attempt two adjacent questions — logged as their own row in the <a href="#sec7">0x7 open-questions table</a> rather than half-solved here: which physical GPU a device pointer belongs to in a multi-GPU node, and whether a transfer should be routed via GPUDirect RDMA or a staged host copy. Both are backend/runtime decisions, not structural facts about the API symbol — the same reasoning that already kept buffer-overlap resolution out of <code class="inline">data_flow</code> and left it to the compiler's own alias analysis in <a href="#sec5">0x5</a>.</p>
+    </section>
+
+    <!-- =================== 0x9 =================== -->
+    <section class="block" id="sec9">
+      <div class="sec-head"><span class="sec-hex">0x9</span><h2 class="sec-title">Schema Explorer</h2></div>
+      <p class="sec-dek">Every <code class="inline">$defs</code> fragment introduced across this document and the base specification, browsable in one place. Pick a definition on the left. These fragments are <b>generated directly from <code class="inline">curated/schemas/api-schema.json</code></b> by <code class="inline">workflow/viz/sync_schema_index.py</code> and re-synced on every schema change, so they cannot drift from it. Long <code class="inline">description</code> strings are stripped for readability; the schema file itself carries the full text.</p>
+
+      <div class="demo" style="padding:0; overflow:hidden;">
+        <div class="explorer">
+          <div class="explorer-list" id="explorerList"></div>
+          <div class="explorer-detail">
+            <div class="explorer-detail-head">
+              <span class="eyebrow" id="explorerGroup">—</span>
+              <h4 id="explorerTitle" style="margin:2px 0 4px 0;">—</h4>
+              <p id="explorerDesc" style="margin:0 0 10px 0; color:var(--ink-soft); font-size:.88rem;">—</p>
+            </div>
+            <pre style="margin:0;"><code id="explorerCode" class="language-json"></code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== 0xA =================== -->
+    <section class="block" id="secA">
+      <div class="sec-head"><span class="sec-hex">0xA</span><h2 class="sec-title">Complete Entries</h2></div>
+      <p class="sec-dek">Everything in this document lives inside one field of a much larger entry. Three full eight-section entries, chosen to each exercise a different piece of what's new: an ambiguous memory space with context_dependencies, a fixed symmetric-heap space combined with type_family, and a runtime-dependent blocking flag combined with a reduce shape.</p>
+
+      <h3 id="entry-mpisend">mpi:mpi_send</h3>
+      <p><span class="badge">memory_space: either</span><span class="badge">point_to_point.tag_match</span> — a blocking send where the buffer's memory space depends on whether the argument is a host or device pointer, tracked via <code class="inline">context_dependencies</code> rather than a fixed enum value.</p>
+      <pre><code class="language-json" id="entryMpiSend"></code></pre>
+
+      <h3 id="entry-nvshmemput">nvshmem:nvshmem_{T}_put</h3>
+      <p><span class="badge">memory_space: symmetric_heap</span><span class="badge">type_family</span><span class="badge">rma.put</span> — memory space is fixed here, not context-dependent: a symmetric-heap allocation resolves to the same logical offset on every PE by construction.</p>
+      <pre><code class="language-json" id="entryNvshmemPut"></code></pre>
+
+      <h3 id="entry-ncclallreduce">nccl:ncclAllReduce</h3>
+      <p><span class="badge">memory_space: device</span><span class="badge">collective.all_to_all_reduce</span><span class="badge amber">context_dependencies</span> — device memory is fixed for this entry, but <code class="inline">execution.blocking</code> is not: it depends on communicator config and group nesting, exactly as introduced in 0x4.</p>
+      <pre><code class="language-json" id="entryNcclAllreduce"></code></pre>
+      <p class="note" style="color:var(--ink-soft); font-size:.85rem;">Flagged honestly rather than glossed over: <code class="inline">stream</code> doesn't map cleanly onto any existing <code class="inline">parameters[].kind</code> value (<code class="inline">BUFFER｜COUNT｜RANK｜DATATYPE｜COMMUNICATOR｜OPERATION｜TAG｜STATUS｜REQUEST｜TEAM｜WINDOW｜KEY｜ERROR_CODE</code>) — CUDA stream handles aren't yet first-class in the parameter kind vocabulary. Bound to <code class="inline">KEY</code> below as the closest existing fit, not a resolved decision.</p>
+    </section>
+
+    <!-- =================== 0xB =================== -->
+    <section class="block" id="secB">
+      <div class="sec-head"><span class="sec-hex">0xB</span><h2 class="sec-title">Cross-Cutting Patterns from the Full MPI Surface</h2></div>
+      <p class="sec-dek">Everything above was built and tested against a curated slice of MPI, NCCL, NVSHMEM, and SHMEM. This section is what changed after checking the vocabulary against the full ~450-symbol MPI standard — some patterns generalized cleanly, one only partially fit, and one is a genuine gap.</p>
+
+      <h3>What generalized cleanly</h3>
+      <table>
+        <tr><th>MPI feature</th><th>What it turned out to be</th></tr>
+        <tr><td>Persistent operations (<code class="inline">_init</code> + <code class="inline">Start</code>/<code class="inline">Wait</code>, including persistent collectives)</td>
+          <td>The same <code class="inline">handle_lifecycle</code> interval from 0x2 — nothing said an epoch could only open and close once. <code class="inline">Start</code> re-opens, <code class="inline">Wait</code> re-closes, <code class="inline">Request_free</code> finally issues <code class="inline">role: "destroy"</code>.</td></tr>
+        <tr><td>Nonblocking collectives (<code class="inline">Iallreduce</code>, <code class="inline">Ibarrier</code>, every <code class="inline">I</code>-prefixed collective)</td>
+          <td>A collective shape plus a <code class="inline">REQUEST</code> handle are independent axes — composed with the same <code class="inline">extra</code>-patch mechanism already used for <code class="inline">tag_match</code>, not a new shape per combination.</td></tr>
+        <tr><td>Neighborhood collectives (<code class="inline">Neighbor_allgather</code>, <code class="inline">Neighbor_alltoall</code>, and their <code class="inline">v</code>/<code class="inline">w</code>/nonblocking/persistent variants)</td>
+          <td>Zero new shapes. One new grammar built-in — <code class="inline">is_neighbor(rank, comm)</code> — and the existing gather/alltoall shapes cover the entire family via <code class="inline">scope_selector</code>.</td></tr>
+        <tr><td>Split collective I/O (<code class="inline">File_write_at_all_begin</code>/<code class="inline">_end</code> and its many siblings)</td>
+          <td>The interval mechanism again, on a fourth handle kind. <code class="inline">FILE</code> and <code class="inline">SESSION</code> were added to <code class="inline">handle_kind</code>'s enum in 0x4 — the mechanism itself needed nothing new.</td></tr>
+        <tr><td>Sessions (MPI-4's alternative to <code class="inline">MPI_Init</code>)</td>
+          <td>Plain <code class="inline">resource.lifecycle</code>, same as a window or a communicator.</td></tr>
+      </table>
+
+      <h3>What partially fit</h3>
+      <p><code class="inline">MPI_Accumulate</code> and friends (<code class="inline">Get_accumulate</code>, <code class="inline">Fetch_and_op</code>, <code class="inline">Raccumulate</code>) are a reduce happening between exactly two parties — an origin's incoming value and a target's resident value — rather than across every participant in a collective. That's a real generalization of the <code class="inline">reduce</code> op worth keeping: a new <code class="inline">inputs[].scope</code> value, <code class="inline">"rma_target_prior"</code>, referring to the target's own value rather than a sibling call-instance read. See the <code class="inline">mpi_accumulate</code> card in 0x6.</p>
+      <p><code class="inline">MPI_Compare_and_swap</code> is the case that didn't fully transfer. SHMEM and NVSHMEM's compare-swap primitives take the swap value and comparand <em>by value</em> as scalar parameters; MPI's takes them as three separate local buffers (<code class="inline">origin_addr</code>, <code class="inline">compare_addr</code>, <code class="inline">result_addr</code>). Reusing the SHMEM-shaped <code class="inline">rma.atomic</code> binding for MPI's version would have silently dropped two of those buffers. Written out fully instead — see the <code class="inline">mpi_compare_and_swap</code> card — rather than forced into a shape that doesn't actually match.</p>
+
+      <h3>Explicit non-goals, found by trying and stopping</h3>
+      <table>
+        <tr><th>MPI feature</th><th>Why it's out of scope</th></tr>
+        <tr><td>Generalized requests (<code class="inline">MPI_Grequest_start</code>, <code class="inline">_complete</code>, and the query/free/cancel callback triple)</td>
+          <td>The whole point of a generalized request is that its completion semantics are arbitrary user code — there is no fixed <code class="inline">data_flow</code> to describe. <code class="inline">formal</code> stays <code class="inline">null</code> by construction, not by omission.</td></tr>
+        <tr><td>MPI Tools Interface (<code class="inline">MPI_T_*</code> — control variables, performance variables, events)</td>
+          <td>Introspection into the MPI implementation itself, not communication between ranks. Same bucket as <code class="inline">management</code>/query calls already excluded in 0x0 — no data moves between participants at all.</td></tr>
+        <tr><td>Dynamic process management (<code class="inline">MPI_Comm_spawn</code>, <code class="inline">Comm_accept</code>, <code class="inline">Comm_connect</code>, <code class="inline">Open_port</code>)</td>
+          <td>These create or attach new processes and change the reachable topology — a different axis entirely from data movement between an already-fixed participant set. <code class="inline">handle_lifecycle</code>'s <code class="inline">create</code> role could name the new intercommunicator, but what's actually novel here (process creation) has nothing to do with what <code class="inline">formal</code> was built to express.</td></tr>
+      </table>
+
+      <h3>The one real gap: partitioned communication</h3>
+      <p>MPI-4's partitioned point-to-point (<code class="inline">Psend_init</code>/<code class="inline">Precv_init</code> plus <code class="inline">Pready</code>/<code class="inline">Pready_range</code>/<code class="inline">Pready_list</code>/<code class="inline">Parrived</code>) splits one send buffer into independently-completable partitions. Every <code class="inline">data_flow</code> entry built so far describes one whole buffer with one completion event attached; nothing in the vocabulary lets a single entry's extent be sliced into sub-ranges that each get their own readiness state. This is logged as genuinely open in the <code class="inline">mpi_psend_init</code> card in 0x6, rather than quietly approximated by a shape that would misrepresent per-partition completion to both a code generator and a race detector.</p>
+
+      <div class="callout open"><b>The pattern holds:</b> running the full standard through the vocabulary surfaced five things that generalized for free, one field that needed a genuinely new value, one shape that correctly failed to apply, and one honest gap — not a redesign. That ratio is closer to what "the vocabulary is right" should look like than a clean sweep would have been.</div>
+    </section>
+
+
+    </div>
+  </main>
+</div>
+
+<footer>
+  A Unified Semantic Interface Specification for Parallel Programming Tools — Supplement B.<br>
+  S. Burak, F. Tomski, J. Jenke, M. Müller (RWTH Aachen) · W. Moses (UIUC)
+</footer>
+
+<script>
+hljs.registerLanguage('text', function(){ return { contains: [] }; });
+document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+
+function showTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'ex-' + name));
+}
+
+// ---- live shape-expansion demo ----
+const SHAPES = {
+  "collective.one_to_all_uniform": {
+    participants: [
+      {id:"root", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"{{root_selector}}"},
+      {id:"non_root", role_kind:"member", calls_function:true, cardinality:"many", selector:"!( {{root_selector}} ) && {{scope_selector}}"}
+    ],
+    data_flow: [
+      {id:"df_read", participant:"root", op:"read", buffer:"{{buffer}}", extent:"{{extent}}", source:null},
+      {id:"df_write", participant:"non_root", op:"write", buffer:"{{buffer}}", extent:"{{extent}}", source:{kind:"structural", ref:"df_read"}}
+    ],
+    sync: {
+      events:[{id:"enter",participant:"any",event_type:"point"},{id:"return",participant:"any",event_type:"point"}],
+      ordering:[{before:{event:"enter",instance:"any"}, after:{event:"return",instance:"any"}, scope:"all_participant_instances"}],
+      matching:{kind:"collective_rendezvous", matched_across:"all_participants", program_order_required:true}
+    },
+    handle_lifecycle: []
+  },
+  "collective.one_to_all_indexed": {
+    participants: [
+      {id:"root", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"{{root_selector}}"},
+      {id:"non_root", role_kind:"member", calls_function:true, cardinality:"many", selector:"!( {{root_selector}} ) && {{scope_selector}}"}
+    ],
+    data_flow: [
+      {id:"df_read", participant:"root", op:"read", buffer:"{{source_buffer}}", extent:"{{extent}}", source:null},
+      {id:"df_write", participant:"non_root", op:"write", buffer:"{{dest_buffer}}", extent:"{{extent}}", offset:"{{index_expr}}",
+       source:{kind:"structural", ref:"df_read", offset:"{{index_expr}}"}}
+    ],
+    sync: {
+      events:[{id:"enter",participant:"any",event_type:"point"},{id:"return",participant:"any",event_type:"point"}],
+      ordering:[{before:{event:"enter",instance:"any"}, after:{event:"return",instance:"any"}, scope:"all_participant_instances"}],
+      matching:{kind:"collective_rendezvous", matched_across:"all_participants", program_order_required:true}
+    },
+    handle_lifecycle: []
+  },
+  "collective.all_to_all_reduce": {
+    participants: [ {id:"member", role_kind:"member", calls_function:true, cardinality:"many", selector:"{{scope_selector}}"} ],
+    data_flow: [
+      {id:"df_in", participant:"member", op:"read", buffer:"{{sendbuf}}", extent:"{{extent}}", source:null},
+      {id:"df_reduce", op:"reduce", inputs:[{ref:"df_in", scope:"all_participant_instances"}], operation_ref:"{{op}}", source:null},
+      {id:"df_out", participant:"member", op:"write", buffer:"{{recvbuf}}", extent:"{{extent}}", source:{kind:"reduced", ref:"df_reduce"}}
+    ],
+    sync: {
+      events:[{id:"enter",participant:"any",event_type:"point"},{id:"return",participant:"any",event_type:"point"}],
+      ordering:[{before:{event:"enter",instance:"any"}, after:{event:"return",instance:"any"}, scope:"all_participant_instances"}],
+      matching:{kind:"collective_rendezvous", matched_across:"all_participants", program_order_required:true}
+    },
+    handle_lifecycle: []
+  }
+};
+
+const DEMO_ENTRIES = {
+  bcast: { shape_ref: "collective.one_to_all_uniform",
+    bindings: { buffer:"param:buffer", extent:{count_ref:"param:count",datatype_ref:"param:datatype"},
+      root_selector:"rank == param:root", scope_selector:"rank in param:comm" } },
+  scatter: { shape_ref: "collective.one_to_all_indexed",
+    bindings: { source_buffer:"param:sendbuf", dest_buffer:"param:recvbuf",
+      extent:{count_ref:"param:recvcount",datatype_ref:"param:recvtype"},
+      root_selector:"rank == param:root", scope_selector:"rank in param:comm",
+      index_expr:"rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)" } },
+  allreduce: { shape_ref: "collective.all_to_all_reduce",
+    bindings: { sendbuf:"param:sendbuff", recvbuf:"param:recvbuff",
+      extent:{count_ref:"param:count",datatype_ref:"param:datatype"},
+      op:"param:op", scope_selector:"rank in param:comm" } }
+};
+
+function expand(node, bindings){
+  if (Array.isArray(node)) return node.map(n => expand(n, bindings));
+  if (node && typeof node === 'object') {
+    const out = {};
+    for (const k in node) out[k] = expand(node[k], bindings);
+    return out;
+  }
+  if (typeof node === 'string') {
+    const whole = node.match(/^\{\{(\w+)\}\}$/);
+    if (whole) return bindings.hasOwnProperty(whole[1]) ? bindings[whole[1]] : node;
+    return node.replace(/\{\{(\w+)\}\}/g, (_, name) => {
+      const v = bindings[name];
+      return (typeof v === 'string') ? v : JSON.stringify(v);
+    });
+  }
+  return node;
+}
+
+function renderDemo(){
+  const key = document.getElementById('demoSelect').value;
+  const entry = DEMO_ENTRIES[key];
+  const template = SHAPES[entry.shape_ref];
+  const expanded = { participants: expand(template.participants, entry.bindings),
+                      data_flow: expand(template.data_flow, entry.bindings),
+                      sync: expand(template.sync, entry.bindings),
+                      handle_lifecycle: template.handle_lifecycle };
+  const left = document.getElementById('demoLeft');
+  const right = document.getElementById('demoRight');
+  left.textContent = JSON.stringify(entry, null, 2);
+  right.textContent = JSON.stringify(expanded, null, 2);
+  left.className = 'language-json'; right.className = 'language-json';
+  hljs.highlightElement(left); hljs.highlightElement(right);
+}
+renderDemo();
+
+// ---- 0x9 schema explorer ----
+// <<< GENERATED SCHEMA_INDEX -- do not hand-edit; see workflow/viz/sync_schema_index.py
+const SCHEMA_INDEX = [
+  { id:"entry", group:"core", title:"entry", desc:"Top-level object \u2014 the eight sections, always present.",
+    code:"{\n  \"type\": \"object\",\n  \"title\": \"PPM Function Entry\",\n  \"required\": [\n    \"identity\",\n    \"bindings\",\n    \"execution\",\n    \"semantics\",\n    \"parameters\",\n    \"return\",\n    \"tool_integration\",\n    \"relationships\"\n  ],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"identity\": {\"$ref\": \"#/$defs/identity\"},\n    \"bindings\": {\"$ref\": \"#/$defs/bindings\"},\n    \"execution\": {\"$ref\": \"#/$defs/execution\"},\n    \"semantics\": {\"$ref\": \"#/$defs/semantics\"},\n    \"parameters\": {\"type\": \"array\", \"items\": {\"$ref\": \"#/$defs/parameter\"}},\n    \"return\": {\"$ref\": \"#/$defs/return\"},\n    \"tool_integration\": {\"$ref\": \"#/$defs/tool_integration\"},\n    \"relationships\": {\"$ref\": \"#/$defs/relationships\"}\n  }\n}" },
+  { id:"identity", group:"core", title:"identity", desc:"Provenance and classification \u2014 model, name, api_group, lifecycle version strings, type_family. The supersession edge lives in relationships.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\n    \"model\",\n    \"name\",\n    \"api_group\",\n    \"since\",\n    \"deprecated_in\",\n    \"standard_refs\",\n    \"desc\",\n    \"type_family\"\n  ],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"model\": {\"type\": \"string\", \"enum\": [\"mpi\", \"nccl\", \"nvshmem\", \"shmem\", \"openmp\", \"cuda\"]},\n    \"name\": {\"type\": \"string\"},\n    \"api_group\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\n        \"collective\",\n        \"point_to_point\",\n        \"one_sided\",\n        \"query\",\n        \"management\",\n        \"synchronization\",\n        \"io\",\n        null\n      ]\n    },\n    \"since\": {\n      \"type\": [\"string\", \"null\"],\n      \"pattern\": \"^[A-Za-z][A-Za-z0-9]*-[0-9]+(\\\\.[0-9]+)*$\"\n    },\n    \"deprecated_in\": {\n      \"type\": [\"string\", \"null\"],\n      \"pattern\": \"^[A-Za-z][A-Za-z0-9]*-[0-9]+(\\\\.[0-9]+)*$\"\n    },\n    \"standard_refs\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"desc\": {\"type\": [\"string\", \"null\"]},\n    \"type_family\": {\"type\": [\"array\", \"null\"], \"items\": {\"type\": \"string\"}}\n  }\n}" },
+  { id:"bindings", group:"core", title:"bindings", desc:"One named sub-object per language; null = unsupported by this PPM.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"c\", \"fortran90\", \"fortran08\", \"lis\", \"cpp\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"c\": {\"anyOf\": [{\"$ref\": \"#/$defs/binding_c\"}, {\"type\": \"null\"}]},\n    \"fortran90\": {\"anyOf\": [{\"$ref\": \"#/$defs/binding_fortran90\"}, {\"type\": \"null\"}]},\n    \"fortran08\": {\"anyOf\": [{\"$ref\": \"#/$defs/binding_fortran08\"}, {\"type\": \"null\"}]},\n    \"lis\": {\"anyOf\": [{\"$ref\": \"#/$defs/binding_lis\"}, {\"type\": \"null\"}]},\n    \"cpp\": {\"anyOf\": [{\"$ref\": \"#/$defs/binding_cpp\"}, {\"type\": \"null\"}]}\n  }\n}" },
+  { id:"execution", group:"core", title:"execution", desc:"When/where the call executes \u2014 all fields present in every entry.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\n    \"blocking\",\n    \"execute_once\",\n    \"collective\",\n    \"thread_safety\",\n    \"launch\",\n    \"runs_on\",\n    \"gpu_scope\",\n    \"stages\",\n    \"locality\",\n    \"completion\",\n    \"procedure_class\"\n  ],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"blocking\": {\"type\": \"boolean\"},\n    \"execute_once\": {\"type\": \"boolean\"},\n    \"collective\": {\"type\": \"boolean\"},\n    \"thread_safety\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\"single\", \"funneled\", \"serialized\", \"multiple\", null]\n    },\n    \"launch\": {\"type\": [\"string\", \"null\"], \"enum\": [\"cpu\", \"gpu\", \"cpu+gpu\", null]},\n    \"runs_on\": {\"type\": [\"string\", \"null\"], \"enum\": [\"cpu\", \"gpu\", \"cpu+gpu\", null]},\n    \"gpu_scope\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\"thread\", \"warp\", \"block\", \"device\", null]\n    },\n    \"stages\": {\n      \"type\": [\"array\", \"null\"],\n      \"items\": {\"type\": \"string\", \"enum\": [\"i\", \"s\", \"c\", \"f\"]}\n    },\n    \"locality\": {\"type\": [\"string\", \"null\"], \"enum\": [\"local\", \"remote\", \"both\", null]},\n    \"completion\": {\"type\": [\"string\", \"null\"], \"enum\": [\"ic\", \"c\", \"f\", \"stream_ordered\", null]},\n    \"procedure_class\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\"b-op\", \"nb-op\", \"p-op\", \"pp-op\", null]\n    }\n  }\n}" },
+  { id:"semantics", group:"core", title:"semantics", desc:"At most one of collective/point_to_point/one_sided/atomic is non-null, and which one IS the operation class. memory and formal are separately nullable; formal is the layer this document is about.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"collective\", \"point_to_point\", \"one_sided\", \"atomic\", \"memory\", \"formal\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"collective\": {\"anyOf\": [{\"$ref\": \"#/$defs/semantics_collective\"}, {\"type\": \"null\"}]},\n    \"point_to_point\": {\"anyOf\": [{\"$ref\": \"#/$defs/semantics_p2p\"}, {\"type\": \"null\"}]},\n    \"one_sided\": {\"anyOf\": [{\"$ref\": \"#/$defs/semantics_one_sided\"}, {\"type\": \"null\"}]},\n    \"atomic\": {\"anyOf\": [{\"$ref\": \"#/$defs/semantics_atomic\"}, {\"type\": \"null\"}]},\n    \"memory\": {\"anyOf\": [{\"$ref\": \"#/$defs/semantics_memory\"}, {\"type\": \"null\"}]},\n    \"formal\": {\"$ref\": \"#/$defs/formal\"}\n  }\n}" },
+  { id:"semantics_memory", group:"core", title:"semantics.memory", desc:"Completion and consistency facts. Nullable as a whole object \u2014 null where the call has no memory semantics to state.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\n    \"local_completion\",\n    \"remote_completion\",\n    \"buffer_reuse\",\n    \"fence_semantics\",\n    \"symmetric_heap\",\n    \"memory_model\"\n  ],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"local_completion\": {\n      \"type\": \"string\",\n      \"enum\": [\"after_return\", \"after_wait\", \"after_test\", \"after_flush\"]\n    },\n    \"remote_completion\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\"after_return\", \"after_fence\", \"after_quiet\", null]\n    },\n    \"buffer_reuse\": {\n      \"type\": \"string\",\n      \"enum\": [\"after_return\", \"after_wait\", \"after_test\", \"after_flush\", \"never\"]\n    },\n    \"fence_semantics\": {\"type\": \"string\", \"enum\": [\"none\", \"local\", \"remote\", \"both\"]},\n    \"symmetric_heap\": {\"type\": \"boolean\"},\n    \"memory_model\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\"relaxed\", \"release_acquire\", \"seq_consistent\", null]\n    }\n  }\n}" },
+  { id:"parameter", group:"core", title:"parameter", desc:"Per-argument semantics \u2014 one entry per formal parameter, including where its buffer lives (memory_space).",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\n    \"name\",\n    \"kind\",\n    \"direction\",\n    \"desc\",\n    \"binding_type\",\n    \"asynchronous\",\n    \"constant\",\n    \"pointer\",\n    \"array_type\",\n    \"func_type\",\n    \"length\",\n    \"parameter_bindings\",\n    \"root_only\",\n    \"constraints\",\n    \"memory_space\"\n  ],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"name\": {\"type\": \"string\"},\n    \"kind\": {\"$ref\": \"#/$defs/parameter_kind\"},\n    \"direction\": {\"type\": \"string\", \"enum\": [\"in\", \"out\", \"inout\"]},\n    \"desc\": {\"type\": [\"string\", \"null\"]},\n    \"binding_type\": {\"$ref\": \"#/$defs/binding_type\"},\n    \"asynchronous\": {\"type\": \"boolean\"},\n    \"constant\": {\"type\": \"boolean\"},\n    \"pointer\": {\"type\": [\"boolean\", \"null\"]},\n    \"array_type\": {\"type\": [\"string\", \"null\"], \"enum\": [\"fixed\", \"variable\", \"2d\", null]},\n    \"func_type\": {\"type\": [\"string\", \"null\"]},\n    \"length\": {\"anyOf\": [{\"type\": \"integer\"}, {\"type\": \"string\"}, {\"type\": \"null\"}]},\n    \"parameter_bindings\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\",\n        \"enum\": [\n          \"c\",\n          \"c_large\",\n          \"fortran90\",\n          \"fortran90_optional\",\n          \"fortran08\",\n          \"fortran08_optional\",\n          \"lis\",\n          \"lis_large\",\n          \"cpp\"\n        ]\n      }\n    },\n    \"root_only\": {\"type\": \"boolean\"},\n    \"constraints\": {\"$ref\": \"#/$defs/parameter_constraints\"},\n    \"memory_space\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\"host\", \"device\", \"symmetric_heap\", \"unified\", \"either\", null]\n    }\n  }\n}" },
+  { id:"parameter_kind", group:"core", title:"parameter_kind", desc:"The kind vocabulary, shared by parameters[].kind and return.value_kind.",
+    code:"{\n  \"type\": [\"string\", \"null\"],\n  \"enum\": [\n    \"BUFFER\",\n    \"COUNT\",\n    \"RANK\",\n    \"DATATYPE\",\n    \"COMMUNICATOR\",\n    \"OPERATION\",\n    \"TAG\",\n    \"STATUS\",\n    \"REQUEST\",\n    \"TEAM\",\n    \"WINDOW\",\n    \"KEY\",\n    \"ERROR_CODE\",\n    \"STREAM\",\n    \"SCALAR\",\n    \"ID\",\n    \"INFO\",\n    \"FILE\",\n    \"GROUP\",\n    \"ERRHANDLER\",\n    \"SESSION\",\n    \"MESSAGE\",\n    \"TOOL_HANDLE\",\n    \"INDEX_ARRAY\",\n    \"OPAQUE_STATE\",\n    \"BOOL\",\n    \"STRING\",\n    \"TEAM_SIZE\",\n    \"THREAD_LEVEL\",\n    \"DEVICE\",\n    \"SIG_OP\",\n    null\n  ]\n}" },
+  { id:"return", group:"core", title:"return", desc:"Return value semantics.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"kind\", \"value_kind\", \"binding_type\", \"possible_errors\", \"possible_successes\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"kind\": {\"type\": \"string\", \"enum\": [\"ERROR_CODE\", \"RESULT\", \"void\", \"bool\", \"value\"]},\n    \"value_kind\": {\"$ref\": \"#/$defs/parameter_kind\"},\n    \"binding_type\": {\"$ref\": \"#/$defs/binding_type\"},\n    \"possible_errors\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"possible_successes\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}\n  }\n}" },
+  { id:"tool_integration", group:"core", title:"tool_integration", desc:"Correctness/perf-tool hooks; context_dependencies covers fields not fixed by the symbol alone.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"profiling_name\", \"invariants\", \"buffer_aliasing\", \"context_dependencies\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"profiling_name\": {\"type\": [\"string\", \"null\"]},\n    \"invariants\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"buffer_aliasing\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\"forbidden\", \"allowed\", \"in_place_only\", null]\n    },\n    \"context_dependencies\": {\"type\": \"array\", \"items\": {\"$ref\": \"#/$defs/context_dependency\"}}\n  }\n}" },
+  { id:"context_dependency", group:"core", title:"context_dependency", desc:"One entry per field whose effective value isn't fixed by the function symbol alone.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"field\", \"default_value\", \"depends_on\", \"note\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"field\": {\"type\": \"string\"},\n    \"default_value\": {\"type\": [\"string\", \"boolean\", \"null\"]},\n    \"depends_on\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"note\": {\"type\": \"string\"}\n  }\n}" },
+  { id:"relationships", group:"core", title:"relationships", desc:"Links to related entries, and nothing else. Every value is a model-qualified \"model:function_key\" reference, and the validator enforces it. supersedes is superseded_by's derived inverse.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"variants\", \"superseded_by\", \"supersedes\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"variants\": {\"$ref\": \"#/$defs/relationship_variants\"},\n    \"superseded_by\": {\"type\": [\"string\", \"null\"]},\n    \"supersedes\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}\n  }\n}" },
+  { id:"formal", group:"formal layer", title:"formal", desc:"The subject of this whole document \u2014 participants, data_flow, sync, handle_lifecycle.",
+    code:"{\n  \"type\": [\"object\", \"null\"],\n  \"required\": [\"participants\", \"data_flow\", \"sync\", \"handle_lifecycle\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"participants\": {\"type\": \"array\", \"items\": {\"$ref\": \"#/$defs/participant\"}},\n    \"data_flow\": {\"type\": \"array\", \"items\": {\"$ref\": \"#/$defs/data_flow_entry\"}},\n    \"sync\": {\"$ref\": \"#/$defs/sync\"},\n    \"handle_lifecycle\": {\"type\": \"array\", \"items\": {\"$ref\": \"#/$defs/handle_lifecycle_entry\"}}\n  }\n}" },
+  { id:"participant", group:"formal layer", title:"participant", desc:"Who is involved, and does each one actually invoke the function.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"id\", \"role_kind\", \"calls_function\", \"cardinality\", \"selector\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"id\": {\"type\": \"string\"},\n    \"role_kind\": {\"type\": \"string\", \"enum\": [\"initiator\", \"member\", \"passive_target\"]},\n    \"calls_function\": {\"type\": \"boolean\"},\n    \"cardinality\": {\"type\": \"string\", \"enum\": [\"one\", \"many\"]},\n    \"selector\": {\"type\": \"string\"}\n  }\n}" },
+  { id:"data_flow_entry", group:"formal layer", title:"data_flow_entry", desc:"One memory access; source is a tagged object stating where a written value provably came from. \"reduced\" sources can carry an offset, and \"gathered\" assembles contributions with no operator.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"id\", \"op\", \"source\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"id\": {\"type\": \"string\"},\n    \"participant\": {\"type\": [\"string\", \"null\"]},\n    \"op\": {\"type\": \"string\", \"enum\": [\"read\", \"write\", \"reduce\", \"read_modify_write\"]},\n    \"buffer\": {\"type\": [\"string\", \"null\"]},\n    \"extent\": {\n      \"type\": [\"object\", \"null\"],\n      \"properties\": {\"count_ref\": {\"type\": \"string\"}, \"datatype_ref\": {\"type\": \"string\"}},\n      \"additionalProperties\": false\n    },\n    \"offset\": {\"type\": [\"string\", \"null\"]},\n    \"inputs\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\"ref\": {\"type\": \"string\"}, \"scope\": {\"type\": \"string\"}},\n        \"additionalProperties\": false\n      }\n    },\n    \"operation_ref\": {\"type\": [\"string\", \"null\"]},\n    \"valid_during\": {\n      \"type\": [\"array\", \"null\"],\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"epoch_scope\": {\"type\": \"string\", \"enum\": [\"access\", \"exposure\"]},\n          \"bound_to\": {\"type\": \"string\"},\n          \"role\": {\"type\": \"string\"}\n        },\n        \"additionalProperties\": false\n      }\n    },\n    \"source\": {\n      \"oneOf\": [\n        {\"type\": \"null\"},\n        {\n          \"type\": \"object\",\n          \"required\": [\"kind\", \"ref\"],\n          \"properties\": {\n            \"kind\": {\"const\": \"structural\"},\n            \"ref\": {\"type\": \"string\"},\n            \"offset\": {\"type\": [\"string\", \"null\"]}\n          }\n        },\n        {\n          \"type\": \"object\",\n          \"required\": [\"kind\", \"ref\"],\n          \"properties\": {\n            \"kind\": {\"const\": \"reduced\"},\n            \"ref\": {\"type\": \"string\"},\n            \"offset\": {\"type\": [\"string\", \"null\"]}\n          }\n        },\n        {\n          \"type\": \"object\",\n          \"required\": [\"kind\", \"ref\", \"scope\"],\n          \"properties\": {\n            \"kind\": {\"const\": \"gathered\"},\n            \"ref\": {\"type\": \"string\"},\n            \"scope\": {\"type\": \"string\"},\n            \"placement_offset\": {\"type\": [\"string\", \"null\"]}\n          }\n        },\n        {\n          \"type\": \"object\",\n          \"required\": [\"kind\", \"via\"],\n          \"properties\": {\"kind\": {\"const\": \"matched\"}, \"via\": {\"type\": \"string\"}}\n        }\n      ]\n    }\n  }\n}" },
+  { id:"sync", group:"formal layer", title:"sync", desc:"Events, ordering, and cross-instance matching.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"events\", \"ordering\", \"matching\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"events\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\"id\", \"participant\", \"event_type\"],\n        \"additionalProperties\": false,\n        \"properties\": {\n          \"id\": {\"type\": \"string\"},\n          \"participant\": {\"type\": \"string\"},\n          \"event_type\": {\"type\": \"string\", \"enum\": [\"point\", \"open_epoch\", \"close_epoch\"]},\n          \"epoch_scope\": {\"type\": [\"string\", \"null\"], \"enum\": [\"access\", \"exposure\", null]},\n          \"bound_to\": {\"type\": [\"string\", \"null\"]},\n          \"group_ref\": {\"type\": [\"string\", \"null\"]}\n        }\n      }\n    },\n    \"ordering\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\"before\", \"after\", \"scope\"],\n        \"additionalProperties\": false,\n        \"properties\": {\n          \"before\": {},\n          \"after\": {},\n          \"scope\": {\n            \"type\": \"string\",\n            \"enum\": [\"same_participant_instance\", \"all_participant_instances\", \"cross_call\"]\n          },\n          \"note\": {\"type\": \"string\"}\n        }\n      }\n    },\n    \"matching\": {\n      \"type\": [\"object\", \"null\"],\n      \"additionalProperties\": false,\n      \"properties\": {\n        \"kind\": {\n          \"type\": \"string\",\n          \"enum\": [\n            \"collective_rendezvous\",\n            \"tag_match\",\n            \"peer_match\",\n            \"group_match\",\n            \"epoch_scoped\"\n          ]\n        },\n        \"match_keys\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n        \"matched_across\": {\"type\": \"string\"},\n        \"program_order_required\": {\"type\": [\"boolean\", \"null\"]}\n      }\n    }\n  }\n}" },
+  { id:"handle_lifecycle_entry", group:"formal layer", title:"handle_lifecycle_entry", desc:"Tracks a handle across its create \u2192 use \u2192 destroy interval; also the basis for RMA epochs.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"handle\", \"handle_kind\", \"role\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"handle\": {\"type\": \"string\"},\n    \"handle_kind\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"REQUEST\",\n        \"WINDOW\",\n        \"COMMUNICATOR\",\n        \"DATATYPE\",\n        \"SYMMETRIC_ALLOCATION\",\n        \"FILE\",\n        \"SESSION\"\n      ]\n    },\n    \"role\": {\"type\": \"string\", \"enum\": [\"create\", \"use\", \"destroy\"]},\n    \"derived_from\": {\"type\": [\"string\", \"null\"]}\n  }\n}" },
+  { id:"shape_template", group:"formal layer", title:"shape_template", desc:"Authoring-time only \u2014 erased by the expander before anything ships. See 0x3/0x4.",
+    code:"{\n  \"type\": \"object\",\n  \"required\": [\"id\", \"slots\", \"template\"],\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"id\": {\"type\": \"string\"},\n    \"slots\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\"name\", \"kind\", \"optional\"],\n        \"additionalProperties\": false,\n        \"properties\": {\n          \"name\": {\"type\": \"string\"},\n          \"kind\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"buffer_slot\",\n              \"extent_slot\",\n              \"selector_slot\",\n              \"operation_slot\",\n              \"handle_slot\",\n              \"index_slot\",\n              \"literal_slot\"\n            ]\n          },\n          \"optional\": {\"type\": \"boolean\"}\n        }\n      }\n    },\n    \"template\": {\"$ref\": \"#/$defs/formal\"}\n  }\n}" },
+];
+// >>> END GENERATED SCHEMA_INDEX
+
+function renderExplorerList(){
+  const groups = [...new Set(SCHEMA_INDEX.map(d => d.group))];
+  const list = document.getElementById('explorerList');
+  list.innerHTML = groups.map(g => `
+    <div class="grp-label">${g}</div>
+    ${SCHEMA_INDEX.filter(d => d.group === g).map(d =>
+      `<button data-id="${d.id}" onclick="selectExplorer('${d.id}')">${d.title}</button>`).join('')}
+  `).join('');
+}
+function selectExplorer(id){
+  const def = SCHEMA_INDEX.find(d => d.id === id);
+  document.querySelectorAll('.explorer-list button').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  document.getElementById('explorerGroup').textContent = def.group;
+  document.getElementById('explorerTitle').textContent = def.title;
+  document.getElementById('explorerDesc').textContent = def.desc;
+  const code = document.getElementById('explorerCode');
+  code.textContent = def.code;
+  code.className = 'language-json';
+  hljs.highlightElement(code);
+}
+renderExplorerList();
+selectExplorer('parameter');
+
+// ---- 0xA complete entries ----
+const ENTRY_MPI_SEND = {
+  identity: { model:"mpi", name:"MPI_Send", api_group:"point_to_point", since:"MPI-1.0", deprecated_in:null,
+    standard_refs:["MPI-4.1 §3.2.1"], desc:"Blocking send of a message to a destination process.", type_family:null },
+  bindings: {
+    c:{expressible:true, header:"mpi.h", signature:"int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)"},
+    fortran90:{name:"MPI_SEND", expressible:true, use_colons:false, index_overload:null, not_with_mpif:false},
+    fortran08:{name:"MPI_Send", expressible:true, abstract_interface:true, module:"mpi_f08"},
+    lis:{expressible:true},
+    cpp:{expressible:true, class_method:"Comm::Send"}
+  },
+  execution: { blocking:true, execute_once:false, collective:false, thread_safety:"multiple", launch:"cpu",
+    runs_on:"cpu", gpu_scope:null, stages:["s","c"], locality:"both", completion:"c", procedure_class:"b-op" },
+  semantics: {
+    operation_class:"point_to_point",
+    collective:null,
+    point_to_point:{ direction:"send", synchronous:false, buffered:false, ready:false },
+    one_sided:null, atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:null, buffer_reuse:"after_return",
+      fence_semantics:"none", symmetric_heap:false, memory_model:null },
+    formal: {
+      participants: [ { id:"sender", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"self" } ],
+      data_flow: [ { id:"df_read", participant:"sender", op:"read", buffer:"param:buf",
+        extent:{count_ref:"param:count", datatype_ref:"param:datatype"}, source:null } ],
+      sync: { events:[], ordering:[],
+        matching:{ kind:"tag_match", match_keys:["param:comm","param:tag","param:dest","self_rank_as_source"],
+          matched_across:"paired_call", program_order_required:false } },
+      handle_lifecycle: []
+    }
+  },
+  parameters: [
+    { name:"buf", kind:"BUFFER", direction:"in", desc:"Initial address of send buffer.",
+      binding_type:{c:"const void*", fortran90:"TYPE(*), DIMENSION(..)", fortran08:"TYPE(*), DIMENSION(..)", lis:null, cpp:"const void*"},
+      asynchronous:false, constant:true, pointer:true, array_type:"variable", func_type:null, length:"count",
+      parameter_bindings:["c","c_large","fortran90","fortran08","cpp"], root_only:false,
+      constraints:{not_null:true, value_range:null, paired_with:"count"}, memory_space:"either" },
+    { name:"count", kind:"COUNT", direction:"in", desc:"Number of elements in send buffer.",
+      binding_type:{c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:null, cpp:"int"},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false,
+      constraints:{not_null:false, value_range:">= 0", paired_with:"buf"}, memory_space:null },
+    { name:"datatype", kind:"DATATYPE", direction:"in", desc:"Datatype of each send buffer element.",
+      binding_type:{c:"MPI_Datatype", fortran90:"TYPE(MPI_Datatype)", fortran08:"TYPE(MPI_Datatype)", lis:null, cpp:"const MPI_Datatype&"},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false,
+      constraints:{not_null:true, value_range:null, paired_with:null}, memory_space:null },
+    { name:"dest", kind:"RANK", direction:"in", desc:"Rank of destination process.",
+      binding_type:{c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:null, cpp:"int"},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false,
+      constraints:{not_null:false, value_range:"0 <= dest < comm_size(comm)", paired_with:null}, memory_space:null },
+    { name:"tag", kind:"TAG", direction:"in", desc:"Message tag.",
+      binding_type:{c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:null, cpp:"int"},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false,
+      constraints:{not_null:false, value_range:"0 <= tag <= MPI_TAG_UB", paired_with:null}, memory_space:null },
+    { name:"comm", kind:"COMMUNICATOR", direction:"in", desc:"Communicator.",
+      binding_type:{c:"MPI_Comm", fortran90:"INTEGER", fortran08:"TYPE(MPI_Comm)", lis:null, cpp:"const MPI_Comm&"},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false,
+      constraints:{not_null:true, value_range:"comm != MPI_COMM_NULL", paired_with:null}, memory_space:null }
+  ],
+  return: { kind:"ERROR_CODE",
+    binding_type:{c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:null, cpp:"void"},
+    possible_errors:["MPI_ERR_COMM","MPI_ERR_COUNT","MPI_ERR_TYPE","MPI_ERR_RANK","MPI_ERR_TAG"],
+    possible_successes:["MPI_SUCCESS"] },
+  tool_integration: {
+    profiling_name:"PMPI_Send",
+    invariants:["comm != MPI_COMM_NULL","count >= 0","dest >= 0 && dest < comm_size(comm)"],
+    buffer_aliasing:"forbidden",
+    context_dependencies:[ { field:"param:buf.memory_space", default_value:"host",
+      depends_on:["pointer provenance of the argument bound to buf","whether the MPI implementation was built with CUDA-aware support"],
+      note:"See 0x8. A code generator cannot resolve this from the symbol alone." } ]
+  },
+  relationships: {
+    variants:{ nonblocking:"mpi:mpi_isend", blocking:null, persistent:"mpi:mpi_send_init", neighborhood:null, host:null, gpu:null },
+    superseded_by:null, supersedes:[], aliases:[], operation_group:"point_to_point_send"
+  }
+};
+
+const ENTRY_NVSHMEM_PUT = {
+  identity: { model:"nvshmem", name:"nvshmem_{T}_put", api_group:"one_sided", since:"NVSHMEM-0.1", deprecated_in:null,
+    standard_refs:["NVSHMEM Spec §8.2"], desc:"Transfers data to a symmetric object on a remote PE.",
+    type_family:["int","long","longlong","float","double","size","ptrdiff"] },
+  bindings: {
+    c:{expressible:true, header:"nvshmem.h", signature:"void nvshmem_{T}_put(TYPE *dest, const TYPE *source, size_t nelems, int pe)"},
+    fortran90:null, fortran08:null, lis:null,
+    cpp:{expressible:true, class_method:null}
+  },
+  execution: { blocking:true, execute_once:false, collective:false, thread_safety:"multiple", launch:"cpu+gpu",
+    runs_on:"gpu", gpu_scope:"thread", stages:["s","c"], locality:"remote", completion:"c", procedure_class:"b-op" },
+  semantics: {
+    operation_class:"one_sided",
+    collective:null, point_to_point:null,
+    one_sided:{ operation:"put", epoch_type:"implicit", ordering:"relaxed" },
+    atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:"after_quiet", buffer_reuse:"after_return",
+      fence_semantics:"both", symmetric_heap:true, memory_model:"relaxed" },
+    formal: {
+      participants: [
+        { id:"origin", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"self" },
+        { id:"target", role_kind:"passive_target", calls_function:false, cardinality:"one", selector:"rank == param:pe" }
+      ],
+      data_flow: [
+        { id:"df_read", participant:"origin", op:"read", buffer:"param:source",
+          extent:{count_ref:"param:nelems", datatype_ref:"type_family:{T}"}, source:null },
+        { id:"df_write", participant:"target", op:"write", buffer:"param:dest",
+          extent:{count_ref:"param:nelems", datatype_ref:"type_family:{T}"}, source:{kind:"structural", ref:"df_read"} }
+      ],
+      sync: { events:[ {id:"issue", participant:"origin", event_type:"point"}, {id:"local_complete", participant:"origin", event_type:"point"} ],
+        ordering:[ {before:"issue", after:"local_complete", scope:"same_participant_instance",
+          note:"remote completion deferred to the next nvshmem_quiet/nvshmem_fence, not this call's return"} ],
+        matching:null },
+      handle_lifecycle: []
+    }
+  },
+  parameters: [
+    { name:"dest", kind:"BUFFER", direction:"out", desc:"Symmetric address on the target PE.",
+      binding_type:{c:"TYPE *", fortran90:null, fortran08:null, lis:null, cpp:"TYPE *"},
+      asynchronous:false, constant:false, pointer:true, array_type:"variable", func_type:null, length:"nelems",
+      parameter_bindings:["c","cpp"], root_only:false, constraints:{not_null:true, value_range:null, paired_with:"nelems"},
+      memory_space:"symmetric_heap" },
+    { name:"source", kind:"BUFFER", direction:"in", desc:"Local (symmetric) address to read from.",
+      binding_type:{c:"const TYPE *", fortran90:null, fortran08:null, lis:null, cpp:"const TYPE *"},
+      asynchronous:false, constant:true, pointer:true, array_type:"variable", func_type:null, length:"nelems",
+      parameter_bindings:["c","cpp"], root_only:false, constraints:{not_null:true, value_range:null, paired_with:"nelems"},
+      memory_space:"symmetric_heap" },
+    { name:"nelems", kind:"COUNT", direction:"in", desc:"Number of elements to transfer.",
+      binding_type:{c:"size_t", fortran90:null, fortran08:null, lis:null, cpp:"size_t"},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c","cpp"], root_only:false, constraints:{not_null:false, value_range:">= 0", paired_with:null},
+      memory_space:null },
+    { name:"pe", kind:"RANK", direction:"in", desc:"PE number of the remote target.",
+      binding_type:{c:"int", fortran90:null, fortran08:null, lis:null, cpp:"int"},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c","cpp"], root_only:false, constraints:{not_null:false, value_range:"0 <= pe < npes()", paired_with:null},
+      memory_space:null }
+  ],
+  return: { kind:"void", binding_type:{c:"void", fortran90:null, fortran08:null, lis:null, cpp:"void"},
+    possible_errors:[], possible_successes:["local_read_complete"] },
+  tool_integration: {
+    profiling_name:null,
+    invariants:["nelems >= 0","pe >= 0 && pe < npes()"],
+    buffer_aliasing:"forbidden",
+    context_dependencies:[]
+  },
+  relationships: {
+    variants:{ nonblocking:null, blocking:null, persistent:null, neighborhood:null, host:"nvshmem_{T}_put", gpu:null },
+    superseded_by:null, supersedes:[], aliases:[], operation_group:"rma_put"
+  }
+};
+
+const ENTRY_NCCL_ALLREDUCE = {
+  identity: { model:"nccl", name:"ncclAllReduce", api_group:"collective", since:"NCCL-1.0", deprecated_in:null,
+    standard_refs:["NCCL API Docs — Collective Operations"], desc:"Reduces data across all ranks and distributes the result to all ranks.", type_family:null },
+  bindings: {
+    c:{expressible:true, header:"nccl.h", signature:"ncclResult_t ncclAllReduce(const void* sendbuff, void* recvbuff, size_t count, ncclDataType_t datatype, ncclRedOp_t op, ncclComm_t comm, cudaStream_t stream)"},
+    fortran90:null, fortran08:null, lis:null, cpp:null
+  },
+  execution: { blocking:true, execute_once:false, collective:true, thread_safety:"serialized", launch:"cpu",
+    runs_on:"gpu", gpu_scope:"device", stages:["s","c"], locality:"both", completion:"c", procedure_class:"b-op" },
+  semantics: {
+    operation_class:"collective",
+    collective:{ type:"allreduce", root_involved:false, in_place:false, comm_scope:"intracommunicator",
+      algorithm_class:"all_to_all", reduction_op:true, topology_aware:true },
+    point_to_point:null, one_sided:null, atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:"after_return", buffer_reuse:"after_return",
+      fence_semantics:"none", symmetric_heap:false, memory_model:null },
+    formal: {
+      participants: [ { id:"member", role_kind:"member", calls_function:true, cardinality:"many", selector:"rank in param:comm" } ],
+      data_flow: [
+        { id:"df_in", participant:"member", op:"read", buffer:"param:sendbuff",
+          extent:{count_ref:"param:count", datatype_ref:"param:datatype"}, source:null },
+        { id:"df_reduce", op:"reduce", inputs:[{ref:"df_in", scope:"all_participant_instances"}], operation_ref:"param:op", source:null },
+        { id:"df_out", participant:"member", op:"write", buffer:"param:recvbuff",
+          extent:{count_ref:"param:count", datatype_ref:"param:datatype"}, source:{kind:"reduced", ref:"df_reduce"} }
+      ],
+      sync: { events:[{id:"enter",participant:"any",event_type:"point"},{id:"return",participant:"any",event_type:"point"}],
+        ordering:[{before:{event:"enter",instance:"any"}, after:{event:"return",instance:"any"}, scope:"all_participant_instances"}],
+        matching:{ kind:"collective_rendezvous", matched_across:"all_participants", program_order_required:true } },
+      handle_lifecycle: []
+    }
+  },
+  parameters: [
+    { name:"sendbuff", kind:"BUFFER", direction:"in", desc:"Device address of send buffer.",
+      binding_type:{c:"const void*", fortran90:null, fortran08:null, lis:null, cpp:null},
+      asynchronous:false, constant:true, pointer:true, array_type:"variable", func_type:null, length:"count",
+      parameter_bindings:["c"], root_only:false, constraints:{not_null:true, value_range:null, paired_with:"count"},
+      memory_space:"device" },
+    { name:"recvbuff", kind:"BUFFER", direction:"out", desc:"Device address of receive buffer, may alias sendbuff for in-place.",
+      binding_type:{c:"void*", fortran90:null, fortran08:null, lis:null, cpp:null},
+      asynchronous:false, constant:false, pointer:true, array_type:"variable", func_type:null, length:"count",
+      parameter_bindings:["c"], root_only:false, constraints:{not_null:true, value_range:null, paired_with:"count"},
+      memory_space:"device" },
+    { name:"count", kind:"COUNT", direction:"in", desc:"Number of elements to reduce.",
+      binding_type:{c:"size_t", fortran90:null, fortran08:null, lis:null, cpp:null},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c"], root_only:false, constraints:{not_null:false, value_range:">= 0", paired_with:null}, memory_space:null },
+    { name:"datatype", kind:"DATATYPE", direction:"in", desc:"Data type of elements.",
+      binding_type:{c:"ncclDataType_t", fortran90:null, fortran08:null, lis:null, cpp:null},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c"], root_only:false, constraints:{not_null:true, value_range:null, paired_with:null}, memory_space:null },
+    { name:"op", kind:"OPERATION", direction:"in", desc:"Reduction operation.",
+      binding_type:{c:"ncclRedOp_t", fortran90:null, fortran08:null, lis:null, cpp:null},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c"], root_only:false, constraints:{not_null:true, value_range:null, paired_with:null}, memory_space:null },
+    { name:"comm", kind:"COMMUNICATOR", direction:"in", desc:"NCCL communicator.",
+      binding_type:{c:"ncclComm_t", fortran90:null, fortran08:null, lis:null, cpp:null},
+      asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c"], root_only:false, constraints:{not_null:true, value_range:null, paired_with:null}, memory_space:null },
+    { name:"stream", kind:"KEY", direction:"in", desc:"CUDA stream this operation is enqueued on.",
+      binding_type:{c:"cudaStream_t", fortran90:null, fortran08:null, lis:null, cpp:null},
+      asynchronous:true, constant:false, pointer:true, array_type:null, func_type:null, length:null,
+      parameter_bindings:["c"], root_only:false, constraints:{not_null:false, value_range:null, paired_with:null}, memory_space:null }
+  ],
+  return: { kind:"RESULT", binding_type:{c:"ncclResult_t", fortran90:null, fortran08:null, lis:null, cpp:null},
+    possible_errors:["ncclInvalidArgument","ncclInvalidUsage","ncclSystemError","ncclInternalError"],
+    possible_successes:["ncclSuccess"] },
+  tool_integration: {
+    profiling_name:null,
+    invariants:["count >= 0","comm != NULL"],
+    buffer_aliasing:"in_place_only",
+    context_dependencies:[
+      { field:"execution.blocking", default_value:true,
+        depends_on:["comm.config.blocking","ncclGroupStart/ncclGroupEnd nesting"],
+        note:"Not determined by the symbol alone — see 0x4." },
+      { field:"execution.completion", default_value:"c",
+        depends_on:["comm.config.blocking","ncclGroupStart/ncclGroupEnd nesting"],
+        note:"Shifts from completing to incomplete while grouped." }
+    ]
+  },
+  relationships: {
+    variants:{ nonblocking:null, blocking:null, persistent:null, neighborhood:null, host:null, gpu:null },
+    superseded_by:null, supersedes:[], aliases:[], operation_group:"allreduce"
+  }
+};
+
+function renderCompleteEntries(){
+  const map = { entryMpiSend: ENTRY_MPI_SEND, entryNvshmemPut: ENTRY_NVSHMEM_PUT, entryNcclAllreduce: ENTRY_NCCL_ALLREDUCE };
+  for (const id in map) {
+    const el = document.getElementById(id);
+    el.textContent = JSON.stringify(map[id], null, 2);
+    hljs.highlightElement(el);
+  }
+}
+renderCompleteEntries();
+
+</script>
+</body>
+</html>

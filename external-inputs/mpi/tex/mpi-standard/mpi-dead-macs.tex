@@ -1,0 +1,152 @@
+% Version of September 15, 2010
+%
+% These are macros that are no longer used
+%
+% a couple of commands from Marc Snir, modified S. Otto
+
+\newlength{\discussSpace}
+\setlength{\discussSpace}{.4cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Used for JOD and draft version of full document
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\newcommand{\discuss}[1]{\vspace{\discussSpace} {\small {\bf Discussion:} #1} \vspace{\discussSpace}}
+%% long discussion
+%\newenvironment{discussion}{\begin{list}{}{}\item[]{\it Discussion.}}{{\rm ({\it End of discussion.})} \end{list}}
+
+%\newcommand{\missing}[1]{\vspace{\discussSpace} {\small {\bf Missing:} #1} \vspace{\discussSpace}}
+
+%\newcommand{\alter}[1]{\vspace{\discussSpace} {\small {\bf Alternatives:} #1} \vspace{\discussSpace}}
+
+%\newcommand{\status}[1]{\vspace{\discussSpace} {\small {\bf Current Status:} #1} \vspace{\discussSpace} }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Used for final version of full document - removes comments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\discuss}[1]{}
+
+% long discussion
+\bgroup\catcode`\{=10\catcode`\}=10\catcode`\[=1\catcode`\]=2\long\gdef\Eatdiscussion#1end{discussion}[\relax\end[discussion]]\relax\egroup\newenvironment{discussion}{\bgroup\def\do##1{\catcode`##1=10}\dospecials\Eatdiscussion}{\egroup}
+
+\newcommand{\missing}[1]{}
+
+\newcommand{\alter}[1]{}
+
+\newcommand{\status}[1]{}
+
+% special comment command for last round
+%\newcommand{\question}[1]{\vspace{\discussSpace} {\small {\bf Question:} #1} \vspace{\discussSpace}}
+\newcommand{\question}[1]{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+\newbox\arg@box
+\makeatother
+
+\def\subtitle{\pagebreak[3]\@ifstar{\@subtit@star}{\@subtit@norm}}
+\def\@subtit@star#1{
+  \item[\hbox{\normalsize\sf\begin{tabular}[t]{l}#1\end{tabular}}\hfill]
+  \hfil\par
+  \expandafter{\let\par=\space\ignorespaces\let\par=\endgraf}
+}
+\def\@subtit@norm#1{
+  \setbox\arg@box=\hbox{\normalsize\sf\begin{tabular}[t]{l}#1\end{tabular}}
+  \ifdim \wd\arg@box > \labelwidth \item[\copy\arg@box\hfill]\hfil\par
+  \else \dp\arg@box=0pt \item[\copy\arg@box\hfill] \fi
+  \expandafter{\let\par=\space\ignorespaces\let\par=\endgraf}
+}
+
+\newenvironment{manpage}[3]{\@beginManpage#1\@@#2\@@#3\@@}{\@endManpage}
+
+\def\@beginManpage#1\@@#2\@@#3\@@{
+  \addcontentsline{toc}{subsection}{#2}
+  \clearpage    
+  \begin{list}{}{
+      \setlength\labelwidth{1.2in}
+      \setlength\leftmargin{\labelwidth}
+      \addtolength\leftmargin{\labelsep}
+      \topsep  5pt plus 2pt minus 2pt
+      \itemsep 5pt plus 2pt minus 2pt
+      \parsep 10pt plus 2pt minus 2pt
+      \raggedbottom
+      }
+    }
+
+\def\@endManpage{\end{list} \clearpage \flushbottom}
+
+\makeatother
+
+\def\setmargin#1{\begingroup\leftmargin #1 \advance\leftmargin\labelsep 
+                 \leftmargini #1 \advance\leftmargini\labelsep}
+\def\esetmargin{\endgroup}
+\def\ibamount{3.0cm\relax}
+\def\ibaamount{4.0cm}
+\def\ibdamount{4.5cm}
+\def\ibcamount{2.0cm}
+\def\ib#1{\hbox to \ibamount{#1\hfil}}
+\def\iba#1{\hbox to \ibaamount{#1\hfil}}
+\def\ibd#1{\hbox to \ibdamount{#1\hfil}}
+\def\ibc#1{\hbox to \ibcamount{#1\hfil}}
+% Use \code{...} for code fragments
+%\def\code#1{\texttt{#1}}
+% Use \df{name} for a definition of name in the text
+\def\df#1{{\bf #1}}
+% Use \note{text} for marginal notes
+\def\note#1{\marginpar{\bf #1}}
+
+%
+% An Editor's Note macro
+%
+\def\ednote#1{{\sl Editor's note: #1}}
+
+%
+%  A few commands to help in writing MPI man pages
+%
+\def\twoc#1#2{
+\begin{list}
+{\hbox to95pt{#1\hfil}}
+{\setlength{\leftmargin}{120pt}
+ \setlength{\labelwidth}{95pt}
+ \setlength{\labelsep}{0pt}
+ \setlength{\partopsep}{0pt}
+ \setlength{\parskip}{0pt}
+ \setlength{\topsep}{0pt}
+}
+\item
+{#2}
+\end{list}
+}
+\outer\long\def\onec#1{
+\begin{list}
+{}
+{\setlength{\leftmargin}{25pt}
+ \setlength{\labelwidth}{0pt}
+ \setlength{\labelsep}{0pt}
+ \setlength{\partopsep}{0pt}
+ \setlength{\parskip}{0pt}
+ \setlength{\topsep}{0pt}
+}
+\item
+{#1}
+\end{list}
+}
+\def\manhead#1{\noindent{\bf{#1}}}
+
+% from binding chapter for appendix B.
+% -*- latex -*-
+
+\def\separator{\rule{\linewidth}{0.5pt}}
+\def\function#1{\texttt{#1}}
+
+% ulem is a package that supports operations such as strike out (\sout).  
+% Unfortunately, ulem breaks some of the other macros (such as \func)
+%\usepackage{ulem}
+%\normalem
+\usepackage[normalem]{ulem}
+\newcommand{\htorchange}[2]{\sout{#1}\uline{#2}}
+
+%%%% TEMPORARY - THESE SHOULD BE DEAD AND REMOVED
+%\newcommand{\status}[1]{}
+
+% a way to comment out large sections of text
+\newcommand{\commentOut}[1]{{}}
+

@@ -1,0 +1,64 @@
+ALL: all-redirect
+
+SHELL  = @SHELL@
+srcdir = @srcdir@
+
+PACKAGE = mpichk
+VERSION = 1.1
+
+DIRS = fortran fortran08 testing
+all-redirect:
+	(cd fortran && make)
+	(cd fortran08 && make)
+
+.SUFFIXES:
+
+clean:
+	for dir in $(DIRS) ; do \
+	    (cd $$dir && make clean) ; done
+
+distclean: clean
+	-rm -f config.log config.status config.cache config.system mpichk \
+		Makefile
+
+test: mpichk
+	(cd testing && make test)
+
+configure: configure.ac
+	autoreconf
+
+mpichk: mpichk.in
+	@echo "See README for using configure to create mpichk"
+	./configure
+
+Makefile: Makefile.in configure
+	@echo "See README for using configure to create mpichk"
+	./configure
+#
+# Create a distribution (make dist)
+# Add the F90 MPI files that configure will update (temporary hacks until
+# there is complete support for F90 in MPI implementations)
+ALL_SOURCES = mpichk.in
+DIST_COMMON = configure.ac configure Makefile.in README
+
+HEADERS =
+DISTFILES = ${DIST_COMMON} ${ALL_SOURCES} ${HEADERS} ${DEP_SOURCES}
+
+distdir = ${PACKAGE}-${VERSION}
+dist: distdir
+	-chmod -R a+r ${distdir}
+	tar cf - ${distdir} | gzip > ${distdir}.tar.gz
+	-rm -rf ${distdir}
+distdir: ${DISTFILES}
+	-rm -rf ${distdir}
+	mkdir ${distdir}
+	-chmod 777 ${distdir}
+	@for file in ${DISTFILES}; do \
+	  d=${srcdir}; \
+	  if test -f $$d/$$file; then \
+	    cp -p $$d/$$file ${distdir}/$$file; \
+	  else \
+	    echo "Could not find $$file" ; \
+	  fi; \
+	done
+

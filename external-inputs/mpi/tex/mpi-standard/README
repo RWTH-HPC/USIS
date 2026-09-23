@@ -1,0 +1,33 @@
+Editing the MPI Standard
+========================
+With the 3.0 Standard, there is now a document, instr.pdf (use make instr.pdf 
+to create it) that describes the process of editing the document and approving 
+changes.
+
+Short version:
+=============
+make cleandoc - build the document
+make allversions - build all versions, including ones with changes marked
+
+LaTeX Issues
+============
+The changebar package must be version 3.5a or later to support color and 
+pdflatex .
+
+Updating the SVN tree
+=====================
+As of MPI 3.1, chapter authors will make changes directly into the
+MPI-3.1 document.  Changes, especially minor changes, do *not* need to
+be marked with change macros; many people, particularly those working
+on the documents, felt that these made it harder to update and correct
+the document, not easier.  Tools such as latexdiff can be used to show
+changes; these are more reliable than manually entered change macros.
+
+However, this does introduce a new problem, since svn does not have a
+good "tag" mechanism (the svn approach is to create a copy, i.e., a
+branch).  Since this is a version control system, all information is
+in the logs, but to simplify creating consistent versions, please
+update the REVISIONHISTORY file with major revision numbers.  That is,
+if there is a version that should be considered a consistent and
+complete working draft, include that in the REVISIONHISTORY file.
+

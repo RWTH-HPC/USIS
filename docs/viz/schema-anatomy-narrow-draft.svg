@@ -1,0 +1,460 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 403 1003" width="403" height="1003">
+  <!-- DRAFT (2026-09-24): single-column variant of schema-anatomy.svg, generated from it. Narrower
+       (403 wide, 1.5 px outer margin), values/meanings column at x=123.5, a few glosses shortened, three rows wrapped.
+       schema-anatomy.svg is unchanged. -->
+  <title>Anatomy of one entry</title>
+  <desc>The eight sections of an entry in the Unified Semantic Interface Specification
+  (curated/schemas/api-schema.json), in one column. Field type is carried by chip colour
+  and the field count inside the chip, never by a type label. bindings.c, semantics.collective
+  and semantics.formal are drawn opened up in place of their own rows; formal is opened two
+  levels deep, one sub-box per sub-object. Each section title carries a section mark and its own
+  section colour; that colour identifies the section and is reused in the listing and the
+  per-section tables, where chip colour means field type.</desc>
+
+  <style>
+    .sec   { font: bold 12px Helvetica, Arial, sans-serif; fill: #161B1A; }
+    /* section colours: one per section, on the title only. These follow .sec so they
+       win the fill; a fill= attribute on the element would not. */
+    .sec-id { fill: #8A2BA0; }  .sec-bi { fill: #284BD2; }
+    .sec-ex { fill: #237D2A; }  .sec-se { fill: #088A6C; }
+    .sec-pa { fill: #0C5CAC; }  .sec-re { fill: #A0345F; }
+    .sec-tl { fill: #4B4B52; }  .sec-rl { fill: #AC3410; }
+    .sdesc { font: italic 9px Helvetica, Arial, sans-serif; fill: #5C6462; }
+    .cnt   { font: 8.5px Helvetica, Arial, sans-serif; fill: #7A8280; text-anchor: end; }
+    .fld   { font: 10px "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #2C3331; }
+    .val   { font: 9px "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #3A403E; }
+    .exp   { font: italic 9px Helvetica, Arial, sans-serif; fill: #5C6462; }
+    .ctit  { font: bold 9px Helvetica, Arial, sans-serif; fill: #33556B; }
+    .ctitv { font: bold 9px Helvetica, Arial, sans-serif; fill: #A8631F; }
+    .cnote { font: italic 8.5px Helvetica, Arial, sans-serif; fill: #6E7674; }
+    .cfld  { font: 9px "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #2C3331; }
+    .cexp  { font: italic 8.5px Helvetica, Arial, sans-serif; fill: #5C6462; }
+    .bdgin { font: bold 8px Helvetica, Arial, sans-serif; fill: #33556B; text-anchor: end; }
+    .bdginc{ font: bold 7.5px Helvetica, Arial, sans-serif; fill: #33556B; text-anchor: end; }
+    .lgl   { font: 9.5px Helvetica, Arial, sans-serif; fill: #4A524F; }
+    .sum   { font: 9.5px Helvetica, Arial, sans-serif; fill: #161B1A; text-anchor: end; }
+    .box   { fill: #FFFFFF; stroke: #9AA29F; stroke-width: 1.2; }
+    .rule  { stroke: #D8DDDA; stroke-width: 1; }
+    .lbox  { fill: #FFFFFF; stroke: #B6BDBA; stroke-width: 1.1; }
+    .enum  { fill: #DCEEEE; stroke: #0E7A82; stroke-width: 1; }
+    .bool  { fill: #FFFFFF; stroke: #0E7A82; stroke-width: 1; }
+    .str   { fill: #F3F5F1; stroke: #8A938C; stroke-width: 1; }
+    .obj   { fill: #E4ECF1; stroke: #4A6B80; stroke-width: 1; }
+    .ref   { fill: #E7E1EF; stroke: #5B4B73; stroke-width: 1; }
+    .oneof { fill: #F3E6D3; stroke: #A8631F; stroke-width: 1.1; }
+    .band  { fill: #F2F6F5; }
+    .bandv { fill: #ECDCC5; }
+    .card  { fill: #FFFFFF; stroke: #4A6B80; stroke-width: 1.4; }
+    .cardv { fill: #FFFFFF; stroke: #A8631F; stroke-width: 1.4; }
+    .sub   { fill: #FAFCFD; stroke: #C3CFD7; stroke-width: 1; }
+    .shadow{ fill: #9AA29F; opacity: 0.22; }
+  </style>
+
+  <!-- ================= identity ================= -->
+  <rect class="box" x="1.5" y="1.5" width="400" height="53" rx="6"/>
+  <text class="sec sec-id" x="13.2" y="14.5">§<tspan x="21.9">identity</tspan></text>
+  <text class="sdesc" x="84.2" y="14.5">which PPM, which name, which version of which standard</text>
+  <text class="cnt"   x="395.5" y="14.5">8 fields · 8 leaves</text>
+  <line class="rule" x1="13.2" y1="18.5" x2="395.5" y2="18.5"/>
+
+  <rect class="enum" x="7.3" y="21.5" width="41.9" height="13" rx="3"/>
+  <text class="fld" x="13.2" y="30.5">model</text>
+  <rect class="str" x="55.2" y="21.5" width="35.9" height="13" rx="3"/>
+  <text class="fld" x="61.1" y="30.5">name</text>
+  <rect class="enum" x="97.1" y="21.5" width="66" height="13" rx="3"/>
+  <text class="fld" x="103" y="30.5">api_group</text>
+  <rect class="str" x="169.1" y="21.5" width="41.9" height="13" rx="3"/>
+  <text class="fld" x="175" y="30.5">since</text>
+  <rect class="str" x="217" y="21.5" width="90.1" height="13" rx="3"/>
+  <text class="fld" x="222.9" y="30.5">deprecated_in</text>
+  <rect class="str" x="313.1" y="21.5" width="35.9" height="13" rx="3"/>
+  <text class="fld" x="319" y="30.5">desc</text>
+
+  <rect class="band" x="4.5" y="35.5" width="394" height="15" rx="3"/>
+  <rect class="str" x="7.3" y="36.5" width="102.1" height="13" rx="3"/>
+  <text class="fld" x="13.2" y="45.5">standard_refs[]</text>
+  <rect class="str" x="115.4" y="36.5" width="90.1" height="13" rx="3"/>
+  <text class="fld" x="121.3" y="45.5">type_family[]</text>
+  <text class="exp" x="221.5" y="45.5">the type suffixes this entry is generic over</text>
+
+  <!-- ================= bindings ================= -->
+  <rect class="box" x="1.5" y="60" width="400" height="56" rx="6"/>
+  <text class="sec sec-bi" x="13.2" y="73">§<tspan x="21.9">bindings</tspan></text>
+  <text class="sdesc" x="84.2" y="73">how the call is spelled per language; null = not offered</text>
+  <text class="cnt"   x="395.5" y="73">5 fields · 15 leaves</text>
+  <line class="rule" x1="13.2" y1="77" x2="395.5" y2="77"/>
+
+  <rect class="shadow" x="11" y="84" width="199" height="31" rx="5"/>
+  <rect class="card" x="7.3" y="80" width="199" height="31" rx="5"/>
+  <text class="ctit"  x="14.7" y="91">c, expanded</text>
+  <text class="cnote" x="77.5" y="91">— the other four are similar</text>
+
+  <rect class="bool" x="14.7" y="95" width="71.4" height="11" rx="3"/>
+  <text class="cfld" x="20.6" y="103.5">expressible</text>
+  <rect class="str" x="91.1" y="95" width="44.3" height="11" rx="3"/>
+  <text class="cfld" x="97" y="103.5">header</text>
+  <rect class="str" x="140.4" y="95" width="60.6" height="11" rx="3"/>
+  <text class="cfld" x="146.3" y="103.5">signature</text>
+
+  <rect class="obj" x="216.3" y="83" width="75.5" height="13" rx="3"/>
+  <text class="fld" x="222.2" y="92">fortran90</text>
+  <text class="bdgin" x="285.9" y="92">5</text>
+  <rect class="obj" x="299.8" y="83" width="75.5" height="13" rx="3"/>
+  <text class="fld" x="305.7" y="92">fortran08</text>
+  <text class="bdgin" x="369.4" y="92">4</text>
+
+  <rect class="obj" x="216.3" y="98" width="39.3" height="13" rx="3"/>
+  <text class="fld" x="222.2" y="107">lis</text>
+  <text class="bdgin" x="249.7" y="107">1</text>
+  <rect class="obj" x="263.6" y="98" width="39.3" height="13" rx="3"/>
+  <text class="fld" x="269.5" y="107">cpp</text>
+  <text class="bdgin" x="297" y="107">2</text>
+
+  <!-- ================= execution ================= -->
+  <rect class="box" x="1.5" y="121.5" width="400" height="177" rx="6"/>
+  <text class="sec sec-ex" x="13.2" y="134.5">§<tspan x="21.9">execution</tspan></text>
+  <text class="sdesc" x="91" y="134.5">when and where the call runs; 8 of 11 closed enums</text>
+  <text class="cnt"   x="395.5" y="134.5">11 fields · 11 leaves</text>
+  <line class="rule" x1="13.2" y1="138.5" x2="395.5" y2="138.5"/>
+
+  <rect class="band" x="4.5" y="140.5" width="394" height="14" rx="3"/>
+  <rect class="bool" x="7.3" y="141.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="150.5">blocking</text>
+  <text class="exp" x="123.5" y="150.5">blocks until locally complete</text>
+
+  <rect class="bool" x="7.3" y="155.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="164.5">execute_once</text>
+  <text class="exp" x="123.5" y="164.5">lifetime singleton, e.g. MPI_Init</text>
+
+  <rect class="band" x="4.5" y="168.5" width="394" height="14" rx="3"/>
+  <rect class="bool" x="7.3" y="169.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="178.5">collective</text>
+  <text class="exp" x="123.5" y="178.5">every process in the team calls it</text>
+
+  <rect class="enum" x="7.3" y="183.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="192.5">thread_safety</text>
+  <text class="val" x="123.5" y="192.5">single, ..., multiple<tspan class="exp" dx="10">— minimum level the call needs</tspan></text>
+
+  <rect class="band" x="4.5" y="196.5" width="394" height="14" rx="3"/>
+  <rect class="enum" x="7.3" y="197.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="206.5">launch</text>
+  <text class="val" x="123.5" y="206.5">cpu, gpu, cpu+gpu<tspan class="exp" dx="10">— where in code it may be issued</tspan></text>
+
+  <rect class="enum" x="7.3" y="211.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="220.5">runs_on</text>
+  <text class="val" x="123.5" y="220.5">cpu, gpu, cpu+gpu<tspan class="exp" dx="10">— what hardware does the work</tspan></text>
+
+  <rect class="band" x="4.5" y="224.5" width="394" height="14" rx="3"/>
+  <rect class="enum" x="7.3" y="225.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="234.5">gpu_scope</text>
+  <text class="val" x="123.5" y="234.5">thread, warp, block, device<tspan class="exp" dx="10">— who calls together</tspan></text>
+
+  <rect class="enum" x="7.3" y="239.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="248.5">stages[]</text>
+  <text class="val" x="123.5" y="248.5">init, start, complete, free<tspan class="exp" dx="10">— MPI-4 taxonomy</tspan></text>
+
+  <rect class="band" x="4.5" y="252.5" width="394" height="14" rx="3"/>
+  <rect class="enum" x="7.3" y="253.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="262.5">locality</text>
+  <text class="val" x="123.5" y="262.5">local, remote, both<tspan class="exp" dx="10">— whose state the call touches</tspan></text>
+
+  <rect class="enum" x="7.3" y="267.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="276.5">completion</text>
+  <text class="val" x="123.5" y="276.5">incomplete, completing, freeing, stream_ordered</text>
+
+  <rect class="band" x="4.5" y="280.5" width="394" height="14" rx="3"/>
+  <rect class="enum" x="7.3" y="281.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="290.5">procedure_class</text>
+  <text class="val" x="123.5" y="290.5">blocking, nonblocking, persistent (+1)</text>
+
+  <!-- ================= semantics ================= -->
+  <rect class="box" x="1.5" y="304" width="400" height="290" rx="6"/>
+  <text class="sec sec-se" x="13.2" y="317">§<tspan x="21.9">semantics</tspan></text>
+  <text class="sdesc" x="91" y="317">what it means; exactly one of the first four is non-null</text>
+  <text class="cnt"   x="395.5" y="317">6 fields · 65 leaves</text>
+  <line class="rule" x1="13.2" y1="321" x2="395.5" y2="321"/>
+
+  <rect class="oneof" x="3.5" y="322" width="397" height="92" rx="4"/>
+
+  <rect class="shadow" x="11" y="328" width="388" height="43" rx="5"/>
+  <rect class="cardv" x="7.3" y="324" width="388" height="43" rx="5"/>
+  <text class="ctitv" x="14.7" y="334">collective, expanded</text>
+  <text class="cnote" x="115.5" y="334">— the other three operation classes are equally small</text>
+
+  <rect class="enum" x="14.7" y="338" width="33.5" height="11" rx="3"/>
+  <text class="cfld" x="20.6" y="346.5">type</text>
+  <rect class="bool" x="53.2" y="338" width="82.3" height="11" rx="3"/>
+  <text class="cfld" x="59.1" y="346.5">root_involved</text>
+  <rect class="bool" x="140.5" y="338" width="55.2" height="11" rx="3"/>
+  <text class="cfld" x="146.4" y="346.5">in_place</text>
+  <rect class="enum" x="200.7" y="338" width="66" height="11" rx="3"/>
+  <text class="cfld" x="206.6" y="346.5">comm_scope</text>
+  <rect class="enum" x="271.7" y="338" width="93.1" height="11" rx="3"/>
+  <text class="cfld" x="277.6" y="346.5">algorithm_class</text>
+  <rect class="bool" x="14.7" y="351" width="76.8" height="11" rx="3"/>
+  <text class="cfld" x="20.6" y="359.5">reduction_op</text>
+
+  <rect class="bool" x="96.5" y="351" width="87.7" height="11" rx="3"/>
+  <text class="cfld" x="102.4" y="359.5">topology_aware</text>
+  <text class="cnote" x="191.5" y="359.5">in_place = documented in-place mode</text>
+
+  <rect class="bandv" x="4.5" y="374" width="394" height="14" rx="3"/>
+  <rect class="obj" x="7.3" y="375" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="384">point_to_point</text>
+  <text class="bdgin" x="107.4" y="384">4</text>
+  <text class="exp" x="123.5" y="384">matched send and receive pairs</text>
+
+  <rect class="obj" x="7.3" y="389" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="398">one_sided</text>
+  <text class="bdgin" x="107.4" y="398">3</text>
+  <text class="exp" x="123.5" y="398">put, get, accumulate — RMA</text>
+
+  <rect class="bandv" x="4.5" y="402" width="394" height="14" rx="3"/>
+  <rect class="obj" x="7.3" y="403" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="412">atomic</text>
+  <text class="bdgin" x="107.4" y="412">3</text>
+  <text class="exp" x="123.5" y="412">atomic read-modify-write</text>
+
+  <rect class="band" x="4.5" y="421" width="394" height="14" rx="3"/>
+  <rect class="obj" x="7.3" y="422" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="431">memory</text>
+  <text class="bdgin" x="107.4" y="431">6</text>
+  <text class="exp" x="123.5" y="431">when buffers may be reused</text>
+
+  <!-- formal, expanded — one sub-box per sub-object -->
+  <rect class="shadow" x="11" y="444" width="388" height="152" rx="5"/>
+  <rect class="cardv" x="7.3" y="440" width="388" height="152" rx="5"/>
+  <text class="ctitv" x="14.7" y="450">formal, expanded</text>
+  <text class="cnote" x="96.5" y="450">— null for query and management calls, a real answer</text>
+
+  <rect class="sub" x="11.5" y="454" width="379" height="28" rx="4"/>
+  <rect class="obj" x="16.5" y="456.5" width="124" height="11" rx="3"/>
+  <text class="cfld" x="22.1" y="465">participants[]</text>
+  <text class="bdginc" x="134.9" y="465">5</text>
+  <text class="cexp" x="148.5" y="465">who is involved, and does each one call</text>
+  <rect class="str" x="23.5" y="468.5" width="22.6" height="11" rx="3"/>
+  <text class="cfld" x="29.4" y="477">id</text>
+  <rect class="enum" x="51.1" y="468.5" width="60.6" height="11" rx="3"/>
+  <text class="cfld" x="57" y="477">role_kind</text>
+  <rect class="bool" x="116.7" y="468.5" width="87.7" height="11" rx="3"/>
+  <text class="cfld" x="122.6" y="477">calls_function</text>
+  <rect class="enum" x="209.4" y="468.5" width="71.4" height="11" rx="3"/>
+  <text class="cfld" x="215.3" y="477">cardinality</text>
+  <rect class="str" x="285.8" y="468.5" width="55.2" height="11" rx="3"/>
+  <text class="cfld" x="291.7" y="477">selector</text>
+
+  <rect class="sub" x="11.5" y="485" width="379" height="40" rx="4"/>
+  <rect class="obj" x="16.5" y="487.5" width="124" height="11" rx="3"/>
+  <text class="cfld" x="22.1" y="496">data_flow[]</text>
+  <text class="bdginc" x="134.9" y="496">10</text>
+  <text class="cexp" x="148.5" y="496">one entry per memory access, with its provenance</text>
+  <rect class="str" x="23.5" y="499.5" width="22.6" height="11" rx="3"/>
+  <text class="cfld" x="29.4" y="508">id</text>
+  <rect class="str" x="51.1" y="499.5" width="71.4" height="11" rx="3"/>
+  <text class="cfld" x="57" y="508">participant</text>
+  <rect class="enum" x="127.5" y="499.5" width="22.6" height="11" rx="3"/>
+  <text class="cfld" x="133.4" y="508">op</text>
+  <rect class="str" x="155.1" y="499.5" width="44.3" height="11" rx="3"/>
+  <text class="cfld" x="161" y="508">buffer</text>
+  <rect class="obj" x="204.4" y="499.5" width="53.5" height="11" rx="3"/>
+  <text class="cfld" x="210.3" y="508">extent</text>
+  <text class="bdginc" x="252" y="508">2</text>
+  <rect class="str" x="262.9" y="499.5" width="44.3" height="11" rx="3"/>
+  <text class="cfld" x="268.8" y="508">offset</text>
+  <rect class="obj" x="312.2" y="499.5" width="64.3" height="11" rx="3"/>
+  <text class="cfld" x="318.1" y="508">inputs[]</text>
+  <text class="bdginc" x="370.6" y="508">2</text>
+  <rect class="str" x="23.5" y="511.5" width="82.3" height="11" rx="3"/>
+  <text class="cfld" x="29.4" y="520">operation_ref</text>
+  <rect class="obj" x="110.8" y="511.5" width="96.8" height="11" rx="3"/>
+  <text class="cfld" x="116.7" y="520">valid_during[]</text>
+  <text class="bdginc" x="201.8" y="520">3</text>
+  <rect class="obj" x="212.6" y="511.5" width="53.5" height="11" rx="3"/>
+  <text class="cfld" x="218.5" y="520">source</text>
+  <text class="bdginc" x="260.2" y="520">6</text>
+  <text class="cnote" x="273.1" y="520">one of 4 kinds</text>
+
+  <rect class="sub" x="11.5" y="528" width="379" height="28" rx="4"/>
+  <rect class="obj" x="16.5" y="530.5" width="124" height="11" rx="3"/>
+  <text class="cfld" x="22.1" y="539">sync</text>
+  <text class="bdginc" x="134.9" y="539">3</text>
+  <text class="cexp" x="148.5" y="539">events, ordering, cross-call-instance matching</text>
+  <rect class="obj" x="23.5" y="542.5" width="64.3" height="11" rx="3"/>
+  <text class="cfld" x="29.4" y="551">events[]</text>
+  <text class="bdginc" x="81.9" y="551">6</text>
+  <rect class="obj" x="92.8" y="542.5" width="75.2" height="11" rx="3"/>
+  <text class="cfld" x="98.7" y="551">ordering[]</text>
+  <text class="bdginc" x="162.1" y="551">4</text>
+  <rect class="obj" x="173" y="542.5" width="64.3" height="11" rx="3"/>
+  <text class="cfld" x="178.9" y="551">matching</text>
+  <text class="bdginc" x="231.4" y="551">4</text>
+
+  <rect class="sub" x="11.5" y="559" width="379" height="28" rx="4"/>
+  <rect class="obj" x="16.5" y="561.5" width="124" height="11" rx="3"/>
+  <text class="cfld" x="22.1" y="570">handle_lifecycle[]</text>
+  <text class="bdginc" x="134.9" y="570">4</text>
+  <text class="cexp" x="148.5" y="570">a handle across create, use and destroy</text>
+  <rect class="str" x="23.5" y="573.5" width="44.3" height="11" rx="3"/>
+  <text class="cfld" x="29.4" y="582">handle</text>
+  <rect class="enum" x="72.8" y="573.5" width="71.4" height="11" rx="3"/>
+  <text class="cfld" x="78.7" y="582">handle_kind</text>
+  <rect class="enum" x="149.2" y="573.5" width="33.5" height="11" rx="3"/>
+  <text class="cfld" x="155.1" y="582">role</text>
+  <rect class="str" x="187.7" y="573.5" width="76.8" height="11" rx="3"/>
+  <text class="cfld" x="193.6" y="582">derived_from</text>
+
+  <!-- ================= parameters ================= -->
+  <rect class="box" x="1.5" y="603.5" width="400" height="137" rx="6"/>
+  <text class="sec sec-pa" x="13.2" y="616.5">§<tspan x="21.9">parameters []</tspan></text>
+  <text class="sdesc" x="118.2" y="616.5">per argument: role, direction, type, constraints</text>
+  <text class="cnt"   x="395.5" y="616.5">15 fields · 21 leaves</text>
+  <line class="rule" x1="13.2" y1="620.5" x2="395.5" y2="620.5"/>
+
+  <rect class="band" x="4.5" y="622.5" width="394" height="14" rx="3"/>
+  <rect class="enum" x="7.3" y="623.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="632.5">kind</text>
+  <text class="exp" x="123.5" y="632.5">the argument's role — BUFFER, COUNT, RANK and 28 more</text>
+
+  <rect class="enum" x="7.3" y="637.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="646.5">direction</text>
+  <text class="val" x="123.5" y="646.5">in, out, inout<tspan class="exp" dx="10">— relative to the caller</tspan></text>
+
+  <rect class="band" x="4.5" y="650.5" width="394" height="14" rx="3"/>
+  <rect class="bool" x="7.3" y="651.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="660.5">asynchronous</text>
+  <text class="exp" x="123.5" y="660.5">runtime may touch it after return</text>
+
+  <rect class="str" x="7.3" y="665.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="674.5">length</text>
+  <text class="exp" x="123.5" y="674.5">a count, or the sibling parameter holding it</text>
+
+  <rect class="band" x="4.5" y="678.5" width="394" height="14" rx="3"/>
+  <rect class="obj" x="7.3" y="679.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="688.5">constraints</text>
+  <text class="bdgin" x="107.4" y="688.5">3</text>
+  <rect class="bool" x="123.5" y="680" width="55.2" height="11" rx="3"/>
+  <text class="cfld" x="129.4" y="688.5">not_null</text>
+  <rect class="str" x="183.7" y="680" width="71.4" height="11" rx="3"/>
+  <text class="cfld" x="189.6" y="688.5">value_range</text>
+  <rect class="str" x="260.1" y="680" width="71.4" height="11" rx="3"/>
+  <text class="cfld" x="266" y="688.5">paired_with</text>
+
+  <rect class="enum" x="7.3" y="693.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="702.5">memory_space</text>
+  <text class="val" x="123.5" y="702.5">host, device, symmetric_heap (+2)<tspan class="exp" dx="10">— where it lives</tspan></text>
+
+  <rect class="str" x="7.3" y="707.5" width="35.9" height="13" rx="3"/>
+  <text class="fld" x="13.2" y="716.5">name</text>
+  <rect class="str" x="49.2" y="707.5" width="35.9" height="13" rx="3"/>
+  <text class="fld" x="55.1" y="716.5">desc</text>
+  <rect class="obj" x="91.1" y="707.5" width="93.5" height="13" rx="3"/>
+  <text class="fld" x="97" y="716.5">binding_type</text>
+  <text class="bdgin" x="178.7" y="716.5">5</text>
+  <rect class="bool" x="190.6" y="707.5" width="60" height="13" rx="3"/>
+  <text class="fld" x="196.5" y="716.5">constant</text>
+  <rect class="bool" x="256.6" y="707.5" width="54" height="13" rx="3"/>
+  <text class="fld" x="262.5" y="716.5">pointer</text>
+  <rect class="enum" x="316.6" y="707.5" width="72" height="13" rx="3"/>
+  <text class="fld" x="322.5" y="716.5">array_type</text>
+
+  <rect class="str" x="7.3" y="722.5" width="66" height="13" rx="3"/>
+  <text class="fld" x="13.2" y="731.5">func_type</text>
+  <rect class="enum" x="79.3" y="722.5" width="132.3" height="13" rx="3"/>
+  <text class="fld" x="85.2" y="731.5">parameter_bindings[]</text>
+  <rect class="bool" x="217.6" y="722.5" width="66" height="13" rx="3"/>
+  <text class="fld" x="223.5" y="731.5">root_only</text>
+
+  <!-- ================= return ================= -->
+  <rect class="box" x="1.5" y="746" width="400" height="68" rx="6"/>
+  <text class="sec sec-re" x="13.2" y="759">§<tspan x="21.9">return</tspan></text>
+  <text class="sdesc" x="70.2" y="759">what the return value means — the C type does not settle it</text>
+  <text class="cnt"   x="395.5" y="759">5 fields · 9 leaves</text>
+  <line class="rule" x1="13.2" y1="763" x2="395.5" y2="763"/>
+
+  <rect class="band" x="4.5" y="765" width="394" height="14" rx="3"/>
+  <rect class="enum" x="7.3" y="766" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="775">kind</text>
+  <text class="val" x="123.5" y="775">ERROR_CODE, RESULT, ...<tspan class="exp" dx="10">— a status, an object, or a datum</tspan></text>
+
+  <rect class="enum" x="7.3" y="781" width="72" height="13" rx="3"/>
+  <text class="fld" x="13.2" y="790">value_kind</text>
+  <rect class="obj" x="85.3" y="781" width="93.5" height="13" rx="3"/>
+  <text class="fld" x="91.2" y="790">binding_type</text>
+  <text class="bdgin" x="172.9" y="790">5</text>
+  <rect class="str" x="184.8" y="781" width="114.2" height="13" rx="3"/>
+  <text class="fld" x="190.7" y="790">possible_errors[]</text>
+  <rect class="str" x="7.3" y="796" width="132.3" height="13" rx="3"/>
+  <text class="fld" x="13.2" y="805">possible_successes[]</text>
+
+  <!-- ================= tool_integration ================= -->
+  <rect class="box" x="1.5" y="819.5" width="400" height="92" rx="6"/>
+  <text class="sec sec-tl" x="13.2" y="832.5">§<tspan x="21.9">tool_integration</tspan></text>
+  <text class="sdesc" x="138.2" y="832.5">hooks and preconditions for consuming tools</text>
+  <text class="cnt"   x="395.5" y="832.5">4 fields · 7 leaves</text>
+  <line class="rule" x1="13.2" y1="836.5" x2="395.5" y2="836.5"/>
+
+  <rect class="band" x="4.5" y="838.5" width="394" height="14" rx="3"/>
+  <rect class="str" x="7.3" y="839.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="848.5">profiling_name</text>
+  <text class="exp" x="123.5" y="848.5">interposer symbol, e.g. PMPI_*</text>
+
+  <rect class="str" x="7.3" y="853.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="862.5">invariants[]</text>
+  <text class="exp" x="123.5" y="862.5">preconditions in the shared grammar</text>
+
+  <rect class="band" x="4.5" y="866.5" width="394" height="14" rx="3"/>
+  <rect class="enum" x="7.3" y="867.5" width="106" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="876.5">buffer_aliasing</text>
+  <text class="val" x="123.5" y="876.5">forbidden, allowed, in_place_only</text>
+
+  <rect class="obj" x="7.3" y="881.5" width="153.8" height="12" rx="3"/>
+  <text class="fld" x="13.2" y="890.5">context_dependencies[]</text>
+  <text class="bdgin" x="155.2" y="890.5">4</text>
+  <rect class="str" x="23.5" y="895" width="38.9" height="11" rx="3"/>
+  <text class="cfld" x="29.4" y="903.5">field</text>
+  <rect class="str" x="67.4" y="895" width="82.3" height="11" rx="3"/>
+  <text class="cfld" x="73.3" y="903.5">default_value</text>
+  <rect class="str" x="154.7" y="895" width="76.8" height="11" rx="3"/>
+  <text class="cfld" x="160.6" y="903.5">depends_on[]</text>
+  <rect class="str" x="236.5" y="895" width="33.5" height="11" rx="3"/>
+  <text class="cfld" x="242.4" y="903.5">note</text>
+
+  <!-- ================= relationships ================= -->
+  <rect class="box" x="1.5" y="917" width="400" height="38" rx="6"/>
+  <text class="sec sec-rl" x="13.2" y="930">§<tspan x="21.9">relationships</tspan></text>
+  <text class="sdesc" x="118.2" y="930">edges to other entries (model:function_key)</text>
+  <text class="cnt"   x="395.5" y="930">3 fields · 8 leaves</text>
+  <line class="rule" x1="13.2" y1="934" x2="395.5" y2="934"/>
+
+  <rect class="ref" x="7.3" y="937" width="69.4" height="13" rx="3"/>
+  <text class="fld" x="13.2" y="946">variants</text>
+  <text class="bdgin" x="70.8" y="946">6</text>
+  <rect class="ref" x="82.7" y="937" width="90.1" height="13" rx="3"/>
+  <text class="fld" x="88.6" y="946">superseded_by</text>
+  <rect class="ref" x="178.8" y="937" width="84.1" height="13" rx="3"/>
+  <text class="fld" x="184.7" y="946">supersedes[]</text>
+
+  <!-- ================= legend ================= -->
+  <rect class="lbox" x="1.5" y="960.5" width="400" height="41" rx="8"/>
+
+  <rect class="enum" x="13.2" y="967.5" width="22" height="11" rx="3"/>
+  <text class="lgl" x="41.2" y="976.5">closed enum</text>
+  <rect class="bool" x="105.1" y="967.5" width="22" height="11" rx="3"/>
+  <text class="lgl" x="133.1" y="976.5">boolean</text>
+  <rect class="str" x="176.9" y="967.5" width="22" height="11" rx="3"/>
+  <text class="lgl" x="204.9" y="976.5">free text</text>
+  <rect class="obj" x="249.2" y="967.5" width="22" height="11" rx="3"/>
+  <text class="lgl" x="277.2" y="976.5">nested object</text>
+  <rect class="ref" x="13.2" y="985.5" width="22" height="11" rx="3"/>
+  <text class="lgl" x="41.2" y="994.5">entry reference</text>
+
+  <rect class="obj" x="115.1" y="985.5" width="30" height="11" rx="3"/>
+  <text class="bdgin" x="139.2" y="994">n</text>
+  <text class="lgl" x="151.1" y="994.5">n fields</text>
+  <text class="lgl" x="191.2" y="994.5">[] array</text>
+  <rect class="oneof" x="230.8" y="985.5" width="22" height="11" rx="3"/>
+  <text class="lgl" x="258.8" y="994.5">exactly one of</text>
+  <text class="sum" x="395.5" y="973">144 leaves</text>
+  <text class="sum" x="395.5" y="984.5">41 enums</text>
+  <text class="sum" x="395.5" y="996">230 values</text>
+</svg>

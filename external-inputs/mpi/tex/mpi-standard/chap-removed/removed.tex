@@ -1,0 +1,123 @@
+\chapter{Removed Interfaces}
+\mpitermtitleindex{removed interfaces}
+\label{chap:removed}
+\label{sec:removed}
+
+\section{Removed \texorpdfstring{\MPII/}{MPI-1} Bindings}
+\label{sec:rm-mpii}
+
+\subsection{Overview}
+\label{subsec:rm-mpii-intro}
+
+The following \mpii/ bindings were deprecated as of \mpiii/ and were removed in \mpiiii/.
+They may be provided by an implementation for backwards compatibility, but are not required.
+Removal of these bindings affects all language-specific definitions thereof.  
+Only the language-neutral bindings are listed when possible.
+
+\subsection{Removed \texorpdfstring{\MPII/}{MPI-1} Functions}
+
+Table~\ref{table:removed:mpiifunctions} shows the removed \mpii/ functions and their replacements.
+
+\begin{table}[htb]
+\caption{Removed \mpii/ functions and their replacements}
+\label{table:removed:mpiifunctions} 
+\begin{center}
+\begin{tabular}{ll}
+\textbf{Removed}&\textbf{\mpiii/ Replacement}\\
+\hline
+\mpifuncmain{MPI\_ADDRESS} & \mpifunc{MPI\_GET\_ADDRESS} \\
+\mpifuncmain{MPI\_ERRHANDLER\_CREATE} & \mpifunc{MPI\_COMM\_CREATE\_ERRHANDLER} \\
+\mpifuncmain{MPI\_ERRHANDLER\_GET} & \mpifunc{MPI\_COMM\_GET\_ERRHANDLER} \\
+\mpifuncmain{MPI\_ERRHANDLER\_SET} & \mpifunc{MPI\_COMM\_SET\_ERRHANDLER} \\
+\mpifuncmain{MPI\_TYPE\_EXTENT} & \mpifunc{MPI\_TYPE\_GET\_EXTENT} \\
+\mpifuncmain{MPI\_TYPE\_HINDEXED} & \mpifunc{MPI\_TYPE\_CREATE\_HINDEXED} \\
+\mpifuncmain{MPI\_TYPE\_HVECTOR} & \mpifunc{MPI\_TYPE\_CREATE\_HVECTOR} \\
+\mpifuncmain{MPI\_TYPE\_LB} & \mpifunc{MPI\_TYPE\_GET\_EXTENT} \\
+\mpifuncmain{MPI\_TYPE\_STRUCT} & \mpifunc{MPI\_TYPE\_CREATE\_STRUCT} \\
+\mpifuncmain{MPI\_TYPE\_UB} & \mpifunc{MPI\_TYPE\_GET\_EXTENT} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Removed \texorpdfstring{\MPII/}{MPI-1} Datatypes}
+
+\namedref{Table}{table:removed:mpiidatatypes} shows the removed \mpii/ 
+datatypes and their replacements.
+
+\begin{table}[tb]
+\caption{Removed \mpii/ datatypes. The indicated routine may be used for
+changing the lower and upper bound respectively.}
+\label{table:removed:mpiidatatypes}
+\begin{center}
+\begin{tabular}{ll}
+\textbf{Removed}&\textbf{\mpiii/ Replacement}\\
+\hline
+\mpiconstmain{MPI\_LB}  & \mpifunc{MPI\_TYPE\_CREATE\_RESIZED} \\
+\mpiconstmain{MPI\_UB}  & \mpifunc{MPI\_TYPE\_CREATE\_RESIZED} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Removed \texorpdfstring{\MPII/}{MPI-1} Constants}
+
+Table~\ref{table:removed:mpiiconstants} shows the removed \mpii/ constants.  There are no replacements.
+
+\begin{table}[htb]
+\caption{Removed \mpii/ constants}
+\label{table:removed:mpiiconstants}
+\begin{center}
+\begin{tabular}{l}
+\multicolumn{1}{c}{\textbf{Removed \mpii/ Constants}} \\
+\hline
+{\small C type: \ctype{const int} (or unnamed \ctype{enum})} \\
+{\small Fortran type: \ftype{INTEGER}} \\
+\hline
+\mpiconstmain{MPI\_COMBINER\_HINDEXED\_INTEGER} \\
+\mpiconstmain{MPI\_COMBINER\_HVECTOR\_INTEGER} \\
+\mpiconstmain{MPI\_COMBINER\_STRUCT\_INTEGER} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Removed \texorpdfstring{\MPII/}{MPI-1} Callback Prototypes}
+
+Table~\ref{table:removed:mpiiprototypes} shows the removed \mpii/ callback prototypes and their replacements.
+
+%% I think it would be better not to use separate tables for each of the
+%% removed lists of items.  But if they are used, we need to allow more floats
+%% on a page.  This changes the number from 2 to 3.
+\edef\savetopnumber{\value{topnumber}} %%ALLOWLATEX%%
+\setcounter{topnumber}{3} %%ALLOWLATEX%%
+
+\begin{table}[ht]
+\caption{Removed \mpii/ callback prototypes and their replacements}
+\label{table:removed:mpiiprototypes}
+\begin{center}
+\begin{tabular}{ll}
+\textbf{Removed}&\textbf{\mpiii/ Replacement}\\
+\hline
+\mpicallbackmain{MPI\_Handler\_function}  & \mpicallback{MPI\_Comm\_errhandler\_function} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+\section{C++ Bindings}
+\label{sec:rm-cpp}
+
+
+\deprecatedsep
+
+
+The C++ bindings were deprecated as of \texorpdfstring{\MPIIIDOTII/}{MPI-2.2}.
+The C++ bindings were removed in \texorpdfstring{\MPIIIIDOTO/}{MPI-3.0}.
+The namespace is still reserved, however,
+and bindings may only be provided by an implementation
+as described in
+the \texorpdfstring{\MPIIIDOTII/}{MPI-2.2} standard.
+
+%% Restore the limit on floats at the top of a page
+\clearpage
+\setcounter{topnumber}{\savetopnumber} %%ALLOWLATEX%%

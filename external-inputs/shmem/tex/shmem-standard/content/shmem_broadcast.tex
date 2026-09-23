@@ -1,0 +1,184 @@
+\apisummary{
+    Broadcasts a block of data from one \ac{PE} to one or more destination
+    \acp{PE}.
+}
+
+\begin{apidefinition}
+
+%% C11
+\begin{C11synopsis}
+int @\FuncDecl{shmem\_broadcast}@(shmem_team_t team, TYPE *dest, const TYPE *source, size_t nelems, int PE_root);
+\end{C11synopsis}
+where \TYPE{} is one of the standard \ac{RMA} types specified by Table \ref{stdrmatypes}.
+
+%% C/C++
+\begin{Csynopsis}
+\end{Csynopsis}
+\begin{CsynopsisCol}
+int @\FuncDecl{shmem\_\FuncParam{TYPENAME}\_broadcast}@(shmem_team_t team, TYPE *dest, const TYPE *source, size_t nelems, int PE_root);
+\end{CsynopsisCol}
+where \TYPE{} is one of the standard \ac{RMA} types and has a corresponding \TYPENAME{} specified by Table \ref{stdrmatypes}.
+
+\begin{CsynopsisCol}
+int @\FuncDecl{shmem\_broadcastmem}@(shmem_team_t team, void *dest, const void *source, size_t nelems, int PE_root);
+\end{CsynopsisCol}
+
+\begin{DeprecateBlock}
+\begin{CsynopsisCol}
+void @\FuncDecl{shmem\_broadcast32}@(void *dest, const void *source, size_t nelems, int PE_root, int PE_start, int logPE_stride, int PE_size, long *pSync);
+void @\FuncDecl{shmem\_broadcast64}@(void *dest, const void *source, size_t nelems, int PE_root, int PE_start, int logPE_stride, int PE_size, long *pSync);
+\end{CsynopsisCol}
+\end{DeprecateBlock}
+
+\begin{apiarguments}
+
+\apiargument{IN}{team}{The team over which to perform the operation.}%
+
+\apiargument{OUT}{dest}{Symmetric address of destination data object.
+      The type of \dest{} should match that implied in the SYNOPSIS section.}
+\apiargument{IN}{source}{Symmetric address of the source data object.
+      The type of \source{} should match that implied in the SYNOPSIS section.}
+\apiargument{IN}{nelems}{
+  The number of elements in \source{} and \dest{} arrays.
+  For \FUNC{shmem\_broadcastmem}, elements are bytes;
+  for \FUNC{shmem\_broadcast\{32,64\}}, elements are 4 or 8 bytes,
+  respectively.
+}
+\apiargument{IN}{PE\_root}{Zero-based ordinal of the \ac{PE}, with respect to
+    the calling \acp{PE}, from which the data is copied.}
+
+\begin{DeprecateBlock}
+
+\apiargument{IN}{PE\_start}{The lowest \ac{PE} number of the active set of
+    \acp{PE}.}
+\apiargument{IN}{logPE\_stride}{ The log (base 2) of the stride between
+    consecutive \ac{PE} numbers in the active set.}
+    \apiargument{IN}{PE\_size}{The number of \acp{PE} in the active set.}
+\apiargument{IN}{pSync}{
+    Symmetric address of a work array of size at least \CONST{SHMEM\_BCAST\_SYNC\_SIZE}.}
+\end{DeprecateBlock}
+
+\end{apiarguments}
+
+\apidescription{
+    \openshmem team-based broadcast routines are collective routines over a valid \openshmem team.
+    They copy the \source{} data object on the \ac{PE} specified by
+    \VAR{PE\_root} to the \dest{} data object on the \acp{PE}
+    participating in the collective operation.
+    The same \dest{} and \source{} data objects and the same value of
+    \VAR{PE\_root} must be passed by all \acp{PE} participating in the
+    collective operation.
+
+    For team-based broadcasts:
+    \begin{itemize}
+    \item The \dest{} object is updated on all \acp{PE}.
+    \item All \acp{PE} in the \VAR{team} argument must participate in
+      the operation.
+    \item Only \acp{PE} in the team  may call the routine.  If a
+      \ac{PE} not in the team calls a team-based
+      collective routine, the behavior is undefined.
+    \item If \VAR{team} compares equal to \LibConstRef{SHMEM\_TEAM\_INVALID} or is
+      otherwise invalid, the behavior is undefined.
+    \item \ac{PE} numbering is relative to the team. The specified
+      root \ac{PE} must be a valid \ac{PE} number for the team,
+      between \CONST{0} and \VAR{N$-$1}, where \VAR{N} is the size of
+      the team.
+    \end{itemize}
+
+    Before the local \ac{PE} calls a broadcast routine, the following conditions
+    must be ensured, otherwise the behavior is undefined:
+    \begin{itemize}
+        \item The \dest{} array on all \acp{PE} in the team is ready to
+            accept the result of the operation.
+        \item The \source{} array at the local root \ac{PE} is ready to be
+            read by any \ac{PE} in the team.
+    \end{itemize}
+    The application does not need to synchronize to ensure that the \source{}
+    array is ready across all \acp{PE} prior to calling this routine.
+
+    Upon return from a team-based broadcast routine, the following are true for the local
+    \ac{PE}:
+    \begin{itemize}
+        \item The \dest{} data object is updated.
+        \item The \source{} data object may be safely reused.
+    \end{itemize}
+
+\begin{DeprecateBlock}
+    \openshmem active-set broadcast routines are collective routines over an active set.
+    They copy the \source{} data object on the \ac{PE} specified by
+    \VAR{PE\_root} to the \dest{} data object on the \acp{PE}
+    participating in the collective operation.
+    The same \dest{} and \source{} data objects and the same value of
+    \VAR{PE\_root} must be passed by all \acp{PE} participating in the
+    collective operation.
+
+    For active-set-based broadcasts:
+    \begin{itemize}
+        \item The \VAR{dest} object is updated on all \acp{PE} other than the root \ac{PE}.
+        \item All \acp{PE} in the active set defined by the
+        \VAR{PE\_start}, \VAR{logPE\_stride}, \VAR{PE\_size} triplet
+        must participate in the operation.
+       \item Only \acp{PE} in the active set may call the routine.  If a
+       \ac{PE} not in the active set calls an active-set-based
+      collective routine, the behavior is undefined.
+      \item The values of arguments \VAR{PE\_root}, \VAR{PE\_start},
+      \VAR{logPE\_stride}, and \VAR{PE\_size} must be the same value
+      on all \acp{PE} in the active set.
+      \item The value of \VAR{PE\_root} must be between \CONST{0} and
+      \VAR{PE\_size $-$ 1}.
+      \item The same \VAR{pSync} work array must be passed by all \acp{PE}
+      in the active set.
+    \end{itemize}
+
+    Before any \ac{PE} calls a active-set-based broadcast routine, the following
+    conditions must be ensured:
+    \begin{itemize}
+         \item The \dest{} array on all \acp{PE} participating in the broadcast
+         is ready to accept the broadcast data.
+         \item The \VAR{pSync} array on all \acp{PE} in the
+         active set is not still in use from a prior call to an \openshmem
+         collective routine.
+    \end{itemize}
+    Otherwise, the behavior is undefined.
+
+    Upon return from an active-based broadcast routine, the following are true for the local
+    \ac{PE}:
+    \begin{itemize}
+      \item If the current \ac{PE} is not the root \ac{PE}, the \dest{} data object is updated.
+      \item The \source{} data object may be safely reused.
+      \item The values in the \VAR{pSync} array are restored to the
+        original values.
+    \end{itemize}
+\end{DeprecateBlock}
+}
+
+
+\apireturnvalues{
+  For team-based broadcasts, zero on successful local completion; otherwise, nonzero.
+
+\begin{DeprecateBlock}
+  For active-set-based broadcasts, none.
+\end{DeprecateBlock}
+
+}
+
+\apinotes{
+    Team handle error checking and integer return codes are currently undefined.
+    Implementations may define these behaviors as needed, but programs should
+    ensure portability by doing their own checks for invalid team handles and for
+    \LibConstRef{SHMEM\_TEAM\_INVALID}.
+}
+
+\begin{apiexamples}
+
+\apicexample
+    {In the following \Cstd[11] example, the call to \FUNC{shmem\_broadcast} copies \source{}
+    on \ac{PE} $0$ to \dest{} on \acp{PE} $0\dots npes-1$.
+
+    \CorCpp{} example:}
+    {./example_code/shmem_broadcast_example.c}
+    {}
+
+\end{apiexamples}
+
+\end{apidefinition}

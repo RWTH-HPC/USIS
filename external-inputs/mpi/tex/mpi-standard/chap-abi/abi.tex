@@ -1,0 +1,1294 @@
+\chapter{Application Binary Interface (ABI)}
+\mpitermtitleindex{ABI}
+\label{sec:abi}
+\label{chap:abi}
+
+\section{Introduction}
+\mpitermtitleindex{ABI!interoperability}
+\label{sec:binary-interop}
+
+The other chapters of the \MPI/ standard specify an Application Programming Interface (API) 
+that defines (amongst other things) a set of opaque handle types and named constants without 
+specifying their memory layout or values, respectively. 
+This allows implementations to choose these according to different types of requirement. 
+However, this flexibility means that different implementations are incompatible from 
+the perspective of compiled applications, because the Application Binary Interface (ABI) 
+is not specified.
+
+This chapter defines an Application Binary Interface (ABI) for \MPI/,
+meaning that it specifies the memory layouts of all opaque handle types, 
+the values of integer constants, and other aspects of \MPI/ needed by use cases 
+that require a defined ABI. 
+This standard ABI for \MPI/ exists in parallel with existing implementation ABIs, 
+in order to preserve backwards-compatibility of existing \MPI/ implementations.
+
+A standard ABI for \MPI/ serves many purposes, including support for
+applications compiled with one implementation of \MPI/ to be executed
+with another implementation.
+It is also a necessary requirement for third-party languages that intend
+to interface with \MPI/ through binary symbol names, rather than direct
+function calls to the C API. 
+This chapter specifies the ABI of the C API of \MPI/
+as well as the implications of the ABI for Fortran implementations.
+
+\section{Implementation Requirements}
+
+Although the ABI is designed to be portable,
+there are platform and implementation designs where it cannot
+be supported, or is not useful to support.
+Furthermore, backwards compatibility of existing implementation
+ABIs is important to some users, and \MPI/ implementations
+may continue to support these.
+
+The standard ABI is intended to support systems with the
+following properties:
+\begin{itemize}
+    \item Dynamic shared libraries, which are loaded
+          by the operating system or by the application,
+          are supported.
+    \item The calling convention of C functions and the
+          sizes and alignment requirements of C standard
+          types are known constant properties of the system;
+          if the system possesses any means for changing
+          these, each choice constitutes a different,
+          incompatible system from the perspective of the \MPI/ ABI.
+    \item Addresses can be represented as 32- or 64-bit signed
+          integers and have a direct relationship with C pointers;
+          segmented addressing is not supported.
+\end{itemize}
+
+%\begin{rationale}
+%\end{rationale}
+
+The following query functions are provided to allow \MPI/ applications, tools, 
+and language bindings to determine whether an implementation provides ABI support
+and, if so, which version of the ABI is supported.
+\mpifunc{MPI\_ABI\_GET\_VERSION}
+and \mpifunc{MPI\_ABI\_GET\_INFO},
+can be called at any time in an \MPI/ program.
+These functions must always be thread-safe, as defined in
+\sectionref{sec:ei-threads}\mpitermindex{threads!thread-safe}.
+
+\begin{mpi-binding}
+    function_name("MPI_Abi_get_version")
+    parameter("abi_major", "VERSION", direction="out", desc=r"ABI major version")
+    parameter("abi_minor", "VERSION", direction="out", desc=r"ABI minor version")
+\end{mpi-binding}
+
+\mpifunc{MPI\_ABI\_GET\_VERSION} produces the standard ABI version, if supported.
+Otherwise, the values of the major and minor version are set to $-1$.
+The ABI version is independent of the \MPI/ specification version.
+The major and minor version of the ABI associated with \MPIVDOTO/
+are 1 and 0.
+
+The ABI version macros \mpiconstmain{MPI\_ABI\_VERSION} and
+\mpiconstmain{MPI\_ABI\_SUBVERSION} are present in the \MPI/ header and modules
+so that applications can check for consistency between the compilation
+environment and the properties of the implementation at runtime.
+
+%%% Make sure that you also change these values in
+%%% chap-appLang/appLang-Const.tex (C preprocessor Constants and Fortran
+%%% Parameters)
+\mpiconstmainindex{MPI\_ABI\_VERSION}%
+\mpiconstmainindex{MPI\_ABI\_SUBVERSION}%
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#define MPI_ABI_VERSION    1
+#define MPI_ABI_SUBVERSION 0
+\end{lstlisting}
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+INTEGER :: MPI_ABI_VERSION, MPI_ABI_SUBVERSION
+PARAMETER (MPI_ABI_VERSION    = 1)
+PARAMETER (MPI_ABI_SUBVERSION = 0)
+\end{lstlisting}
+\noindent
+
+Backwards-compatible changes, such as the addition of new handle types,
+will increment the minor version.
+Backwards-incompatible changes will increment the major version.
+The addition of new functions to the \MPI/ API
+does not change the ABI version.
+The existing function \mpifunc{MPI\_GET\_VERSION} can be used
+to query the version of the API supported and whether certain
+functions are present in the \MPI/ library.
+
+\begin{mpi-binding}
+    function_name("MPI_Abi_get_info")
+    parameter(
+        "info",
+        "INFO",
+        direction="out",
+        desc=r"ABI details info object (implementation-defined)",
+    )
+\end{mpi-binding}
+
+Implementations may provide additional information related to the ABI.
+The function \mpifunc{MPI\_ABI\_GET\_INFO} allows the user to query
+this information via an info object.
+
+The following keys are predefined for this object:
+\begin{description}
+\item[\infokeymain{mpi\_aint\_size}:] The size in bytes of \mpictype{MPI\_Aint}.
+\item[\infokeymain{mpi\_count\_size}:] The size in bytes of \mpictype{MPI\_Count}.
+\item[\infokeymain{mpi\_offset\_size}:] The size in bytes of \mpictype{MPI\_Offset}.
+\end{description}
+
+\subsection{The \texorpdfstring{\MPI/}{MPI} ABI Header File and Shared Library}
+\label{subsec:c-abi-filenames}
+
+The ABI must be implemented using a header named \code{mpi.h}.
+The \MPI/ library that implements the standard ABI must be
+named \code{mpi\_abi}.
+The filename for this library may have a platform-specific
+prefix and/or a platform-specific suffix. For Linux, for example,
+\code{lib} and \code{.so} would be the default prefix and suffix.
+Implementors are expected to follow platform-specific conventions
+for dynamic shared library naming and versioning.
+ABI-compliant implementations must not require more than \code{mpi\_abi}
+or its versioned variant as the sole direct dependency of the application binary.
+
+\begin{implementors}
+If an implementation implements its own ABI definition,
+it must clearly document how users employ one or the other,
+such as the paths of the aforementioned files and any
+other options required for their correct use.
+\end{implementors}
+
+Applications must not mix different ABIs. 
+If implementations provide both the standard ABI and 
+an implementation-specific ABI, applications must compile 
+and link against only one of these.
+
+The API defined in \code{mpi.h} associated with the standard ABI
+does not include features of \MPI/ deprecated in \MPIIIIDOTI/ or earlier.
+A full list of deprecated features can be found in Table~\ref{table:deprecated}.
+
+\begin{rationale}
+If deprecated features are included in the standard ABI, deleting
+them will cause a backwards-incompatibility issue in the ABI.
+Removing them from the ABI now makes it straightforward for them
+to be deleted from \MPI/ in the future.
+\end{rationale}
+
+\section{The C Application Binary Interface}
+\label{sec:c-abi}
+
+\subsection{The Status Object}
+
+The \MPI/ status object is a struct containing 8 integers: 
+the three public member fields described in \sectionref{subsec:pt2pt-status}
+and 5 private member fields that are reserved for implementations and 
+must never be directly accessed by applications.
+
+The \MPI/ status object is defined in C as follows:
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+typedef struct {
+    int MPI_SOURCE;
+    int MPI_TAG;
+    int MPI_ERROR;
+    int MPI_internal[5];
+} MPI_Status;
+\end{lstlisting}
+The \MPI/ status object must use exactly eight C \ctype{int} worth of storage.
+
+\begin{implementors}
+The alignment of the status object may be less than the alignment
+of a pointer or \mpictype{MPI\_Count}.  Therefore, implementatons
+that store such a value in the status object must take care to access
+it using a method that does not depend on alignment greater than \ctype{int}.
+Such methods include \code{memcpy} and type-punning.
+\end{implementors}
+
+\begin{rationale}
+This definition provides sufficient space to accommodate implementation-specific 
+information and leads to memory alignment that allows efficient access to arrays
+of status objects.
+\end{rationale}
+
+\subsection{Opaque Handles}
+\label{subsec:abi-opaque-handles}
+
+Handles for \MPI/ objects are defined to be incomplete struct pointers, 
+which allows for C compilers to do type-checking, while also satisfying 
+the existing requirements, such as equality comparison.
+
+\begin{rationale}
+Integer handles do not provide type safety, while \code{struct} or \code{union} handles 
+fail to satisfy the existing API requirements.
+\end{rationale}
+
+The following handle type definitions are part of the \MPI/ ABI:
+
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+typedef struct MPI_ABI_Comm* MPI_Comm;
+typedef struct MPI_ABI_Datatype* MPI_Datatype;
+typedef struct MPI_ABI_Errhandler* MPI_Errhandler;
+typedef struct MPI_ABI_File* MPI_File;
+typedef struct MPI_ABI_Group* MPI_Group;
+typedef struct MPI_ABI_Info* MPI_Info;
+typedef struct MPI_ABI_Message* MPI_Message;
+typedef struct MPI_ABI_Op* MPI_Op;
+typedef struct MPI_ABI_Request* MPI_Request;
+typedef struct MPI_ABI_Session* MPI_Session;
+typedef struct MPI_ABI_T_cvar_handle* MPI_T_cvar_handle;
+typedef struct MPI_ABI_T_enum* MPI_T_enum;
+typedef struct MPI_ABI_T_event_instance* MPI_T_event_instance;
+typedef struct MPI_ABI_T_event_registration* MPI_T_event_registration;
+typedef struct MPI_ABI_T_pvar_handle* MPI_T_pvar_handle;
+typedef struct MPI_ABI_T_pvar_session* MPI_T_pvar_session;
+typedef struct MPI_ABI_Win* MPI_Win;
+\end{lstlisting}
+
+\subsection{Handle Constants}
+
+Every handle type has at least one, and often many, 
+predefined constants of that type, e.g.,
+\mpiconst{MPI\_REQUEST\_NULL} for \mpictype{MPI\_Request} and 
+\mpiconst{MPI\_COMM\_WORLD} for \mpictype{MPI\_Comm}.
+The \MPI/ ABI defines handle constants to be compile-time constants,
+which are specified as integer expressions cast to the appropriate handle type.
+
+\begin{rationale}
+Link-time constants, while convenient, are not strictly portable.
+\end{rationale}
+
+All predefined handle constants correspond to integer representations 
+that are unlikely to be valid addresses, and must not be dereferenced. 
+Implementations must ensure that the handles they create for the user 
+are never in the range reserved for predefined handle constants. 
+The \MPI/ ABI reserves values corresponding to
+the integers 1 to 4095 for predefined handle constants.
+The definition of these constants is described in \sectionref{sec:handle-abi}.
+Handle arguments with an integer representation of zero are never valid handles.
+
+\begin{rationale}
+Many operating systems support a ``zero page'' that corresponds 
+to the above address range, in which case, implementations 
+will not need to do any runtime checking to ensure the above requirement is satisfied.
+Ensuring that an integer representation of zero is never a legal handle
+argument allows the detection of uninitialized data, which may lead to
+undefined behavior.
+\end{rationale}
+
+All of the constants are specified in \sectionref{subsec:annexa-const}.
+
+\subsection{Integer Constants}
+
+Integer constants fall into groups, where all constants in each group must have unique values. 
+In cases where integer constants are intended to be combined using bitwise logical expressions, 
+there are additional requirements, specified elsewhere
+(e.g. \sectionref{sec:io-filecntl-open}).
+A different constraint exists for constants like \mpiconst{MPI\_ANY\_SOURCE}, 
+which must be negative, because any non-negative integer may be a valid rank.
+
+The \MPI/ ABI reserves all unused values up to 16384 for integer constants,
+to allow for adding new constants without creating a noncontiguous range.
+For example, implementations may define their own extensions for
+\mpifunc{MPI\_COMM\_SPLIT\_TYPE} that use non-standard values of the
+\mpiarg{split\_type} argument -- these integer constants must exceed 16384.
+
+\subsection{Integer Types}
+
+\MPI/ defines four special types of integers in C:
+\mpictype{MPI\_Aint}, \mpictype{MPI\_Offset}, \mpictype{MPI\_Count},
+and \mpictype{MPI\_Fint}.
+The properties of \mpictype{MPI\_Aint} correspond to the C standard integer type \code{intptr\_t}.
+Thus, \mpictype{MPI\_Aint} should be defined as a C \code{typedef} to \code{intptr\_t}.
+In a compilation environment where \code{intptr\_t} is not available,
+a type with the same properties must be used.
+
+Essentially all filesystems relevant to \MPI/ use 64-bit addressing
+so the standard ABI defines \mpictype{MPI\_Offset}
+to be the C standard integer type \code{int64\_t} (or an equivalent type).
+On systems where \code{intptr\_t} is 32 or 64 bits,
+\mpictype{MPI\_Count} is the C standard integer type \code{int64\_t} (or an equivalent type).
+% said elsewhere
+%\mpictype{MPI\_Count} is required to be able to hold values of
+%\mpictype{MPI\_Aint} and \mpictype{MPI\_Offset}.
+
+\mpictype{MPI\_Fint} is discussed in \sectionref{sec:fortran-abi}.
+
+\begin{rationale}
+Fixing the size of \mpictype{MPI\_Offset} ensures the standard ABI
+depends only on the address size and thus is unambiguous
+on each platform.
+The need for \MPI/ to support offsets greater than 64 bits
+implies the possibility of a single \MPI/ file of more
+than 8 exabytes in size, which is not currently practical. % revisit this assumption in 2040+
+The use of 64-bit \MPI/ offsets does not prevent \MPI/
+from supporting 128-bit filesystems.
+\end{rationale}
+
+\subsection{Calling Conventions and Binary Representations}
+
+ABI compatibility 
+means that the binary object code of the \MPI/ implementation, 
+libraries that use \MPI/, and the main \MPI/ application 
+program can be linked and executed correctly.
+The type layouts, symbol names, and calling conventions of 
+\MPI/ routines behave as if they have been compiled with the 
+system C compiler toolchain 
+(as determined, in particular, by the system C runtime library).
+
+\begin{users}
+Libraries and applications that use \MPI/ may be built with any toolchain they wish, 
+as long as they adhere to these conventions when calling \MPI/ routines. 
+Compiler options that change the size or layout of types, or calling conventions, 
+should be avoided.
+\end{users}
+
+\section{The Fortran Application Binary Interface}
+\label{sec:fortran-abi}
+
+Fortran support for the ABI is more complicated than C,
+because the sizes of \ftype{INTEGER}, \ftype{REAL},
+and \ftype{DOUBLE PRECISION} can be changed with compiler options;
+there is no ABI constancy even with a single Fortran compiler and platform.
+This flexibility creates a difficult situation for the \MPI/ C ABI
+because the functions defined in \sectionref{sec:misc-handleconvert}
+and \sectionref{sec:conversion:status} in the \MPI/ C API
+depend on the size of \ftype{INTEGER} via \mpictype{MPI\_Fint}.
+As a result, the functions defined in \sectionref{sec:misc-handleconvert}
+and \sectionref{sec:conversion:status} 
+as well as \mpictype{MPI\_F08\_Status} are not part of this ABI.
+Instead, to support Fortran and other use cases where obtaining an
+integer associated with an \MPI/ handle is necessary, new functions are
+added that do not depend on \mpictype{MPI\_Fint}.
+
+\MPI/ applications can discover the size of Fortran types such as
+\type{MPI\_INTEGER} and \type{MPI\_REAL} using \mpifunc{MPI\_TYPE\_SIZE}.
+Lack of support in the implementation for optional predefined datatypes
+is indicated when the type size returned is
+\mpiconst{MPI\_UNDEFINED}. % the other option is 0
+
+\begin{rationale}
+Prior to the ABI, optional predefined datatypes were not present in the \MPI/ header and modules.
+When absent, usage would generate compilation errors.
+The standard ABI must define a value for all predefined datatypes, including the optional ones.
+Therefore, the absence of optional datatypes must be detected at runtime.
+\end{rationale}
+
+\subsection{Fortran Type Registration}
+\label{subsec:fortran-type-registration}
+
+In order to decouple \MPI/ Fortran support from the rest of the implementation,
+there must be a way to inform the implementation of the properties of
+\MPI/ Fortran datatypes.
+With this, it is possible to implement \MPI/ Fortran support on top
+of the \MPI/ C implementation, without the latter having to know the
+properties of the Fortran environment.
+
+\begin{mpi-binding}
+    function_name("MPI_Abi_set_fortran_info")
+    parameter(
+        "info",
+        "INFO",
+        desc=r"Fortran ABI details info object",
+    )
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    function_name("MPI_Abi_get_fortran_info")
+    parameter(
+        "info",
+        "INFO",
+        desc=r"Fortran ABI details info object",
+        direction="out"
+    )
+\end{mpi-binding}
+
+\mpifunc{MPI\_ABI\_SET\_FORTRAN\_INFO} allows the application
+to inform the implementation of the sizes of Fortran types
+and whether or not optional types are supported by the
+Fortran compiler.
+Before setting this information, the application should
+get this info object using \mpifunc{MPI\_ABI\_GET\_FORTRAN\_INFO}.
+When \mpiconst{MPI\_INFO\_NULL} is returned, the implementation
+does not know the properties of the Fortran compiler and they
+must be set by the application.
+%Otherwise, the application cannot set these properties.
+%It should, however, check to see that the properties contained
+%in the info object returned are compatible with the Fortran
+%compiler and not proceed if they are incompatible.
+Only the first call to \mpifunc{MPI\_ABI\_SET\_FORTRAN\_INFO}
+affects the state of the \MPI/ library; all subsequent calls
+will return the error code \errormain{MPI\_ERR\_ABI}.
+If a call to \mpifunc{MPI\_ABI\_SET\_FORTRAN\_INFO} is not
+successful, the user should call \mpifunc{MPI\_ABI\_GET\_FORTRAN\_INFO}
+to determine what Fortran compiler properties were set.
+
+The following keys are predefined for this object:
+\begin{description}
+\item[\infokeymain{mpi\_logical\_size}:] The size in bytes of the Fortran default \ftype{LOGICAL} kind.
+\item[\infokeymain{mpi\_integer\_size}:] The size in bytes of the Fortran default \ftype{INTEGER} kind.
+\item[\infokeymain{mpi\_real\_size}:] The size in bytes of the Fortran default \ftype{REAL} kind.
+\item[\infokeymain{mpi\_double\_precision\_size}:] The size in bytes of the Fortran \ftype{DOUBLE PRECISION} kind.
+%\item[\infokeymain{mpi\_async\_protects\_nonblocking}:] Equivalent to \mpiconst{MPI\_ASYNC\_PROTECTS\_NONBLOCKING}.
+%\item[\infokeymain{mpi\_subarrays\_supported}:] Equivalent to \mpiconst{MPI\_SUBARRAYS\_SUPPORTED}.
+\item[\infokeymain{mpi\_logical1\_supported}:]  (boolean) \mpidtype{MPI\_LOGICAL1} is supported.
+\item[\infokeymain{mpi\_logical2\_supported}:]  (boolean) \mpidtype{MPI\_LOGICAL2} is supported.
+\item[\infokeymain{mpi\_logical4\_supported}:]  (boolean) \mpidtype{MPI\_LOGICAL4} is supported.
+\item[\infokeymain{mpi\_logical8\_supported}:]  (boolean) \mpidtype{MPI\_LOGICAL8} is supported.
+\item[\infokeymain{mpi\_logical16\_supported}:] (boolean) \mpidtype{MPI\_LOGICAL16} is supported.
+\item[\infokeymain{mpi\_integer1\_supported}:]  (boolean) \mpidtype{MPI\_INTEGER1} is supported.
+\item[\infokeymain{mpi\_integer2\_supported}:]  (boolean) \mpidtype{MPI\_INTEGER2} is supported.
+\item[\infokeymain{mpi\_integer4\_supported}:]  (boolean) \mpidtype{MPI\_INTEGER4} is supported.
+\item[\infokeymain{mpi\_integer8\_supported}:]  (boolean) \mpidtype{MPI\_INTEGER8} is supported.
+\item[\infokeymain{mpi\_integer16\_supported}:] (boolean) \mpidtype{MPI\_INTEGER16} is supported.
+\item[\infokeymain{mpi\_real2\_supported}:]     (boolean) \mpidtype{MPI\_REAL2} is supported.
+\item[\infokeymain{mpi\_real4\_supported}:]     (boolean) \mpidtype{MPI\_REAL4} is supported.
+\item[\infokeymain{mpi\_real8\_supported}:]     (boolean) \mpidtype{MPI\_REAL8} is supported.
+\item[\infokeymain{mpi\_real16\_supported}:]    (boolean) \mpidtype{MPI\_REAL16} is supported.
+\item[\infokeymain{mpi\_complex4\_supported}:]  (boolean) \mpidtype{MPI\_COMPLEX4} is supported.
+\item[\infokeymain{mpi\_complex8\_supported}:]  (boolean) \mpidtype{MPI\_COMPLEX8} is supported.
+\item[\infokeymain{mpi\_complex16\_supported}:] (boolean) \mpidtype{MPI\_COMPLEX16} is supported.
+\item[\infokeymain{mpi\_complex32\_supported}:] (boolean) \mpidtype{MPI\_COMPLEX32} is supported.
+\item[\infokeymain{mpi\_double\_complex\_supported}:] (boolean) \mpidtype{MPI\_DOUBLE\_COMPLEX} is supported.
+\end{description}
+
+\begin{mpi-binding}
+    function_name("MPI_Abi_set_fortran_booleans")
+    parameter("logical_size", "TYPECLASS_SIZE",
+              desc=r"the size of Fortran \code{LOGICAL} in bytes",
+              direction="in")
+    parameter("logical_true", "LOGICAL_VOID",
+              desc=r"the Fortran literal value \code{.TRUE.}",
+              direction="in", pointer=True)
+    parameter("logical_false", "LOGICAL_VOID",
+              desc=r"the Fortran literal value \code{.FALSE.}",
+              direction="in", pointer=True)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    function_name("MPI_Abi_get_fortran_booleans")
+    parameter("logical_size", "TYPECLASS_SIZE",
+              desc=r"the size of Fortran \code{LOGICAL} in bytes",
+              direction="in")
+    parameter("logical_true", "LOGICAL_VOID",
+              desc=r"the Fortran literal value \code{.TRUE.}",
+              direction="out")
+    parameter("logical_false", "LOGICAL_VOID",
+              desc=r"the Fortran literal value \code{.FALSE.}",
+              direction="out")
+    parameter("is_set", "LOGICAL",
+              desc=r"flag to indicate whether the logical boolean values were set previously",
+              direction="out")
+\end{mpi-binding}
+
+\mpifunc{MPI\_ABI\_SET\_FORTRAN\_BOOLEANS} allows the application
+to inform the implementation of the literal values of the Fortran booleans.
+Boolean literals must be passed directly so that they can be observed
+by the implementation, since it may not be possible to obtain their
+literal values directly.
+This function has a size argument to allow it to be called before
+\mpifunc{MPI\_ABI\_SET\_FORTRAN\_INFO}.
+Before setting this information, the application should
+check if the logical values are already set
+using \mpifunc{MPI\_ABI\_GET\_FORTRAN\_BOOLEANS}.
+When \mpiarg{is\_set}\mpicode{ = false}, the implementation
+does not know the properties of the Fortran compiler and they
+must be set by the application.
+When \mpiarg{is\_set}\mpicode{ = true}, the implementation
+already knows the literal values of the Fortran booleans
+and they cannot be set.
+As with \mpifunc{MPI\_ABI\_SET\_FORTRAN\_INFO}, only the first call
+to this function affects the state of the \MPI/ library; subsequent
+calls will return the error code \error{MPI\_ERR\_ABI}.
+
+\begin{rationale}
+\MPI/ does not assume that Fortran boolean literals follow the C
+convention (zero is false and non-zero is true).
+\end{rationale}
+
+\subsection{The \texorpdfstring{\MPI/}{MPI} ABI Fortran Modules and Shared Library}
+\label{subsec:fortran-abi-names}
+
+The ABI must be implemented using modules named \code{mpi} and \code{mpi\_f08}.
+The \MPI/ library that implements the standard ABI must be
+named \code{mpifort\_abi} and follow all of the requirements stated in
+\sectionref{subsec:c-abi-filenames} for naming, versioning, and dependencies.
+
+\subsection{The Status Object}
+\label{subsec:fortran-abi-status}
+
+The \MPI/ status object is defined in Fortran as follows:
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+integer, parameter :: MPI_STATUS_SIZE = 8
+type, bind(C) :: Status
+   integer  :: MPI_SOURCE
+   integer  :: MPI_TAG
+   integer  :: MPI_ERROR
+   integer  :: MPI_INTERNAL(5)
+end type Status
+\end{lstlisting}
+The \MPI/ status object must use exactly eight Fortran \ftype{INTEGER} worth of storage.
+
+The following constants can be specified:
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#define MPI_F_STATUS_SIZE 8
+#define MPI_F_SOURCE      0
+#define MPI_F_TAG         1
+#define MPI_F_ERROR       2
+\end{lstlisting}
+
+\subsection{Integer Constants}
+
+As specified elsewhere (Section~\ref{sec:misc-constants}),
+constants have the same value in all languages, unless specified otherwise.
+
+\begin{sloppy}
+The constants
+\mpiconst{MPI\_F\_STATUS\_IGNORE}, \mpiconst{MPI\_F\_STATUSES\_IGNORE},
+\mpiconst{MPI\_F08\_STATUS\_IGNORE} and \mpiconst{MPI\_F08\_STATUSES\_IGNORE}
+are not specified in the C header file.
+
+\end{sloppy}
+
+\begin{rationale}
+Users can obtain the addresses of Fortran sentinels by passing them as
+arguments to a Fortran function call that is implemented in C.
+\end{rationale}
+
+\subsection{Handle Serialization}
+\mpitermtitleindex{handle serialization}
+\label{sec:abi-handleserialization}
+
+\sectionref{sec:misc-handleconvert} defines
+methods for converting handles to integers of the type
+\mpictype{MPI\_Fint}.
+In order to provide this functionality without depending
+on the behavior of the Fortran compiler,
+new functions that convert handles to and from
+\ctype{int} are necessary.
+Because these functions depend only on C language features,
+they are not referred to as C-Fortran conversion functions
+but handle serialization functions.
+
+In the C ABI, handles are pointers and therefore applications
+can trivially serialize handles into the type \ctype{intptr\_t}
+using a cast, but this does not support use cases where a
+language integer type is narrower than this.
+
+\begin{rationale}
+While it is possible to implement this functionality outside of \MPI/,
+e.g. using a lookup table or hash function,
+it is possible to implement more efficiently within an \MPI/
+implementation, particularly if the implementation is already
+using a limited range of values for C handles.
+An implementation may also store the integer associated with
+a C handle, in which case the lookup is trivial.
+\end{rationale}
+
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Comm_toint')
+    return_type("KEY_INDEX")
+
+    parameter("comm", "COMMUNICATOR", direction="in", pointer=False)
+\end{mpi-binding}
+
+The function \cfunc{MPI\_Comm\_toint}
+translates a C communicator handle into a C integer.
+For all predefined handles, the integer value must be
+the same as the values listed in Section~\ref{sec:lang}.
+For user-defined handles, the implementation must
+return the same integer for every call to this function with the same handle,
+which does not conflict with the reserved range for predefined handles.
+It is erroneous to call this function with an invalid handle argument.
+
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Comm_fromint')
+    return_type("COMMUNICATOR")
+
+    parameter("comm", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+The function \cfunc{MPI\_Comm\_fromint} translates a C integer
+to the appropriate C communicator handle.
+Only an integer obtained from a previous call to \cfunc{MPI\_Comm\_toint}
+may be passed to this function.
+It is erroneous to pass to this function an integer associated
+with a handle that has been freed, disconnected, or aborted (or that was derived from a session that has been finalized).
+
+Similar functions are provided for the other types of opaque objects.
+
+\bindingislisttrue
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Type_fromint')
+    return_type("DATATYPE")
+
+    parameter("datatype", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Type_toint')
+    return_type("KEY_INDEX")
+
+    parameter("datatype", "DATATYPE", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Group}%
+
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Group_fromint')
+    return_type("GROUP")
+
+    parameter("group", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Group}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Group_toint')
+    return_type("KEY_INDEX")
+
+    parameter("group", "GROUP", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Request}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Request_fromint')
+    return_type("REQUEST")
+
+    parameter("request", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Request}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Request_toint')
+    return_type("KEY_INDEX")
+
+    parameter("request", "REQUEST", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_File}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_File_fromint')
+    return_type("FILE")
+
+    parameter("file", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_File}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_File_toint')
+    return_type("KEY_INDEX")
+
+    parameter("file", "FILE", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Win}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Win_fromint')
+    return_type("WINDOW")
+
+    parameter("win", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Win}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Win_toint')
+    return_type("KEY_INDEX")
+
+    parameter("win", "WINDOW", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Op}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Op_fromint')
+    return_type("OPERATION")
+
+    parameter("op", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Op}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Op_toint')
+    return_type("KEY_INDEX")
+
+    parameter("op", "OPERATION", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Info}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Info_fromint')
+    return_type("INFO")
+
+    parameter("info", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Info}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Info_toint')
+    return_type("KEY_INDEX")
+
+    parameter("info", "INFO", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Errhandler}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Errhandler_fromint')
+    return_type("ERRHANDLER")
+
+    parameter("errhandler", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Errhandler}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Errhandler_toint')
+    return_type("KEY_INDEX")
+
+    parameter("errhandler", "ERRHANDLER", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Message}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Message_fromint')
+    return_type("MESSAGE")
+
+    parameter("message", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Message}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Message_toint')
+    return_type("KEY_INDEX")
+
+    parameter("message", "MESSAGE", direction="in", pointer=False)
+\end{mpi-binding}
+
+\cdeclindex{MPI\_Session}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Session_fromint')
+    return_type("SESSION")
+
+    parameter("session", "KEY_INDEX", direction="in", pointer=False)
+\end{mpi-binding}
+
+\bindingislistfalse
+\cdeclindex{MPI\_Session}%
+\begin{mpi-binding}
+    no_lis_binding()
+    no_f08_binding()
+    no_f90_binding()
+
+    with_uppercase_index()
+
+    function_name('MPI_Session_toint')
+    return_type("KEY_INDEX")
+
+    parameter("session", "SESSION", direction="in", pointer=False)
+\end{mpi-binding}
+
+Within the context of the ABI, where the layout of the status object
+is known and representable directly in terms of C \ctype{int},
+no serialization functionality is necessary.
+
+\section{Handle Constants}
+\label{sec:handle-abi}
+
+Predefined handle constants are represented as integers in the range 1 to 4095.
+To make it easy for implementations and tools to decode handle constants,
+their values are derived from a Huffman code.
+The Huffman code currently uses the lower 10 bits of the 12 bits allocated above.
+In the following, we will describe constants in their binary representation,
+$0b***\_***\_***\_***$, where underscores are added for readability.
+We count bits from the right starting from zero; the rightmost three bits
+will be denoted $2:0$.
+
+Datatypes are the most common type of predefined handle and use the range $0b00\_10\_********$.
+Bits $7:3$ identify the category and the bits $2:0$ identify the specific instances thereof.
+The first set of predefined datatypes are not fixed-sized.
+While \ctype{long} has a fixed size for a given platform ABI, it is not fixed across all platforms.
+In contrast, types like \ctype{int32\_t} and \ftype{REAL*8} (or its Fortran standard equivalents)
+have the same size on all platforms.
+Fixed-sized types allow the implementation to determine the size of the datatype
+from the predefined handle value itself, without a lookup table.
+
+\begin{table}[tb]
+\caption{Predefined \MPI/ datatype categories and instance values, for types without a specified size.
+         All unassigned values are reserved.}
+\label{table:abi:datatypes:lang_indep}
+\begin{center}
+\begin{small}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0010} & \textbf{00000} & & Language-independent types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_DATATYPE\_NULL} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_AINT} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_COUNT} \\
+              &                & \textbf{011} & & \mpidtype{MPI\_OFFSET} \\
+              &                & \textbf{111} & & \mpidtype{MPI\_PACKED} \\
+\hline
+\end{tabular}
+\end{small}
+\end{center}
+\end{table}
+
+\begin{table}[tb]
+\caption{Predefined \MPI/ datatype categories and instance values, for types without a specified size.
+         All unassigned values are reserved.}
+\label{table:abi:datatypes:c_integers}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0010} & \textbf{00001} & & C integer types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_SHORT} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_INT} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_LONG} \\
+              &                & \textbf{011} & & \mpidtype{MPI\_LONG\_LONG} \\
+              &                & \textbf{100} & & \mpidtype{MPI\_UNSIGNED\_SHORT} \\
+              &                & \textbf{101} & & \mpidtype{MPI\_UNSIGNED} \\
+              &                & \textbf{110} & & \mpidtype{MPI\_UNSIGNED\_LONG} \\
+              &                & \textbf{111} & & \mpidtype{MPI\_UNSIGNED\_LONG\_LONG} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[ht!]
+\caption{Predefined \MPI/ datatype categories and instance values, for types without a specified width.
+         All unassigned values are reserved.}
+\label{table:abi:datatypes:c_floats}
+\begin{center}
+\begin{small}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0010} & \textbf{00010} & & C/C++ floating-           & \\
+              &                & &               point types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_FLOAT} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_C\_FLOAT\_COMPLEX} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_CXX\_FLOAT\_COMPLEX} \\
+              &                & \textbf{100} & & \mpidtype{MPI\_DOUBLE} \\
+              &                & \textbf{101} & & \mpidtype{MPI\_C\_DOUBLE\_COMPLEX} \\
+              &                & \textbf{110} & & \mpidtype{MPI\_CXX\_DOUBLE\_COMPLEX} \\
+\hline
+\end{tabular}
+\end{small}
+\end{center}
+\end{table}
+
+\begin{table}[ht!]
+\caption{Predefined \MPI/ datatype categories and instance values, for types without a specified width.
+         All unassigned values are reserved.}
+\label{table:abi:datatypes:fortran}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0010} & \textbf{00011} & & Fortran types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_LOGICAL} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_INTEGER} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_REAL} \\
+              &                & \textbf{011} & & \mpidtype{MPI\_COMPLEX} \\
+              &                & \textbf{100} & & \mpidtype{MPI\_DOUBLE\_PRECISION} \\
+              &                & \textbf{101} & & \mpidtype{MPI\_DOUBLE\_COMPLEX} \\
+              &                & \textbf{110} & & \mpidtype{MPI\_CHARACTER} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[tb]
+\caption{Predefined \MPI/ datatype categories and instance values, for types without a specified width.
+         All unassigned values are reserved.}
+\label{table:abi:datatypes:long_double}
+\begin{center}
+\begin{small}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0010} & \textbf{00100} & & Long double & \\
+              &                & &       types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_LONG\_DOUBLE} \\
+              &                & \textbf{100} & & \mpidtype{MPI\_C\_LONG\_DOUBLE\_COMPLEX} \\
+              &                & \textbf{101} & & \mpidtype{MPI\_CXX\_LONG\_DOUBLE\_COMPLEX} \\
+\hline
+\end{tabular}
+\end{small}
+\end{center}
+\end{table}
+
+\begin{table}[tb]
+\caption{Predefined \MPI/ datatype categories and instance values, for types without a specified width.
+         All unassigned values are reserved.}
+\label{table:abi:datatypes:pair_types}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0010} & \textbf{00101} & & C pair types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_FLOAT\_INT} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_DOUBLE\_INT} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_LONG\_INT} \\
+              &                & \textbf{011} & & \mpidtype{MPI\_2INT} \\
+              &                & \textbf{100} & & \mpidtype{MPI\_SHORT\_INT} \\
+              &                & \textbf{101} & & \mpidtype{MPI\_LONG\_DOUBLE\_INT} \\
+\hline
+\textbf{0010} & \textbf{00110} & & Fortran pair types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_2REAL} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_2DOUBLE\_PRECISION} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_2INTEGER} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[tb]
+\caption{Predefined \MPI/ datatype categories and instance values, for types without a specified width.
+         All unassigned values are reserved.}
+\label{table:abi:datatypes:other}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0010} & \textbf{00111} & & Other C/C++ types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_C\_BOOL} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_CXX\_BOOL} \\
+              &                & \textbf{100} & & \mpidtype{MPI\_WCHAR} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+The Huffman code for fixed-size types encodes the base-2 logarithm of
+the type size in bits $5:3$.  Implemenations can identify datatypes
+with fixed-size using bit $6$.
+
+% scheme
+% C/C++ (0b01_***)
+% 0b000: "MPI_INT(n)_T"
+% 0b001: "MPI_UINT(n)_T"
+% 0b010: "<float (n)b>"
+% 0b011: (size=1) ? "MPI_CHAR" : "<C complex 2x(n/2)b>"
+% 0b100: (size=1) ? "MPI_SIGNED_CHAR" : "reserved datatype"
+% 0b101: (size=1) ? "MPI_UNSIGNED_CHAR" : "reserved datatype"
+% 0b110: (size=2) ? "<C++23 bfloat16_t>" : "reserved datatype"
+% 0b111: (size=1) ? "MPI_BYTE" : "<C++ complex 2x(n/2)b>"
+% Fortran (0b11_***)
+% 0b000: "MPI_INTEGER(n)"
+% 0b001: "MPI_LOGICAL(n)"
+% 0b010: "MPI_REAL(n)"
+
+\begin{table}[tb]
+\caption{Predefined \MPI/ datatype categories and instance values, for types with a specified width.
+         All unassigned values are reserved.}
+\label{table:abi:datatypes:c_fixed}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0010} & \textbf{01000} & & 1-byte C/C++ types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_INT8\_T} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_UINT8\_T} \\
+              &                & \textbf{011} & & \mpidtype{MPI\_CHAR} \\
+              &                & \textbf{100} & & \mpidtype{MPI\_SIGNED\_CHAR} \\
+              &                & \textbf{101} & & \mpidtype{MPI\_UNSIGNED\_CHAR} \\
+              &                & \textbf{111} & & \mpidtype{MPI\_BYTE} \\
+\hline
+\textbf{0010} & \textbf{01001} & & 2-byte C/C++ types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_INT16\_T} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_UINT16\_T} \\
+\hline
+\textbf{0010} & \textbf{01010} & & 4-byte C/C++ types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_INT32\_T} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_UINT32\_T} \\
+\hline
+\textbf{0010} & \textbf{01011} & & 8-byte C/C++ types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_INT64\_T} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_UINT64\_T} \\
+
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[tb]
+\caption{Predefined \MPI/ datatype categories and instance values, for types with a specified width.
+         All unassigned values are reserved.}
+\label{table:abi:datatypes:fortran_fixed}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0010} & \textbf{11000} & & 1-byte Fortran types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_LOGICAL1} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_INTEGER1} \\
+\hline
+\textbf{0010} & \textbf{11001} & & 2-byte Fortran types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_LOGICAL2} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_INTEGER2} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_REAL2} \\
+\hline
+\textbf{0010} & \textbf{11010} & & 4-byte Fortran types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_LOGICAL4} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_INTEGER4} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_REAL4} \\
+              &                & \textbf{011} & & \mpidtype{MPI\_COMPLEX4} \\
+\hline
+\textbf{0010} & \textbf{11011} & & 8-byte Fortran types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_LOGICAL8} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_INTEGER8} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_REAL8} \\
+              &                & \textbf{011} & & \mpidtype{MPI\_COMPLEX8} \\
+\hline
+\textbf{0010} & \textbf{11100} & & 16-byte Fortran types & \\
+              &                & \textbf{000} & & \mpidtype{MPI\_LOGICAL16} \\
+              &                & \textbf{001} & & \mpidtype{MPI\_INTEGER16} \\
+              &                & \textbf{010} & & \mpidtype{MPI\_REAL16} \\
+              &                & \textbf{011} & & \mpidtype{MPI\_COMPLEX16} \\
+\hline
+\textbf{0010} & \textbf{11101} & & 32-byte Fortran types & \\
+              &                & \textbf{011} & & \mpidtype{MPI\_COMPLEX32} \\
+
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Reduction operators use the range $0b00\_00\_001\_*****$ and the predefined values
+fall into four categories: arithmetic, bit-wise, logical, and other.
+
+All other predefined handles use the range $0b00\_01\_********$.
+In general, predefined null handles have all zero bits other than those required to detect
+the handle type.
+
+\begin{table}[tb]
+\caption{Predefined \mpictype{MPI\_Op} categories and instance values.
+         All unassigned values are reserved.}
+\label{table:abi:ops}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:5$} & \textbf{Bits $4:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0000001} & \textbf{00} & & Arithmetic operations & \\
+                 &             & \textbf{000} & & \mpiconst{MPI\_OP\_NULL} \\
+                 &             & \textbf{001} & & \mpiconst{MPI\_SUM} \\
+                 &             & \textbf{010} & & \mpiconst{MPI\_MIN} \\
+                 &             & \textbf{011} & & \mpiconst{MPI\_MAX} \\
+                 &             & \textbf{100} & & \mpiconst{MPI\_PROD} \\
+\hline
+\textbf{0000001} & \textbf{01} & & Bit operations & \\
+                 &             & \textbf{000} & & \mpiconst{MPI\_BAND} \\
+                 &             & \textbf{001} & & \mpiconst{MPI\_BOR} \\
+                 &             & \textbf{010} & & \mpiconst{MPI\_BXOR} \\
+\hline
+\textbf{0000001} & \textbf{10} & & Logical operations & \\
+                 &             & \textbf{000} & & \mpiconst{MPI\_LAND} \\
+                 &             & \textbf{001} & & \mpiconst{MPI\_LOR} \\
+                 &             & \textbf{010} & & \mpiconst{MPI\_LXOR} \\
+\hline
+\textbf{0000001} & \textbf{11} & & Other operations & \\
+                 &             & \textbf{000} & & \mpiconst{MPI\_MINLOC} \\
+                 &             & \textbf{001} & & \mpiconst{MPI\_MAXLOC} \\
+                 &             & \textbf{100} & & \mpiconst{MPI\_REPLACE} \\
+                 &             & \textbf{101} & & \mpiconst{MPI\_NO\_OP} \\
+
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[tb]
+\caption{Predefined \MPI/ handle categories and instance values.
+         All unassigned values are reserved.}
+\label{table:abi:handles}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Bits $11:8$} & \textbf{Bits $7:3$} & \textbf{Bits $2:0$} & \textbf{Category} & \textbf{Instance} \\
+\hline
+\textbf{0001} & \textbf{00000} & & Communicators & \\
+              &                & \textbf{000} & & \mpiconst{MPI\_COMM\_NULL} \\
+              &                & \textbf{001} & & \mpiconst{MPI\_COMM\_WORLD} \\
+              &                & \textbf{010} & & \mpiconst{MPI\_COMM\_SELF} \\
+
+\textbf{0001} & \textbf{00001} & & Group & \\
+              &                & \textbf{000} & & \mpiconst{MPI\_GROUP\_NULL} \\
+              &                & \textbf{001} & & \mpiconst{MPI\_GROUP\_EMPTY} \\
+
+\textbf{0001} & \textbf{00010} & & Windows & \\
+              &                & \textbf{000} & & \mpiconst{MPI\_WIN\_NULL} \\
+
+\textbf{0001} & \textbf{00011} & & Files & \\
+              &                & \textbf{000} & & \mpiconst{MPI\_FILE\_NULL} \\
+
+\textbf{0001} & \textbf{00100} & & Sessions & \\
+              &                & \textbf{000} & & \mpiconst{MPI\_SESSION\_NULL} \\
+
+\textbf{0001} & \textbf{00101} & & Messages & \\
+              &                & \textbf{000} & & \mpiconst{MPI\_MESSAGE\_NULL} \\
+              &                & \textbf{001} & & \mpiconst{MPI\_MESSAGE\_NO\_PROC} \\
+
+\textbf{0001} & \textbf{00110} & & Info & \\
+              &                & \textbf{000} & & \mpiconst{MPI\_INFO\_NULL} \\
+              &                & \textbf{001} & & \mpiconst{MPI\_INFO\_ENV} \\
+
+\textbf{0001} & \textbf{01000} & & Errhandlers & \\
+              &                & \textbf{000} & & \mpiconst{MPI\_ERRHANDLER\_NULL} \\
+              &                & \textbf{001} & & \mpiconst{MPI\_ERRORS\_ARE\_FATAL} \\
+              &                & \textbf{010} & & \mpiconst{MPI\_ERRORS\_RETURN} \\
+              &                & \textbf{011} & & \mpiconst{MPI\_ERRORS\_ABORT} \\
+
+\textbf{0001} & \textbf{10000} & & Requests & \\
+              &                & \textbf{000} & & \mpiconst{MPI\_REQUEST\_NULL} \\
+
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+

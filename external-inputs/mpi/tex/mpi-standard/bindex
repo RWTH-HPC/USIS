@@ -1,0 +1,234 @@
+#! /usr/bin/env python3
+#
+# -*- mode: python-mode; -*-
+#
+## Process the index file from the latex run
+import re
+import sys
+import argparse
+
+verbose     = 0
+idxname     = ""
+hasprefix   = 0
+idxfilename = ""
+outfilename = ""
+outfmt      = "latex" # or "html"
+hasremfile  = 0
+usesecname  = 1
+
+## Process arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('--verbose', help="Verbose for debugging this script", action="store_true")
+parser.add_argument('--warnfile', help="Use this file for warning messages", type=str)
+parser.add_argument('--hasidxname', help="Index keys may start with index name", action ="store_true")
+parser.add_argument('--idxname', help="Only include entries with this index name", type=str)
+parser.add_argument('--idxfile', help="Index file created by tohtml", type=str)
+parser.add_argument('--outfile', help="Output file for generated index", type=str)
+parser.add_argument("--outfmt", help="Output format, one of latex or html", type=str)
+parser.add_argument("--remainder", help="If selected, send unprocessed entries to this file (only with --hasidxname or --idxname)", type=str)
+parser.add_argument('--listbyterm', help="List entries by their term rather than the containing section", action ="store_true")
+
+args = parser.parse_args()
+# Convert determined arg values into internal variable values
+if args.verbose:
+    verbose = 1
+if args.hasidxname:
+    hasprefix = 1
+if args.idxname:
+    hasprefix  = 1
+    idxname    = args.idxname
+if args.listbyterm:
+    usesecname = 0
+if args.warnfile:
+    warningfile = open(args.warnfile, "w")
+if args.idxfile:
+    idxfilename = args.idxfile
+if args.outfile:
+    outfilename = args.outfile
+if args.outfmt:
+    outfmt = args.outfmt
+if args.remainder:
+    hasremfile  = 1
+    remfile = open(args.remainder, "w");
+
+idxfile = open(idxfilename, "r")
+
+if outfilename != "":
+    outfile = open(outfilename, "w")
+else:
+    outfile = sys.stdout
+idx = []
+for line in idxfile:
+    # Match \tohtmlindexentry{[NAME:]text}{file}{nodenumber}{section name}
+    # where text make have ! (subindex) and |(formatting) as in
+    # TERM:get!in function name|hyperindexformat{\uu}
+    entryObj = re.match(r'\\tohtmlindexentry\{([^:]*:?.*)}{(.+)}{([0-9]+)}{(.*)}', line, 0)
+    if entryObj:
+        entryText    = entryObj.group(1)
+        entryFile    = entryObj.group(2)
+        entryNodenum = entryObj.group(3)
+        entrySecname = entryObj.group(4)
+
+        if verbose:
+            print( "Index:")
+            print( "Text " + entryText)
+            print( "file " + entryFile)
+            print( "number " + entryNodenum)
+            print( "secname " + entrySecname)
+    else :
+        entryText = "Unknown"
+        entryFile = ""
+        entryNodenum = "-1"
+        entrySecname = ""
+
+    # replace any newlines with a blank. Handle the case that an index
+    # command was mangled.
+    try:
+        entryText
+    except NameError:
+        printWarning("mangled index entry, type " + entryType + ", input:" + line)
+    else:
+        entryText = re.sub('\n', ' ', entryText)
+
+    # Handle the case of multiple index keys (NAME:key format)
+    if hasprefix:
+        key = re.match(r'([^:]+):(.*)',entryText)
+        if key:
+            # Found name
+            if verbose:
+                print("idxname is " + key.group(1))
+            if key.group(1) != idxname:
+                if verbose:
+                    print("Skipping entry " + entryText)
+                if hasremfile:
+                    print(line,file=remfile,end='')
+                continue;
+            else:
+                entryText = key.group(2)
+        else:
+            # no name - is idxselect empty
+            if idxname != "":
+                if verbose:
+                    print("Skipping entry " + entryText)
+                if hasremfile:
+                    print(line,file=remfile,end='')
+                continue
+            # Otherwise, keep and no further processing needed
+
+    # determine the key for the entry
+    entryKey = entryText
+    key = re.match(r'([^@]+)@(.*)', entryText)
+    if key:
+        entryKey  = key.group(1)
+        entryText = key.group(2)
+
+    key = re.match(r'([^\|]+)\|(.*)', entryText)
+    entryFmt = ""
+    if key:
+        entryText = key.group(1)
+        entryFmt  = key.group(2)
+
+    # Add tuple
+    # Make key lowercase for sorting
+    idx.append( (entryKey.lower(), entryText, entryFile, entryNodenum, entryFmt, entrySecname) )
+
+idxfile.close()
+
+if verbose:
+    print(sorted(idx))
+
+# Output the entries, removing duplicates and combining entries with the same
+# name
+lasttxt     = ""
+lastbasetxt = ""
+lastsubtxt  = ""
+lastlink    = ""
+lastfmt     = ""
+newitem     = 1
+newsubitem  = 0
+for t in sorted(idx):
+    txt = t[1]
+    # Split core name and any subname
+    keyobj = re.match(r'([^!]*)!(.*)', txt, 0)
+    if keyobj:
+        basetxt = keyobj.group(1)
+        subtxt  = keyobj.group(2)
+        if verbose:
+            print("Found subtopic " + subtxt + " in " + basetxt)
+    else:
+        basetxt = txt
+        subtxt  = ""
+
+    if txt == lasttxt:
+        if t[2] == lastlink and t[4] == lastfmt:
+            # skip this item as a duplicate
+            if verbose:
+                print("Skipping entry " + t[1] + " as a duplicate")
+            continue
+
+    # Now, check whether we're a new item of subitem
+    if basetxt == lastbasetxt:
+        # Note same text, different link
+        newitem = 0
+        if subtxt == lastsubtxt:
+            newsubitem = 1
+        else:
+            newsubitem = 0
+    else:
+        newitem    = 1
+        newsubitem = 1
+
+    # Handle the format control
+    if t[4] != "":
+        if t[4] == "uu":
+            if outfmt == "html":
+                txt = "<u>" + txt + "</u>"
+            else:
+                txt = "\\underline{" + txt + "}"
+        elif t[4] == "bold":
+            if outfmt == "html":
+                txt = "<b>" + txt + "</b>"
+            else:
+                txt = "\\textbf{" + txt + "}"
+        else:
+            print("Unrecognized format " + t[4])
+
+    if usesecname:
+        linktxt = t[5]
+    else:
+        linktxt = txt
+
+    # We need a rule for the output of the names - particularly when
+    # there might be a sub item.
+    # The current algorithm is:
+    #   if txt != lasttxt then output txt, else output a comma
+    # New idea
+    #   if txt != lasttxt then output txt, else
+    #      it subtxt != lastsubtxt then output subtxt, else
+    #      output comma
+    # An even better model will make non-empty subtxt a nested list.
+    # For that, we'd need to add an if lastsubtxt == "": add new list/indent
+    # and at newitem, also end any subtxt list.
+    if outfmt == "html":
+        if newitem:
+            print("<li> ", end='', file=outfile)
+            if usesecname:
+                print(txt + ":", file=outfile)
+        else:
+            print(", ", end='', file=outfile)
+        print("<a href=\"" + t[2] + "#node" + t[3] + "\">" + linktxt + "</a>",
+              file=outfile)
+    else:
+        if newitem:
+            print("\\item ", end='', file=outfile)
+            if usesecname:
+                print(txt + ":", file=outfile)
+        else:
+            print(", ", end='', file=outfile)
+        print("\\href{" + t[2] + "#node" + t[3] + "}{" + linktxt + "}", file=outfile)
+    lastbasetxt = basetxt
+    lastsubtxt  = subtxt
+    lastlink    = t[2]
+    lasttxt     = t[1]
+    lastfmt     = t[4]
+

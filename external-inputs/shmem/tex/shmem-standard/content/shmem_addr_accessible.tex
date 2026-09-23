@@ -1,0 +1,46 @@
+\apisummary{
+    Determines whether an address is accessible via \openshmem data transfer
+    routines from the specified remote \ac{PE}.
+}
+
+\begin{apidefinition}
+
+\begin{Csynopsis}
+int @\FuncDecl{shmem\_addr\_accessible}@(const void *addr, int pe);
+\end{Csynopsis}
+
+\begin{apiarguments}
+    \apiargument{IN}{addr}{Local address of data object to query.}
+    \apiargument{IN}{pe}{Integer id of a remote \ac{PE}.}
+\end{apiarguments}
+
+\apidescription{
+    \FUNC{shmem\_addr\_accessible} is a query routine that indicates whether
+    the address \VAR{addr} can be used to access the given data object on the
+    specified \ac{PE} via \openshmem routines.
+
+    This routine verifies that the data object is symmetric and accessible with
+    respect to a remote \ac{PE} via \openshmem data transfer routines.  The
+    specified address \VAR{addr} is the local address of the data object on the
+    local \ac{PE}.
+}
+
+\apireturnvalues{
+    The return value is \CONST{1} if the local address \VAR{addr} is also a symmetric
+    address and the given data object is accessible via \openshmem routines on
+    the specified remote \ac{PE}; otherwise, it is \CONST{0}.
+}
+
+\apinotes{
+    This routine may be particularly useful for hybrid programming with other
+    communication libraries (such as \ac{MPI}) or parallel languages.  For
+    example, when an \ac{MPI} job uses \ac{MPMD} mode, multiple executable
+    \ac{MPI} programs may use \openshmem routines.  In such cases, static
+    memory, such as a \Cstd global variable, is
+    symmetric between processes running from the same executable file, but is
+    not symmetric between processes running from different executable files.
+    Data allocated from the symmetric heap (e.g., using \FUNC{shmem\_malloc})
+    is symmetric across the same or different executable files.
+}
+
+\end{apidefinition}

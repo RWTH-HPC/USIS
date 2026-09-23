@@ -1,0 +1,6 @@
+%%LANG: Fortran   ? why no fortran08 etc:
+%%NOUSEMPI      - unused in current version
+%%AUTOCONTINUE  - unused in current version
+%%INCDIR        - unused in current version
+%%RETURN        - unused in current version
+%%ARGS          - unused in current version

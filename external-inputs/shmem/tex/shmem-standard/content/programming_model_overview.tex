@@ -1,0 +1,183 @@
+\openshmem implements \ac{PGAS} by defining remotely accessible data objects as
+mechanisms to share information among \openshmem processes, or \acp{PE}, and
+private data objects that are accessible by only the \ac{PE} itself. The \ac{API}
+allows communication and synchronization operations on both private (local to
+the \ac{PE} initiating the operation) and remotely accessible data objects. A
+remote \ac{PE} is defined as any \ac{PE} whose remotely accessible data objects
+are accessible to the \ac{PE} initiating an operation and may include the
+initiating \ac{PE}. The key
+feature of \openshmem is that data transfer operations are
+\emph{one-sided} in nature. This means that a local \ac{PE} executing
+a data transfer routine does not require the participation of the remote \ac{PE}
+to complete the routine. This allows for overlap between communication and
+computation to hide data transfer latencies, which makes  \openshmem ideal for
+unstructured, small-to-medium-sized data communication patterns. The \openshmem
+library has the potential to provide a low-latency, high-bandwidth
+communication \ac{API} for use in highly parallelized scalable programs.
+
+\openshmem's interfaces can be used to implement \ac{SPMD} style programs.
+It provides interfaces to start the \openshmem \acp{PE} in parallel and
+communication and synchronization interfaces to access remotely accessible data
+objects across \acp{PE}. These interfaces can be leveraged to divide a problem
+into multiple sub-problems that can be solved independently or with coordination
+using the communication and synchronization interfaces.  The \openshmem
+specification defines library calls, constants, variables, and language bindings
+for \Cstd.
+The \Cpp interface is currently the same as that
+for \Cstd. Unlike Unified Parallel C, \Fortran[2008], Titanium, X10, and Chapel, which are all
+PGAS languages, \openshmem relies on the user to use the library calls  to
+implement the correct semantics of its programming model.
+
+An overview of the \openshmem routines is described below:
+
+\begin{enumerate}
+
+\item \textbf{Library Setup and Query}
+\begin{enumerate}
+  \item \OPR{Initialization}: The \openshmem library environment is initialized,
+   where the \acp{PE} are either single or multithreaded.
+  \item \OPR{Query}: The local \ac{PE} may get the number of \acp{PE} running
+      the same program and its unique integer identifier.
+  \item \OPR{Accessibility}: The local \ac{PE} can find out if a remote \ac{PE} is
+      executing the same binary, or if a particular symmetric data object can be
+      accessed by a remote \ac{PE}, or may obtain a pointer to a symmetric data
+      object on the specified remote \ac{PE} on shared memory systems.
+\end{enumerate}
+
+\item \textbf{Symmetric Data Object Management}
+\begin{enumerate}
+  \item \OPR{Allocation}: All executing \acp{PE} must collectively participate in the
+      allocation of a symmetric data object with identical arguments.
+  \item  \OPR{Deallocation}: All executing \acp{PE} must collectively participate in the
+      deallocation of the same symmetric data object with identical arguments.
+  \item  \OPR{Reallocation}: All executing \acp{PE} must collectively participate in the
+      reallocation of the same symmetric data object with identical arguments.
+\end{enumerate}
+
+\item \textbf{Communication Management}
+\begin{enumerate}
+    \item \OPR{Contexts}: Contexts are containers for communication operations.
+        Each context provides an environment where the operations performed on
+        that context are ordered and completed independently of other operations
+        performed by the application.
+\end{enumerate}
+
+\item \textbf{Team Management}
+\begin{enumerate}
+    \item \OPR{Teams}: Teams are \ac{PE} subsets created by grouping a set of
+    \acp{PE}. Teams are involved in both collective and point-to-point
+    communication operations. Collective communication operations are performed
+    on all \acp{PE} in a valid team and point-to-point communication operations
+    are performed between a local and remote \ac{PE} with team-based \ac{PE}
+    numbering through team-based contexts.
+\end{enumerate}
+
+\item \textbf{\acf{RMA}}
+\begin{enumerate}
+    \item \PUT: The local \ac{PE} specifies the \source{} data object, private
+        or symmetric, that is copied to the symmetric data object on the remote
+        \ac{PE}.
+  \item \GET: The local \ac{PE} specifies the symmetric data object on the remote
+      \ac{PE} that is copied to a data object, private or symmetric, on the local
+      \ac{PE}.
+\end{enumerate}
+
+\item \textbf{\acfp{AMO}}
+\begin{enumerate}
+  \item \OPR{Fetch}: The \ac{PE} initiating the fetch returns the value of the
+      symmetric data object on the remote \ac{PE}.
+  \item \OPR{Set}: The \ac{PE} initiating the set copies a new value to the
+      symmetric data object on the remote \ac{PE}.
+  \item \OPR{Swap}: The \ac{PE} initiating the swap copies a new value to the
+      symmetric data object on the remote \ac{PE} and returns the old value.
+  \item \OPR{Increment}: The \ac{PE} initiating the increment adds 1 to the
+      symmetric data object on the remote \ac{PE}.
+  \item \OPR{Add}: The \ac{PE} initiating the add specifies the value to be added
+      to the symmetric data object on the remote \ac{PE}.
+  \item \OPR{Bitwise Operations}: The \ac{PE} initiating the bitwise
+      operation specifies the operand value to the bitwise operation to be
+      performed on the symmetric data object on the remote \ac{PE}.
+  \item \OPR{Compare and Swap}: The \ac{PE} initiating the compare and swap
+      conditionally copies a new value to the symmetric data object on the
+      remote \ac{PE} and returns the old value.
+  \item \OPR{Fetch and Increment}: The \ac{PE} initiating the increment adds 1
+      to the symmetric data object on the remote \ac{PE} and returns the old
+      value.
+  \item \OPR{Fetch and Add}: The \ac{PE} initiating the add specifies the value to
+      be added to the symmetric data object on the remote \ac{PE} and returns
+      the old value.
+  \item \OPR{Fetch and Bitwise Operations}: The \ac{PE} initiating the bitwise
+      operation specifies the operand value to the bitwise operation to be
+      performed on the symmetric data object on the remote \ac{PE}
+      and returns the old value.
+\end{enumerate}
+
+\item \textbf{Signaling Operations}
+\begin{enumerate}
+  \item \OPR{Put Signal}: The local \ac{PE} specifies the \source{} data object
+      to be copied to the symmetric data object on the remote \ac{PE} and
+      another symmetric data object on the remote \ac{PE} is subsequently
+      updated to signal completion.
+  \item \OPR{Signal Add}: The local \ac{PE} specifies a value to be added to
+      the symmetric data object on the remote \ac{PE}.
+  \item \OPR{Signal Set}: The local \ac{PE} specifies a value to be copied to
+      the symmetric data object on the remote \ac{PE}.
+  \item \OPR{Signal Fetch}: The local \ac{PE} returns the value of a local data
+      object.
+\end{enumerate}
+
+\item \textbf{Session Management}
+\begin{enumerate}
+  \item \OPR{Sessions}: Sessions are a mechanism for the application to inform
+      the implementation about an upcoming sequence of operations that exhibit
+      a pattern that may be suitable for runtime optimization.
+\end{enumerate}
+
+\item \textbf{Synchronization and Ordering}
+\begin{enumerate}
+  \item \OPR{Fence}: The \ac{PE} calling fence ensures ordering of
+  \PUT, \ac{AMO}, and memory store operations
+  to symmetric data objects with respect to a specific
+      destination \ac{PE}.
+  \item \OPR{Quiet}: The \ac{PE} calling quiet ensures remote completion of remote access
+      operations and stores to symmetric data objects.
+  \item \OPR{Barrier}: All or some \acp{PE} collectively synchronize and ensure
+      completion of all remote and local updates prior to any \ac{PE} returning
+      from the call.
+  \item \OPR{Wait and Test}: A \ac{PE} calling a point-to-point synchronization
+      routine ensures the value of a local symmetric object meets a specified
+      condition.  Wait operations block until the specified condition is
+      met, whereas test operations return immediately and indicate whether or
+      not the specified condition is met.
+\end{enumerate}
+
+\item \textbf{Collective Communication}
+\begin{enumerate}
+  \item \OPR{Broadcast}: The \VAR{root} \ac{PE} specifies a symmetric data
+      object to be copied to a symmetric data object on one or more remote
+      \acp{PE}.
+  \item \OPR{Collection}: All \acp{PE} participating in the routine get the result
+      of concatenated symmetric objects contributed by each of the \acp{PE} in
+      another symmetric data object.
+  \item \OPR{Reduction}: All \acp{PE} participating in the routine get the result
+      of an associative binary routine over elements of the specified symmetric
+      data object on another symmetric data object.
+  \item \OPR{All-to-All}: All \acp{PE} participating in the routine exchange
+      a fixed amount of contiguous or strided data with all other participating
+      \acp{PE}.
+  \item \OPR{Scan}: All \acp{PE} participating in the routine perform an
+      inclusive or exclusive prefix sum over elements of the specified
+      symmetric data object.
+\end{enumerate}
+
+\item \textbf{Mutual Exclusion}
+\begin{enumerate}
+  \item \OPR{Set Lock}: The \ac{PE} acquires exclusive access to the region
+      bounded by the symmetric \VAR{lock} variable.
+  \item \OPR{Test Lock}: The \ac{PE} tests the symmetric \VAR{lock} variable
+      for availability.
+  \item \OPR{Clear Lock}: The \ac{PE} which has previously acquired the
+      \VAR{lock} releases it.
+\end{enumerate}
+
+\end{enumerate}

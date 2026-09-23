@@ -1,0 +1,494 @@
+%
+% Standard Issue #20
+%   https://github.com/mpi-forum/mpi-issues/issues/20
+%
+% Formerly Ticket 323
+%    https://svn.mpi-forum.org/trac/mpi-forum-web/ticket/323
+%
+% More information on implementation and development process
+%    https://fault-tolerance.org
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Process Fault Tolerance}
+\label{sec:ft}
+\label{chap:ft}
+\mpitermtitleindex{error handling!fault tolerance}
+\mpitermtitleindex{error handling!process failure}
+
+\section{Introduction}
+\label{sec:ft-intro}
+
+\par In distributed systems with numerous or complex components,
+a serious risk is that a component fault manifests as a process failure
+that disrupts the normal execution of a long running application.
+A process failure is a common outcome for many
+hardware, network, or software faults that cause a process to crash;
+it can be more formally defined as a fail-stop failure: the affected
+\MPI/ process unexpectedly and permanently stops communicating.
+This chapter introduces \MPI/ features that support the development of
+applications, libraries, and programming languages that can tolerate
+\MPI/ process failures. The primary goal is to specify error classes and
+interfaces that permit users to continue simple \MPI/ communication
+(e.g., some point-to-point patterns) after failures have impacted the execution and rebuild
+\MPI/ objects (e.g., communicators, etc.) as needed to restore the full
+capability of \MPI/ to carry out communication operations (like
+collective communications). This specification does not include
+mechanisms to restore the application data lost due to process failures. The
+literature is rich with diverse fault tolerance techniques that
+the users may employ at their discretion, including
+checkpoint-restart, algorithmic dataset recovery, and continuation
+ignoring failed \MPI/ processes. All these fault tolerance approaches
+benefit from, and often require, the definitions and interfaces
+specified in this chapter in order to resume communicating after a failure.
+
+\par The expected behavior of \MPI/ in the case of an \MPI/ process failure
+is defined by the following statements: any \MPI/ operation that
+involves a failed process must eventually either
+succeed or raise an \MPI/ error (see
+Section~\ref{sec:ft-notification}); an \MPI/ operation that does not
+involve a failed process will complete normally, unless interrupted
+by the user through provided functionality.
+%
+If an application
+needs comprehensive knowledge of failures, it can use the
+interfaces defined in Section~\ref{sec:ft-functions} to explicitly
+propagate the notification of locally detected failures, or set
+communicators in specific modes that enforce such propagation, see Section~\ref{sec:ft-modes}. %sec:reinit
+
+\par Some usage patterns on reliable machines do not
+require fault tolerance. An \MPI/ implementation that does not
+tolerate process failures must never raise a \mpitermni{fault tolerance error}\mpitermindex{error handling!fault tolerance!fault tolerance error}
+(as listed in Section~\ref{sec:ft-errorcodes}). Applications
+using the interfaces defined in this chapter must be portable across
+\MPI/ implementations (including those which do not provide
+fault tolerance). If an \MPI/ implementation does not provide fault
+tolerance features, it may exhibit undefined behavior after a process
+failure at any \MPI/ process.
+%TODO: a future PR will add a reference to the mechanism used to query
+% what FT models are runtime supported by the implementation.
+
+\begin{users}
+The \MPI/ standard does not specify transparent process recovery upon \MPI/ process failure.
+In particular, restoring the lost dataset, spawning spare processes
+or taking other recovery actions are the responsibility of the user.
+
+Many of the operations and semantics described in
+this chapter are applicable only when the \MPI/ application has replaced
+the default error handler \mpiconst{MPI\_ERRORS\_ARE\_FATAL} on the communicators
+it uses.
+\end{users}
+
+\section{Failure Notification}
+\label{sec:ft-notification}
+\mpitermtitleindex{error handling!fault tolerance!notification}
+
+\par All \MPI/ procedures must eventually return (possibly by raising one of the process
+failure error classes listed in Section~\ref{sec:ft-errorcodes}) even if they involve a failed \MPI/ process.
+
+\begin{implementors}
+As long as an implementation can successfully complete some operations during
+a completing procedure, it may choose to delay raising an error. Another valid
+implementation might choose to raise an error as quickly as possible.
+\end{implementors}
+
+\par When an operation raises a process failure error it may not satisfy its
+specification (like any other error, see~\ref{sec:ei-error-classes}).
+
+\subsection{Revoked Communicator}
+\mpitermtitleindex{error handling!fault tolerance!revoked}
+
+A communicator is \mpitermdefni{revoked}\mpitermdefindex{error handling!fault tolerance!revoked}
+at a given \MPI/ process either when
+\mpifunc{MPI\_COMM\_REVOKE} is locally called on it, or when any \MPI/
+operation on the communicator raises an error of class
+\error{MPI\_ERR\_REVOKED} at that process. Once a
+communicator has been revoked at an \MPI/ process, all subsequent non-local operations on
+that communicator are considered
+local and must complete by raising an error of class
+\error{MPI\_ERR\_REVOKED} at that \MPI/ process.
+
+\begin{implementors}
+An implementation may detect that a communicator should become revoked
+when completing procedures can still complete some operations successfully.
+The implementation may delay raising the \error{MPI\_ERR\_REVOKED} error to a later operation,
+but it cannot delay revoking the communicator indefinitely and should favor
+raising the error promptly.
+\end{implementors}
+
+
+\subsection{Error Reporting Range}
+\label{sec:ft-modes}
+
+By default, process failure errors are raised only during communication operations
+in which a failed process is involved, but
+users can control the range of \MPI/ processes whose failure cause \MPI/ operations
+to raise errors on their communicators by setting the following values to the
+info key \infokey{mpi\_error\_range} on their communicators:
+
+\begin{description}
+\item \infoval{operation}
+A process fault tolerance error shall be raised only if the operation involves
+a failed \MPI/ process (e.g., a point-to-point message between two non-failed \MPI/ processes
+shall not raise a process fault tolerance error).
+An \MPI/ process is considered involved in an operation (for the purpose
+of this definition) if its failure may prevent it from calling a matching
+procedure for the operation, that is, an \MPI/ process is involved in a
+communication if any of the following is true:
+the process is in the group(s) over which the operation is collective;
+the process is a destination or a specified or a matched source in a
+point-to-point communication;
+or the process belongs to the source group in an \mpiconst{MPI\_ANY\_SOURCE}
+receive operation.
+
+\item \infoval{group}
+The failure of any \MPI/ process in the group of the communicator causes the communicator to become revoked\mpitermindex{error handling!fault tolerance!revoked}
+(as if \mpifunc{MPI\_COMM\_REVOKE} had been called on the communicator).
+
+\item \infoval{universe}
+The failure of any \MPI/ process in the \MPI/ universe causes the communicator to become revoked
+(as if \mpifunc{MPI\_COMM\_REVOKE} had been called on the communicator).
+\end{description}
+
+When the info key \infokey{mpi\_error\_range} is not set, it is equivalent to having the key set to \infoval{operation}.
+
+\subsection{Fault Tolerance Errors in Point-to-Point Communication}
+\label{sec:ft-notification:p2p-comm}
+\mpitermtitleindex{error handling!fault tolerance!communicator}
+
+An \MPI/ point-to-point communication raises errors of the following
+classes to notify users that the communication
+could not complete successfully because of the failure of at least one involved \MPI/ process:
+
+\begin{itemize}
+
+\item \error{MPI\_ERR\_REVOKED} indicates that the communicator is revoked.
+
+\item \error{MPI\_ERR\_PROC\_FAILED\_PENDING} indicates, for a nonblocking or persistent communication,
+   that the communication is a receive operation from
+   \mpiconst{MPI\_ANY\_SOURCE} and no send operation has matched, yet
+    a potential sending \MPI/ process has failed. The request remains
+    active.
+
+\item In all other cases, the operation raises an error of class
+    \error{MPI\_ERR\_PROC\_FAILED} to indicate that the failure prevents the
+    operation from following its failure-free specification. If there is a
+    request representing a point-to-point communication, it is completed.
+
+\end{itemize}
+
+\subsection{Fault Tolerance Errors in Collective Operations}
+\label{sec:ft-notification:coll}
+
+A collective operation raises errors of the following classes to notify
+users that the communication could not complete successfully because of
+the failure of at least one involved \MPI/ process:
+
+\begin{itemize}
+
+\item \error{MPI\_ERR\_REVOKED} indicates that the communicator is revoked.
+
+\item \error{MPI\_ERR\_PROC\_FAILED} indicates that the failure prevents the
+    operation from following its failure-free specification. If there is a
+    request representing a collective communication, it is completed.
+
+\end{itemize}
+
+
+\begin{users}
+
+Depending on how the collective operation is implemented and when an \MPI/ process
+failure occurs, some participating \MPI/ processes may raise an error while
+other \MPI/ processes return successfully from the same collective operation. For
+example, in \mpifunc{MPI\_BCAST}, the root process may succeed before a failed
+\MPI/ process disrupts the operation, resulting in some other \MPI/ processes raising an
+error.
+
+\end{users}
+
+\begin{users}
+
+Note that communicator creation procedures (e.g., \mpifunc{MPI\_COMM\_DUP} or
+\mpifunc{MPI\_COMM\_SPLIT}) are collective operations. As such, if a failure
+happened during the procedure, an error might be raised at some \MPI/ processes while
+others succeed and obtain a new communicator handle.  Although it is valid to communicate
+between \MPI/ processes that succeeded in creating the new communicator handle, the user is
+responsible for ensuring a consistent view of the communicator creation, if needed.
+\end{users}
+
+\par After an \MPI/ process failure, \mpifunc{MPI\_COMM\_FREE} (as with all
+other collective operations) may not complete successfully at all
+\MPI/ processes. For any \MPI/ process that receives the return code
+\error{MPI\_SUCCESS}, the behavior is defined in
+Section~\ref{subsec:context-intracomdest}. If an \MPI/ process raises a process
+failure error (classes \error{MPI\_ERR\_PROC\_FAILED} or
+\error{MPI\_ERR\_REVOKED}), the communicator handle \mpiarg{comm} is
+set to \mpiconst{MPI\_COMM\_NULL}; however, the implementation makes no
+guarantee about the success or failure of the
+\mpifunc{MPI\_COMM\_FREE} operation, locally or remotely.
+
+\begin{users} Users are encouraged to call \mpifunc{MPI\_COMM\_FREE}
+    on communicators they do not wish to use anymore, even when they
+    contain failed \MPI/ processes. Although the operation may raise a
+    fault tolerance error and not synchronize properly, this
+    gives a high quality implementation an opportunity to release
+    local resources and memory consumed by the object.
+\end{users}
+
+\subsubsection{Error Uniformity}
+
+As noted above, by default, collective communication do not enforce uniformity
+in error raising across \MPI/ processes. Despite the performance advantages that
+non-uniformity offers, a common usage pattern in applications is
+to transform non-uniform error raising into a uniform behavior across all
+\MPI/ processes of the group.
+
+Users can set collective operations on a communicator to enforce uniform error
+raising by setting the following values in the info key \infokey{mpi\_error\_uniform} on the communicator:
+
+\begin{description}
+\item \infoval{local} Process fault tolerance errors are raised to indicate that an \MPI/ process failure prevents from guaranteeing the specified behavior at this process for the collective communication operation (e.g., the output buffer contains invalid data). Other \MPI/ processes may have satisfied their specification (e.g., the output buffer is valid at that process) and may have returned \error{MPI\_SUCCESS}.
+\item \infoval{coll} Process fault tolerance errors are raised to indicate that an \MPI/ process failure prevents from guaranteeing the specified behavior at any process for the collective communication operation. Non-synchronizing collective communication become synchronizing.
+\item \infoval{construct} Process fault tolerance errors are raised to indicate that an \MPI/ process failure prevents from guaranteeing the specified behavior at any process for the collective \MPI/ communication context constructor/destructor operation (e.g., \mpifunc{MPI\_COMM\_DUP} could not create a new communicator at any process in the group of the communicator). Non-synchronizing context constructor/destructor operations become synchronizing. Collective communication that do not create or free a communication context are not impacted. %TODO: list? what about set_info?
+\end{description}
+
+When the info key \infokey{mpi\_error\_uniform} is not set on the communicator, it is equivalent to having the key set to \infoval{local}.
+The info key \infokey{mpi\_error\_uniform} must be set to the same value at all \MPI/ processes
+for a given communicator.
+
+\subsection{Files and One-sided Operations}
+\label{sec:ft-notification:file-rma}
+
+\begin{users}
+    Support for fault tolerance with \MPI/ Files and \RMA/ Windows is not
+    defined by the \MPI/ standard.
+\end{users}
+
+\section{Failure Mitigation Procedures}
+\label{sec:ft-functions}
+\mpitermtitleindex{error handling!fault tolerance!mitigation}
+
+\subsection{Communicator Procedures}
+\label{sec:ft-functions:commfunctions}
+\mpitermtitleindex{error handling!fault tolerance!communicator}
+
+\par Process failure notification is not global in \MPI/.
+\MPI/ processes that do not call operations involving a failed \MPI/ process are
+possibly never notified of its failure (see
+Section~\ref{sec:ft-notification}). If a
+notification must be propagated, \MPI/
+provides a procedure to revoke a communicator at
+all members.
+
+\cdeclmainindex{MPI\_Comm}
+\begin{mpi-binding}
+    function_name("MPI_Comm_revoke")
+    parameter("comm", "COMMUNICATOR")
+\end{mpi-binding}
+\mpitermindex{error handling!fault tolerance!revoked}
+
+\par
+This procedure notifies all \MPI/ processes in the groups (local and remote)
+associated with the communicator \mpiarg{comm} that this communicator
+is revoked. The revocation of a communicator by any
+\MPI/ process completes non-local \MPI/ operations on
+\mpiarg{comm} at all \MPI/ processes by raising an error of class
+\error{MPI\_ERR\_REVOKED}.
+This procedure is not collective and
+therefore does not have a matching call on remote \MPI/ processes. All
+non-failed \MPI/ processes belonging to \mpiarg{comm} will be notified of the
+revocation despite failures.
+
+\cdeclmainindex{MPI\_Comm}
+\begin{mpi-binding}
+    function_name("MPI_Comm_is_revoked")
+    parameter("comm", "COMMUNICATOR")
+    parameter("flag", "LOGICAL", desc=r"\mpicode{true} if the communicator is revoked", direction="out")
+\end{mpi-binding}
+\mpitermindex{error handling!fault tolerance!revoked}
+
+\par
+Returns \mpiarg{flag = true} if the communicator associated with the handle \mpiarg{comm} is revoked at the calling process. It returns \mpiarg{flag = false} otherwise. The operation is local.
+
+\begin{users}
+    In a multithreaded application, a thread calling \mpifunc{MPI\_COMM\_IS\_REVOKED} may return \mpiarg{flag = true} before the operation that raises the first exception of class \error{MPI\_ERR\_REVOKED} has completed in a concurrent thread.
+\end{users}
+
+\cdeclmainindex{MPI\_Comm}
+\cdeclmainindex{MPI\_Group}
+\begin{mpi-binding}
+    function_name("MPI_Comm_get_failed")
+    parameter("comm", "COMMUNICATOR")
+    parameter("failedgrp", "GROUP", direction="out", desc=r"group of failed processes")
+\end{mpi-binding}
+
+\par
+This local procedure returns the group \mpiarg{failedgrp} of \MPI/ processes from the
+communicator \mpiarg{comm} that are known to have failed by the calling \MPI/ process.
+Any \MPI/ process whose failure caused a procedure on \mpiarg{comm} to raise
+a process failure error at this \MPI/ process must appear in that group.
+The \mpiarg{failedgrp} can be empty, that is, equal to \mpiconst{MPI\_GROUP\_EMPTY}.
+
+When an \MPI/ process is a member of \mpiarg{failedgrp}, it is also a member,
+with the same rank, in any group produced by a subsequent call to \mpifunc{MPI\_COMM\_GET\_FAILED} on \mpiarg{comm} at the same calling process.
+
+\begin{users}
+\MPI/ makes no assumption about asynchronous
+progress of the failure detection. A valid \MPI/ implementation may choose
+to update the group of locally known failed \MPI/ processes only when it enters
+a procedure that must raise a fault tolerance error.
+
+It is possible that only the calling \MPI/ process has
+detected the reported failure.
+\end{users}
+
+\cdeclmainindex{MPI\_Comm}
+\begin{mpi-binding}
+    function_name("MPI_Comm_ack_failed")
+    parameter("comm", "COMMUNICATOR")
+    parameter("num_to_ack", "COMM_SIZE", desc=r"Maximum number of process failures to acknowledge")
+    parameter("num_acked", "COMM_SIZE", direction="out", desc=r"Number of process failures acknowledged")
+\end{mpi-binding}
+
+\par
+This local procedure is used to
+\mpitermdefni{acknowledge}\mpitermdefindex{error handling!fault tolerance!ack}
+locally notified failures on \mpiarg{comm}. The operation acknowledges the first \mpiarg{num\_to\_ack}
+process failures on \mpiarg{comm}, that is, it acknowledges the failure of members with a rank lower than
+\mpiarg{num\_to\_ack} in the group that would be produced by a concurrent call to \mpifunc{MPI\_COMM\_GET\_FAILED}
+on the same \mpiarg{comm}.
+
+The operation also sets the value of \mpiarg{num\_acked} to the current number of acknowledged process
+failures in \mpiarg{comm}, that is, a process failure has been acknowledged on \mpiarg{comm} if and only if
+the rank of the process is lower than \mpiarg{num\_acked} in the group that would be produced by a subsequent call to
+\mpifunc{MPI\_COMM\_GET\_FAILED} on the same \mpiarg{comm}.
+
+\mpiarg{num\_acked} can be larger than \mpiarg{num\_to\_ack} when process failures have been acknowledged in a prior call
+to \mpifunc{MPI\_COMM\_ACK\_FAILED}.
+
+After an \MPI/ process failure is acknowledged on \mpiarg{comm}, unmatched \mpiconst{MPI\_ANY\_SOURCE} receive operations
+on the same \mpiarg{comm} that would have raised an error of class \error{MPI\_ERR\_PROC\_FAILED\_PENDING}
+(see Section~\ref{sec:ft-notification:p2p-comm}) proceed without further
+raising errors due to this acknowledged failure.
+
+\begin{users}
+    One may query, without side effect, for the number of currently aknowledged
+    process failures in \mpiarg{comm} by supplying $0$ in \mpiarg{num\_to\_ack}.
+    Conversely, one may unconditionally acknowledge all currently known process
+    failures in \mpiarg{comm} by supplying the size of the group of \mpiarg{comm}
+    in \mpiarg{num\_to\_ack}.
+    Note that the number of acknowledged \MPI/ processes, as returned in \mpiarg{num\_acked},
+    can be smaller or larger than the value supplied in \mpiarg{num\_to\_ack}; It is
+    however never larger than the size of the group returned by a subsequent call
+    to \mpifunc{MPI\_COMM\_GET\_FAILED}.
+
+    Calling \mpifunc{MPI\_COMM\_ACK\_FAILED} on a communicator with failed
+    \MPI/ processes has no effect on collective operations.
+    If a collective operation would raise an
+    error due to the communicator containing a failed process (as
+    defined in Section~\ref{sec:ft-notification:coll}), it can
+    continue to raise an error even after the failure has been
+    acknowledged.
+\end{users}
+
+\section{Fault Tolerance Error Codes and Classes}
+\label{sec:ft-errorcodes}
+\mpitermindex{error handling!fault tolerance!notification}
+\mpitermtitleindex{error handling!fault tolerance!fault tolerance error}
+
+Among the error classes defined in Section~\ref{sec:ei-error-classes}, the following are \mpitermdefni{fault tolerance error} classes:
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{l p{2.8in}}
+    \error{MPI\_ERR\_PROC\_FAILED} & The operation could not complete because of an \MPI/ process failure (a fail-stop failure). \\
+    \error{MPI\_ERR\_PROC\_FAILED\_PENDING} & The operation was interrupted by an \MPI/ process failure (a fail-stop failure). The request is still pending and the operation may be completed later. \\
+    \error{MPI\_ERR\_REVOKED} & The communication object used in the operation has been revoked. \\
+\end{tabular}
+\end{center}
+\caption{Fault tolerance error classes}
+\label{table:ft-errorcodes:errclasses}
+\end{table}
+
+\section{Examples}
+
+\subsection{Fault Tolerant Manager/Worker}
+
+The example below presents a manager code that handles worker failures
+by discarding failed worker \MPI/ processes and resubmitting the work to
+the remaining workers. It demonstrates the different failure cases
+that may occur with receive operations using \mpiconst{MPI\_ANY\_SOURCE}
+as discussed in Section~\ref{sec:ft-notification:p2p-comm}.
+
+\begin{example}
+\label{ft-ex-manager-worker}
+\Exindex{C}{Fault Tolerant Manager/Worker}{MPI\_Comm\_get\_failed,MPI\_Comm\_ack\_failed}%
+Fault Tolerant Manager Example
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%AUTOCONTINUE
+%%DECL: MPI_Comm comm;
+%%DECL: MPI_Group gcomm, g;
+%%DECL: int rc, ec, size, gsize, tag, active_workers, work_available;
+%%DECL: int *granks, *cranks;
+%%DECL: MPI_Status status;
+%%DECL: MPI_Request req;
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]]
+int manager(void)
+{
+    MPI_Comm_set_errhandler(comm, MPI_ERRORS_RETURN);
+    MPI_Comm_size(comm, &size);
+    MPI_Comm_group(comm, &gcomm);
+
+    /* ... submit the initial work requests ... */
+
+    /* Progress engine: Get answers, send new requests,
+       and handle process failures */
+    MPI_Irecv(buffer, 1, MPI_INT, MPI_ANY_SOURCE, tag, comm, &req);
+    while( (active_workers > 0) && work_available ) {
+        rc = MPI_Wait(&req, &status);
+        if( MPI_SUCCESS == rc ) {
+            /* ... process the answer and update work_available ... */
+        }
+        else {
+            MPI_Error_class(rc, &ec);
+            if( (MPI_ERR_PROC_FAILED == ec) ||
+                (MPI_ERR_PROC_FAILED_PENDING == ec) ) {
+                /* We ack the full size of comm, so we will ack
+                 * unconditionally. Variable gsize will contain all
+                 * currently known failures. */
+                MPI_Comm_ack_failed(comm, size, &gsize);
+
+                /* ... find the lost work and requeue it ... */
+                MPI_Comm_get_failed(comm, &g);
+                granks = (int*)calloc(active_workers-gsize-1,
+                                      sizeof(int));
+                cranks = (int*)calloc(active_workers-gsize-1,
+                                      sizeof(int));
+                for(i = active_workers; i < gsize; i++)
+                    granks[i-active_workers] = i;
+                MPI_Group_translate_ranks(g, gsize, granks,
+                                          gcomm,    cranks);
+                /* iterate over newly failed procs */
+                for(i = active_workers; i < gsize; i++) {
+                    /* resubmit the work */
+                }
+                free(cranks); free(granks);
+                MPI_Group_free(&g);
+
+                active_workers = size - gsize - 1;
+
+                /* no need to repost: the request is still pending */
+                if( ec == MPI_ERR_PROC_FAILED_PENDING )
+                    continue;
+            }
+        }
+        /* get ready to receive more notifications from workers */
+        MPI_Irecv(buffer, 1, MPI_INT, MPI_ANY_SOURCE, tag, comm, &req);
+    }
+    /* ... cancel request and cleanup ... */
+}
+\end{lstlisting}
+\end{example}
+

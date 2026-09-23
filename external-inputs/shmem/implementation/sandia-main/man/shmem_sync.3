@@ -1,0 +1,286 @@
+.TH SHMEM_SYNC 3 "Open Source Software Solutions, Inc." "OpenSHMEM Library Documentation"
+./ sectionStart
+.SH NAME
+shmem_sync \- 
+Registers the arrival of a PE at a synchronization point.
+This routine does not return until all other PEs in a given OpenSHMEM team
+or active set arrive at this synchronization point.
+
+./ sectionEnd
+
+
+./ sectionStart
+.SH   SYNOPSIS
+./ sectionEnd
+
+./ sectionStart
+.SS C11:
+
+.B int
+.B shmem\_sync(shmem_team_t
+.I team
+.B );
+
+
+
+./ sectionEnd
+
+
+
+./ sectionStart
+.SS C/C++:
+
+.B int
+.B shmem\_team\_sync(shmem_team_t
+.I team
+.B );
+
+
+
+./ sectionEnd
+
+
+
+./ sectionStart
+.B ***************DEPRECATED***************
+./ sectionEnd
+
+./ sectionStart
+
+.B void
+.B shmem\_sync(int
+.IB "PE_start" ,
+.B int
+.IB "logPE_stride" ,
+.B int
+.IB "PE_size" ,
+.B long
+.I *pSync
+.B );
+
+
+
+./ sectionEnd
+
+
+
+./ sectionStart
+.B ****************************************
+./ sectionEnd
+
+./ sectionStart
+
+.SH DESCRIPTION
+.SS Arguments
+.BR "IN " -
+.I team
+- The team over which to perform the operation.%
+
+
+./ sectionStart
+.B ***************DEPRECATED***************
+./ sectionEnd
+
+
+
+.BR "IN " -
+.I PE\_start
+- The lowest PE number of the active set of
+PEs.
+
+
+.BR "IN " -
+.I logPE\_stride
+- The log (base 2) of the stride between
+consecutive PE numbers in the active set.
+
+
+.BR "IN " -
+.I PE\_size
+- The number of PEs in the active set.
+
+
+.BR "IN " -
+.I pSync
+- 
+Symmetric address of a work array of size at least SHMEM\_SYNC\_SIZE.
+
+./ sectionStart
+.B ****************************************
+./ sectionEnd
+
+./ sectionEnd
+
+
+./ sectionStart
+
+.SS API Description
+
+.B shmem\_sync
+is a collective synchronization routine over an
+existing OpenSHMEM team or active set.
+
+The routine registers the arrival of a PE at a synchronization point in the program.
+This is a fast mechanism for synchronizing all PEs that participate in this
+collective call. The routine blocks the calling PE until all PEs in the
+specified team or active set have called 
+.BR "shmem\_sync" .
+In a multithreaded OpenSHMEM
+program, only the calling thread is blocked.
+
+Team-based sync routines operate over all PEs in the provided team argument. All
+PEs in the provided team must participate in the sync operation.
+If 
+.I team
+compares equal to SHMEM\_TEAM\_INVALID or is
+otherwise invalid, the behavior is undefined.
+
+Active-set-based sync routines operate over all PEs in the active set
+defined by the 
+.I PE\_start
+, 
+.I logPE\_stride
+, 
+.I PE\_size
+triplet.
+
+As with all active set-based collective routines,
+each of these routines assumes
+that only PEs in the active set call the routine. If a PE not in
+the active set calls an active set-based collective routine,
+the behavior is undefined.
+
+The values of arguments 
+.I PE\_start
+, 
+.I logPE\_stride
+, and
+.I PE\_size
+must be equal on all PEs in the active set. The same
+work array must be passed in 
+.I pSync
+to all PEs in the active set.
+
+In contrast with the 
+.B shmem\_barrier
+routine, 
+.B shmem\_sync
+only
+ensures completion and visibility of previously issued memory stores and does not ensure
+completion of remote memory updates issued via OpenSHMEM routines.
+
+The same 
+.I pSync
+array may be reused on consecutive calls to
+.B shmem\_sync
+if the same active set is used.
+
+./ sectionEnd
+
+
+./ sectionStart
+
+.SS Return Values
+
+Zero on successful local completion. Nonzero otherwise.
+
+./ sectionEnd
+
+
+./ sectionStart
+
+.SS API Notes
+
+The 
+.B shmem\_sync
+routine can be used to portably ensure that
+memory access operations observe remote updates in the order enforced by the
+initiator PEs, provided that the initiator PE ensures completion of remote
+updates with a call to 
+.B shmem\_quiet
+prior to the call to the
+.B shmem\_sync
+routine.
+
+./ sectionEnd
+
+
+
+./ sectionStart
+.SS Examples
+
+
+
+The following 
+.B shmem\_sync
+example is
+for C11 programs:
+
+.nf
+#include <shmem.h>
+#include <stdio.h>
+
+int main(void) {
+ static int x = 10101;
+
+ shmem_team_t twos_team = SHMEM_TEAM_INVALID;
+ shmem_team_t threes_team = SHMEM_TEAM_INVALID;
+ shmem_team_config_t *config = NULL;
+
+ shmem_init();
+ int mype = shmem_my_pe();
+ int npes = shmem_n_pes();
+
+ if (npes > 2)
+   shmem_team_split_strided(SHMEM_TEAM_WORLD, 2, 2, (npes - 1) / 2, config, 0, &twos_team);
+
+ if (npes > 3)
+   shmem_team_split_strided(SHMEM_TEAM_WORLD, 3, 3, (npes - 1) / 3, config, 0,
+                            &threes_team);
+
+ int mype_twos = shmem_team_my_pe(twos_team);
+ int mype_threes = shmem_team_my_pe(threes_team);
+ int npes_twos = shmem_team_n_pes(twos_team);
+ int npes_threes = shmem_team_n_pes(threes_team);
+
+ if (twos_team != SHMEM_TEAM_INVALID) {
+   /* put the value 2 to the next team member in a circular fashion */
+   shmem_p(
+       &x, 2,
+       shmem_team_translate_pe(twos_team, (mype_twos + 1) % npes_twos, SHMEM_TEAM_WORLD));
+   shmem_quiet();
+   shmem_sync(twos_team);
+ }
+
+ shmem_sync(SHMEM_TEAM_WORLD);
+
+ if (threes_team != SHMEM_TEAM_INVALID) {
+   /* put the value 3 to the next team member in a circular fashion */
+   shmem_p(&x, 3,
+           shmem_team_translate_pe(threes_team, (mype_threes + 1) % npes_threes,
+                                   SHMEM_TEAM_WORLD));
+   shmem_quiet();
+   shmem_sync(threes_team);
+ }
+
+ if (mype && mype % 3 == 0) {
+   if (x != 3)
+     shmem_global_exit(3);
+ }
+ else if (mype && mype % 2 == 0) {
+   if (x != 2)
+     shmem_global_exit(2);
+ }
+ else if (x != 10101) {
+   shmem_global_exit(1);
+ }
+
+ shmem_finalize();
+ return 0;
+}
+.fi
+
+
+
+
+

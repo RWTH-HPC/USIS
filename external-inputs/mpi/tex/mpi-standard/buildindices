@@ -1,0 +1,960 @@
+#! /usr/bin/env python3
+#
+# -*- mode: python-mode; -*-
+#
+# Build the indices
+# Read the single index file and extract the different index entries
+# There are several indices:
+#   TERM - General index
+#   CONST - MPI Constants and predefined handles
+#   EXAMPLES - Examples
+#   NEWEXAMPLES - Examples with a special format; see below
+#   TYPEDEF - MPI C typedefs
+#   <null> - MPI Functions
+# Each of these has a list:
+#   listTERM
+#   listCONST
+#   listEXAMPLES
+#   listTYPEDEF
+#   listFUNCS
+# In addition, we keep track of info and string constants
+#   listINFOCONST_KEY
+#   listINFOCONST_VAL
+#   listSTRINGCONST
+# We do this by permitting an optional sublist specifier for the index type
+# using the format <NAME>(=TYPE), for example INFOCONST=KEY and INFOCONST=VAL
+#
+# Idea here is to capture constants in categories that change as the standard
+# evolves - things like status fields aren't included because they rarely change
+#
+# todo - listERRCONST       - MPI_ERR and MPI_T_ERR
+#            Update \error, \errormain to use \IIconstidx[ERRCONST]{...}
+#            (Could also, or instead, check for MPI_ERR_... and MPI_T_ERR_...)
+#      - listSTRINGMAXSIZE  - MPI_MAX_
+#            Update this script to detect these as CONST (MPI_MAX_....)
+#      - listDATATYPE       - MPI datatypes (fairly stable now, and in
+#        		      many subcategories)
+#            Update \mpidtype etc to use \IIconstidx[DTYPECONST]{...}
+#      - listSPLITTYPE      - Few types, but being added to
+#      - listMODES          - MPI_MODE
+#            Update this script to detect these as CONST (MPI_MODE_...)
+#      - listPVARCLASS      - MPI_T_PVAR_CLASS (fairly stable, may not need to
+#                             managed in this way)
+#            If done, update this script to detect these as CONST
+#            (MPI_T_PVAR_CLASS_...)
+
+import re
+import os
+import subprocess
+import datetime
+import sys
+import argparse
+
+listTERM     = []
+listCONST    = []
+listDECLS    = []
+listEXAMPLES = []
+listTYPEDEF  = []
+listFUNCS    = []
+
+# Special constants (separate lists, these are *in addition* to the lists
+# for constants
+listINFOCONST     = []
+listINFOCONST_KEY = []
+listINFOCONST_VAL = []
+listSTRINGCONST   = []
+
+# These list are determined by the constant prefix
+listERRCONST      = []
+listERRTCONST     = []
+listSTRINGMAXSIZE = []
+listMODES         = []
+listPVARCLASS     = []
+listSPLITTYPE     = []
+listDATATYPE      = []
+constPrefixes = { 'MPI\\\\_ERR\\\\_'       : listERRCONST,
+                  'MPI\\\\_T\\\\_ERR\\\\_' : listERRTCONST,
+                  'MPI\\\\_MAX\\\\_'       : listSTRINGMAXSIZE,
+                  'MPI\\\\_MODE\\\\_'      : listMODES,
+                  'MPI\\\\_T\\\\_PVAR\\\\_CLASS' : listPVARCLASS,
+                  'MPI\\\\_COMM\\\\_TYPE\\\\_' : listSPLITTYPE,
+}
+
+headerTERM = r"""This index lists mainly terms of the \MPI/ specification. The underlined page numbers refer to the definitions or parts of the definition of the terms. Bold face page numbers are used for entries appearing in a section or subsection title."""
+headerEXAMPLES = r"""This index lists code examples throughout the text.  Some examples are referred to by content; others are listed by the major \MPI/ procedure name that they are demonstrating.  \MPI/ procedure names listed in all capital letter are Fortran examples; \MPI/ procedure names listed in mixed case are C examples."""
+headerCONST = r"""This index lists predefined \MPI/ constants and handles, including info keys and values. Underlined page numbers give the location of the primary definition or use of the indexed term."""
+headerDECLS = r"""This index refers to declarations needed in C and Fortran, such as address kind integers, handles, etc. The underlined page numbers is the ``main'' reference (sometimes there are more than one when key concepts are discussed in multiple areas). Fortran defined types are shown as \mpicode{TYPE($name$)}."""
+headerTYPEDEF = r"""This index lists the C typedef names for callback routines, such as those used with attribute caching or user-defined reduction operations.  Fortran example prototypes are given near the text of the C name."""
+# This header should add text to describe the _c functions added in MPI 4.0
+# to support MPI_Count arguments.
+headerFUNCS = r"""The underlined page numbers refer to the function definitions."""
+
+# Known special cases. This is used in checking for problems in the
+# index entries.  These are allowed. Only the MPI Document Editor should update
+# this list.
+knownOK = { 'basic datatypes!C++' : 'Ok',
+            '"!(_c)' : 'Ok',
+            'communication!typed, untyped, and packed' : 'Ok',
+            'neighborhood collective communication!periodic and dims==1 or 2' : 'Ok'
+        }
+
+# Redirect makeindex error output (which includes a lot of non-error output!)
+mklog = open('mkindex.log', 'w')
+
+def writeIndexData( lst, fname ):
+    "Output the index data entries"
+    outInd = open( fname, "w" )
+    for i in range(len(lst)):
+        outInd.write(r"\indexentry{"+lst[i]+"}\n")
+    outInd.close()
+    return
+
+def createIndex( infile, outfile ):
+    # Run the process to create the index file.
+    subprocess.run(["makeindex", "-c", "-o", outfile, infile], stderr=mklog)
+    return
+
+def appendFile( ofile, fname ):
+    " Append the file name to the open file ofile"
+    ifile = open( fname, "r" )
+    for line in ifile:
+        # Special case: change the environment for each index
+        if re.match(r'\\begin\{theindex\}', line):
+            line = "\\begin{myindex}\n"
+        elif re.match(r'\\end\{theindex\}', line):
+            line = "\\end{myindex}\n"
+
+        ofile.write(line)
+    ifile.close()
+    return
+
+def writeHeader( ofile, idxname, shortname, header ):
+    " Format the header and append to ofile"
+    ofile.write("%%%% THIS FILE CREATED BY buildindices on %s.  DO NOT EDIT\n" % datetime.datetime.now())
+    ofile.write("\\newpage\n\\phantomsection\n\\addcontentsline{toc}{chapter}")
+    ofile.write("{%s}\n" % idxname )
+    # For scrbook, we must manually set the running headers
+    ofile.write("\\markboth{%s}{%s}\n" % (idxname, idxname) )
+    ofile.write("\\label{index:%s}\n" % shortname )
+    ofile.write("\\makeatletter\n\\renewcommand{\\@index}{%s}\n" % idxname )
+    ofile.write("\\renewcommand{\\@introtext}{%s}\n\\makeatother\n" % header )
+    return
+
+def funcidxUpcaseOrder( lst ):
+    " Use upper-case only to sort function names, and use standard formatting for functions"
+    listtmp = []
+    for i in range(len(lst)):
+        # Extract the name for sorting
+        item = re.match(r'([^|@!]*)([\|!].*)$', lst[i], 0)
+        if item :
+            name = item.group(1)
+            rem  = item.group(2)
+            name = name.upper() + "@\\IImpifuncfmt{" + name + "}"
+            listtmp.append(name + rem)
+        else :
+            listtmp.append(lst[i]);
+    return listtmp
+
+# Write the list out, using replcmd for the command for the name, and
+# add eol text to the end of the line
+def writeConstList( lst, replcmd, eoltext, ofile ):
+    lastname = "ZZZ"
+    for name in sorted(lst, key=str.casefold) :
+        # Extract just the name
+        snameObj = re.match(r'([^@]*)@([^\|]*)\|',name,0)
+        if snameObj :
+            sname = snameObj.group(1)
+            if sname != lastname :
+                ofile.write(replcmd + "{" + snameObj.group(1) + "}" + eoltext + "\n")
+        lastname = sname
+
+# For functions and typedefs, we remove (...) from the entry - if set,
+# this warns about each such occurance
+warnParens = 0
+# Set to 0 to suppress warnings
+warnings   = 1
+# Keep track of problems
+warncount  = 0
+# Set to 1 to return a status code of 1 if there are any warnings.  Use
+# to ensure that the index build is free of problems
+warnFails = 0
+# Set to 1 to warn of duplicate primary references. Currently (Jan 2025),
+# there are many such references, so this is off by default
+warnDupPrimary = 0
+# Set to 1 to ignore constants that do not start with MPI
+# (Warnings will still be produced)
+ignoreBadConst = 1
+# Use this to turn off warnings on bad constants (warnings must also be true)
+warnBadConst = 1
+# Set to 1 to ignore functions that do not start with MPI (or mpiexec/mpirun)
+# (Warnings will still be produced)
+ignoreBadFunc  = 1
+# Use this to turn off warnings on bad functions (warnings must also be true)
+warnBadFunc = 1
+# Set to 1 to ignore missing primary index entry
+ignoreNoPrimary = 1
+printNoPrimary  = 0
+# Set to 1 to ignore checking for functions in lower case
+ignoreFunctionCase = 0
+# Set to 1 for debugging
+verbose = 0
+# remove intermediate files
+cleanupFiles = 1
+# Set to true to remove index entries on the same page as a primary index
+# entry
+removeDupSecondaryEntries = 1
+# Set true to create files with the info values and the string values
+# (Currently under development; can be compared with the values in
+# applang-const)
+createConstListFiles = 0
+#
+# Enhanced Example Index options
+# if true, add "Example x.xx: short description" to the Examples index
+ExamplesAddByNumber = 0
+# if true, add the short description with the routine as a subitem to the
+# examples index
+ExamplesAddByDesc = 0
+# if true, add the routine with the short description as a subitem to the
+# examples index
+ExamplesAddWithDesc = 0
+# if true, add a subitem to the routine entry in the Functions index with the
+# location of the example, and whether it is in C or Fortran
+ExamplesAddToFuncs = 0
+# Ditto for constants, declarations, and callbacks (typedefs)
+ExamplesAddToConsts = 0
+ExamplesAddToDecls = 0
+ExamplesAddToTypedefs = 0
+
+# Generate a log file of entries without a primary index entry
+logNoPrimary = 0
+noprimefile  = 0
+
+def printToNoPrimary( itemname, page ):
+    noprimefile.write( itemname + "\t" + page + "\n")
+
+
+## Output of problems
+warningfile = sys.stderr
+def printWarning( str ):
+    global warncount, warningfile
+    if warnings :
+         warncount += 1
+         print( "WARNING:" + str, file=warningfile )
+def printWarningNNL( str ):
+    global warncount, warningfile
+    if warnings :
+         warncount += 1
+         print( "WARNING:" + str, file=warningfile, end='' )
+
+
+## Check for problems
+def checkForPrimary( lst, lstnamestr, doWarn ):
+    """
+    Check the list for primary entries
+    Also remove non-primary entries on the same page as a primary entry
+    """
+    # namedefs - defined for a primary definition, else the first page number
+    # on which the name appears. Only tof the top level name - e.g., in
+    # a!b!c, defined for a, not a!b!c
+    # namefulldefs - defined for a primary definition. E.g., if index entry
+    # is a!b!c, defined for a!b!c
+    # nameprimary - comma separated list of where the top-level name appears
+    namedefs = dict()
+    namefulldefs = dict()
+    nameprimary = dict()
+    namefullprimary = dict()
+
+    titleWritten = 0
+    for i in range(len(lst)):
+        # Extract the name and the page type
+        # Name is <name>|hyperpage}{page#  OR
+        #         <name>|hyperindexformat{\uu}}{page# OR
+        #         <name>|hyperxindexformat{\uu}}{page#
+        # hyperxindexformat is an update from the hyperref package to
+        # (some?) uses of hyperindexformat. This supports both.
+        idxObj = re.match(r'([^|]*)\|([^}]*)}.*{([0-9]*)$', lst[i], 0)
+        if idxObj :
+            namefull = idxObj.group(1)
+            # For deteching entries with no primary, we just look at the top
+            # level name.
+            nmObj = re.match(r'([^!]*)!.*', namefull, 0)
+            if nmObj :
+                name = nmObj.group(1)
+            else :
+                name = namefull
+            if verbose :
+                print( "  (cPrimary)Name = " + name + "[" + lst[i] + "]")
+            if idxObj.group(2) == "hyperpage" :
+                if verbose:
+                    print( "      use entry")
+                if name in namedefs :
+                    if namedefs[name] != "defined" :
+                        # Must compare locations as integers
+                        if int(namedefs[name]) > int(idxObj.group(3)) :
+                            namedefs[name] = idxObj.group(3)
+                else:
+                    namedefs[name] = idxObj.group(3)
+                if namefull in namefulldefs :
+                    if namefulldefs[namefull] != "defined" :
+                        # Must compare locations as integers
+                        if int(namefulldefs[namefull]) > int(idxObj.group(3)) :
+                            namefulldefs[namefull] = idxObj.group(3)
+                else:
+                    namefulldefs[namefull] = idxObj.group(3)
+            elif idxObj.group(2) == "hyperx?indexformat{\\uu" or idxObj.group(2) == "hyperx?indexformat{\\bold" or re.match(r'hyperx?indexformat{\\see{.*',idxObj.group(2),0) or re.match(r'hyperx?indexformat{\\seealso{.*',idxObj.group(2),0) :
+                if verbose:
+                    print( "      defining entry: " + idxObj.group(2) )
+                if  warnDupPrimary and namefull in namefulldefs and namefulldefs[namefull] == 'defined' :
+                    # duplicate primary definitions
+                    printWarning("Duplicate primary definition for " + namefull + " on page " + idxObj.group(3) + " others at " + nameprimary[namefull])
+                namedefs[name] = 'defined'
+                namefulldefs[name] = 'defined'
+                if name in nameprimary :
+                    nameprimary[name] = nameprimary[name] + "," + idxObj.group(3)
+                else :
+                    nameprimary[name] = idxObj.group(3)
+                if namefull in namefullprimary :
+                    namefullprimary[namefull] = namefullprimary[namefull] + "," + idxObj.group(3)
+                else :
+                    namefullprimary[namefull] = idxObj.group(3)
+            else :
+                printWarning( "unrecognized format in list " + lstnamestr + ": " + idxObj.group(2) + " on page " + idxObj.group(3))
+                printWarning( "Full entry is: " + lst[i] )
+
+    if doWarn :
+        for name in sorted(namedefs):
+            if namedefs[name] != 'defined' :
+                if not titleWritten :
+                    if printNoPrimary:
+                        print( "List " + lstnamestr)
+                    if logNoPrimary:
+                        noprimefile.write( "List " + lstnamestr + "\n")
+                    titleWritten = 1
+                # Use sort name
+                namebase = re.match(r'([^|@]*)@', name, 0)
+                if namebase :
+                    itemname = namebase.group(1)
+                else:
+                    itemname = name
+                if printNoPrimary:
+                    printWarning(itemname + " does not have a primary index, first used on page " + namedefs[name])
+                if logNoPrimary:
+                    if verbose :
+                        print("  adding " + name + " to nomain log")
+                    printToNoPrimary(itemname, namedefs[name])
+
+    # Now that we know which names have a primary entry, we can remove
+    # non-primary references on the same page. Move backwards through the
+    # list so that the removals don't change the index
+    if removeDupSecondaryEntries :
+        for i in range(len(lst)-1,0,-1):
+            # Extract the name and the page type
+            # Name is <name>|hyperpage}{page#  OR
+            #         <name>|hyperindexformat{\uu}}{page# OR
+            #         <name>|hyperxindexformat{\uu}}{page#
+            idxObj = re.match(r'([^|]*)\|([^}]*)}.*{([0-9]*)$', lst[i], 0)
+            if idxObj :
+                name = idxObj.group(1)
+                nmObj = re.match(r'([^!]*)!.*', name, 0)
+                if nmObj :
+                    name = nmObj.group(1)
+                if verbose:
+                    print( "  (removeDup)Name = " + name)
+                if idxObj.group(2) == "hyperpage" and namedefs[name] == 'defined' and re.match( ","+idxObj.group(3)+",",nameprimary[name],0) :
+                    if verbose :
+                        print("Need to remove " + name + " in " + lst[i])
+                    del lst[i]
+
+    return
+
+def checkForCase( lst, lstnamestr, exceptionStr, allowsuffix ):
+    "Check the list for lower case, ignoring those in the exceptions, and those ending with allowsuffix"
+    namedefs = dict()
+    titleWritten = 0
+    for i in range(len(lst)):
+        # Extract the name and the page type
+        # Name is <name>|hyperpage}{page#  OR
+        #         <name>|hyperindexformat{\uu}}{page# OR
+        #         <name>|hyperxindexformat{\uu}}{page#
+        idxObj = re.match(r'([^|]*)\|[^}]*}.*{([0-9]*)$', lst[i], 0)
+        if idxObj :
+            page = idxObj.group(2)
+            name = idxObj.group(1)
+            # If Name includes a second level, ignore that and extract only
+            # the top-level name
+            idxObj = re.match(r'([^!]*)!.*', name, 0)
+            if idxObj :
+                name = idxObj.group(1)
+            if verbose:
+                print( "  (checkCase)Name = " + name)
+            if re.search(r'[a-z]+', name, 0) and not re.search(name, exceptionStr, 0) and not re.search(allowsuffix+'$', name, 0) :
+                printWarning("Lowercase " + name + " in " + lstnamestr + " on page " + page)
+    return
+
+# Check for characters that should not be used in the text of an index entry
+# allow is a string of extra characters to allow in str; may be empty
+# Note that no more than two ! may be used to specify subitems
+def checkForBadChars( str, eText, eType, ePage, allow ):
+    nameObj = re.match('([^|]*)|', str + '|', 0)
+    if nameObj :
+        if verbose :
+            print( "Name is " + nameObj.group(1) )
+        # Look for problems. The name should contain only alphanum and
+        # ! and \_
+        # Handle the special case of sortkey@formatted line - strip
+        # the @... from the clean name
+        nameclean = nameObj.group(1).replace('\\_', '_')
+        nameclean = re.sub('@.*','', nameclean)
+        if allow != '':
+            nameclean = re.sub("["+allow+"]", '', nameclean)
+        # Special case for {RMA} and {MPI}, to suppress getlatex
+        # warnings (yes, a hack)
+        nameclean = re.sub('{RMA}', 'RMA', nameclean)
+        nameclean = re.sub('{MPI}', 'MPI', nameclean)
+        # Do NOT include a comma - this usually means that a subitem
+        # was intended
+        if re.search(r'[^a-zA-Z0-9_!:/\(\)\. *-]',nameclean) :
+            # First, check for the exceptions
+            if nameclean not in knownOK :
+                printWarning( "Name contains invalid characters:" + nameclean + " on page " + ePage + " entry type " + eType)
+                printWarning( "Full entry is: " + eText )
+        # Check for too many !
+        if re.search('.*!.*!.*!.*', nameclean) :
+            printWarning( "Name contains too many subitems: " + nameclean + " on page " + ePage + " entry type " + eType)
+            printWarning( "Full entry is: " + eText )
+
+def checkSpecialLists(str):
+    # Look for the known prefixes for the special constants.  Str is known
+    # to be a CONST
+    for prefix in constPrefixes.keys():
+        if re.match(prefix,str):
+            constPrefixes[prefix].append(str)
+            break
+
+## Process arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('--nomain', help="List entries with no primary entry", action="store_true")
+parser.add_argument('--leavefiles', help="Do not remove temporary files", action="store_true")
+parser.add_argument('--verbose', help="Verbose for debugging this script", action="store_true")
+parser.add_argument('--constfiles', help="Create files containing sorted lists of info and string constants", action="store_true")
+parser.add_argument('--newexamples', help="Add new example index entries", action="store_true")
+parser.add_argument('--exampleindex', help="Turn on different entries for examples in the indices", nargs='+', choices=('number', 'bydesc', 'withdesc', 'funcs', 'consts', 'decls', 'callbacks'))
+parser.add_argument('--lognomain', help="Write entries with no primary entry to the specified file", type=str)
+parser.add_argument('--warnfile', help="Use this file for warning messages", type=str)
+parser.add_argument('--warndupmain', help="Warn about duplicate primary (main) index entries", action="store_true")
+
+args = parser.parse_args()
+# Convert determined arg values into internal variable values
+if args.nomain :
+    ignoreNoPrimary = 0
+    printNoPrimary  = 1
+if args.leavefiles :
+    cleanupFiles = 0
+if args.verbose :
+    verbose = 1
+if args.constfiles :
+    createConstListFiles = 1
+if args.warndupmain :
+    warnDupPrimary = 1
+if args.newexamples :
+    ExamplesAddByNumber   = 1
+    ExamplesAddByDesc     = 1
+    ExamplesAddWithDesc   = 1
+    ExamplesAddToFuncs    = 1
+    ExamplesAddToConsts   = 1
+    ExamplesAddToDecls    = 1
+    ExamplesAddToTypedefs = 1
+if args.exampleindex :
+    for name in args.exampleindex :
+        name = name.lower()
+        if name == "number" :
+            ExamplesAddByNumber   = 1
+        elif name == "bydesc" :
+            ExamplesAddByDesc     = 1
+        elif name == "withdesc" :
+            ExamplesAddWithDesc   = 1
+        elif name == "funcs" :
+            ExamplesAddToFuncs    = 1
+        elif name == "consts" :
+            ExamplesAddToConsts   = 1
+        elif name == "decls" :
+            ExamplesAddToDecls    = 1
+        elif name == "callbacks" :
+            ExamplesAddToTypedefs = 1
+        else :
+            # This should be unnecessary because of choice value where
+            # this argument is defined
+            printWarning("Unrecognized --exampleindex option " + name)
+            sys.exit(1)
+
+if args.lognomain:
+    noprimefile     = open(args.lognomain, "w")
+    logNoPrimary    = 1
+    if ignoreNoPrimary:
+        printNoPrimary = 0
+    ignoreNoPrimary = 0
+
+if args.warnfile:
+    warningfile = open(args.warnfile, "w")
+
+## Process the index file from the latex run
+idxfile = open('mpi-report.idx')
+for line in idxfile:
+    # Match \indexentry{[NAME:]text}{page}
+    # where text may have ! (subindex) and |(formatting) as in
+    # TERM:get!in function name|hyperindexformat{\uu}
+    # TERM:get!in function name|hyperxindexformat{\uu}
+    # FIXME: This will not handle pages in the frontmatter - with numbers
+    # in Roman numerals. (e.g., iii or xvi)
+    entryObj = re.match(r'\\indexentry\{(.*?):(.*?)}{([0-9]+)}', line, 0)
+    if entryObj:
+        entryText    = entryObj.group(2)
+        entryPage    = entryObj.group(3)
+        entryType    = entryObj.group(1)
+        entrySubtype = ""
+        e2Obj = re.match(r'([^=]*)=(.*)', entryType, 0)
+        if e2Obj:
+            entryType    = e2Obj.group(1)
+            entrySubtype = e2Obj.group(2)
+        if verbose:
+            print( "Index " + entryType)
+            if entrySubtype != "":
+                print( "Subtype " + entrySubtype)
+            print( "Text " + entryText)
+            print( "Page " + entryPage)
+    else :
+        entryObj = re.match(r'\\indexentry\{(.*?)}{([0-9]+)}', line, 0)
+        if entryObj:
+            if verbose:
+                print( "Index Function")
+                print( "Text " + entryObj.group(1))
+                print( "Page " + entryObj.group(2))
+            entryType    = "MPIFUNCTION"
+            entrySubtype = ""
+            entryText    = entryObj.group(1)
+            entryPage    = entryObj.group(2)
+            # FIXME: This is an ugly hack
+            if not re.match("MPI",entryText) and not re.match("PMPI",entryText) and not re.match("mpiexec",entryText) and not re.match("mpirun",entryText) and not re.match("COPY\\\\_FUNCTION",entryText) and not re.match("DELETE\\\\_FUNCTION", entryText) and not re.match("COMM\\\\_COPY\\\\_ATTR\\\\_FUNCTION",entryText) and not re.match("COMM\\\\_DELETE\\\\_ATTR\\\\_FUNCTION",entryText):
+                if warnBadFunc :
+                    printWarning("function index not MPI: " + entryText + " page " + entryPage)
+                if ignoreBadFunc:
+                    entryType = "Unknown"
+            elif not re.match("MPI",entryText) and not re.match("PMPI",entryText) and not re.match("mpiexec",entryText) and not re.match("mpirun",entryText):
+                printWarning("function index is exception: " + entryText + " page " + entryPage)
+        else:
+            entryType = "Unknown"
+            entryText = ""
+
+    # replace any newlines with a blank. Handle the case that an index
+    # command was mangled.
+    try:
+        entryText
+    except NameError:
+        printWarning("mangled index entry, type " + entryType + ", input:" + line)
+    else:
+        entryText = re.sub('\n', ' ', entryText)
+
+    if entryType == "MPIFUNCTION" or entryType == "TYPEDEF":
+        # This is complex, because an index entry may contain LaTeX commands
+        # with @ characters. This should remove balanced parenthesis strings
+        # This is required because of how the function definitions are
+        # handled in the LaTeX source, which include the function parmaeters
+        # (and LaTeX commands around them) in the index entry, and these should
+        # not be part of the index entry.  This processing should *not* be
+        # applied elsewhere; for example, "TYPE(MPI_Status)" is a valid
+        # declaration entry to index
+        splitObj = re.search(r'(.*)\([^\(\)]*\)(.*)', entryText, re.DOTALL)
+        while splitObj:
+            if verbose:
+                print("Removing a balanced paren from " + entryText)
+            entryText = splitObj.group(1) + splitObj.group(2)
+            splitObj = re.search(r'(.*)\([^\(\)]*\)(.*)', entryText, re.DOTALL)
+
+    # Error checking
+    if entryType != "Unknown" :
+        if verbose:
+            print("Checking " + entryText)
+        if re.match('^ *$',entryText,0) or re.match(r'^ *\|',entryText,0):
+            printWarningNNL("Empty index entry" + line)
+            entryType = "Unknown"
+    # Additional error checking for invalid characters is performed after
+    # any type-specific processing is performed, using checkForBadChars
+
+    # Add the entry to the appropriate index list
+    # Note that we allow comma in the text for the general (TERM) index
+    if   entryType == "TERM" :
+        checkForBadChars( entryText, entryText, entryType, entryPage, "," )
+        listTERM.append(entryText + "}{" + entryPage)
+    elif entryType == "CONST" :
+        # Depending on the name, this is either the constants (all uppercase)
+        # or declarations (mixed case). Note some constants are all lowercase
+        # (info keys and vals). Consider marking declarations in the macro
+        # instead of this derived rule.
+        mm = re.match(r'TYPE\(([^@]*)\)(@.*)', entryText)
+        if mm :
+            if verbose :
+                print( "Removing TYPE from " + entryText)
+            # Remove ", DIMENSION(*...)" if it appears - this is like removing
+            # the "*" in an mpictype for an array or pointer
+            if re.search(r', *DIMENSION', mm.group(2)) :
+                if verbose :
+                    print("Found dimension in TYPE:" + entryText)
+                m2 = re.match(r'TYPE\(([^\)]*)[^@]*\)(@.*TYPE\([^\)]*\))[^\|}]*(}\|.*)', entryText)
+                if m2 :
+                    entryText = m2.group(1) + m2.group(2) + m2.group(3)
+                    if verbose :
+                        print("Replacement is : " + entryText)
+                else :
+                    printWarning("Failed to extract DIMENSION from TYPE in: " + entryText)
+            else :
+                entryText = mm.group(1) + mm.group(2)
+            if verbose :
+                print(" result is " + entryText)
+        if re.match(r'MPI[:\\_A-Z0-9a-z]*[a-z]\s*[*]*@', entryText) :
+            # Remove "*" at the end if this type was shown in the text
+            # to show the use as a pointer to the type.
+            # Remove only if it shows up in the key (but remove in both
+            # key and formatted name in that case)
+            mm = re.match(r'[^@]*[*]+.*@', entryText)
+            if mm :
+                if verbose :
+                    print( "Removing * from " + entryText)
+                entryText =re.sub(r' *[*]+', '', entryText)
+                #entryText = entryText.replace("*","")
+                if verbose :
+                    print( "Replacement is " + entryText)
+            checkForBadChars( entryText, entryText, entryType, entryPage, "" )
+            listDECLS.append(entryText + "}{" + entryPage)
+        elif re.match(r'MPI[:\\_A-Z0-9]*[A-Z0-9]@', entryText) :
+            checkForBadChars( entryText, entryText, entryType, entryPage, "" )
+            listCONST.append(entryText + "}{" + entryPage)
+            checkSpecialLists(entryText)
+        else :
+            if warnBadConst :
+                printWarning("Unrecognized constant " + entryText + " page " + entryPage)
+            if ignoreBadConst:
+                entryType = "Unknown"
+    elif entryType == "INFOCONST" :
+        # Check for invalid characters (should be alphanum or _)
+	# for infovalue, also allow commas
+        if entrySubtype == "VAL":
+            # FIXME: Allow commas in the entry - skip this test for now
+            #if re.match(r'[A-Za-z0-9_\\|,]*@', entryText) :
+            #    checkForBadChars( entryText, entryText, entryType, entryPage )
+            listCONST.append(entryText + "}{" + entryPage)
+            listINFOCONST_VAL.append(entryText)
+        elif re.match(r'[A-Za-z0-9_\\|]*@', entryText) :
+            checkForBadChars( entryText, entryText, entryType, entryPage, "" )
+            listCONST.append(entryText + "}{" + entryPage)
+            if entrySubtype == "KEY":
+                listINFOCONST_KEY.append(entryText)
+            else:
+                listINFOCONST.append(entryText)
+        else :
+            printWarning("Unrecognized info constant " + entryText + " page " + entryPage)
+    elif entryType == "DATATYPE" :
+        # Check for invalid characters (should be MPI[::|_][A-Z_0-9] only
+        # Especially no lower case - those are likely MPI C types.
+        if re.match(r'MPI[:\\_A-Z0-9]*[A-Z0-9]@', entryText) :
+            checkForBadChars( entryText, entryText, entryType, entryPage, "" )
+            listCONST.append(entryText + "}{" + entryPage)
+            listDATATYPE.append(entryText)
+        else :
+            printWarning("Unrecognized MPI Datatype handle constant " + entryText + " page " + entryPage)
+    elif entryType == "STRINGCONST" :
+        # Check for invalid characters (should be alphanum or _)
+        if re.match(r'[A-Za-z0-9:/_\\|]*@', entryText) :
+            checkForBadChars( entryText, entryText, entryType, entryPage, "" )
+            listCONST.append(entryText + "}{" + entryPage)
+            listSTRINGCONST.append(entryText)
+        else :
+            printWarning("Unrecognized string constant " + entryText + " page " + entryPage)
+    elif entryType == "EXAMPLES" :
+        checkForBadChars( entryText, entryText, entryType, entryPage, "" )
+        listEXAMPLES.append(entryText + "}{" + entryPage)
+    elif entryType == "TYPEDEF" :
+        checkForBadChars( entryText, entryText, entryType, entryPage, "" )
+        listTYPEDEF.append(entryText + "}{" + entryPage)
+    elif entryType == "MPIFUNCTION" :
+        checkForBadChars( entryText, entryText, entryType, entryPage, "" )
+        listFUNCS.append(entryText + "}{" + entryPage)
+    elif entryType == "BCFUNCTION" :
+        checkForBadChars( entryText, entryText, entryType, entryPage, "" )
+        # Make this entry a subitem under the primary function
+        # entryText looks like
+        # MPI_xxx_c|hyperindexformat{\uu} or
+        # MPI_xxx_c|hyperxindexformat{\uu} or
+        # MPI_xxx_c|hyperpage
+        # Extract function name, update entry text
+        parts = re.match(r'([A-Za-z0-9_\\]*)\\_c\|(.*)$', entryText, 0)
+        if parts :
+            basename = parts.group(1)
+            pageformat = parts.group(2)
+            entryText = basename.upper() + "!" + basename + "\\_c@\\IImpifuncfmt{" + basename + "\\_c}|" + pageformat
+        listFUNCS.append(entryText + "}{" + entryPage)
+    elif entryType == "NEWEXAMPLES" :
+        # Break the Entry text into values:
+        #   (number)::(language)::(short desc)::(routine[,routine...])
+	# Note: the number might be -1 to indicate no valid example
+	# number. This permits the use of this example indexing, except
+	# that entries that use the example number wil be skipped.
+	# The short description can also be empty, in which case
+	# no index entry is generated for a description (entries are
+	# still generated for the objects)
+        [exnum,exlang,exdesc,rlist]   = entryText.split("::")
+        # if there is a formatting command (e.g., |hyperpage),
+        # capture that and remove it from the list of names
+        [rstr,hformat] = rlist.split("|")
+        # names my have an optional prefix, c,d,t.  This is handled below
+        routines = rstr.split(",")
+        if hformat != "":
+            hformat = "|" + hformat
+
+        # Check on valid language
+        # "Neutral" is used for language-independent
+        if exlang != "C" and exlang != "Fortran" and exlang != "Neutral" :
+            printWarning("Exindex language " + exlang + " is unknown")
+        # Replace the name with what will be used in an index entry.
+        if exlang == "Neutral" :
+            exlang = "Language-independent"
+
+        # Add the examples in 4 different places; we can drop some of these
+        # after review (for example, the first of these - adding the function
+        # name to the examples when a short description is available)
+        checkForBadChars( exdesc, entryText, entryType, entryPage, "\\\\#=`'" )
+        if ExamplesAddByNumber :
+            # Ignore if number is invalid (NA)
+            if exnum != 'NA' and exdesc != '' :
+                # Check for the case where exdesc includes @.
+                # First, split the exdesc into desctop!descbottom.
+                # descsecond may be empty
+                sp = re.match(r'([^!]*)!(.*)', exdesc, 0)
+                if sp:
+                    desctop    = sp.group(1)
+                    descbottom = sp.group(2)
+                else:
+                    desctop    = exdesc
+                    descbottom = ''
+
+                sp = re.match(r'(.*)@(.*)', desctop, 0)
+                if sp:
+                    exdescsort      = sp.group(1)
+                    exdescformatted = sp.group(2)
+                else:
+                    exdescsort      = desctop
+                    exdescformatted = desctop
+                # Also, To get intended sorting order, for the
+                # sort key, ensure that the number is represented
+                # in a way that sorts as expected in word order. I.e.,
+                # instead of 2.3, use 02.03, so this sorts before 11.12.
+                sp = re.match(r'([0-9]*)\.([0-9]*)$', exnum, 0)
+                if sp:
+                    exnumtop = sp.group(1)
+                    exnumbot = sp.group(2)
+                    exnumsort      = exnumtop.rjust(2,'0') + "." + exnumbot.rjust(2,'0')
+                    exnumformatted = exnum
+                else:
+                    # Did not recognize format, so use as is
+                    exnumsort      = exnum
+                    exnumformatted = exnum
+
+                descwithnum = "Example " + exnumsort + ": " + exdescsort + "@" + "Example " + exnumformatted + ": " + exdescformatted
+                if descbottom != '':
+                    descwithnum = descwithnum + "!" + descbottom
+                listEXAMPLES.append(descwithnum + hformat + "}{" + entryPage)
+
+        for f in routines:
+            # Skip empty values of f
+            if f == '':
+                continue
+            # Extract the name and name type (c,d,f,i,t):
+            item = re.match(r'([^:]*):(.*)', f, 0)
+            if item :
+                nametype = item.group(1)
+                name     = item.group(2)
+            else :
+                nametype = "f"
+                name     = f
+
+            # Ensure name is in correct case - make Fortran names uppercase.
+            # Query: Is there any non-routine case where this is not correct?
+            if exlang == "Fortran":
+                name = name.upper()
+
+            # Format the name
+            if nametype == 'f':
+                nameformatted = name + "@" + "\\IImpifuncfmt{" + name + "}"
+            elif nametype == 't':
+                nameformatted = name + "@" + "\\textsf{" + name + "}"
+            elif nametype == 'i':
+                nameformatted = name + "@" + "\\IIfmatstring {" + name + "}"
+            else:
+                nameformatted = name + "@" + "\\IIconstfmt {" + name + "}"
+
+            if ExamplesAddWithDesc :
+                if exdesc != '':
+                    listEXAMPLES.append(nameformatted + "!" + exdesc + hformat + "}{" + entryPage)
+            else :
+                # Add without the description
+                listEXAMPLES.append(nameformatted + hformat + "}{" + entryPage)
+
+            if ExamplesAddByDesc :
+                if exdesc != '' :
+                    listEXAMPLES.append(exdesc + "!" + nameformatted + hformat + "}{" + entryPage)
+            if nametype == "f":
+                if ExamplesAddToFuncs :
+                    # Special case: FUNCS requires routine names in uppercase
+                    listFUNCS.append(name.upper() + "!" + exlang + " example usage" + hformat + "}{" + entryPage)
+            elif nametype == "c" or nametype == "i":
+                if ExamplesAddToConsts :
+                    listCONST.append(nameformatted + "!" + exlang + " example usage" + hformat + "}{" + entryPage)
+            elif nametype == "d":
+                if ExamplesAddToDecls :
+                    listDECLS.append(nameformatted + "!" + exlang + " example usage" + hformat + "}{" + entryPage)
+            elif nametype == "t":
+                if ExamplesAddToTypedefs :
+                    listTYPEDEFS.append(nameformatted + "!" + exlang + " example usage" + hformat + "}{" + entryPage)
+            else :
+                printWarning("Unrecognized MPI name:" + f)
+    else :
+        printWarningNNL("Unrecognized entry " + line)
+
+idxfile.close()
+
+# Check for problems
+if not ignoreNoPrimary and warnings :
+    checkForPrimary( listCONST, "Constants", 1 )
+    checkForPrimary( listDECLS, "MPI Declarations", 1 )
+    checkForPrimary( listTYPEDEF, "Typedefs", 1 )
+elif removeDupSecondaryEntries :
+    checkForPrimary( listCONST, "Constants", 0 )
+    checkForPrimary( listDECLS, "MPI Declarations", 0 )
+    checkForPrimary( listTYPEDEF, "Typedefs", 0 )
+
+# Use checkForPrimary to remove duplicate secondaries, but do not generate
+# warnings for missing primary (A temporary hack)
+if removeDupSecondaryEntries :
+    checkForPrimary( listFUNCS, "MPI Functions", 0 )
+    checkForPrimary( listTERM, "MPI Terms", 0 )
+    checkForPrimary( listEXAMPLES, "MPI Examples", 0 )
+
+if not ignoreFunctionCase :
+    # Include two MPI API functions that are C-only in the index.
+    checkForCase( listFUNCS, "MPI Functions", "mpirun,mpiexec", "_c" )
+
+# Last chance to update/reformat the index entries
+# Ensure that the functions are formatted properly and listed alphabetically
+# regardless of case
+listFUNCS = funcidxUpcaseOrder( listFUNCS )
+
+# Generate the index files
+# 1. Output a new .idx file
+# 2. Run makeindex
+writeIndexData( listTERM, "term.idx" )
+writeIndexData( listEXAMPLES, "examples.idx" )
+writeIndexData( listCONST, "const.idx" )
+writeIndexData( listDECLS, "decls.idx" )
+writeIndexData( listTYPEDEF, "typedef.idx" )
+writeIndexData( listFUNCS, "mpifunction.idx" )
+
+# makeindex -c -o foo.ind
+#outInd = open( "const.idx", "w" )
+#for i in range(len(listCONST)):
+#    outInd.write(r"\indexentry{"+listCONST[i]+"}\n")
+#outInd.close()
+
+
+
+#subprocess.run(["makeindex", "-c", "-o", "term.ind", "term.idx"])
+
+createIndex( "term.idx", "term.ind" )
+createIndex( "examples.idx", "examples.ind" )
+createIndex( "const.idx", "const.ind" )
+createIndex( "decls.idx", "decls.ind" )
+createIndex( "typedef.idx", "typedef.ind" )
+createIndex( "mpifunction.idx", "mpifunction.ind" )
+
+# Produce a single file with the indices
+
+ofile = open( "func-index.tex", "w" )
+writeHeader( ofile, "General Index", "general", headerTERM )
+appendFile( ofile, "term.ind" )
+writeHeader( ofile, "Examples Index", "example", headerEXAMPLES )
+appendFile( ofile, "examples.ind" )
+writeHeader( ofile, "MPI Constant and Predefined Handle Index", "constant", headerCONST )
+appendFile( ofile, "const.ind" )
+writeHeader( ofile, "MPI Declarations Index", "declaration", headerDECLS )
+appendFile( ofile, "decls.ind" )
+writeHeader( ofile, "MPI Callback Function Prototype Index", "callback", headerTYPEDEF )
+appendFile( ofile, "typedef.ind" )
+writeHeader( ofile, "MPI Function Index", "function", headerFUNCS )
+appendFile( ofile, "mpifunction.ind" )
+ofile.close()
+
+# Produce files with the list of info constants and string constants
+if createConstListFiles :
+    ofile = open( "infokey-list.tex", "w" )
+    writeConstList( listINFOCONST_KEY, '\\infokey', '\\\\', ofile )
+    ofile.close()
+
+    ofile = open( "infoval-list.tex", "w" )
+    writeConstList( listINFOCONST_VAL, '\\infoval', '\\\\', ofile )
+    ofile.close()
+
+    # Check that listINFOCONST is empty
+    if len(listINFOCONST) > 0:
+        printWarning("Info entry neither key nor value found - " + str(len(listINFOCONST)) + " entries")
+
+    ofile = open( "string-list.tex", "w" )
+    writeConstList( listSTRINGCONST, '\\mpistring', '\\\\', ofile )
+    ofile.close()
+
+    ofile = open("err-list.tex", "w")
+    writeConstList(listERRCONST, '\\error', '\\\\', ofile)
+    ofile.close()
+
+    ofile = open("err-t-list.tex", "w")
+    writeConstList(listERRTCONST, '\\error', '\\\\', ofile)
+    ofile.close()
+
+    ofile = open("maxsize-list.tex", "w")
+    writeConstList(listSTRINGMAXSIZE, '\\const', '\\\\', ofile)
+    ofile.close()
+
+    ofile = open("modes-list.tex", "w")
+    writeConstList(listMODES, '\\const', '\\\\', ofile)
+    ofile.close()
+
+    ofile = open("pvarclass-list.tex", "w")
+    writeConstList(listPVARCLASS, '\\error', '\\\\', ofile)
+    ofile.close()
+
+    ofile = open("splittype-list.tex", "w")
+    writeConstList(listSPLITTYPE, '\\const', '\\\\', ofile)
+    ofile.close()
+
+    ofile = open("datatype-list.tex", "w")
+    writeConstList(listDATATYPE, '\\mpidtype', '\\\\', ofile)
+    ofile.close()
+
+
+# Close the log file
+mklog.close()
+
+if cleanupFiles:
+    os.remove('const.idx')
+    os.remove('decls.idx')
+    os.remove('examples.idx')
+    os.remove('mpifunction.idx')
+    os.remove('term.idx')
+    os.remove('typedef.idx')
+    os.remove('const.ind')
+    os.remove('decls.ind')
+    os.remove('examples.ind')
+    os.remove('mpifunction.ind')
+    os.remove('term.ind')
+    os.remove('typedef.ind')
+
+# Return non-zero error code if there were warnings
+if warncount and warnFails :
+    sys.exit(1)

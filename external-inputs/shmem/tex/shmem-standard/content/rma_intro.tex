@@ -1,0 +1,82 @@
+The \ac{RMA} routines described in this section can be used to perform
+reads from and writes to symmetric data objects. These operations
+are one-sided, meaning that the \ac{PE} invoking an operation provides all
+communication parameters and the targeted \ac{PE} is passive. A characteristic
+of one-sided communication is that it decouples communication from
+synchronization. One-sided communication mechanisms transfer data; however,
+they do not synchronize the sender of the data with the receiver of the data.
+
+\openshmem \ac{RMA} routines are performed on symmetric data objects.  The
+initiator \ac{PE} of a call is designated as the \emph{origin} \ac{PE} and the
+\ac{PE} targeted by an operation is designated as the \emph{destination} \ac{PE}.  The
+\source{} and \dest{} designators refer to the data objects that an operation
+reads from and writes to.  In the case of the remote update routine, \PUT{},
+the origin \ac{PE} provides the \source{} data object and the destination
+\ac{PE} provides the \dest{} data object. In the case of the remote read
+routine, \GET{}, the origin \ac{PE} provides the \dest{} data object and the
+destination \ac{PE} provides the \source{} data object.
+
+The destination \ac{PE} is specified as an integer representing the \ac{PE} number.
+This \ac{PE} number is relative to the team associated with the
+communication context being used for the operation. If no context argument is passed to the routine,
+then the routine operates on the default context, which implies that
+the \ac{PE} number is relative to the world team.
+If the \ac{PE} number passed to the routine is invalid, being negative
+or greater than or equal to the size of the \openshmem team, then the behavior is undefined.
+
+\openshmem \ac{RMA} routines specified in this section have two variants. In
+one of the variants, the context handle, \VAR{ctx}, is explicitly passed as
+an argument. In this variant, the operation is performed on the specified
+context. If the context handle \VAR{ctx} does not correspond to a valid
+context, the behavior is undefined. In the other variant, the context handle
+is not explicitly passed and thus, the operations are performed on the
+default context.
+
+Where appropriate compiler support is available, \openshmem provides type-generic
+one-sided communication interfaces via \Cstd[11] generic selection
+(\Cstd[11]~\S6.5.1.1\footnote{Formally, the \Cstd[11] specification is ISO/IEC 9899:2011(E).})
+for block, scalar, and block-strided put and get communication.
+Such type-generic routines are supported for the ``standard \ac{RMA} types''
+listed in Table \ref{stdrmatypes}.
+
+The standard \ac{RMA} types include the exact-width integer types defined in
+\HEADER{stdint.h} by \Cstd[99]%
+\footnote{Formally, the \Cstd[99] specification is ISO/IEC~9899:1999(E).}%
+~\S7.18.1.1 and \Cstd[11]~\S7.20.1.1. When the \Cstd translation environment
+does not provide exact-width integer types with \HEADER{stdint.h}, an
+\openshmem implementation is not required to provide support for these types.
+
+\begin{table}[h]
+  \begin{center}
+    \begin{tabular}{|l|l|}
+      \hline
+      \TYPE              & \TYPENAME  \\ \hline
+      float              & float      \\ \hline
+      double             & double     \\ \hline
+      long double        & longdouble \\ \hline
+      char               & char       \\ \hline
+      signed char        & schar      \\ \hline
+      short              & short      \\ \hline
+      int                & int        \\ \hline
+      long               & long       \\ \hline
+      long long          & longlong   \\ \hline
+      unsigned char      & uchar      \\ \hline
+      unsigned short     & ushort     \\ \hline
+      unsigned int       & uint       \\ \hline
+      unsigned long      & ulong      \\ \hline
+      unsigned long long & ulonglong  \\ \hline
+      int8\_t            & int8       \\ \hline
+      int16\_t           & int16      \\ \hline
+      int32\_t           & int32      \\ \hline
+      int64\_t           & int64      \\ \hline
+      uint8\_t           & uint8      \\ \hline
+      uint16\_t          & uint16     \\ \hline
+      uint32\_t          & uint32     \\ \hline
+      uint64\_t          & uint64     \\ \hline
+      size\_t            & size       \\ \hline
+      ptrdiff\_t         & ptrdiff    \\ \hline
+    \end{tabular}
+    \TableCaptionRef{Standard \ac{RMA} Types and Names}
+    \label{stdrmatypes}
+  \end{center}
+\end{table}

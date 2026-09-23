@@ -1,0 +1,1192 @@
+{
+  "cuda:cudaGraphLaunch": {
+    "execution.blocking": false,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": "thread",
+    "execution.launch": "cpu+gpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": null,
+    "parameters": [
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": "STREAM",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "cuda:cudaMalloc": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": "thread",
+    "execution.launch": "cpu+gpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "management",
+    "parameters": [
+      {
+        "kind": "SCALAR",
+        "not_null": null
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": null,
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": "cuda:cudaMallocAsync",
+      "persistent": null
+    },
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "cuda:cudaMemcpy": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": null,
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": null,
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": "cuda:cudaMemcpyAsync",
+      "persistent": null
+    },
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "cuda:cudaSetDevice": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "management",
+    "parameters": [
+      {
+        "kind": "DEVICE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "cuda:cudaStreamCreateWithPriority": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "management",
+    "parameters": [
+      {
+        "kind": "STREAM",
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "mpi:mpi_bcast": {
+    "execution.blocking": true,
+    "execution.collective": true,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": "b-op",
+    "execution.stages": [
+      "i",
+      "s",
+      "c",
+      "f"
+    ],
+    "identity.api_group": "collective",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      },
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": null,
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": "mpi:mpi_ibcast",
+      "persistent": "mpi:mpi_bcast_init"
+    },
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "mpi:mpi_bcast_init": {
+    "execution.blocking": true,
+    "execution.collective": true,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": "p-op",
+    "execution.stages": [
+      "i"
+    ],
+    "identity.api_group": "collective",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      },
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "INFO",
+        "not_null": null
+      },
+      {
+        "kind": "REQUEST",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": "mpi:mpi_bcast",
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": null,
+      "persistent": null
+    },
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "mpi:mpi_comm_size": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "query",
+    "parameters": [
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "TEAM_SIZE",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "mpi:mpi_compare_and_swap": {
+    "execution.blocking": false,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "one_sided",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      },
+      {
+        "kind": "SCALAR",
+        "not_null": null
+      },
+      {
+        "kind": "WINDOW",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": {
+      "compare": true,
+      "fetch": true,
+      "operation": "cswap"
+    }
+  },
+  "mpi:mpi_fetch_and_op": {
+    "execution.blocking": false,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "one_sided",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      },
+      {
+        "kind": "SCALAR",
+        "not_null": null
+      },
+      {
+        "kind": "OPERATION",
+        "not_null": null
+      },
+      {
+        "kind": "WINDOW",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": {
+      "compare": false,
+      "fetch": true,
+      "operation": null
+    }
+  },
+  "mpi:mpi_ibcast": {
+    "execution.blocking": false,
+    "execution.collective": true,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": "nb-op",
+    "execution.stages": [
+      "i",
+      "s"
+    ],
+    "identity.api_group": "collective",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      },
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "REQUEST",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": "mpi:mpi_bcast",
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": null,
+      "persistent": null
+    },
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "mpi:mpi_init": {
+    "execution.blocking": true,
+    "execution.collective": true,
+    "execution.execute_once": true,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "management",
+    "parameters": [
+      {
+        "kind": "SCALAR",
+        "not_null": true
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "mpi:mpi_init_thread": {
+    "execution.blocking": true,
+    "execution.collective": true,
+    "execution.execute_once": true,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "management",
+    "parameters": [
+      {
+        "kind": "SCALAR",
+        "not_null": true
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "THREAD_LEVEL",
+        "not_null": null
+      },
+      {
+        "kind": "THREAD_LEVEL",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "mpi:mpi_psend_init": {
+    "execution.blocking": false,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": "pp-op",
+    "execution.stages": [
+      "i"
+    ],
+    "identity.api_group": "point_to_point",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      },
+      {
+        "kind": "TAG",
+        "not_null": null
+      },
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "INFO",
+        "not_null": null
+      },
+      {
+        "kind": "REQUEST",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "mpi:mpi_reduce_local": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "collective",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "OPERATION",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "mpi:mpi_type_size": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "query",
+    "parameters": [
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "SCALAR",
+        "not_null": null
+      },
+      {
+        "kind": "ERROR_CODE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "nccl:ncclBroadcast": {
+    "execution.blocking": false,
+    "execution.collective": true,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "collective",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      },
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "STREAM",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "nccl:ncclCommCount": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "query",
+    "parameters": [
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "TEAM_SIZE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "nccl:ncclCommCuDevice": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "query",
+    "parameters": [
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "DEVICE",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "nccl:ncclSend": {
+    "execution.blocking": false,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "point_to_point",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "DATATYPE",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      },
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "STREAM",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "nvshmem:nvshmem_broadcastmem": {
+    "execution.blocking": true,
+    "execution.collective": true,
+    "execution.execute_once": false,
+    "execution.gpu_scope": "thread",
+    "execution.launch": "cpu+gpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "collective",
+    "parameters": [
+      {
+        "kind": "TEAM",
+        "not_null": null
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "nvshmem:nvshmem_team_n_pes": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": "thread",
+    "execution.launch": "cpu+gpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "query",
+    "parameters": [
+      {
+        "kind": "TEAM",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": "TEAM_SIZE",
+    "semantics.atomic": null
+  },
+  "nvshmem:nvshmem_{T}_put_nbi": {
+    "execution.blocking": false,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": "thread",
+    "execution.launch": "cpu+gpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "one_sided",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": "nvshmem:nvshmem_{T}_put",
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": null,
+      "persistent": null
+    },
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "openmp:omp_get_device_num": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": null,
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "query",
+    "parameters": [],
+    "relationships.variants": null,
+    "return.value_kind": "DEVICE",
+    "semantics.atomic": null
+  },
+  "openmp:omp_get_max_threads": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": null,
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "query",
+    "parameters": [],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "openmp:omp_get_thread_num": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": null,
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "query",
+    "parameters": [],
+    "relationships.variants": null,
+    "return.value_kind": "RANK",
+    "semantics.atomic": null
+  },
+  "openmp:omp_mempartition_set_part": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": null,
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "management",
+    "parameters": [
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "openmp:omp_target_memcpy_async": {
+    "execution.blocking": false,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": null,
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": null,
+    "parameters": [
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": "DEVICE",
+        "not_null": null
+      },
+      {
+        "kind": "DEVICE",
+        "not_null": null
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": "openmp:omp_target_memcpy",
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": null,
+      "persistent": null
+    },
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "shmem:shmem_ctx_{T}_atomic_compare_swap": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "one_sided",
+    "parameters": [
+      {
+        "kind": "COMMUNICATOR",
+        "not_null": null
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "SCALAR",
+        "not_null": null
+      },
+      {
+        "kind": "SCALAR",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": null,
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": "shmem:shmem_ctx_{T}_atomic_compare_swap_nbi",
+      "persistent": null
+    },
+    "return.value_kind": null,
+    "semantics.atomic": {
+      "compare": true,
+      "fetch": true,
+      "operation": "cswap"
+    }
+  },
+  "shmem:shmem_init": {
+    "execution.blocking": true,
+    "execution.collective": true,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "management",
+    "parameters": [],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "shmem:shmem_malloc": {
+    "execution.blocking": true,
+    "execution.collective": true,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "management",
+    "parameters": [
+      {
+        "kind": "COUNT",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "shmem:shmem_my_pe": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "query",
+    "parameters": [],
+    "relationships.variants": null,
+    "return.value_kind": "RANK",
+    "semantics.atomic": null
+  },
+  "shmem:shmem_team_split_strided": {
+    "execution.blocking": true,
+    "execution.collective": true,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "management",
+    "parameters": [
+      {
+        "kind": "TEAM",
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": null,
+        "not_null": true
+      },
+      {
+        "kind": null,
+        "not_null": null
+      },
+      {
+        "kind": "TEAM",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": null,
+    "return.value_kind": null,
+    "semantics.atomic": null
+  },
+  "shmem:shmem_{T}_atomic_fetch_add_nbi": {
+    "execution.blocking": false,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "one_sided",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "SCALAR",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": "shmem:shmem_{T}_atomic_fetch_add",
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": null,
+      "persistent": null
+    },
+    "return.value_kind": null,
+    "semantics.atomic": {
+      "compare": false,
+      "fetch": true,
+      "operation": "fetch_add"
+    }
+  },
+  "shmem:shmem_{T}_put_signal": {
+    "execution.blocking": true,
+    "execution.collective": false,
+    "execution.execute_once": false,
+    "execution.gpu_scope": null,
+    "execution.launch": "cpu",
+    "execution.procedure_class": null,
+    "execution.stages": null,
+    "identity.api_group": "one_sided",
+    "parameters": [
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": true
+      },
+      {
+        "kind": "COUNT",
+        "not_null": null
+      },
+      {
+        "kind": "BUFFER",
+        "not_null": null
+      },
+      {
+        "kind": "SCALAR",
+        "not_null": null
+      },
+      {
+        "kind": "SIG_OP",
+        "not_null": null
+      },
+      {
+        "kind": "RANK",
+        "not_null": null
+      }
+    ],
+    "relationships.variants": {
+      "blocking": null,
+      "gpu": null,
+      "host": null,
+      "neighborhood": null,
+      "nonblocking": "shmem:shmem_{T}_put_signal_nbi",
+      "persistent": null
+    },
+    "return.value_kind": null,
+    "semantics.atomic": null
+  }
+}

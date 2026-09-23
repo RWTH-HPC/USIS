@@ -1,0 +1,2826 @@
+\chapter{Change-Log}
+\mpitermtitleindex{change-log}
+\label{sec:change}
+\label{chap:change}
+
+Annex~\ref{sec:change:newest} summarizes changes from the previous
+version of the
+\MPI/ standard to the version presented by this document.
+Only significant changes (i.e., clarifications and new features) 
+that might either require implementation effort in the 
+\MPI/ libraries or change the understanding of \MPI/ from a 
+user's perspective are presented.
+Editorial modifications, formatting, typo corrections and
+minor clarifications are not shown. 
+If not otherwise noted, the section and page references refer to the
+locations of the change or new functionality in this
+version of the standard. 
+Changes in Annexes~\ref{sec:change:recent}--\ref{sec:changes:last}
+were already introduced in the corresponding sections
+in previous versions of this standard. 
+
+%%
+%% Use raggedright for these entries because they often include long routine
+%% names and other items that make right justification hard.
+%%
+\section{Changes from Version 5.0 to Version 5.1}
+\label{subsec:50to51}
+%% Keep the label sec:change:newest with the most recent changes
+\label{sec:change:newest}
+
+\begin{enumerate}
+% 01.--- MPI-5.0-issue #20 PR665
+\item
+    Chapter~\ref{chap:ft}, Sections~\ref{sec:terms-errorhandling}, \ref{subsec:inquiry-inquiry}, \ref{sec:errorhandler}, and \ref{sec:ei-error-classes},
+    on pages~\pageref{chap:ft}, \pageref{sec:terms-errorhandling}, \pageref{subsec:inquiry-inquiry}, \pageref{sec:errorhandler}, and \pageref{sec:ei-error-classes}.
+    \newline
+    Added operations, procedures, constants, and semantics to handle \MPI/ process failures.
+\end{enumerate}
+
+\subsection{Fixes to Errata in Previous Versions of \texorpdfstring{\MPI/}{MPI}}
+\label{sec:changes-50-51-errata}
+
+\begin{enumerate}
+% MPI-5.1 issue #1001 PR #1127
+\item
+  Section~\ref{subsec:abi-opaque-handles} on page~\pageref{subsec:abi-opaque-handles}, and \MPIVDOTO/ Section 20.3.2 on page 846.
+  \newline
+  Added missing handle type definitions for opaque handle types of the \MPI/ tool information interface.
+
+\end{enumerate}
+
+\subsection{Changes in \texorpdfstring{\MPIVDOTI/}{MPI-5.1}}
+\label{subsec:changes-50-51}
+
+
+\section{Changes from Version 4.1 to Version 5.0}
+\label{subsec:41to50}
+\label{sec:change:recent}
+%% The label sec:change:recent should be moved to the section for the
+%% changes the version immeadiately prior to this one - e.g.,
+%% for MPI 5.1, following MPI 5.0, this label is attached to
+%% the section on changes from MPI 4.1 to MPI 5.0. When the next
+%% version of MPI is released (probably MPI 5.2), move this label to
+%% the section covering changes between MPI 5.0 and MPI 5.1.
+%% Keep the label sec:change:newest with the most recent changes
+
+\subsection{Fixes to Errata in Previous Versions of \texorpdfstring{\MPI/}{MPI}}
+\label{sec:changes-41-50-errata}
+
+\begin{enumerate}
+% 01.--- MPI-5.0-issue #889 PR1034 MPI-5.0-p39, 4.1-page 39
+\item
+  Section~\ref{subsec:pt2pt-status} on
+  page~\pageref{subsec:pt2pt-status}, and \MPIIVDOTI/ Section~3.2.5 on page~39.
+  \newline
+  Mark \mpiarg{status} argument as \code{const} in \mpifunc{MPI\_STATUS\_GET\_SOURCE},
+  \mpifunc{MPI\_STATUS\_GET\_TAG}, and \mpifunc{MPI\_STATUS\_GET\_ERROR}.
+  
+% 02.--- MPI-5.0-issue #810 PR946 MPI-5.0-p484, 4.1-page 484
+\item
+  Sections~\ref{sec:inquiry-startup} and~\ref{subsec:mem_alloc_kinds} on
+  pages~\pageref{sec:inquiry-startup} and~\pageref{subsec:mem_alloc_kinds}, and
+  \MPIIVDOTI/ Sections~11.2.1 and~11.4.3 on pages 484 and 508.
+  \newline
+  Clarified that, in the \wpm{}, the value of the \infokey{mpi\_memory\_alloc\_kinds}
+  info key in \mpiconst{MPI\_INFO\_ENV} indicates the requested memory allocation kinds.
+  The provided memory allocation kinds can be queried through the value of the \infokey{mpi\_memory\_alloc\_kinds}
+  info key in the info object returned by a call to
+  \mpifunc{MPI\_COMM\_GET\_INFO} on \mpiconst{MPI\_COMM\_WORLD} or \mpiconst{MPI\_COMM\_SELF}.
+
+% 03.--- MPI-5.0-issue #773 PR986 MPI-5.0-p510, 4.1-page 508
+\item
+  Section~\ref{subsec:mem_alloc_kinds} on
+  page~\pageref{subsec:mem_alloc_kinds}, and
+  \MPIIVDOTI/ Section~11.4.3 on page 508.
+  \newline
+  Clarified the requirements of the \infokey{mpi\_memory\_alloc\_kinds}
+  info key's value when defaulted.
+
+% 04.--- MPI_5.0-issue #760 PR904 MPI-5.0-p580, 4.1-page 580
+\item 
+  Section~\ref{sec:1sided-req} page~\pageref{sec:1sided-req} and \MPIIVDOTI/~Section~12.3.5 on page~580.
+  \newline
+  The text contained contradicting statements about the use of \mpifunc{MPI\_REQUEST\_FREE} on \RMA/ requests.
+  A statement that suggested the use of \mpifunc{MPI\_REQUEST\_FREE} to release \RMA/ requests after the window has been flushed was removed.
+
+\end{enumerate}
+
+\subsection{Changes in \texorpdfstring{\MPIVDOTO/}{MPI-5.0}}
+\label{subsec:changes-41-50}
+
+\begin{enumerate}
+
+% 01.--- MPI-5.0-issue #699 PR963 MPI-5.0-p228
+\item Fixed-size Fortran logical datatypes were added to \sectionref{subsec:pt2pt-messagedata},
+      \sectionref{coll-predefined-op}, Table \ref{table:io:optional-extsizes},
+      \sectionref{f90:types}, and Appendix \sectionref{sec:lang}.
+
+% 02.--- MPI-5.0-issue #811 PR938, MPI-5.0-p314, MPI-4.1 page 318
+\item
+  Section~\ref{subsec:context-grpconst} on page~\pageref{subsec:context-grpconst}.
+  \newline
+  A restriction on the provenance of the process set name supplied to \mpifunc{MPI\_GROUP\_FROM\_SESSION\_PSET} was removed.
+
+% 03.--- MPI-5.0-issue #751 PR977 MPI-5.0-p853
+\item { \raggedright Chapter~\ref{chap:abi} was added, which defines new functions,
+        \mpifunc{MPI\_ABI\_GET\_VERSION} and \mpifunc{MPI\_ABI\_GET\_INFO},
+        the layout of the \MPI/ status object,
+        and the type of \MPI/ object handles (e.g. \mpictype{MPI\_Comm}).
+      Extensive changes and additions were made in Section~\ref{subsec:annexa-const}
+        to define literal values for many \MPI/ constants.
+      In Chapter~\ref{chap:info}, \mpiconst{MPI\_MAX\_INFO\_KEY} was
+          modified by one to be consistent with other constants.
+      \mpifunc{MPI\_ABI\_GET\_VERSION} and \mpifunc{MPI\_ABI\_GET\_INFO} were added to
+          Table~\ref{table:dynamic:preinit_functions}. }
+
+% 04.--- MPI-5.0-issue #654 PR978 MPI-5.0-p858
+\item {\sloppy%%ALLOWLATEX%%
+  \sectionref{subsec:fortran-type-registration} was added to define new functions,
+        \mpifunc{MPI\_ABI\_SET\_FORTRAN\_INFO}, \mpifunc{MPI\_ABI\_GET\_FORTRAN\_INFO},
+        and \mpifuncshort{MPI\_ABI\_SET\_FORTRAN\_BOOLEANS}, along with the associated info keys
+        and an error code \error{MPI\_ERR\_ABI},
+        in order to expose Fortran environment settings to the \MPI/ library.
+      \sectionref{subsec:fortran-abi-names} and \sectionref{subsec:fortran-abi-status}
+        were added to define basic properties of the \MPI/ Fortran ABI.
+      \sectionref{sec:abi-handleserialization} was added to obviate the need for \mpictype{MPI\_Fint}.
+
+}
+
+\end{enumerate}
+
+\section{Changes from Version 4.0 to Version 4.1}
+\label{subsec:40to41}
+
+\subsection{Fixes to Errata in Previous Versions of \texorpdfstring{\MPI/}{MPI}}
+\label{sec:changes-40-41-errata}
+
+\begin{enumerate}
+
+% 01.--- MPI-4.1-issue #676 PR825 4.0-page 13
+\item
+  Sections~\ref{subsec:operations}, \ref{sec:pt2pt-semantics}, \ref{sec:pt2pt-nonblock}, \ref{sec:pt2pt-probe}, \ref{sec:nbcoll},
+\ref{sec:context:mpilibsupport}, \ref{sec:context:contexts}, \ref{subsec:context-intracomconst},
+\ref{sec:dynamic:threads:clarifications}, \ref{sec:io-filecntl-preallocate}, \ref{sec:io-semantics-nb-collective},
+\ref{sec:f90-problems:code-movements}, \ref{sec:f90-problems:comparison-with-C},
+  on pages~\pageref{subsec:operations}, \pageref{sec:pt2pt-semantics}, \pageref{sec:pt2pt-nonblock}, \pageref{sec:pt2pt-probe},
+\pageref{sec:nbcoll}, \pageref{sec:context:mpilibsupport}, \pageref{sec:context:contexts}, \pageref{subsec:context-intracomconst},
+\pageref{sec:dynamic:threads:clarifications}, \pageref{sec:io-filecntl-preallocate}, \pageref{sec:io-semantics-nb-collective},
+\pageref{sec:f90-problems:code-movements}, \pageref{sec:f90-problems:comparison-with-C}
+  and \MPIIVDOTO/ Sections~2.4.1, 3.5, 3.7, 3.8, 6.12, 7.1.2, 7.2.2, 7.4.2, 11.6.2, 14.2.5, 14.6.5, 19.1.17, 19.1.20
+  on pages~13, 54, 60, 84, 250, 312, 314, 327, 518, 650, 713, 826, and 834.
+  \newline
+  The term \mpitermni{pending}\mpitermindex{pending (communication) operation}\mpitermindex{pending I/O operation}\mpitermindex{communication!pending}\mpitermindex{operation!pending}
+  communication or I/O operation is defined as \mpitermni{in the active operation state}\mpitermindex{active!operation state}.
+  If the phrase \mpitermni{pending communication operation} in \MPIIDOTI/ to \MPIIVDOTO/ additionally includes
+  \mpitermni{decoupled \MPI/ activities}\mpitermindex{decoupled MPI activities@decoupled \MPI/ activities}, then this has
+been added explicitly.
+  If this phrase had a different meaning, it was replaced accordingly, see
+  item~\ref{item:changes:issue710-PR823} in this list and  % (outcome of MPI\_COMM\_DISCONNECT)
+  item~\ref{item:changes:issue543-PR791} in \sectionref{subsec:changes-40-41}.  % (definition of MPI\_COMM\_FREE was clarified)}
+
+% 02.--- MPI-4.1-issue #705 and #657 fixed by PR822 4.0-page 20
+\item
+  Sections~\ref{subsec:named-constants} and~\ref{subsec:annexa-const} on pages~\pageref{subsec:named-constants} and~\pageref{subsec:annexa-const}, and
+  \MPIIVDOTO/ Sections~2.5.4 and~A.1.1 on pages~20 and~857.
+  \newline
+  The implementation of named \MPI/ \mpiterm{constants} in C and Fortran and implied usage restrictions were clarified.
+
+% 03.--- MPI-4.1-issue #658 PR776 4.0-page 20
+\item
+  Section~\ref{subsec:named-constants} on page~\pageref{subsec:named-constants}, and \MPIIVDOTO/ Section~2.5.4 on page~20.
+  \newline
+  Add \mpiconst{MPI\_MAX\_PSET\_NAME\_LEN} and \mpiconst{MPI\_MAX\_STRINGTAG\_LEN} to list of named constants.
+
+% 04.--- MPI-4.1-issue #710 PR823 4.0-pages 94, 494 and 546
+\item \label{item:changes:issue710-PR823}
+  Sections~\ref{sec:pt2pt-persistent}, \ref{sec:inquiry-finalize}, \ref{sec:session-init-finalize} and~\ref{subsec:disconnect} 
+  on pages~\pageref{sec:pt2pt-persistent}, \pageref{sec:inquiry-finalize}, \pageref{sec:session-init-finalize} and~\pageref{subsec:disconnect}
+  and \MPIIVDOTO/ Sections~3.9, 11.2.2, 11.3.1 and~11.10.4 on pages~94, 494, 501 and~546.
+  \newline
+  The requirements for calling \mpifunc{MPI\_FINALIZE}, \mpifunc{MPI\_SESSION\_FINALIZE}, and \mpifunc{MPI\_COMM\_DISCONNECT} 
+  and the outcome of \mpifunc{MPI\_COMM\_DISCONNECT}, especially for related
+  inactive persistent request handles, were clarified.
+  
+% 05.--- MPI-4.1-issue #589 PR726 4.0-page 115
+\item
+  Section~\ref{sec:part-communication-examples} on page~\pageref{sec:part-communication-examples}, and
+  \MPIIVDOTO/ Section~4.3.3. on page~115.
+  Example~\ref{partexample4} on page~\pageref{partexample4}, and
+  \MPIIVDOTO/ Example~4.4 on page 115. 
+  \newline
+  Fixed and simplified erroneous \MPIIVDOTO/ Example 4.4. The example could deadlock due to
+  incorrect use of the \mpicode{flag} variable in multiple \MPI/ test procedure calls or
+  thread concurrent access.
+  The example was also simplified by removing unnecessary code and updated according to current
+  best practice in OpenMP.
+
+% 06.--- MPI 4.1-issue #509 PR607 4.0-page 122
+\item 
+Section~\ref{subsec:part-channel-examples} on page~\pageref{subsec:part-channel-examples}, \MPIIV/ Section~4.3.1 on page 112.
+\newline
+Example~\ref{part-example2} was corrected.
+
+% 07.--- MPI-4.1-issue #710 PR823 4.0-pages 150, 488, 494 and 501
+\item
+  Section~\ref{subsec:pt2pt-comfree} on page~\pageref{subsec:pt2pt-comfree}
+  and \MPIIVDOTO/ Section~5.1.9 on page~150.
+\newline
+The relationship between \mpifunc{MPI\_TYPE\_COMMIT} and initialization/finalization of a session (or the \wpm{})
+with \mpifunc{MPI\_INIT}, \mpifunc{MPI\_INIT\_THREAD}, \mpifunc{MPI\_FINALIZE},
+\mpifunc{MPI\_SESSION\_INIT}, and \mpifunc{MPI\_SESSION\_FINALIZE}
+was clarified.
+
+% 08--- MPI-4.1-issue #511 PR629 4.0-pages 343 and 360
+\item
+	Sections~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst} and~\ref{subsec:context-intercomm} on page~\pageref{subsec:context-intercomm}, and \MPIIVDOTO/ Section 7.4.2 on page~343 and Section 7.6.2 on page~360.
+  \newline
+  Use of the \mpiarg{errhandler} argument to \mpifunc{MPI\_COMM\_CREATE\_FROM\_GROUP} and \mpifunc{MPI\_INTERCOMM\_CREATE\_FROM\_GROUPS} is clarified.
+  The error handler invoked when an error is encountered during invocation of these functions is also clarified.
+
+% 09.--- MPI 4.1-issue #690 PR830 4.0-page 328
+\item
+  Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}, \MPIIII/ Section~6.4.2 on page 237,
+  \MPIIIIDOTI/ Section~6.4.2 on page 237, and \MPIIV/ Section~7.4.2 on page 327. 
+  \newline
+  The description of \mpifunc{MPI\_COMM\_DUP} now clarifies that error handlers are also copied in
+  the output communicator produced when this procedure is called.
+
+% 10.--- MPI 4.1-issue #687 PR#827 4.0-page 369
+\item
+  Section~\ref{subsec:context-cachecomm} on page~\pageref{subsec:context-cachecomm}, \MPIIII/ Section~6.7.2 on page 267, \MPIIIIDOTI/ Section~6.7.2 on page 267, and \MPIIV/ Section~7.7.2 on page 366.
+  \newline
+  \mpifunc{MPI\_COMM\_DISCONNECT} was explicitlly stated as a procedure that deletes attributes.
+  
+% 11.--- MPI-4.1-issue #556 PR690 4.0-page 403 (406-407)
+\item
+  Section~\ref{subsec:topol-inquiry} on page~\pageref{subsec:topol-inquiry} and \MPIIVDOTO/ Section 8.5.5 on page 403. 
+  \newline
+  The unintended change in the specification of argument \mpiarg{coords} in \mpifunc{MPI\_CART\_COORDS} in \MPIIVDOTO/ is reverted to the original meaning in \MPIIDOTI/ to \MPIIIIDOTI/. It is clarified that the outcome of               \mpifunc{MPI\_CART\_GET} and \mpifunc{MPI\_CART\_COORDS} is unspecified for the case that \mpiarg{maxdims} is less than \mpiarg{ndims}.
+
+% 12.--- MPI-4.1-issue #588 PR644 4.0-page 459
+\item
+  Section~\ref{sec:errorhandler} on page~\pageref{sec:errorhandler} and \MPIIVDOTO/ Section 9.3 on page 458.
+  \newline
+  The fallback error-handler for the \spm{} was clarified.
+
+% 13.--- MPI-4.1-issue #545 PR657 4.0-page 473
+\item
+  Section~\ref{sec:ei-error} on page~\pageref{sec:ei-error} and \MPIIVDOTO/ Section~9.5 on page~473.
+  \newline
+  It was clarified that \mpiconst{MPI\_LASTUSEDCODE} is only available in the \wpm{}.
+
+% 14.--- MPI-4.1-issue #434 PR618 4.0-page 487
+\item
+  Sections~\ref{sec:dynamic:introduction} and~\ref{sec:model} on pages~\pageref{sec:dynamic:introduction} and~\pageref{sec:model},
+  and \MPIIVDOTO/ Sections~11.1 and~11.7 on pages~487 and~521.
+  \newline
+  It was clarified that the usage of the Dynamic Process Model requires the \wpm{} to be initialized.
+
+% 15.--- MPI-4.1-issue #499 PR729 4.0-page 601
+\item
+  Section~\ref{sec:1sided-sync:pscw} on page~\pageref{sec:1sided-sync:pscw}  and \MPIIV/ Section~12.5.2 on page~598.
+  \newline
+  The definition of \mpifunc{MPI\_WIN\_TEST} was clarified.
+
+% 16.--- MPI 4.1-issue #634 PR747 4.0-page 607
+\item \mpitermindex{progress!load/store access synchronization}
+Section~\ref{sec:1sided-flush} on page~\pageref{sec:1sided-flush}, \MPIIII/ Section~11.5.4 on page 449, \MPIIIIDOTI/ Section~11.5.4 on page 448, and \MPIIV/ Section~12.5.4 on page 605.
+\newline
+The description of \mpifunc{MPI\_WIN\_SYNC} was clarified to include its use for ordering load/store accesses to shared memory.
+A statement was added to highlight that a call to \mpifunc{MPI\_WIN\_SYNC} does not complete pending \RMA/ operations and
+that a call to \mpifunc{MPI\_WIN\_SYNC} does not guarantee any progress of \MPI/ operations.
+
+% 17.--- MPI-4.1-issue #517 PR620 4.0-page 640
+\item 
+  Section~\ref{sec:ei-status} on page~\pageref{sec:ei-status}, and \MPIIV/ Section~13.3 on page 640.
+\newline
+  Large count interface of \mpifunc{MPI\_STATUS\_SET\_ELEMENTS} had been missing and was added.
+
+% 18.--- MPI_4.0-issue #443 PR754
+\item Sections~\ref{sec:mpit:cvar} and~\ref{sec:mpit:pvar} on pages~\pageref{sec:mpit:cvar} and~\pageref{sec:mpit:pvar}, \MPIIII/ Sections~14.3.6 and 14.3.7 on pages~567 and 573, \MPIIIIDOTI/ Sections~14.3.6 and 14.3.7 on pages~573 and 580, and \MPIIV/ Sections~15.3.6 and 15.3.7 on pages~738 and 744.
+\newline
+The intent of handle arguments of the language independent definition of
+\mpifunc{MPI\_T\_CVAR\_WRITE}, %
+\mpifunc{MPI\_T\_PVAR\_HANDLE\_ALLOC},\flushline %
+\mpifunc{MPI\_T\_PVAR\_HANDLE\_FREE}, %
+\mpifunc{MPI\_T\_PVAR\_START}, %
+\mpifunc{MPI\_T\_PVAR\_STOP}, %
+\mpifunc{MPI\_T\_PVAR\_WRITE}, and %
+\mpifunc{MPI\_T\_PVAR\_RESET}%
+were marked as \INOUT\ in accordance with the special rule for handles described in Section~\ref{terms:procedure-specification}.
+
+\end{enumerate}
+
+\subsection{Changes in \texorpdfstring{\MPIIVDOTI/}{MPI-4.1}}
+\label{subsec:changes-40-41}
+
+\begin{enumerate}
+
+
+% 01.--- MPI-4.1-issue #562 PR694, MPI-4.0 page 6 (new section will start there)
+\item
+  Section~\ref{sec:side-documents} on page~\pageref{sec:side-documents}.
+  \newline
+  Introduced the concept of side documents.
+
+% 02.--- MPI-4.1-issue #669 PR788, MPI-4.0 pages 14, 15, and 17
+\item
+  Sections~\ref{subsec:operations} and~\ref{subsec:procedures} on pages~\pageref{subsec:operations} and~\pageref{subsec:procedures}.
+  \newline
+  Added the definition of the
+  \mpiterm{enabled operation state}\mpitermindex{state!operation!enabled}\mpitermindex{operation!state!enabled}.
+
+% 03.--- MPI-4.1-issue #565 PR727
+\item
+  Sections~\ref{sub:choice}, \ref{sec:fortran-binding-issues}, and \ref{sec:fortran}
+  on pages~\pageref{sub:choice}, \pageref{sec:fortran-binding-issues}, and \pageref{sec:fortran}.
+  \newline
+  The \MPI/ standard now reflects that TS 29113\mpitermindex{TS 29113}
+  was superceded by Fortran 2018\mpitermindex{Fortran 2018}.
+
+% 04.--- MPI-4.1-issue #518 (PR623) PR832 MPI-4.0 on pages 23, 141, 147, 149, 153, 640, (786)
+\item
+    Sections~\ref{sec:deprecated}, \ref{subsec:pt2pt-addfunc}, \ref{subsec:pt2pt-extent}, \ref{subsec:pt2pt-true-extent}, \ref{subsec:pt2pt-datatypeuse}, \ref{sec:ei-status},
+    and~\ref{sec:deprecated:since41}
+    on pages~\pageref{sec:deprecated}, \pageref{subsec:pt2pt-addfunc}, \pageref{subsec:pt2pt-extent}, \pageref{subsec:pt2pt-true-extent}, \pageref{subsec:pt2pt-datatypeuse}, \pageref{sec:ei-status},
+    and~\pageref{sec:deprecated:since41}.
+    \newline
+    \mpifunc{MPI\_TYPE\_SIZE\_X}, \mpifunc{MPI\_TYPE\_GET\_EXTENT\_X},
+    \newline
+    \mpifunc{MPI\_TYPE\_GET\_TRUE\_EXTENT\_X}, \mpifunc{MPI\_GET\_ELEMENTS\_X}, and
+    \newline
+    \mpifunc{MPI\_STATUS\_SET\_ELEMENTS\_X}
+    were deprecated and may be removed in a future version of the \MPI/ specification.
+
+% 05.--- MPI 4.1-issue #57 PR790
+\item
+  Sections~\ref{sec:deprecated}, \ref{sec:predef-comms} and~\ref{subsec:inquiry-inquiry} on pages~\pageref{sec:deprecated}, \pageref{sec:predef-comms} and~\pageref{subsec:inquiry-inquiry}.
+  \newline
+  \mpiconst{MPI\_HOST} has been deprecated, and a mention to host process has been removed.
+
+% 06.--- MPI-4.1-issue #561 PR722
+\item
+  Sections~\ref{sec:deprecated}, \ref{f90:overview}, \ref{f90:basic}, \ref{sec:deprecated:since41}
+  on pages~\pageref{sec:deprecated}, \pageref{f90:overview}, \pageref{f90:basic}, \pageref{sec:deprecated:since41}.
+  \newline
+  Deprecated the use of \code{mpif.h}.
+
+% 07.--- MPI-4.1-issue #646 PR771
+\item
+  Section~\ref{sec:macros} on page~\pageref{sec:macros}.
+  \newline
+  Removed the functions \mpifunc{MPI\_WTIME}, \mpifuncskip{PMPI\_WTIME},
+  \mpifunc{MPI\_WTICK}, and \mpifuncskip{PMPI\_WTICK} from the list of functions
+  that may be implemented as a macro.
+
+% 08.--- MPI-4.1-issue #647 PR770
+\item
+  Section~\ref{sec:macros} on page~\pageref{sec:macros} and
+  Section~\ref{sec:misc-handleconvert} on page~\pageref{sec:misc-handleconvert}.
+  \newline
+  Removed the ability to implement \mpi/ handle conversion functions as a macro.
+
+% 09.--- MPI-4.1-issue #493 PR753 and MPI-4.1-issue #468 PR667, MPI-4.0 page 83
+\item
+  Sections~\ref{subsec:terms:progress}, \ref{subsec:pt2pt-teststatus}, \ref{sec:1sided-pscw},
+  and Example~\ref{exa:sync-shared:deadlock}
+  on pages~\pageref{subsec:terms:progress}, \pageref{subsec:pt2pt-teststatus}, \pageref{sec:1sided-pscw},
+  and \pageref{exa:sync-shared:deadlock}.
+  \newline
+  The \mpitermni{progress rules}\mpitermindex{progress}\mpitermindex{progress!point-to-point communication}
+  \mpitermindex{semantics!point-to-point communication!progress} were clarified in general
+  and for \mpifunc{MPI\_REQUEST\_GET\_STATUS} and \mpifunc{MPI\_WIN\_TEST}.
+  The terms \mpitermni{strong}\mpitermindex{strong progress}\mpitermindex{progress!strong}
+  and \mpiterm{weak progress}\mpitermindex{progress!weak} were introduced.
+  An example showing restrictions on the use of \MPI/ shared memory for
+  synchronizing\mpitermindex{shared memory!loads/stores for synchronizing} purposes was introduced.
+
+% 10.--- MPI 4.1-issue #645 PR767
+\item
+  Sections~\ref{subsec:pt2pt-status} and~\ref{sec:ei-status} on pages~\pageref{subsec:pt2pt-status} and~\pageref{sec:ei-status}.
+  \newline
+  Added procedures \mpifunc{MPI\_STATUS\_GET\_SOURCE}, \mpifunc{MPI\_STATUS\_GET\_TAG}, and \mpifunc{MPI\_STATUS\_GET\_ERROR} to query \MPI/ status fields
+  and procedures \mpifunc{MPI\_STATUS\_SET\_SOURCE}, \mpifunc{MPI\_STATUS\_SET\_TAG}, and \mpifunc{MPI\_STATUS\_SET\_ERROR} to set \MPI/ status fields.
+  Direct access to these fields remains available.
+
+% 11.--- MPI 4.1-issue #586 PR736 and #685 PR808, Section 3.6, MPI-4.0 page 57
+\item Section~\ref{sec:pt2pt-buffer} on page~\pageref{sec:pt2pt-buffer}.
+  \newline
+  % Common change-log entry for both issues and their PRs
+  Automatic (unlimited) buffering is added, which can be enabled by using \mpiconst{MPI\_BUFFER\_AUTOMATIC} in any of the buffer attach procedures.
+  New procedures \mpifunc{MPI\_COMM\_ATTACH\_BUFFER}, \mpifunc{MPI\_SESSION\_ATTACH\_BUFFER},
+  \mpifunc{MPI\_COMM\_DETACH\_BUFFER} and \mpifunc{MPI\_SESSION\_DETACH\_BUFFER}
+  % to attach and detach a buffer to a communicator or session, respectively, to be used for buffered sends
+  % on that communicator or on communicators derived from groups derived from process sets from that session.
+  have been\flushline % Needed to address overfull box
+ added.
+  The buffers attached with the existing functions \mpifunc{MPI\_BUFFER\_ATTACH} and \mpifunc{MPI\_BUFFER\_DETACH}
+  now only apply to communicators that have no buffer attached at the communicator or session level.
+  New procedures \mpifunc{MPI\_COMM\_FLUSH\_BUFFER}, \mpifunc{MPI\_SESSION\_FLUSH\_BUFFER}, and
+  \mpifunc{MPI\_BUFFER\_FLUSH} were added as a combination of detach and attach, as well as the corresponding
+  nonblocking variants \mpifunc{MPI\_COMM\_IFLUSH\_BUFFER}, \mpifunc{MPI\_SESSION\_IFLUSH\_BUFFER}, and
+  \mpifunc{MPI\_BUFFER\_IFLUSH}.
+
+% 12.--- MPI-4.1-issue #519 PR799
+\item
+ Subsection~\ref{subsec:pt2pt-teststatus} on page~\pageref{subsec:pt2pt-teststatus}
+ \newline
+ \begin{raggedright}
+ Added new procedures \mpifunc{MPI\_REQUEST\_GET\_STATUS\_ANY}, \mpifunc{MPI\_REQUEST\_GET\_STATUS\_SOME},
+ and \mpifunc{MPI\_REQUEST\_GET\_STATUS\_ALL} to \gb{}query the statuses of multiple requests without freeing them.
+ \end{raggedright}
+
+% 13.--- MPI-4.1-issue #520 PR798
+\item
+  Section~\ref{subsec:typeaccess} and~\ref{coll-minloc-maxloc} on pages~\pageref{subsec:typeaccess} and~\pageref{coll-minloc-maxloc}.
+  \newline
+  Added procedure \mpifunc{MPI\_TYPE\_GET\_VALUE\_INDEX} to query predefined
+  datatype handles for pairs of value and index types to be usable in
+  conjunction with \mpiconst{MPI\_MINLOC} and \mpiconst{MPI\_MAXLOC}.
+  Added combiner \mpiconst{MPI\_COMBINER\_VALUE\_INDEX} for unnamed type handles
+  returned by \mpifunc{MPI\_TYPE\_GET\_VALUE\_INDEX}.
+
+% 14.--- MPI-4.1-issue #538 PR761, MPI-4.0 page 327
+\item
+  Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}.
+  \newline
+  \mpiconst{MPI\_COMM\_TYPE\_RESOURCE\_GUIDED} was added as a new possible value for the \mpiarg{split\_type}
+  parameter of the \mpifunc{MPI\_COMM\_SPLIT\_TYPE} procedure, as well as a new info key
+  \infokey{mpi\_pset\_name}.
+
+% 15.--- MPI-4.1-issue #543 PR791, MPI-4.0 page 345
+\item\label{item:changes:issue543-PR791}
+  Section~\ref{subsec:context-intracomdest} on page~\pageref{subsec:context-intracomdest}.
+  \newline
+  The definition of \mpifunc{MPI\_COMM\_FREE} was clarified.
+
+% 16.--- MPI-4.1-issue #83 PR666
+\item
+   Section~\ref{sec:comm-info} on page~\pageref{sec:comm-info}.
+   \newline
+   A new info key was added, namely
+   \infokey{mpi\_assert\_strict\_persistent\_collective\_ordering}.
+
+% 17.--- MPI-4.1-issue #580 PR714
+\item
+    Sections~\ref{sec:comm-info}, \ref{sec:inquiry-startup}, \ref{sec:model_sessions}, \ref{subsec:mem_alloc_kinds}, \ref{subsec:spawnkeys}, \ref{chap:one-side-2:win_create}, and~\ref{sec:io-info}
+    on pages~\pageref{sec:comm-info}, \pageref{sec:inquiry-startup}, \pageref{sec:model_sessions}, \pageref{subsec:mem_alloc_kinds}, \pageref{subsec:spawnkeys}, \pageref{chap:one-side-2:win_create},~and \pageref{sec:io-info}.
+    \newline
+    Added the ability to request support for, query support of, and assert
+    usage of memory allocation kinds via two new info keys,
+    \infokey{mpi\_memory\_alloc\_kinds} and
+    \infokey{mpi\_assert\_memory\_alloc\_kinds}.
+
+% 18.--- MPI-4.1-issue #544 PR652 4.0-page 381 (383, 385-386)
+\item
+  Section~\ref{sec:ei-naming} on page~\pageref{sec:ei-naming}
+  was amended to allow \mpiconst{MPI\_COMM\_NULL},
+  \mpiconst{MPI\_DATATYPE\_NULL}, and \mpiconst{MPI\_WIN\_NULL} to be
+  passed to \mpifunc{MPI\_COMM\_GET\_NAME},
+  \mpifunc{MPI\_TYPE\_GET\_NAME} and
+  \mpifunc{MPI\_WIN\_GET\_NAME}, respectively.
+
+% 19.--- MPI 4.1-issue #154 PR762, MPI-4.0 page 453
+\item
+  Section~\ref{subsubsec:inquiry-hw-resource-info} on page~\pageref{subsubsec:inquiry-hw-resource-info}.
+  \newline
+  Added new procedure \mpifunc{MPI\_GET\_HW\_RESOURCE\_INFO}.
+
+% 20.--- MPI-4.1-issue #525 PR633, MPI-4.0 page 469
+
+\item
+  Section~\ref{sec:ei-error-classes} on page~\pageref{sec:ei-error-classes}.
+  \newline
+  Added new error class
+  \error{MPI\_ERR\_ERRHANDLER}.
+
+
+% 21.--- MPI-4.1-issue #283 PR166, MPI-4.0 page 473
+\item
+ Section~\ref{sec:ei-error} on page~\pageref{sec:ei-error}.
+ \newline
+ Add procedures \mpifunc{MPI\_REMOVE\_ERROR\_CLASS}, \mpifunc{MPI\_REMOVE\_ERROR\_CODE},
+ \mpifunc{MPI\_REMOVE\_ERROR\_STRING} to complement the procedures adding error classes, codes, and strings.
+
+% 22.--- MPI-4.1-issue #23 PR708
+\item
+  Section~\ref{sec:one-side-2:intro} on page~\pageref{sec:one-side-2:intro}.
+  \newline
+  Relaxed the constraints on the windows for which shared memory can be queried using
+  \mpifunc{MPI\_WIN\_SHARED\_QUERY} to allow windows with flavor \mpiconst{MPI\_WIN\_FLAVOR\_CREATE}
+  and \mpiconst{MPI\_WIN\_FLAVOR\_ALLOCATE}.
+
+% 23.--- MPI-4.1-issue #640 PR749, MPI-4.0 page 553 
+\item
+  Section~\ref{chap:one-side-2:win_create} on page~\pageref{chap:one-side-2:win_create}.
+  \newline
+  Added new info key \infokey{mpi\_accumulate\_granularity} to specify a desired
+  synchronization granularity of accumulate operations.
+
+% 24.--- MPI-4.1-issue #551 PR659, MPI-4.0 page 565
+
+\item
+  Section~\ref{sec:rma-win-free} on page~\pageref{sec:rma-win-free}.
+  \newline
+  Implementations may avoid synchronization of processes in \mpifunc{MPI\_WIN\_FREE}
+  if the \infokey{no\_locks} info key is set to \infoval{true}.
+
+% 25.--- MPI 4.1-issue #555 PR671
+\item
+  Section~\ref{sec:1sided-pscw} on page~\pageref{sec:1sided-pscw}.
+  \newline
+  In Example~\ref{ex:1sided-start-complete}, \mpifunc{MPI\_PUT} has been removed from the list
+  of procedures that may delay their return waiting for the call to \mpifunc{MPI\_WIN\_POST} to occur at the target.
+  \MPI/ \RMA/ communication procedures are generally not intended to delay their return waiting for synchronization procedure calls
+  to occur at the target.
+
+% 26.--- MPI-4.1-issue #553 PR663
+\item
+  Section~\ref{sec:1sided-semantics} on page~\pageref{sec:1sided-semantics} and
+  Section~\ref{sec:onesided_examples} on page~\pageref{sec:onesided_examples}.
+  \newline
+  Clarified the use of \mpifunc{MPI\_WIN\_SYNC} for memory synchronization on shared memory.
+
+% 27.--- MPI 4.1-issue #160 PR161 4.0-page 732
+\item
+  Section~\ref{sec:mpit:assoc} on page~\pageref{sec:mpit:assoc}.
+  \newline
+  The text specifying when entities of the \MPI/ Tool Information Interface can 
+  be bound to objects during the object's lifetime was clarified.
+
+% 28.--- MPI 4.1-issue #414 PR723
+\item
+    Section~\ref{sec:tools:mpit:droppedevents} on page~\pageref{sec:tools:mpit:droppedevents} and
+    Section~\ref{sec:mpit:category_changed} on page~\pageref{sec:mpit:category_changed}.
+    \newline
+    Behavior specified when the count of dropped events or category changes overflow, respectively.
+
+% 29.--- MPI-4.1-issue #535 PR658
+\item
+  Section~\ref{sec:misc-lang-interop:initialization} on page~\pageref{sec:misc-lang-interop:initialization}.
+  \newline
+  Language interoperability when using \mpifunc{MPI\_SESSION\_INIT} and \mpifunc{MPI\_SESSION\_FINALIZE} was clarified.
+
+% 30.--- MPI-4.1-issue #641 PR752
+\item
+  Annex~\ref{sec:lang:semantics:summary} on page~\pageref{sec:lang:semantics:summary}.
+  \newline
+  The annex has been completed with the operation-related
+  \MPI/ procedures for one-sided communication and some other rarely used scenarios.
+  It is now integrated into the \MPI/ standard.
+
+\end{enumerate}
+
+\section{Changes from Version 3.1 to Version 4.0}
+\label{subsec:31to40}
+
+\subsection{Fixes to Errata in Previous Versions of \texorpdfstring{\MPI/}{MPI}}
+\label{sec:changes-31-40-errata}
+
+\begin{enumerate}
+
+% 01.--- MPI-3.0-issue #153 p410
+\item
+\mpitermindex{neighborhood collective communication!periodic and dims 1 or 2@periodic and dims=1 or 2}
+Sections~\ref{subsec:sparsecoll:allgather}, \ref{subsec:sparsecoll:alltoall} and~\ref{sec:topol-applic-example}
+on pages~\pageref{subsec:sparsecoll:allgather}, \pageref{subsec:sparsecoll:alltoall} and~\pageref{sec:topol-applic-example},
+and \MPIIIIDOTI/ Sections~7.6.1, 7.6.2 and 7.8 on pages 315, 318 and 329.
+\newline
+\mpifuncindex{MPI\_NEIGHBOR\_ALLTOALL}%
+\mpifuncindex{MPI\_NEIGHBOR\_ALLTOALLV}%
+\mpifuncindex{MPI\_NEIGHBOR\_ALLTOALLW}%
+\mpiskipfunc{MPI\_NEIGHBOR\_ALLTOALL\{$|$V$|$W\}}
+and
+\mpifuncindex{MPI\_NEIGHBOR\_ALLGATHER}%
+\mpifuncindex{MPI\_NEIGHBOR\_ALLGATHERV}%
+\mpiskipfunc{MPI\_NEIGHBOR\_ALLGATHER\{$|$V\}}
+for Cartesian virtual grids were clarified. 
+An advice to implementors was added to illustrate a correct implementation
+for the case of \mpicode{periods[d]=1} or \mpicode{.TRUE.} 
+and \mpicode{dims[d]=1} or \mpicode{2} in a direction \mpicode{d}.
+
+% 02.--- MPI-4.0-issue #298 p832.1
+\item
+  Section~\ref{sec:conversion:status} on
+  page~\pageref{sec:conversion:status-f2f08-not-in-mpifh}, and
+  \MPIIIIDOTI/ Section 17.2.5 on page 657 line 11.
+  \newline
+  Clarified that the \mpifunc{MPI\_STATUS\_F2F08} and
+  \mpifunc{MPI\_STATUS\_F082F} routines and the declaration for
+  \mpiftype{TYPE(MPI\_Status)} are not supposed to appear with
+  \code{mpif.h}.
+
+% 03.--- MPI-4.0-issue #306 p832.2
+
+\item
+  Sections~\ref{subsec:named-constants:F_STATUS_SIZE}, \ref{sec:conversion:status:C_F_constants},
+  and~\ref{subsec:annexa-const:MPI_F_STATUS-constants} on
+  pages~\pageref{subsec:named-constants:F_STATUS_SIZE},
+  \pageref{sec:conversion:status:C_F_constants},
+  and~\pageref{subsec:annexa-const:MPI_F_STATUS-constants}, and
+  \MPIIIIDOTI/ Sections 2.5.4, 17.2.5, and A.1.1 on pages 15, 656, and
+  669.
+  \newline
+  Define the C constants \mpiconst{MPI\_F\_STATUS\_SIZE}, \mpiconst{MPI\_F\_SOURCE},
+  \mpiconst{MPI\_F\_TAG}, and \mpiconst{MPI\_F\_ERROR}.
+
+% 04.--- MPI-4.0-issue #307 p832.3
+\item
+  Section~\ref{sec:conversion:status:status_f2f08} on
+  page~\pageref{sec:conversion:status:status_f2f08}, and
+  \MPIIIIDOTI/ Section 17.2.5 on page 658.
+  \newline
+  Added missing \code{const} to \IN\ parameters for
+  \mpifunc{MPI\_STATUS\_F2F08} and \mpifunc{MPI\_STATUS\_F082F}.
+
+\end{enumerate}
+
+\subsection{Changes in \texorpdfstring{\MPIIVDOTO/}{MPI-4.0}}
+\label{subsec:changes-31-40}
+
+\begin{enumerate}
+
+% 01.--- MPI-4.0-issue #405 p9
+\item
+  Sections~\ref{subsec:terms:naming}, \ref{sec:incompatible:since40}, and~\ref{sec:f90:linker-names}
+  on pages~\pageref{subsec:terms:naming}, \pageref{sec:incompatible:since40}, and~\pageref{sec:f90:linker-names}.
+  \newline
+  The limit for the maximum length of \MPI/ identifiers was removed.
+
+% 02.--- MPI-4.0-issue #96 p11
+\item
+\mpitermindex{semantics} Section~\ref{terms:semantic},
+\ref{sec:pt2pt-modes}, \ref{subsec:pt2pt-commstart},
+\ref{subsec:pt2pt-commend}, \ref{subsec:pt2pt-probe},
+\ref{sec:matching-probe},
+\ref{sec:coll-persistent},
+\ref{sec:io-split-collective}, and
+Annex~\ref{sec:lang:semantics:summary} on
+pages~\pageref{terms:semantic}, \pageref{sec:pt2pt-modes},
+\pageref{subsec:pt2pt-commstart}, \pageref{subsec:pt2pt-commend},
+\pageref{subsec:pt2pt-probe}, \pageref{sec:matching-probe},
+\pageref{sec:coll-persistent},
+\pageref{sec:io-split-collective}, and
+\pageref{sec:lang:semantics:summary}.
+\newline
+The semantic terms were updated.
+
+% 03.--- MPI-4.0-issue #137 p11
+\item Sections~\ref{subsec:count} and~\ref{sec:largecount} on pages~\pageref{subsec:count} and~\pageref{sec:largecount}, and throughout the entire document.
+  \newline
+  New large count functions \mpifuncskip{MPI\_\{\ldots\}\_c}
+\MPIbindindexuse{MPI\_Send\_c}%
+\MPIbindindexuse{MPI\_Recv\_c}%
+\MPIbindindexuse{MPI\_Get\_count\_c}%
+\MPIbindindexuse{MPI\_Sendrecv\_c}%
+\MPIbindindexuse{MPI\_Sendrecv\_replace\_c}%
+\MPIbindindexuse{MPI\_Bsend\_c}%
+\MPIbindindexuse{MPI\_Ssend\_c}%
+\MPIbindindexuse{MPI\_Rsend\_c}%
+\MPIbindindexuse{MPI\_Buffer\_attach\_c}%
+\MPIbindindexuse{MPI\_Buffer\_detach\_c}%
+\MPIbindindexuse{MPI\_Isend\_c}%
+\MPIbindindexuse{MPI\_Ibsend\_c}%
+\MPIbindindexuse{MPI\_Issend\_c}%
+\MPIbindindexuse{MPI\_Irsend\_c}%
+\MPIbindindexuse{MPI\_Irecv\_c}%
+\MPIbindindexuse{MPI\_Isendrecv\_c}%
+\MPIbindindexuse{MPI\_Isendrecv\_replace\_c}%
+\MPIbindindexuse{MPI\_Mrecv\_c}%
+\MPIbindindexuse{MPI\_Imrecv\_c}%
+\MPIbindindexuse{MPI\_Send\_init\_c}%
+\MPIbindindexuse{MPI\_Bsend\_init\_c}%
+\MPIbindindexuse{MPI\_Ssend\_init\_c}%
+\MPIbindindexuse{MPI\_Rsend\_init\_c}%
+\MPIbindindexuse{MPI\_Recv\_init\_c}%
+\MPIbindindexuse{MPI\_Type\_contiguous\_c}%
+\MPIbindindexuse{MPI\_Type\_vector\_c}%
+\MPIbindindexuse{MPI\_Type\_create\_hvector\_c}%
+\MPIbindindexuse{MPI\_Type\_indexed\_c}%
+\MPIbindindexuse{MPI\_Type\_create\_hindexed\_c}%
+\MPIbindindexuse{MPI\_Type\_create\_indexed\_block\_c}%
+\MPIbindindexuse{MPI\_Type\_create\_hindexed\_block\_c}%
+\MPIbindindexuse{MPI\_Type\_create\_struct\_c}%
+\MPIbindindexuse{MPI\_Type\_create\_subarray\_c}%
+\MPIbindindexuse{MPI\_Type\_create\_darray\_c}%
+\MPIbindindexuse{MPI\_Type\_size\_c}%
+\MPIbindindexuse{MPI\_Type\_get\_extent\_c}%
+\MPIbindindexuse{MPI\_Type\_create\_resized\_c}%
+\MPIbindindexuse{MPI\_Type\_get\_true\_extent\_c}%
+\MPIbindindexuse{MPI\_Get\_elements\_c}%
+\MPIbindindexuse{MPI\_Type\_get\_envelope\_c}%
+\MPIbindindexuse{MPI\_Type\_get\_contents\_c}%
+\MPIbindindexuse{MPI\_Pack\_c}%
+\MPIbindindexuse{MPI\_Unpack\_c}%
+\MPIbindindexuse{MPI\_Pack\_size\_c}%
+\MPIbindindexuse{MPI\_Pack\_external\_c}%
+\MPIbindindexuse{MPI\_Unpack\_external\_c}%
+\MPIbindindexuse{MPI\_Pack\_external\_size\_c}%
+\MPIbindindexuse{MPI\_Bcast\_c}%
+\MPIbindindexuse{MPI\_Gather\_c}%
+\MPIbindindexuse{MPI\_Gatherv\_c}%
+\MPIbindindexuse{MPI\_Scatter\_c}%
+\MPIbindindexuse{MPI\_Scatterv\_c}%
+\MPIbindindexuse{MPI\_Allgather\_c}%
+\MPIbindindexuse{MPI\_Allgatherv\_c}%
+\MPIbindindexuse{MPI\_Alltoall\_c}%
+\MPIbindindexuse{MPI\_Alltoallv\_c}%
+\MPIbindindexuse{MPI\_Alltoallw\_c}%
+\MPIbindindexuse{MPI\_Reduce\_c}%
+\MPIbindindexuse{MPI\_Op\_create\_c}%
+\MPIbindindexuse{MPI\_Allreduce\_c}%
+\MPIbindindexuse{MPI\_Reduce\_local\_c}%
+\MPIbindindexuse{MPI\_Reduce\_scatter\_block\_c}%
+\MPIbindindexuse{MPI\_Reduce\_scatter\_c}%
+\MPIbindindexuse{MPI\_Scan\_c}%
+\MPIbindindexuse{MPI\_Exscan\_c}%
+\MPIbindindexuse{MPI\_Ibcast\_c}%
+\MPIbindindexuse{MPI\_Igather\_c}%
+\MPIbindindexuse{MPI\_Igatherv\_c}%
+\MPIbindindexuse{MPI\_Iscatter\_c}%
+\MPIbindindexuse{MPI\_Iscatterv\_c}%
+\MPIbindindexuse{MPI\_Iallgather\_c}%
+\MPIbindindexuse{MPI\_Iallgatherv\_c}%
+\MPIbindindexuse{MPI\_Ialltoall\_c}%
+\MPIbindindexuse{MPI\_Ialltoallv\_c}%
+\MPIbindindexuse{MPI\_Ialltoallw\_c}%
+\MPIbindindexuse{MPI\_Ireduce\_c}%
+\MPIbindindexuse{MPI\_Iallreduce\_c}%
+\MPIbindindexuse{MPI\_Ireduce\_scatter\_block\_c}%
+\MPIbindindexuse{MPI\_Ireduce\_scatter\_c}%
+\MPIbindindexuse{MPI\_Iscan\_c}%
+\MPIbindindexuse{MPI\_Iexscan\_c}%
+\MPIbindindexuse{MPI\_Bcast\_init\_c}%
+\MPIbindindexuse{MPI\_Gather\_init\_c}%
+\MPIbindindexuse{MPI\_Gatherv\_init\_c}%
+\MPIbindindexuse{MPI\_Scatter\_init\_c}%
+\MPIbindindexuse{MPI\_Scatterv\_init\_c}%
+\MPIbindindexuse{MPI\_Allgather\_init\_c}%
+\MPIbindindexuse{MPI\_Allgatherv\_init\_c}%
+\MPIbindindexuse{MPI\_Alltoall\_init\_c}%
+\MPIbindindexuse{MPI\_Alltoallv\_init\_c}%
+\MPIbindindexuse{MPI\_Alltoallw\_init\_c}%
+\MPIbindindexuse{MPI\_Reduce\_init\_c}%
+\MPIbindindexuse{MPI\_Allreduce\_init\_c}%
+\MPIbindindexuse{MPI\_Reduce\_scatter\_block\_init\_c}%
+\MPIbindindexuse{MPI\_Reduce\_scatter\_init\_c}%
+\MPIbindindexuse{MPI\_Scan\_init\_c}%
+\MPIbindindexuse{MPI\_Exscan\_init\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_allgather\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_allgatherv\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_alltoall\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_alltoallv\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_alltoallw\_c}%
+\MPIbindindexuse{MPI\_Ineighbor\_allgather\_c}%
+\MPIbindindexuse{MPI\_Ineighbor\_allgatherv\_c}%
+\MPIbindindexuse{MPI\_Ineighbor\_alltoall\_c}%
+\MPIbindindexuse{MPI\_Ineighbor\_alltoallv\_c}%
+\MPIbindindexuse{MPI\_Ineighbor\_alltoallw\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_allgather\_init\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_allgatherv\_init\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_alltoall\_init\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_alltoallv\_init\_c}%
+\MPIbindindexuse{MPI\_Neighbor\_alltoallw\_init\_c}%
+\MPIbindindexuse{MPI\_Win\_create\_c}%
+\MPIbindindexuse{MPI\_Win\_allocate\_c}%
+\MPIbindindexuse{MPI\_Win\_allocate\_shared\_c}%
+\MPIbindindexuse{MPI\_Win\_shared\_query\_c}%
+\MPIbindindexuse{MPI\_Put\_c}%
+\MPIbindindexuse{MPI\_Get\_c}%
+\MPIbindindexuse{MPI\_Accumulate\_c}%
+\MPIbindindexuse{MPI\_Get\_accumulate\_c}%
+\MPIbindindexuse{MPI\_Rput\_c}%
+\MPIbindindexuse{MPI\_Rget\_c}%
+\MPIbindindexuse{MPI\_Raccumulate\_c}%
+\MPIbindindexuse{MPI\_Rget\_accumulate\_c}%
+\MPIbindindexuse{MPI\_File\_read\_at\_c}%
+\MPIbindindexuse{MPI\_File\_read\_at\_all\_c}%
+\MPIbindindexuse{MPI\_File\_write\_at\_c}%
+\MPIbindindexuse{MPI\_File\_write\_at\_all\_c}%
+\MPIbindindexuse{MPI\_File\_iread\_at\_c}%
+\MPIbindindexuse{MPI\_File\_iread\_at\_all\_c}%
+\MPIbindindexuse{MPI\_File\_iwrite\_at\_c}%
+\MPIbindindexuse{MPI\_File\_iwrite\_at\_all\_c}%
+\MPIbindindexuse{MPI\_File\_read\_c}%
+\MPIbindindexuse{MPI\_File\_read\_all\_c}%
+\MPIbindindexuse{MPI\_File\_write\_c}%
+\MPIbindindexuse{MPI\_File\_write\_all\_c}%
+\MPIbindindexuse{MPI\_File\_iread\_c}%
+\MPIbindindexuse{MPI\_File\_iread\_all\_c}%
+\MPIbindindexuse{MPI\_File\_iwrite\_c}%
+\MPIbindindexuse{MPI\_File\_iwrite\_all\_c}%
+\MPIbindindexuse{MPI\_File\_read\_shared\_c}%
+\MPIbindindexuse{MPI\_File\_write\_shared\_c}%
+\MPIbindindexuse{MPI\_File\_iread\_shared\_c}%
+\MPIbindindexuse{MPI\_File\_iwrite\_shared\_c}%
+\MPIbindindexuse{MPI\_File\_read\_ordered\_c}%
+\MPIbindindexuse{MPI\_File\_write\_ordered\_c}%
+\MPIbindindexuse{MPI\_File\_read\_at\_all\_begin\_c}%
+\MPIbindindexuse{MPI\_File\_write\_at\_all\_begin\_c}%
+\MPIbindindexuse{MPI\_File\_read\_all\_begin\_c}%
+\MPIbindindexuse{MPI\_File\_write\_all\_begin\_c}%
+\MPIbindindexuse{MPI\_File\_read\_ordered\_begin\_c}%
+\MPIbindindexuse{MPI\_File\_write\_ordered\_begin\_c}%
+\MPIbindindexuse{MPI\_File\_get\_type\_extent\_c}%
+\MPIbindindexuse{MPI\_Register\_datarep\_c}%
+  in C and through function overloading
+  in the Fortran \code{mpi\_f08} module,
+  (with the exception of the explicit Fortran procedures
+   \MPIBCfunc{MPI\_Op\_create\_c} and \MPIBCfunc{MPI\_Register\_datarep\_c})
+  and the new large count callbacks
+\mpicallback{MPI\_User\_function\_c} and
+\mpicallback{MPI\_Datarep\_conversion\_function\_c}
+together with the predefined function
+\mpiconstfunc{MPI\_CONVERSION\_FN\_NULL\_C}
+  were introduced to accomodate large buffers and/or datatypes.
+
+  Clarifications were added to the behavior of
+  \INOUT/\OUT\ parameters that cannot represent the value
+  to be returned for the \mpifunc{MPI\_BUFFER\_DETACH} and
+  \mpifunc{MPI\_FILE\_GET\_TYPE\_EXTENT} functions.
+
+  A new error class \error{MPI\_ERR\_VALUE\_TOO\_LARGE} was
+  introduced.
+
+% 04.--- MPI-4.0 Issues 1, 3 p24
+\item
+    Sections~\ref{sec:terms-errorhandling},~\ref{sec:errorhandler},~\ref{sec:ei-error}, and~\ref{sec:inquiry-startup} on
+pages~\pageref{sec:terms-errorhandling},~\pageref{sec:errorhandler},~\pageref{sec:ei-error}, and~\pageref{sec:inquiry-startup}.
+\newline
+\MPI/ calls that are not related to any objects are considered to be attached to
+the communicator \mpiconst{MPI\_COMM\_SELF} instead of \mpiconst{MPI\_COMM\_WORLD}.
+The definition of
+\mpiconst{MPI\_ERRORS\_ARE\_FATAL} was clarified to cover all connected processes,
+and a new error handler, \mpiconst{MPI\_ERRORS\_ABORT}, was created to limit the
+scope of aborting.
+
+% 05.--- MPI-4.0-issue #122 p58
+\item
+\mpitermindex{cancel}
+Section~\ref{sec:pt2pt-nonblock} on page~\pageref{sec:pt2pt-nonblock}.
+\newline
+The introduction of \MPI/ nonblocking communication was changed to
+describe correctness and performance reasons for the use of nonblocking communication.
+
+% 06.--- MPI-4.0-issue #125 p60
+\item
+  Section~\ref{subsec:pt2pt-commstart} on page~\pageref{subsec:pt2pt-commstart}.
+  \newline
+  Addition of
+  \mpifunc{MPI\_ISENDRECV} and
+  \mpifunc{MPI\_ISENDRECV\_REPLACE}.
+
+% 07.--- MPI-4.0-issue #25 p67
+\item
+Sections~\ref{subsec:pt2pt-commend}, \ref{sec:pt2pt-persistent}, \ref{sec:coll-persistent}, \ref{sec:sparsecoll-pnbc}, and \ref{sec:topol-applic-example} on pages~\pageref{subsec:pt2pt-commend}, \pageref{sec:pt2pt-persistent}, \pageref{sec:coll-persistent}, \pageref{sec:sparsecoll-pnbc}, and \pageref{sec:topol-applic-example}.
+\newline
+Persistent collective communication 
+\mpifuncindex{MPI\_ALLGATHER\_INIT}%
+\mpifuncindex{MPI\_ALLGATHERV\_INIT}%
+\mpifuncindex{MPI\_ALLREDUCE\_INIT}%
+\mpifuncindex{MPI\_ALLTOALL\_INIT}%
+\mpifuncindex{MPI\_ALLTOALLV\_INIT}%
+\mpifuncindex{MPI\_ALLTOALLW\_INIT}%
+\mpifuncindex{MPI\_BARRIER\_INIT}%
+\mpifuncindex{MPI\_BCAST\_INIT}%
+\mpifuncindex{MPI\_EXSCAN\_INIT}%
+\mpifuncindex{MPI\_GATHER\_INIT}%
+\mpifuncindex{MPI\_GATHERV\_INIT}%
+\mpifuncindex{MPI\_REDUCE\_INIT}%
+\mpifuncindex{MPI\_REDUCE\_SCATTER\_BLOCK\_INIT}%
+\mpifuncindex{MPI\_REDUCE\_SCATTER\_INIT}%
+\mpifuncindex{MPI\_SCAN\_INIT}%
+\mpifuncindex{MPI\_SCATTER\_INIT}%
+\mpifuncindex{MPI\_SCATTERV\_INIT}%
+\mpiskipfunc{MPI\_\{ALLGATHER$|$\ldots\}\_INIT}
+including persistent collective neighborhood communication
+\mpifuncindex{MPI\_NEIGHBOR\_ALLGATHER\_INIT}%
+\mpifuncindex{MPI\_NEIGHBOR\_ALLGATHERV\_INIT}%
+\mpifuncindex{MPI\_NEIGHBOR\_ALLTOALL\_INIT}%
+\mpifuncindex{MPI\_NEIGHBOR\_ALLTOALLV\_INIT}%
+\mpifuncindex{MPI\_NEIGHBOR\_ALLTOALLW\_INIT}%
+\vlgb\mpiskipfunc{MPI\_NEIGHBOR\_\{ALLGATHER$|$\ldots\}\_INIT}
+was added to the standard.
+
+% 08.--- MPI-4.0-issue #26 p88
+\item
+\mpitermindex{cancel}
+Sections~\ref{sec:cancel} and~\ref{sec:deprecated:since40} on pages~\pageref{sec:cancel} and~\pageref{sec:deprecated:since40}.
+\newline
+Cancelling a send request by calling \mpifunc{MPI\_CANCEL} has been deprecated and may be removed in a future version of the \MPI/ specification.
+
+% 09.--- MPI-4.0-issue #136 p99
+\item
+  Chapter~\ref{chap:part} on page~\pageref{chap:part}.
+  \newline
+  A new chapter on partitioned communication 
+  with the new \MPI/ procedures 
+\mpifuncindex{MPI\_PARRIVED}%
+\mpifuncindex{MPI\_PREADY}%
+\mpifuncindex{MPI\_PREADY\_LIST}%
+\mpifuncindex{MPI\_PREADY\_RANGE}%
+\mpifuncindex{MPI\_PRECV\_INIT}%
+\mpifuncindex{MPI\_PSEND\_INIT}%
+  \mpiskipfunc{MPI\_\{PARRIVED$|$PREADY\{\ldots\}\}}
+  and \mpiskipfunc{MPI\_\{PRECV$|$PSEND\}\_INIT}
+  was added.
+
+% 10.--- MPI-4.0-issue #156 p321
+\item
+Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}.
+\newline
+\mpiconst{MPI\_COMM\_TYPE\_HW\_UNGUIDED} was added as a new possible value for the \mpiarg{split\_type}
+  parameter of the \mpifunc{MPI\_COMM\_SPLIT\_TYPE} function.
+
+% 11.--- MPI-4.0-issue #132 p321
+\item
+  Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}.
+  \newline
+  \mpiconst{MPI\_COMM\_TYPE\_HW\_GUIDED} was added as a new possible value for the \mpiarg{split\_type}
+  parameter of the \mpifunc{MPI\_COMM\_SPLIT\_TYPE} function, as well as a new info key
+  \infokey{mpi\_hw\_resource\_type}. A specific value associated with this new info key is also defined:
+  \infoval{mpi\_shared\_memory}.
+
+% 12.--- MPI-4.0-issue #52 p321
+\item
+Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}.
+\newline
+The functions \mpifunc{MPI\_COMM\_DUP} and \mpifunc{MPI\_COMM\_IDUP} were
+updated to no longer propagate info hints.
+\newline This change may affect backward compatibility.
+
+% 13.--- MPI-4.0-issue #53 p321
+\item
+Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}.
+\newline
+The
+\mpifunc{MPI\_COMM\_IDUP\_WITH\_INFO} function was added.
+
+% 14.--- MPI-4.0-issue #11 p339.1
+\item
+Sections~\ref{sec:comm-info}, \ref{subsec:window-info}, and~\ref{sec:io-info} on pages
+\pageref{sec:comm-info}, \pageref{subsec:window-info}, and \pageref{sec:io-info}.
+\newline
+The definition of info hints was updated to allow applications to provide
+assertions regarding their usage of \MPI/ objects and operations.
+
+% 15.--- MPI-4.0-issue #11 p339.2
+\item
+Section~\ref{sec:comm-info} on page~\pageref{sec:comm-info}.
+\newline
+The new info hints \infokey{mpi\_assert\_no\_any\_tag},
+\infokey{mpi\_assert\_no\_any\_source}, \infokey{mpi\_assert\_exact\_length},
+and \infokey{mpi\_assert\_allow\_overtaking} were added for use with
+communicators.
+
+% 16.--- MPI-4.0-issue #63 p339
+\item
+Sections~\ref{sec:comm-info}, \ref{subsec:window-info}, and~\ref{sec:io-info}
+on pages~\pageref{sec:comm-info}, \pageref{subsec:window-info},
+and~\pageref{sec:io-info}.
+\newline
+The semantics of the
+\mpifunc{MPI\_COMM\_SET\_INFO}, \mpifunc{MPI\_COMM\_GET\_INFO},
+\mpifunc{MPI\_WIN\_SET\_INFO}, \mpifunc{MPI\_WIN\_GET\_INFO},
+\mpifunc{MPI\_FILE\_SET\_INFO}, and \mpifunc{MPI\_FILE\_GET\_INFO}
+were clarified.
+
+% 17.--- MPI-4.0-issue #72 p387
+\item
+Section~\ref{subsec:topol-construct} on page~\pageref{subsec:topol-construct}.
+\newline
+\mpifunc{MPI\_DIMS\_CREATE} is now guaranteed to return \error{MPI\_SUCCESS} if the number of dimensions passed to the routine is set to 0 and the number of nodes is set to 1.
+
+% 18.--- MPI-4.0-issue #121 p447
+\mpitermindex{memory!alignment}\mpitermindex{alignment}
+\item Sections~\ref{sec:misc-memalloc},~\ref{sec:winalloc}, and~\ref{sec:winallocshared} on
+pages~\pageref{sec:misc-memalloc},~\pageref{sec:winalloc}, and~\pageref{sec:winallocshared}.
+\newline
+{\raggedright
+Introduced alignment requirements for memory allocated through
+\mpifunc{MPI\_ALLOC\_MEM}, \mpifunc{MPI\_WIN\_ALLOCATE}, and
+\mpifunc{MPI\_WIN\_ALLOCATE\_SHARED} and added a new \mpiarg{info}
+key \infokey{mpi\_minimum\_memory\_alignment} to specify a desired alternative minimum alignment.
+
+}
+% 19.--- MPI-4.0-issue #28 p450
+\item
+Sections~\ref{sec:errorhandler} and~\ref{sec:ei-error-classes} on
+pages~\pageref{sec:errorhandler} and~\pageref{sec:ei-error-classes}.
+\newline
+Clarified definition of errors to say that \MPI/ should continue whenever
+possible and allow the user to recover from errors.
+
+% 20.--- MPI-4.0-issue #119 p461
+\item
+Section~\ref{sec:ei-error-classes} on page~\pageref{sec:ei-error-classes}.
+\newline
+Added text to clarify what is implied about the status of \MPI/ and user visible buffers when \MPI/
+functions return \error{MPI\_SUCCESS} or other error codes.
+
+% 21.---  MPI-4.0-issue #134 p463
+\item
+  Section~\ref{sec:ei-error-classes} on page~\pageref{table:inquiry:errclasses:part:i}.
+  \newline
+  The error class \error{MPI\_ERR\_PROC\_ABORTED} has been added.
+
+% 22.--- MPI-4.0-issue #129 p471
+%% label sec:info has become subsec:info. If the original number in the
+%% MPI-3 document, these should use the exact number, not a labeled referece.
+\item
+Section~\ref{subsec:info} on page~\pageref{subsec:info}.
+\newline
+Added a new function \mpifunc{MPI\_INFO\_GET\_STRING} that takes a
+buffer length argument for returning info value strings. This function
+returns the required buffer length for the requested string and guarantees
+null termination for C strings where buffer size is greater than 0.
+
+% 23.--- MPI-4.0-issue #131 p471
+\item
+Section~\ref{subsec:info} on page~\pageref{subsec:info} and
+Section~\ref{sec:deprecated:since40} on page~\pageref{sec:deprecated:since40}.
+\newline
+\mpifunc{MPI\_INFO\_GET} and \mpifunc{MPI\_INFO\_GET\_VALUELEN} were deprecated.
+  
+% 24.--- MPI-4.0-issue #103 p479
+\item
+Chapter~\ref{sec:dynamic-2},
+\ref{subsec:pt2pt-envelope},
+\ref{sec:predef-comms},
+\ref{subsec:context-grpconst},
+\ref{subsec:context-intracomconst},
+\ref{subsec:context-intercomm},
+\ref{subsec:inquiry-version},
+\ref{subsec:inquiry-inquiry},
+\ref{sec:errorhandler},
+\ref{subsec:inquiry-errhdlr-sessions},
+\ref{sec:ei-error},
+\ref{sec:ei-threads},
+\ref{sec:io-filecntl-open},
+\ref{sec:io-filecntl-get-params},
+\ref{sec:io-errhandlers},
+\ref{sec:mpit:init},
+\ref{sec:misc-handleconvert},
+\ref{subsec:mpiopaqueobjects},
+and
+Annex~\ref{sec:lang}
+on pages~\pageref{sec:dynamic-2},
+\pageref{subsec:pt2pt-envelope},
+\pageref{sec:predef-comms},
+\pageref{subsec:context-grpconst},
+\pageref{subsec:context-intracomconst},
+\pageref{subsec:context-intercomm},
+\pageref{subsec:inquiry-version},
+\pageref{subsec:inquiry-inquiry},
+\pageref{sec:errorhandler},
+\pageref{subsec:inquiry-errhdlr-sessions},
+\pageref{sec:ei-error},
+\pageref{sec:ei-threads},
+\pageref{sec:io-filecntl-open},
+\pageref{sec:io-filecntl-get-params},
+\pageref{sec:io-errhandlers},
+\pageref{sec:mpit:init},
+\pageref{sec:misc-handleconvert},
+\pageref{subsec:mpiopaqueobjects},
+and
+\pageref{sec:lang}.
+\newline
+{\raggedright
+The \spm{} was added to the standard.
+New \MPI/ procedures are 
+\mpifuncindex{MPI\_SESSION\_INIT}%
+\mpifuncindex{MPI\_SESSION\_FINALIZE}%
+\mpiskipfunc{MPI\_SESSION\_\{INIT$|$FINALIZE\}},
+\mpifuncindex{MPI\_SESSION\_GET\_INFO}%
+\mpifuncindex{MPI\_SESSION\_GET\_NTH\_PSET}%
+\mpifuncindex{MPI\_SESSION\_GET\_NUM\_PSETS}%
+\mpifuncindex{MPI\_SESSION\_GET\_PSET\_INFO}%
+\mpiskipfunc{MPI\_SESSION\_GET\_\{\ldots\}},
+\mpifuncindex{MPI\_SESSION\_CREATE\_ERRHANDLER}%
+\mpifuncindex{MPI\_SESSION\_SET\_ERRHANDLER}%
+\mpifuncindex{MPI\_SESSION\_GET\_ERRHANDLER}%
+\mpifuncindex{MPI\_SESSION\_CALL\_ERRHANDLER}%
+\mpiskipfunc{MPI\_SESSION\_\{\ldots\}\_ERRHANDLER},
+\mpifunc{MPI\_GROUP\_FROM\_SESSION\_PSET}, 
+\mpifunc{MPI\_COMM\_CREATE\_FROM\_GROUP}, 
+\vlgb\mpifunc{MPI\_INTERCOMM\_CREATE\_FROM\_GROUPS},
+\mpifuncindex{MPI\_SESSION\_C2F}%
+\mpifuncindex{MPI\_SESSION\_F2C}%
+and new conversion functions are \mpiskipfunc{MPI\_SESSION\_\{C2F$|$F2C\}}.
+New declarations are \mpictype{MPI\_Session} in C 
+and \mpiftype{TYPE(MPI\_Session)}
+together with the related overloaded operators \code{.EQ.}, \code{.NE.}, \code{==} and \code{/=}
+in the Fortran \code{mpi\_f08} and \code{mpi} modules,
+and the callback function prototype \mpicallback{MPI\_Session\_errhandler\_function}\mpicallbackindex{SESSION\_ERRHANDLER\_FUNCTION}.
+New constants are \mpiconst{MPI\_SESSION\_NULL}, \error{MPI\_ERR\_SESSION},
+\mpiconst{MPI\_MAX\_PSET\_NAME\_LEN}, \mpiconst{MPI\_MAX\_STRINGTAG\_LEN}, \mpiconst{MPI\_T\_BIND\_MPI\_SESSION}
+and the predefined info key \infokey{mpi\_size}.
+
+}
+% 25.--- MPI-4.0-issue #143 p480
+\item
+Section~\ref{sec:inquiry-startup} on page~\pageref{sec:inquiry-startup}.
+\newline
+A new function \mpifunc{MPI\_INFO\_CREATE\_ENV} was added.
+
+% 26.--- MPI-4.0-issue #102 p480
+\item
+    Sections~\ref{sec:inquiry-startup} and~\ref{subsec:disconnect}
+    on pages~\pageref{sec:inquiry-startup} and~\pageref{subsec:disconnect}.
+    \newline
+    Clarified the semantic of failure and error reporting before (and during) \mpifunc{MPI\_INIT} and after \mpifunc{MPI\_FINALIZE}.
+
+% 27.--- MPI-4.0-issue #102 p521
+\item
+    Section~\ref{subsec:spawnkeys} on page~\pageref{subsec:spawnkeys}.
+    \newline
+    Added the \infokey{mpi\_initial\_errhandler} reserved info key with the
+    reserved values \infoval{mpi\_errors\_abort},
+    \infoval{mpi\_errors\_are\_fatal}, and \infoval{mpi\_errors\_return} to the
+    launch keys in \mpifunc{MPI\_COMM\_SPAWN}, \mpifunc{MPI\_COMM\_SPAWN\_MULTIPLE}, and \mpilaunch{mpiexec}.
+
+% 28.--- MPI-4.0-issue #405 p592
+\item
+  Section~\ref{sec:1sided-lock} on page~\pageref{sec:1sided-lock}.
+  \newline
+  \RMA/ passive target synchronization using locks can now be used portably in memory
+  allocated via \mpifunc{MPI\_WIN\_ALLOCATE\_SHARED}.
+
+% 29.--- MPI-4.0-issue #91 p628
+% No label mpi:chap:ei:status-set-cancelled
+\item
+  Section~\ref{sec:ei-status} on page~\pageref{sec:ei-status}.
+  \newline
+  The \code{mpi\_f08} binding incorrectly had the dummy parameter
+  \code{flag} in the \MPI/ F08 binding for
+  \mpifunc{MPI\_STATUS\_SET\_CANCELLED} marked as
+  \code{INTENT(OUT)}.  It has been fixed to be \code{INTENT(IN)}.
+
+% 30.--- MPI_4.0-issue #79 p745
+\item
+Sections~\ref{sec:mpit} and~\ref{sec:mpit:events} on pages~\pageref{sec:mpit} and~\pageref{sec:mpit:events}.
+\newline
+{\raggedright
+A callback-driven event interface
+\mpifuncindex{MPI\_T\_CATEGORY\_GET\_EVENTS}%
+\mpifuncindex{MPI\_T\_CATEGORY\_GET\_NUM\_EVENTS}%
+\mpifuncindex{MPI\_T\_EVENT\_CALLBACK\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_EVENT\_CALLBACK\_SET\_INFO}%
+\mpifuncindex{MPI\_T\_EVENT\_COPY}%
+\mpifuncindex{MPI\_T\_EVENT\_GET\_INDEX}%
+\mpifuncindex{MPI\_T\_EVENT\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_EVENT\_GET\_NUM}%
+\mpifuncindex{MPI\_T\_EVENT\_GET\_SOURCE}%
+\mpifuncindex{MPI\_T\_EVENT\_GET\_TIMESTAMP}%
+\mpifuncindex{MPI\_T\_EVENT\_HANDLE\_ALLOC}%
+\mpifuncindex{MPI\_T\_EVENT\_HANDLE\_FREE}%
+\mpifuncindex{MPI\_T\_EVENT\_HANDLE\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_EVENT\_HANDLE\_SET\_INFO}%
+\mpifuncindex{MPI\_T\_EVENT\_READ}%
+\mpifuncindex{MPI\_T\_EVENT\_REGISTER\_CALLBACK}%
+\mpifuncindex{MPI\_T\_EVENT\_SET\_DROPPED\_HANDLER}%
+\mpifuncindex{MPI\_T\_SOURCE\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_SOURCE\_GET\_NUM}%
+\mpifuncindex{MPI\_T\_SOURCE\_GET\_TIMESTAMP}%
+with the \mpiskipfunc{MPI\_T\_\{SOURCE$|$EVENT\}\_\{\ldots\}}
+and \mpiskipfunc{MPI\_T\_CATEGORY\_\{GET$|$GET\_NUM\}\_EVENTS} routines,
+the declaration types \mpictype{MPI\_T\_cb\_safety},
+\mpictypeskip{MPI\_T\_event\_\{instance$|$registration\}}\cdeclindex{MPI\_T\_event\_instance}\cdeclindex{MPI\_T\_event\_registration},
+\mpictype{MPI\_T\_source\_order},
+and the callback function prototypes \mpicallbackskip{MPI\_T\_event\_\{cb$|$dropped\_cb$|$free\_cb\}\_function},
+\mpicallbackindex{MPI\_T\_event\_cb\_function}%
+\mpicallbackindex{MPI\_T\_event\_dropped\_cb\_function}%
+\mpicallbackindex{MPI\_T\_event\_free\_cb\_function}%
+were added to the \MPI/ tool information interface.
+
+}
+% 31.--- MPI-4.0-issue #392 p772
+\item
+  Section~\ref{sec:mpit:category_query_functions} on page~\pageref{sec:mpit:category_changed}.
+  \newline
+  The argument \mpiarg{stamp} (previously described as a virtual time stamp) from \mpifunc{MPI\_T\_CATEGORY\_CHANGED} was renamed to \mpiarg{update\_number} and its intended implementation and use was clarified.
+
+% 32.--- MPI-4.0-issue #60 p766
+\item
+Section~\ref{sec:mpit:retcodes}, Table~\ref{table:tools:mpit:err}, and Section~\ref{sec:deprecated:since40}
+on pages~\pageref{sec:mpit:retcodes}, \pageref{table:tools:mpit:err}, and~\pageref{sec:deprecated:since40}.
+\newline
+\error{MPI\_T\_ERR\_INVALID\_ITEM} is deprecated. \MPI/
+routines should return
+\newline
+\error{MPI\_T\_ERR\_INVALID\_INDEX} instead of
+\error{MPI\_T\_ERR\_INVALID\_ITEM}.
+
+% 33.--- MPI-4.0-issue #51 p773
+\item
+  Section~\ref{sec:deprecated:since40} on page~\pageref{sec:deprecated-fortran-sizeof}.
+  \newline
+  \mpifunc{MPI\_SIZEOF} was deprecated.
+
+% 34.--- MPI-4.0-issue #405 p786
+\item
+  Section~\ref{sec:f90:linker-names} on page~\pageref{sec:f90:linker-names}.
+  \newline
+  An exception was added for the specific Fortran names in the case of TS 29113 interface specifications 
+  in \code{mpif.h} for \mpifunc{MPI\_NEIGHBOR\_ALLTOALLW\_INIT}, 
+  \mpifunc{MPI\_NEIGHBOR\_ALLTOALLV\_INIT}, and \mpifunc{MPI\_NEIGHBOR\_ALLGATHERV\_INIT}.
+
+\end{enumerate}
+
+\section{Changes from Version 3.0 to Version 3.1}
+\label{subsec:30to31}
+% The following tickets do not have a change-log entry:
+% 
+% 1) The following tickets are passed MPI-3.0-errata tickets:
+% 
+%    Tickets that need NOT a change-log and do not have one:
+%      #347 #348 #354 #359 #367 #385 #387 #390 #393 #403 #405
+%      #406 #413 #420 #431 #433 #440 #441 #443 #444 #445 #446
+%      #447 #449 #450 #451 #452 #453
+% 
+%    Tickets that MAY need a change-log and do NOT yet have one:
+%      #383 #394
+% 
+%    Tickets that need a change-log and do NOT yet have one:
+%      #345 #415
+%
+%    Tickets that need a change-log and have one:
+%      #350 #355 #362 #386 #388 #389 #391 #419 #424
+%      (#421 belongs to #349, see below)
+% 
+% 2) The following tickets are passed MPI-3.1 tickets:
+% 
+%    Tickets that need NOT a change-log and do not have one:
+%      #368 #455
+% 
+%    Tickets that need a change-log and do NOT yet have one:
+%      #357 #400
+%
+%    Tickets that need a change-log and have one:
+%      #273 #349+#402+#404+#421 #369 #377 #378
+
+\subsection{Fixes to Errata in Previous Versions of \texorpdfstring{\MPI/}{MPI}} 
+\label{sec:changes-30-31-errata}
+ 
+\begin{enumerate}
+
+% 01.--- MPI-3.0-erratum Ticket 388
+\item 
+Chapters~\ref{chap:pt2pt}--\ref{chap:binding-2},
+Annex~\ref{sec:lang:fortran-mpi-f08-module} on page~\pageref{sec:lang:fortran-mpi-f08-module}, 
+and Example~\ref{coll-exX-fortran} on page~\pageref{coll-exX-fortran}, and 
+\MPIIIIDOTO/ Chapters 3--17, Annex A.3 on page 707, and Example 5.21 on page 187.
+\newline 
+Within the \code{mpi\_f08} Fortran support method, \ftype{BIND(C)} was removed from 
+all \flushline
+\code{SUBROUTINE}, \code{FUNCTION}, and \code{ABSTRACT INTERFACE} definitions.
+
+% 02.--- MPI-3.0-erratum Ticket 415
+\item 
+Section~\ref{subsec:pt2pt-status} on page~\pageref{subsec:pt2pt-status}, and
+\MPIIIIDOTO/ Section~3.2.5 on page~30.
+\newline 
+The three public fields \mpiconst{MPI\_SOURCE}, \mpiconst{MPI\_TAG}, and \mpiconst{MPI\_ERROR} 
+of the Fortran derived type \mpiftype{TYPE(MPI\_Status)}\cdeclindex{MPI\_Status}
+must be of type \ftype{INTEGER}.
+
+% 03.--- MPI-3.0-erratum Ticket 424
+\item 
+Section~\ref{sec:matching-probe} on page~\pageref{sec:matching-probe}, and
+\MPIIIIDOTO/ Section~3.8.2 on page~67.
+\newline 
+The flag arguments of the Fortran interfaces of \mpifunc{MPI\_IMPROBE} 
+were originally incorrectly defined as \ftype{INTEGER} (instead as \ftype{LOGICAL}). 
+
+% 04.--- MPI-3.0-erratum Ticket 345
+\item 
+Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}, and
+\MPIIIIDOTO/ Section~6.4.2 on page 237.
+\newline 
+In the \code{mpi\_f08} binding of \mpifunc{MPI\_COMM\_IDUP},
+the output argument \mpiarg{newcomm} is declared as \ftype{ASYNCHRONOUS}.
+
+% 05.--- MPI-3.0-erratum Ticket 345
+\item 
+Section~\ref{sec:comm-info} on page~\pageref{sec:comm-info}, and
+\MPIIIIDOTO/ Section~6.4.4 on page 248.
+\newline 
+In the \code{mpi\_f08} binding of \mpifunc{MPI\_COMM\_SET\_INFO},
+the \code{INTENT} of \mpiarg{comm} is \code {IN}, and
+the optional output argument \mpiarg{ierror} was missing.
+
+% 06.--- MPI-3.0-erratum Ticket 419
+\item 
+Section~\ref{sec:sparsecoll} on page~\pageref{sec:sparsecoll}, and
+\MPIIIIDOTO/ Sections 7.6, on pages 314.
+\newline 
+In the case of virtual general graph topolgies (created with \mpifunc{MPI\_CART\_CREATE}),
+the use of neighborhood collective communication is restricted to adjacency matrices
+with the number of edges between any two processes is defined to be the same for
+both processes (i.e., with a symmetric adjacency matrix). 
+
+% 07.--- MPI-3.0-erratum Ticket 345
+\item 
+Section~\ref{subsec:inquiry-version} on page~\pageref{subsec:inquiry-version}, and
+\MPIIIIDOTO/ Section~8.1.1 on page 335.
+\newline 
+In the \code{mpi\_f08} binding of \mpifunc{MPI\_GET\_LIBRARY\_VERSION},
+a typo in the \mpiarg{resultlen} argument was corrected.
+
+% 08.--- MPI-3.0-erratum Ticket 388
+\item 
+{\raggedright
+Sections~\ref{sec:misc-memalloc} (\mpifunc{MPI\_ALLOC\_MEM} and \mpifunc{MPI\_ALLOC\_MEM\_CPTR}),\\
+\ref{sec:winalloc} (\mpifunc{MPI\_WIN\_ALLOCATE} and \mpifunc{MPI\_WIN\_ALLOCATE\_CPTR}),\\
+\ref{sec:winallocshared} (\mpifunc{MPI\_WIN\_ALLOCATE\_SHARED} and \mpifunc{MPI\_WIN\_ALLOCATE\_SHARED\_CPTR}),\\
+\ref{sec:winallocshared} (\mpifunc{MPI\_WIN\_SHARED\_QUERY} and \mpifunc{MPI\_WIN\_SHARED\_QUERY\_CPTR}),\\
+\ref{sec:prof:require} and~\ref{sec:prof:complications} (Profiling interface), 
+and corresponding sections in \MPIIIIDOTO/.
+\newline 
+The linker name concept was substituted by defining specific procedure names.
+
+}
+% 09.--- MPI-3.0-erratum Ticket 362
+\item 
+Section~\ref{chap:one-side-2:win_create} on page~\pageref{chap:one-side-2:win_create}, and
+\MPIIIIDOTO/ Section~11.2.2 on page 407.
+\newline 
+The \infokey{same\_size} info key can be used with all window flavors,
+and requires that all processes in the process group of the communicator
+have provided this info key with the same value.
+
+
+% 10.--- MPI-3.0-erratum Ticket 350
+\item 
+Section~\ref{sec:1sided-accumulate} on page~\pageref{sec:1sided-accumulate}, and
+\MPIIIIDOTO/ Section~11.3.4 on page 424.
+\newline 
+Origin buffer arguments to \mpifunc{MPI\_GET\_ACCUMULATE} are ignored when the \mpiconst{MPI\_NO\_OP} operation is used. 
+
+% 11.--- MPI-3.0-erratum Ticket 355
+\item 
+Section~\ref{sec:1sided-accumulate} on page~\pageref{sec:1sided-accumulate}, and
+\MPIIIIDOTO/ Section~11.3.4 on page 424.
+\newline 
+Clarify the roles of origin, result, and target communication parameters in \mpifunc{MPI\_GET\_ACCUMULATE}. 
+
+% 12.--- MPI-3.0-erratum Ticket 383
+\item 
+Section~\ref{sec:mpit} on page~\pageref{sec:mpit}, and
+\MPIIIIDOTO/ Section 14.3 on page~561
+\newline 
+New paragraph and advice to users clarifying intent of variable names in the tools information interface.
+
+% 13.--- MPI-3.0-erratum Ticket 383
+\item 
+Section~\ref{sec:mpit:strings} on page~\pageref{sec:mpit:strings}, and
+\MPIIIIDOTO/ Section~14.3.3 on page~563.
+\newline 
+New paragraph clarifying variable name equivalence in the tools information interface.
+
+% 14.--- MPI-3.0-erratum Ticket 383
+\item 
+Sections~\ref{sec:mpit:cvar}, \ref{sec:mpit:pvar}, and~\ref{sec:mpit:cat} on pages~\pageref{sec:mpit:cvar}, \pageref{sec:mpit:pvar}, and \pageref{sec:mpit:cat}, and
+\newline 
+\MPIIIIDOTO/ Sections~14.3.6, 14.3.7, and 14.3.8 on pages 567, 573, and 584.
+\newline 
+In functions \mpifunc{MPI\_T\_CVAR\_GET\_INFO}, \mpifunc{MPI\_T\_PVAR\_GET\_INFO}, and \mpifunc{MPI\_T\_CATEGORY\_GET\_INFO}, clarification of parameters that must be identical for equivalent control variable / performance variable / category names across connected processes.
+
+% 15.--- MPI-3.0-erratum Ticket 391
+\item 
+Section~\ref{sec:mpit:pvar} on page~\pageref{sec:mpit:pvar}, and
+\MPIIIIDOTO/ Section~14.3.7 on page~573.
+\newline 
+Clarify return code 
+\mpifuncindex{MPI\_T\_PVAR\_START}%
+\mpifuncindex{MPI\_T\_PVAR\_STOP}%
+\mpifuncindex{MPI\_T\_PVAR\_RESET}%
+of \mpiskipfunc{MPI\_T\_PVAR\_\{START,STOP,RESET\}} routines. 
+
+% 16.--- MPI-3.0-erratum Ticket 386
+\item 
+Section~\ref{sec:mpit:pvar} on page~\pageref{sec:mpit:pvar}, and
+\MPIIIIDOTO/ Section~14.3.7 on page~579, line~7.
+\newline 
+Clarify the return code when bad handle is passed to 
+\mpifuncindex{MPI\_T\_PVAR\_HANDLE\_FREE}%
+\mpifuncindex{MPI\_T\_PVAR\_START}%
+\mpifuncindex{MPI\_T\_PVAR\_STOP}%
+\mpifuncindex{MPI\_T\_PVAR\_READ}%
+\mpifuncindex{MPI\_T\_PVAR\_WRITE}%
+\mpifuncindex{MPI\_T\_PVAR\_RESET}%
+\mpifuncindex{MPI\_T\_PVAR\_READRESET}%
+an \mpiskipfunc{MPI\_T\_PVAR\_*} routine. 
+
+% 17.--- MPI-3.0-erratum Ticket 388
+\item 
+Section~\ref{f90:basic} on page~\pageref{f90:basic}, and
+\MPIIIIDOTO/ Section~17.1.4 on page~603.
+\newline 
+The advice to implementors at the end of the section was rewritten and moved into the following section.
+
+% 18.--- MPI-3.0-erratum Ticket 388
+\item 
+Section~\ref{sec:f90:linker-names} on page~\pageref{sec:f90:linker-names}, and
+\MPIIIIDOTO/ Section~17.1.5 on page~605.
+\newline 
+The section was fully rewritten. The linker name concept was substituted by defining specific procedure names.
+
+% 19.--- MPI-3.0-erratum Ticket 388
+\item 
+Section~\ref{sec:f90:different-fortran-versions} on page~\pageref{sec:f90:different-fortran-versions}, and
+\MPIIIIDOTO/ Section~17.1.6 on page~611.
+\newline 
+The requirements on \ftype{BIND(C)} procedure interfaces were removed. 
+
+% 20.--- MPI-3.0-erratum Ticket 389
+\item 
+Annexes~\ref{sec:lang:c-mpi-interfaces}, \ref{sec:lang:fortran-mpi-f08-module}, and~\ref{sec:lang:fortran-mpifh-and-mpi-module}
+on pages~\pageref{sec:lang:c-mpi-interfaces}, \pageref{sec:lang:fortran-mpi-f08-module}, and~\pageref{sec:lang:fortran-mpifh-and-mpi-module}, and
+\newline 
+\MPIIIIDOTO/ Annexes~A.2, A.3, and A.4 on pages~685, 707, and 756.
+\newline 
+The predefined callback \mpiconstfunc{MPI\_CONVERSION\_FN\_NULL} was added to all three annexes.
+
+% 21.--- MPI-3.0-erratum Ticket 345
+\item 
+{\raggedright
+Annex~\ref{app:subsec:f08:context} on page~\pageref{app:subsec:f08:context}, and
+\MPIIIIDOTO/ Annex~A.3.4 on page~724.
+\newline 
+In the \code{mpi\_f08} binding 
+\mpiconstfuncindex{MPI\_COMM\_DUP\_FN}%
+\mpiconstfuncindex{MPI\_COMM\_NULL\_COPY\_FN}%
+\mpiconstfuncindex{MPI\_COMM\_NULL\_DELETE\_FN}%
+\mpiconstfuncindex{MPI\_TYPE\_DUP\_FN}%
+\mpiconstfuncindex{MPI\_TYPE\_NULL\_COPY\_FN}%
+\mpiconstfuncindex{MPI\_TYPE\_NULL\_DELETE\_FN}%
+\mpiconstfuncindex{MPI\_WIN\_DUP\_FN}%
+\mpiconstfuncindex{MPI\_WIN\_NULL\_COPY\_FN}%
+\mpiconstfuncindex{MPI\_WIN\_NULL\_DELETE\_FN}%
+of\\
+\mpiskipfunc{MPI\_\{COMM$|$TYPE$|$WIN\}\_\{DUP$|$NULL\_COPY$|$NULL\_DELETE\}\_FN},
+all \code{INTENT(...)} information was removed.
+
+}
+\end{enumerate}
+
+\subsection{Changes in \texorpdfstring{\MPIIIIDOTI/}{MPI-3.1}}
+\label{sec:changes-30-31}
+ 
+\begin{enumerate}
+
+% 01.--- MPI-3.0 Tickets 349, 402, 404, 421  
+\item 
+Sections~\ref{sec:macros} and~\ref{subsec:pt2pt-addfunc} on pages~\pageref{sec:macros} and~\pageref{subsec:pt2pt-addfunc}.
+\newline 
+The use of the intrinsic operators ``\code{+}'' and ``\code{-}'' for absolute addresses is substituted by \mpifunc{MPI\_AINT\_ADD} and \mpifunc{MPI\_AINT\_DIFF}. In C, they can be implemented as macros. 
+
+% 02.--- MPI-3.1 Ticket 357
+\item 
+Sections~\ref{subsec:inquiry-version}, \ref{sec:inquiry-startup}, and~\ref{sec:ei-threads}
+on pages~\pageref{subsec:inquiry-version}, \pageref{sec:inquiry-startup}, and~\pageref{sec:ei-threads}.
+\newline 
+The routines \mpifunc{MPI\_INITIALIZED}, \mpifunc{MPI\_FINALIZED},
+\mpifunc{MPI\_QUERY\_THREAD}, \mpifunc{MPI\_IS\_THREAD\_MAIN}, 
+\mpifunc{MPI\_GET\_VERSION}, and \mpifunc{MPI\_GET\_LIBRARY\_VERSION}
+are callable from threads without restriction (in the sense of 
+\mpiconst{MPI\_THREAD\_MULTIPLE}), irrespective of the actual level of thread support 
+provided, in the case where the implementation supports threads.  
+
+% 03.--- MPI-3.1 Ticket 369
+\item 
+Section~\ref{chap:one-side-2:win_create} on page~\pageref{chap:one-side-2:win_create}.
+\newline 
+The \infokey{same\_disp\_unit} info key was added for use in \RMA/ window creation routines. 
+
+% 04.--- MPI-3.1 Ticket 273
+\item 
+Sections~\ref{sec:io-explicit} and~\ref{sec:io-indiv-ptr} 
+on pages~\pageref{sec:io-explicit} and~\pageref{sec:io-indiv-ptr}.
+\newline 
+%% WDG - Corrected to refer to the language-neutral names, as required
+%% by the standard and the mpifunc macro
+Added \mpifunc{MPI\_FILE\_IREAD\_AT\_ALL}, \mpifunc{MPI\_FILE\_IWRITE\_AT\_ALL},
+\mpifunc{MPI\_FILE\_IREAD\_ALL}, and \mpifunc{MPI\_FILE\_IWRITE\_ALL}
+
+% 05.--- MPI-3.1 Ticket 378
+\item 
+Sections~\ref{sec:mpit:cvar}, \ref{sec:mpit:pvar}, and~\ref{sec:mpit:cat}
+on pages~\pageref{sec:mpit:cvar}, \pageref{sec:mpit:pvar}, and \pageref{sec:mpit:cat}.
+\newline 
+Clarified that \code{NULL} parameters can be provided
+\mpifuncindex{MPI\_T\_CVAR\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_PVAR\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_CATEGORY\_GET\_INFO}%
+in\\
+\mpiskipfunc{MPI\_T\_\{CVAR$|$PVAR$|$CATEGORY\}\_GET\_INFO} routines. 
+
+% 06.--- MPI-3.1 Ticket 377 and 400
+\item 
+Sections~\ref{sec:mpit:cvar}, \ref{sec:mpit:pvar}, \ref{sec:mpit:cat}, and~\ref{sec:mpit:retcodes}
+on pages~\pageref{sec:mpit:cvar}, \pageref{sec:mpit:pvar}, \pageref{sec:mpit:cat}, and~\pageref{sec:mpit:retcodes}.
+\newline 
+New routines \mpifunc{MPI\_T\_CVAR\_GET\_INDEX}, \mpifunc{MPI\_T\_PVAR\_GET\_INDEX},
+\mpifunc{MPI\_T\_CATEGORY\_GET\_INDEX}, were added to support retrieving
+indices of variables and categories. 
+The error codes \error{MPI\_T\_ERR\_INVALID} and \error{MPI\_T\_ERR\_INVALID\_NAME}
+were added to indicate invalid uses of the interface.
+
+\end{enumerate}
+
+
+\section{Changes from Version 2.2 to Version 3.0}
+\label{subsec:22to30}
+ 
+% The following MPI-3.0 tickets are handled in a special way: 
+%   #228 because MPIR is a stand-alone-document 
+% 
+% The following tickets do not have a change-log entry:
+%   #158 #170 #172 #179 #181 #182 #185 #186 #187 #191 #201 #207 #215 #222
+%   #229-A #251-(helper) #240-L #241-M #246-R #249-U #253-X
+%   #254 #255 #259 #262 #263 #272 #278 #293 #298 
+%   #308 #309 #312 #316 #317 #321 #329 #330 #331 #332 #333 #334 #335 #341
+% 
+% Additional correction in closed tickets:
+%   #183 #197 #216 #260 #267 #268
+%
+% The following tickets did not pass MPI-2.2 final votes
+%
+% The following tickets are MPI-2.2-errata tickets
+% (which should be mentioned below): 
+%   #166 Item 1, #171 #192 #202 #340
+% 
+% Tickets that are expected to go to MPI-next (not yet moved):
+%   #32 #47 #59 #165 #176 #195 #198 #310 #311 #319
+%   #273 (under discussion)
+%   #323 #326 #327 (FT)
+%
+% Tickets that are expected to be withdrawn (not yet withdrawn):
+%   #102 #177 #178 #190 #315
+%
+% Tickets that need a change-log and do not yet have one and passed:
+%   #38 #125 #126 #140 #162 #168, #171 2.2-ERRATA, 
+%   #204 #219 #258 #265 #266 #270 #274 #280 #284 #286 #287 #299 #305 #322   
+%
+% Tickets that need a change-log and do not yet have one and passed in last meeting:
+%   #166 Item 1 2.2-ERRATA, #192 2.2-ERRATA, #202 2.2-ERRATA, 
+%   #256 #271 #281 #294 #300 #303 #313  #328
+% 
+% Tickets with change-log done: 
+%   #109, #229ff (Fortran), #279 (obsolete due to #281)
+
+\subsection{Fixes to Errata in Previous Versions of \texorpdfstring{\MPI/}{MPI}} 
+\label{sec:changes-22-30-errata}
+ 
+\begin{enumerate}
+
+% 01.--- MPI-3.0 Ticket 343 = MPI-2.2 ERRATUM
+\item 
+Sections~\ref{sec:fortran-binding-issues} and~\ref{sec:c-binding-issues} 
+on pages~\pageref{sec:fortran-binding-issues} and~\pageref{sec:c-binding-issues}, and
+\MPIIIDOTII/ Section~2.6.2 on page~17, lines~41--42, 
+Section~2.6.3 on page~18, lines~15--16, and 
+Section~2.6.4 on page~18, lines~40--41.
+\newline 
+This is an \MPIII/ erratum: 
+The scope for the reserved prefix \code{MPI\_} and 
+the C++ namespace \code{MPI} is now any name as originally intended in \MPII/. 
+
+% 02.--- MPI-3.0 Ticket 340 =  MPI-2.2 ERRATUM
+\item 
+Sections~\ref{subsec:pt2pt-messagedata},
+\ref{coll-predefined-op},
+\ref{subsec:ext32} Table~\ref{table:io:extsizes},
+%-REMOVED-C++ \ref{sec:c++datatypes} Table \ref{tab:cpp-basic-datatypes},
+and Annex~\ref{subsec:annexa-const} 
+on pages~\pageref{subsec:pt2pt-messagedata},
+\pageref{coll-predefined-op},
+\pageref{table:io:extsizes}, 
+%-REMOVED-C++ \pageref{tab:cpp-basic-datatypes},
+and \pageref{subsec:annexa-const}, and
+\MPIIIDOTII/ Sections 3.2.2, 5.9.2, 13.5.2 Table 13.2, 16.1.16 Table 16.1, and Annex A.1.1 on pages 27, 164, 433, 472 and 513
+\newline 
+This is an \MPIIIDOTII/ erratum: 
+New named predefined datatypes \type{MPI\_CXX\_BOOL}, \type{MPI\_CXX\_FLOAT\_COMPLEX}, 
+\type{MPI\_CXX\_DOUBLE\_COMPLEX}, and \type{MPI\_CXX\_LONG\_DOUBLE\_COMPLEX} were added
+in C and Fortran corresponding to the C++ types 
+\ctype{bool}, \ctype{std::complex<float>}, \ctype{std::complex<double>}, and \ctype{std::complex<long double>}. 
+These datatypes also correspond to the deprecated C++ predefined datatypes 
+\mpidtypeskip{MPI::BOOL}, \mpidtypeskip{MPI::COMPLEX}, \mpidtypeskip{MPI::DOUBLE\_COMPLEX}, and \mpidtypeskip{MPI::LONG\_DOUBLE\_COMPLEX},
+which were removed in \MPIIIIDOTO/. 
+The nonstandard C++ types \ctype{Complex<...>} were substituted by the standard types \ctype{std::complex<...>}.  
+
+% 03.--- MPI-3.0 Ticket 340 = MPI-2.2 ERRATUM
+\item 
+Sections~\ref{coll-predefined-op} on pages~\pageref{coll-predefined-op} and
+\MPIIIDOTII/ Section 5.9.2, page 165, line 47.
+\newline 
+This is an \MPIIIDOTII/ erratum: 
+\type{MPI\_C\_COMPLEX} was added to the ``Complex'' reduction group. 
+
+% 04.--- MPI-3.0 Ticket 192 = MPI-2.2 ERRATUM
+\item 
+Section~\ref{subsec:topol-inquiry} on page~\pageref{subsec:topol-inquiry}, and 
+\MPIIIDOTII/, Section 7.5.5 on page 257, C++ interface on page 264, line 3. 
+\newline 
+This is an \MPIIIDOTII/ erratum: 
+The argument \mpiarg{rank} was removed and \mpiarg{in/outdegree} are 
+now defined as \code{int\& indegree} and \code{int\& outdegree}
+in the C++ interface of 
+\mpifunc{MPI\_DIST\_GRAPH\_NEIGHBORS\_COUNT}. 
+
+% 05.--- MPI-3.0 Ticket 171 = MPI-2.2 ERRATUM
+\item 
+Section~\ref{subsec:ext32}, Table~\ref{table:io:extsizes} on page~\pageref{table:io:extsizes}, and
+\MPIIIDOTII/, Section 13.5.3, Table 13.2 on page 433.
+\newline 
+This was an \MPIIIDOTII/ erratum: 
+The \type{MPI\_C\_BOOL} \mpistring{external32} representation is corrected to a 1-byte size.  
+
+% 06.--- MPI-3.0 Ticket 166 Item 1 = MPI-2.2 ERRATUM
+\item 
+{\raggedright
+%-REMOVED-C++ Section~\ref{sec:c++datatypes} on page~\pageref{sec:c++datatypes}, and
+%-REMOVED-C++ \newline 
+\MPIIIDOTII/ Section 16.1.16 on page 471, line 45.
+\newline 
+This is an \MPIIIDOTII/ erratum: 
+The constant \mpidtypeskip{MPI::\_LONG\_LONG} should be \mpidtypeskip{MPI::LONG\_LONG}.
+
+}
+% 07.--- MPI-3.0 Ticket 202 = MPI-2.2 ERRATUM
+\item 
+Annex~\ref{subsec:annexa-const} on page~\pageref{subsec:annexa-const}, Table ``Optional datatypes (Fortran),'' and
+\newline 
+\MPIIIDOTII/, Annex A.1.1, Table on page 517, lines 34, and 37--41. 
+\newline 
+This is an \MPIIIDOTII/ erratum: 
+The C++ datatype handles \mpidtypeskip{MPI::INTEGER16}, \mpidtypeskip{MPI::REAL16}, 
+\mpidtypeskip{MPI::F\_COMPLEX4}, \mpidtypeskip{MPI::F\_COMPLEX8}, \mpidtypeskip{MPI::F\_COMPLEX16}, \mpidtypeskip{MPI::F\_COMPLEX32}
+were added to the table. 
+ 
+\end{enumerate}
+
+\subsection{Changes in \texorpdfstring{\MPIIIIDOTO/}{MPI-3.0}}
+ 
+\begin{enumerate}
+
+% 01.--- MPI-3.0 Ticket 281 
+\item 
+Section~\ref{sec:deprecated} on page~\pageref{sec:deprecated},
+Section~\ref{sec:rm-cpp} on page~\pageref{sec:rm-cpp} and all other chapters. 
+\newline 
+The C++ bindings were removed from the standard.
+See errata 
+in Section~\ref{sec:changes-22-30-errata} on page~\pageref{sec:changes-22-30-errata}
+for the latest changes to the \MPI/ C++ binding defined in \MPIIIDOTII/. 
+\newline This change may affect backward compatibility.
+
+% 02.--- MPI-3.0 Ticket 303 
+\item
+{\raggedright
+Section~\ref{sec:deprecated} on page~\pageref{sec:deprecated},
+Section~\ref{sec:deprecated:since20} on page~\pageref{sec:deprecated:since20} and
+Section~\ref{sec:rm-mpii} on page~\pageref{sec:rm-mpii}.
+\newline 
+The deprecated functions 
+\mpifunc{MPI\_TYPE\_HVECTOR},
+\mpifunc{MPI\_TYPE\_HINDEXED},
+\mpifunc{MPI\_TYPE\_STRUCT},
+\mpifunc{MPI\_ADDRESS},
+\mpifunc{MPI\_TYPE\_EXTENT},
+\mpifunc{MPI\_TYPE\_LB},
+\mpifunc{MPI\_TYPE\_UB},
+\mpifunc{MPI\_ERRHANDLER\_CREATE} 
+(and its callback function prototype \mpicallback{MPI\_Handler\_function}),
+\mpifunc{MPI\_ERRHANDLER\_SET},
+\mpifunc{MPI\_ERRHANDLER\_GET},
+the deprecated special datatype handles
+\mpidtype{MPI\_LB},
+\mpidtype{MPI\_UB},
+and the constants
+\mpiconst{MPI\_COMBINER\_HINDEXED\_INTEGER},
+\mpiconst{MPI\_COMBINER\_HVECTOR\_INTEGER},
+\mpiconst{MPI\_COMBINER\_STRUCT\_INTEGER}
+were removed from the standard. 
+\newline This change may affect backward compatibility.
+
+}
+% 03.--- MPI-3.0 Ticket 140 
+\item 
+Section~\ref{terms:procedure-specification} on page~\pageref{terms:procedure-specification}. 
+\newline 
+Clarified parameter usage for \IN\ parameters. C bindings are now const-correct where
+backward compatibility is preserved. 
+
+% 04.--- MPI-3.0 Ticket 294 
+\item 
+Section~\ref{subsec:named-constants} on page~\pageref{subsec:named-constants} and
+Section~\ref{subsec:topol-distgraph-constructor} on page~\pageref{subsec:topol-distgraph-constructor}. 
+\newline 
+The recommended C implementation value for \mpiconst{MPI\_UNWEIGHTED} 
+changed from NULL to non-NULL. 
+An additional weight array constant (\mpiconst{MPI\_WEIGHTS\_EMPTY}) was introduced.
+
+% 05.--- MPI-3.0 Ticket 204 
+\item 
+Section~\ref{subsec:named-constants} on page~\pageref{subsec:named-constants} and 
+Section~\ref{subsec:inquiry-version} on page~\pageref{subsec:inquiry-version}. 
+\newline 
+Added the new routine \mpifunc{MPI\_GET\_LIBRARY\_VERSION} 
+to query library specific versions,
+and the new constant \mpiconst{MPI\_MAX\_LIBRARY\_VERSION\_STRING}.
+
+% 06.--- MPI-3.0 Ticket 265, 1st entry 
+\item 
+Sections~\ref{subsec:count}, \ref{subsec:pt2pt-messagedata},
+\ref{table:pttopt:datatypes:c_f}, \ref{coll-predefined-op}, 
+on pages~\pageref{subsec:count}, \pageref{subsec:pt2pt-messagedata},
+\pageref{table:pttopt:datatypes:c_f}, \pageref{coll-predefined-op},
+Sections~\ref{sec:pt2pt-datatype}, % MPI_TYPE_SIZE_X
+\ref{subsec:pt2pt-extent}, % MPI_TYPE_GET_EXTENT_X
+\ref{subsec:pt2pt-true-extent}, % MPI_TYPE_GET_TRUE_EXTENT_X
+\ref{subsec:pt2pt-datatypeuse}, % MPI_GET_EXTENTS_X
+\ref{func:mpi-status-set-elements-x} % MPI_STATUS_SET_ELEMENTS_X
+on pages~\pageref{sec:pt2pt-datatype}, % MPI_TYPE_SIZE_X
+\pageref{subsec:pt2pt-extent}, % MPI_TYPE_GET_EXTENT_X
+\pageref{subsec:pt2pt-true-extent}, % MPI_TYPE_GET_TRUE_EXTENT_X
+\pageref{subsec:pt2pt-datatypeuse}, % MPI_GET_EXTENTS_X
+\pageref{func:mpi-status-set-elements-x}, % MPI_STATUS_SET_ELEMENTS_X
+and
+Annex~\ref{subsec:annexa-const} on page~\pageref{subsec:annexa-const}.
+\newline 
+New inquiry functions, \mpifunc{MPI\_TYPE\_SIZE\_X}, \mpifunc{MPI\_TYPE\_GET\_EXTENT\_X},
+\mpifunc{MPI\_TYPE\_GET\_TRUE\_EXTENT\_X}, and \mpifunc{MPI\_GET\_ELEMENTS\_X}, return their results
+as an \mpictype{MPI\_Count} value, which is a new type large enough to represent element
+counts in memory, file views, etc. A new function, \mpifunc{MPI\_STATUS\_SET\_ELEMENTS\_X},
+modifies the opaque part of an \mpictype{MPI\_Status} object so that a call to \mpifunc{MPI\_GET\_ELEMENTS\_X}
+returns the provided \mpictype{MPI\_Count} value (in Fortran, \mpiftypekind{COUNT}).
+The corresponding predefined datatype is \mpidtype{MPI\_COUNT}.  
+
+% 07.--- MPI-3.0 Ticket 125+126
+\item 
+Chapter~\ref{chap:pt2pt} on page~\pageref{chap:pt2pt} through
+Chapter~\ref{chap:binding-2} on page~\pageref{chap:binding-2}.
+\newline 
+In the C language bindings, the array-arguments' interfaces were modified to consistently 
+use \code{{[}{]}} instead of \code{*}.
+
+Exceptions are \mpifunc{MPI\_INIT}, which continues to use 
+\code{char ***argv} 
+(correct because of subtle rules regarding the use of 
+the \code{\&} operator with \code{char *argv[]}), 
+and \mpifunc{MPI\_INIT\_THREAD}, which is changed to be 
+consistent with \mpifunc{MPI\_INIT}.
+ 
+% 08.--- MPI-3.0 Ticket 265, 2nd entry 
+\item 
+Sections~\ref{subsec:pt2pt-status}, % MPI_GET_COUNT
+\ref{subsec:pt2pt-addfunc}, % MPI_TYPE_SIZE
+\ref{subsec:pt2pt-datatypeuse}, % MPI_GET_ELEMENTS
+\ref{sec:pt2pt-packing} % MPI_PACK_SIZE
+on pages~\pageref{subsec:pt2pt-status}, 
+\pageref{subsec:pt2pt-addfunc},
+\pageref{subsec:pt2pt-datatypeuse}, 
+\pageref{sec:pt2pt-packing}.
+\newline 
+The functions \mpifunc{MPI\_GET\_COUNT} and \mpifunc{MPI\_GET\_ELEMENTS} were
+defined to set the \mpiarg{count} argument to \mpiconst{MPI\_UNDEFINED} when that argument
+would overflow. 
+The functions \mpifunc{MPI\_PACK\_SIZE} and \mpifunc{MPI\_TYPE\_SIZE} were 
+defined to set the \mpiarg{size} argument to \mpiconst{MPI\_UNDEFINED} when that argument 
+would overflow. In all other \MPIIIDOTII/
+routines, the type and semantics of the count arguments remain unchanged, i.e., \ctype{int}
+or \ftype{INTEGER}. 
+ 
+% 09.--- MPI-3.0 Ticket 229.2, 229.4 (and MPROBE ticket 38+274)
+\item 
+Section~\ref{sec:pt2pt-status-ignore} on page~\pageref{sec:pt2pt-status-ignore}, and
+Section~\ref{sec:pt2pt-probe} on page~\pageref{sec:pt2pt-probe}.
+\newline 
+\mpiconst{MPI\_STATUS\_IGNORE} can also be used in 
+\mpifunc{MPI\_IPROBE}, \mpifunc{MPI\_PROBE},
+\mpifunc{MPI\_IMPROBE}, and \mpifunc{MPI\_MPROBE}.
+
+% 10.--- MPI-3.0 Ticket 256+328 
+\item 
+Section~\ref{sec:pt2pt-probe} on page~\pageref{sec:pt2pt-probe} and  
+Section~\ref{sec:pt2pt-nullproc} on page~\pageref{sec:pt2pt-nullproc}. 
+\newline 
+The use of \mpiconst{MPI\_PROC\_NULL} in probe operations was clarified. 
+A special predefined message \mpiconst{MPI\_MESSAGE\_NO\_PROC} 
+was defined for the use of matching probe 
+(i.e., the new \mpifunc{MPI\_MPROBE} and \mpifunc{MPI\_IMPROBE}) 
+with \mpiconst{MPI\_PROC\_NULL}. 
+ 
+% 11.--- MPI-3.0 Tickets 38, 274
+\item 
+Sections~\ref{sec:matching-probe}, 
+\ref{sec:matched-receive}, 
+\ref{sec:misc-handleconvert}, 
+\ref{subsec:annexa-const}
+on pages~\pageref{sec:matching-probe},
+\pageref{sec:matched-receive},
+\pageref{sec:misc-handleconvert},
+\pageref{subsec:annexa-const}. 
+\newline 
+Like \mpifunc{MPI\_PROBE} and \mpifunc{MPI\_IPROBE}, the new \mpifunc{MPI\_MPROBE} and \mpifunc{MPI\_IMPROBE} 
+operations allow incoming messages to be queried without actually receiving them, except that
+\mpifunc{MPI\_MPROBE} and \mpifunc{MPI\_IMPROBE} provide a mechanism to receive the specific message
+with the new routines \mpifunc{MPI\_MRECV} and \mpifunc{MPI\_IMRECV} regardless of other intervening probe or receive operations. 
+The opaque object \mpictype{MPI\_Message}, the null handle \mpiconst{MPI\_MESSAGE\_NULL}, and
+the conversion functions  
+\cfunc{MPI\_Message\_c2f}\index{MPI\_MESSAGE\_C2F} and
+\cfunc{MPI\_Message\_f2c}\index{MPI\_MESSAGE\_F2C} 
+were defined. 
+
+% 12.--- MPI-3.0 Ticket 280 
+\item 
+Section~\ref{subsec:pt2pt-datatypeconst} on page~\pageref{subsec:pt2pt-datatypeconst} and
+Section~\ref{subsec:typeaccess} on page~\pageref{subsec:typeaccess}. 
+\newline 
+The routine \mpifunc{MPI\_TYPE\_CREATE\_HINDEXED\_BLOCK} 
+and constant \mpiconst{MPI\_COMBINER\_HINDEXED\_BLOCK} were added.
+
+% 13.--- MPI-3.0 Ticket 109 
+\item 
+Chapter~\ref{chap:coll} on page~\pageref{chap:coll} and
+Section~\ref{sec:nbcoll} on page~\pageref{sec:nbcoll}. 
+\newline 
+Added nonblocking interfaces to all collective operations.
+
+% 14.--- MPI-3.0 Ticket 271 
+\item 
+Sections~\ref{subsec:context-intracomconst}, 
+\ref{sec:comm-info}, % 6.4.4 Communicator Info, in context.tex
+\ref{subsec:window-info}, % 11.2.3 Window Info, in one-sided-2.tex 
+on pages~\pageref{subsec:context-intracomconst},
+\pageref{sec:comm-info}, % 6.4.4 Communicator Info
+\pageref{subsec:window-info}. % 11.2.3 Window Info
+\newline 
+The new routines \mpifunc{MPI\_COMM\_DUP\_WITH\_INFO}, 
+\mpifunc{MPI\_COMM\_SET\_INFO}, \mpifunc{MPI\_COMM\_GET\_INFO}, 
+\mpifunc{MPI\_WIN\_SET\_INFO}, and \mpifunc{MPI\_WIN\_GET\_INFO} were\flushline % added to correct overful box into margin
+added.
+The routine \mpifunc{MPI\_COMM\_DUP} must also duplicate 
+info hints. 
+
+% 15.--- MPI-3.0 Ticket 168 
+\item 
+Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}. 
+\newline 
+Added \mpifunc{MPI\_COMM\_IDUP}. 
+
+% 16.--- MPI-3.0 Ticket 286 
+\item 
+Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}. 
+\newline 
+Added the new communicator construction routine \mpifunc{MPI\_COMM\_CREATE\_GROUP}, which is
+invoked only by the processes in the group of the new communicator being constructed.
+
+% 17.--- MPI-3.0 Ticket 287 
+\item 
+Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}. 
+\newline 
+Added the \mpifunc{MPI\_COMM\_SPLIT\_TYPE} routine
+and the communicator split type constant \mpiconst{MPI\_COMM\_TYPE\_SHARED}.
+
+% 18.--- MPI-3.0 Ticket 305 
+\item 
+Section~\ref{subsec:context-intercomm} on page~\pageref{subsec:context-intercomm}. 
+\newline 
+In \MPIIIDOTII/, communication involved in an  \mpifunc{MPI\_INTERCOMM\_CREATE} operation 
+could interfere with point-to-point communication on the parent 
+communicator with the same tag or \mpiconst{MPI\_ANY\_TAG}.  This interference has 
+been removed in \MPIIIIDOTO/.
+
+% 19.--- MPI-3.0 Ticket 219 
+\item 
+Section~\ref{sec:ei-naming} on page~\pageref{sec:ei-naming}. 
+\newline 
+Section 6.8 on page 238.
+The constant \mpiconst{MPI\_MAX\_OBJECT\_NAME} also applies for type and window names. 
+
+% 20.--- MPI-3.0 Ticket 162 
+\item 
+Section~\ref{subsec:topol-lowlevel} on page~\pageref{subsec:topol-lowlevel}. 
+\newline 
+\mpifunc{MPI\_CART\_MAP} can also be used for a zero-dimensional topologies. 
+
+% 21.--- MPI-3.0 Ticket 258, 299 
+\item 
+Section~\ref{sec:sparsecoll} on page~\pageref{sec:sparsecoll} and
+Section~\ref{sec:sparsecoll-nbc} on page~\pageref{sec:sparsecoll-nbc}.
+\newline 
+The following neighborhood collective communication routines 
+were added to support sparse communication on virtual topology grids: 
+\mpifunc{MPI\_NEIGHBOR\_ALLGATHER}, \mpifunc{MPI\_NEIGHBOR\_ALLGATHERV}, 
+\mpifunc{MPI\_NEIGHBOR\_ALLTOALL}, \mpifunc{MPI\_NEIGHBOR\_ALLTOALLV},
+\mpifunc{MPI\_NEIGHBOR\_ALLTOALLW} and the nonblocking variants  
+\mpifunc{MPI\_INEIGHBOR\_ALLGATHER}, \mpifunc{MPI\_INEIGHBOR\_ALLGATHERV},
+\mpifunc{MPI\_INEIGHBOR\_ALLTOALL}, \mpifunc{MPI\_INEIGHBOR\_ALLTOALLV}, and
+\mpifunc{MPI\_INEIGHBOR\_ALLTOALLW}.
+The displacement arguments in \mpifunc{MPI\_NEIGHBOR\_ALLTOALLW}
+and \mpifunc{MPI\_INEIGHBOR\_ALLTOALLW} were defined as address size integers.
+In \mpifunc{MPI\_DIST\_GRAPH\_NEIGHBORS}, an ordering rule was added
+for communicators created with \mpifunc{MPI\_DIST\_GRAPH\_CREATE\_ADJACENT}.  
+
+% 22.--- MPI-3.0 Ticket 313 
+\item 
+Section~\ref{sec:inquiry-startup} on page~\pageref{sec:inquiry-startup} and
+Section~\ref{sec:ei-threads-initialization} on page~\pageref{sec:ei-threads-initialization}. 
+\newline 
+The use of \mpifunc{MPI\_INIT}, \mpifunc{MPI\_INIT\_THREAD} and \mpifunc{MPI\_FINALIZE}
+was clarified. 
+After \MPI/ is initialized, the application can access information about the execution
+environment by querying the new predefined info object \mpiconst{MPI\_INFO\_ENV}.
+
+% 23.--- MPI-3.0 Ticket 266, 1st part 
+\item 
+Section~\ref{sec:inquiry-startup} on page~\pageref{sec:inquiry-startup}. 
+\newline 
+Allow calls to \mpiskipfunc{MPI\_T} routines before \mpifunc{MPI\_INIT}
+and after \mpifunc{MPI\_FINALIZE}. 
+
+% 24.--- MPI-3.0 Tickets 270, 284, 300 
+\item 
+Chapter~\ref{chap:one-side-2} on page~\pageref{chap:one-side-2}.
+\newline 
+Substantial revision of the entire One-sided chapter, with new routines for window creation, 
+additional synchronization methods in passive target communication, new one-sided communication routines, 
+a new memory model, and other changes. 
+
+% 25.--- MPI-3.0 Ticket 266, 2nd part 
+\item 
+Section~\ref{sec:mpit} on page~\pageref{sec:mpit}. 
+\newline 
+A new \MPI/ Tool Information Interface was added.
+ 
+\noindent
+The following changes are related to the Fortran language support.
+ 
+% 26.--- MPI-3.0 Ticket 230-B
+% --- MPI-3.0 Ticket 247-S
+% --- MPI-3.0 Ticket 248-T
+\item 
+Section~\ref{terms:procedure-specification} on page~\pageref{terms:procedure-specification}, 
+and Sections~\ref{f90:overview}, \ref{f90:mpif08}, \ref{sec:f90:requirements} 
+on pages~\pageref{f90:overview}, \pageref{f90:mpif08}, and \pageref{sec:f90:requirements}.
+\newline 
+The new \code{mpi\_f08} Fortran module was introduced. 
+ 
+% 27.--- MPI-3.0 Ticket 231-C
+\item 
+Section~\ref{terms:opaque-objects} on page~\pageref{terms:opaque-objects}, 
+and Sections~\ref{f90:mpif08}, \ref{f90:extended}, \ref{sec:f90:requirements} 
+on pages~\pageref{f90:mpif08}, \pageref{f90:extended}, and~\pageref{sec:f90:requirements}.
+\newline 
+Handles to opaque objects were defined as named types within the \code{mpi\_f08} Fortran module. 
+The operators \code{.EQ.}, \code{.NE.}, \code{==}, and \code{/=} were overloaded to allow the comparison of these handles. 
+The handle types and the overloaded operators are also available through the \code{mpi} Fortran module.
+ 
+%-Rab %
+%-Rab % Ticket 244-P was removed by decision at Chicago meeting, Jul 19, 2011
+%-Rab % Question:    Overloading instead of IGNORE constants?  
+%-Rab % Straw-votes: 1 x Yes, 11 x No, 8 x Abstain 
+%-Rab % 
+%-Rab % --- MPI-3.0 Ticket 244-P
+%-Rab \item 
+%-Rab {%
+%-Rab Section~\ref{subsec:array-arguments} on page~\pageref{subsec:array-arguments},
+%-Rab Section~\ref{sec:pt2pt-status-ignore} on page~\pageref{sec:pt2pt-status-ignore}, 
+%-Rab Section~\ref{subsec:topol-distgraph-constructor} on page~\pageref{subsec:topol-distgraph-constructor},
+%-Rab Section~\ref{subsec:topol-inquiry} on page~\pageref{subsec:topol-inquiry},
+%-Rab Section~\ref{sec:processes} on page~\pageref{sec:processes},
+%-Rab Section~\ref{subsec:multiple} on page~\pageref{subsec:multiple}, 
+%-Rab Section~\ref{sec:ei-gr} on page~\pageref{sec:ei-gr}, and 
+%-Rab Section~\ref{f90:mpif08} on page~\pageref{f90:mpif08}.
+%-Rab \newline 
+%-Rab With the \code{mpi\_f08} module, optional arguments through function overloading
+%-Rab are used instead of 
+%-Rab \mpiconst{MPI\_STATUS\_IGNORE}, \mpiconst{MPI\_STATUSES\_IGNORE},
+%-Rab \mpiconst{MPI\_ERRCODES\_IGNORE},
+%-Rab and \mpiconst{MPI\_UNWEIGHTED}.
+%-Rab }% 
+ 
+% 28.--- MPI-3.0 Ticket 234-F
+% --- MPI-3.0 Ticket 234-G
+% --- MPI-3.0 Ticket 236-H
+\item 
+Sections~\ref{subsec:named-constants}, \ref{sub:choice} 
+on pages~\pageref{subsec:named-constants}, \pageref{sub:choice},  
+Sections~\ref{f90:overview}, \ref{sec:misc-problems}, 
+\ref{sec:f90-problems:strong-typing}, \ref{sec:misc-sequence}, 
+\ref{sec:f90-problems:vector-subscripts}
+on pages~\pageref{f90:overview}, \pageref{sec:misc-problems}, 
+\pageref{sec:f90-problems:strong-typing}, \pageref{sec:misc-sequence}, 
+\pageref{sec:f90-problems:vector-subscripts}, and
+Sections~\ref{f90:mpif08}, \ref{f90:extended}, \ref{sec:f90:requirements}
+on pages~\pageref{f90:mpif08}, \pageref{f90:extended}, \pageref{sec:f90:requirements}.
+\newline 
+Within the \code{mpi\_f08} Fortran module, 
+choice buffers were defined as assumed-type and assumed-rank 
+according to Fortran 2008 with TS 29113\mpitermindex{TS 29113}
+\cite{fortran2008:ts29113-interop},
+and the compile-time constant \mpiconst{MPI\_SUBARRAYS\_SUPPORTED} was set to \code{.TRUE.}.
+With this, Fortran subscript triplets can be used in nonblocking \MPI/ operations;
+vector subscripts are not supported in nonblocking operations. 
+If the compiler does not support this Fortran
+TS 29113\mpitermindex{TS 29113} feature,
+the constant is set to \code{.FALSE.}.
+ 
+% 29.--- MPI-3.0 Ticket 239-K
+\item 
+Section~\ref{sec:fortran-binding-issues} on page~\pageref{sec:fortran-binding-issues},
+Section~\ref{f90:mpif08} on page~\pageref{f90:mpif08}, and
+Section~\ref{sec:f90:requirements} on page~\pageref{sec:f90:requirements}.
+\newline 
+The \mpiarg{ierror} dummy arguments are \ftype{OPTIONAL} within the \code{mpi\_f08} Fortran module. 
+ 
+% 30.--- MPI-3.0 Ticket 243-O
+\item 
+Section~\ref{subsec:pt2pt-status} on page~\pageref{subsec:pt2pt-status},
+Sections~\ref{f90:mpif08}, \ref{f90:extended}, \ref{sec:f90:requirements}, 
+on pages~\pageref{f90:mpif08}, \pageref{f90:extended}, \pageref{sec:f90:requirements}, 
+and Section~\ref{sec:conversion:status} on page~\pageref{sec:conversion:status}. 
+\newline 
+Within the \code{mpi\_f08} Fortran module,
+the status was defined as \mpiftype{TYPE(MPI\_Status)}\cdeclindex{MPI\_Status}. 
+Additionally, within both the \code{mpi} and the \code{mpi\_f08} modules,
+the constants \mpiconst{MPI\_STATUS\_SIZE}, 
+\mpiconst{MPI\_SOURCE}, \mpiconst{MPI\_TAG}, \mpiconst{MPI\_ERROR},
+and \mpiftype{TYPE(MPI\_Status)}\cdeclindex{MPI\_Status}
+are defined.
+New conversion routines were added: 
+\mpifunc{MPI\_STATUS\_F2F08}, 
+\mpifunc{MPI\_STATUS\_F082F}, 
+\cfunc{MPI\_Status\_c2f08}\index{MPI\_STATUS\_C2F08}, and
+\cfunc{MPI\_Status\_f082c}\index{MPI\_STATUS\_F082C}, 
+In \code{mpi.h}, the new type \mpictype{MPI\_F08\_status}, 
+and the external variables \mpiconst{MPI\_F08\_STATUS\_IGNORE} and \mpiconst{MPI\_F08\_STATUSES\_IGNORE} were added. 
+ 
+% 31.--- MPI-3.0 Ticket 229.2 (and MPROBE ticket 38+274)
+\item 
+Section~\ref{sec:pt2pt-buffer} on page~\pageref{sec:pt2pt-buffer}.
+\newline 
+In Fortran with the \code{mpi} module or \code{mpif.h}, 
+the type of the \mpiarg{buffer\_addr} argument of \mpifunc{MPI\_BUFFER\_DETACH}
+is incorrectly defined and the argument is therefore unused.
+ 
+% 32.--- MPI-3.0 Ticket 229.2 and 237-I
+\item 
+Section~\ref{sec:pt2pt-datatype} on page~\pageref{sec:pt2pt-datatype},
+Section~\ref{subsec:pt2pt-markers} on page~\pageref{subsec:pt2pt-markers}, and
+Section~\ref{sec:f90-problems:derived-types} on page~\pageref{sec:f90-problems:derived-types}.
+\newline 
+The Fortran alignments of basic datatypes within Fortran derived types
+are implementation dependent; 
+therefore it is recommended to use the \ftype{BIND(C)} attribute for derived types
+in \MPI/ communication buffers. 
+If an array of structures (in C/C++) or derived types (in Fortran) 
+is to be used in \MPI/ communication buffers, 
+it is recommended that the user creates a portable datatype handle and 
+additionally applies \mpifunc{MPI\_TYPE\_CREATE\_RESIZED} to this datatype handle.
+
+% 33.--- MPI-3.0 Ticket 252-W
+% --- MPI-3.0 Ticket 251-V
+\item 
+Sections~%
+\ref{sec:ei-dupdata},
+\ref{subsec:coll-user-ops},
+\ref{subsec:coll-process-local-reduction},
+\ref{subsec:caching:datatypes},
+\ref{sec:ei-naming},
+\ref{subsec:inquiry-errhdlr-comm},
+\ref{subsec:inquiry-errhdlr-windows},
+\ref{subsec:inquiry-errhdlr-files},
+\ref{sec:deprecated:since20},
+\ref{f90:types}
+on pages~%
+\pageref{sec:ei-dupdata},
+\pageref{subsec:coll-user-ops},
+\pageref{subsec:coll-process-local-reduction},
+\pageref{subsec:caching:datatypes},
+\pageref{sec:ei-naming},
+\pageref{subsec:inquiry-errhdlr-comm},
+\pageref{subsec:inquiry-errhdlr-windows},
+\pageref{subsec:inquiry-errhdlr-files},
+\pageref{sec:deprecated:since20}, and
+\pageref{f90:types}.
+In some routines, the dummy argument names were changed because they
+were identical to the Fortran keywords \ftype{TYPE} and \ftype{FUNCTION}.
+The new dummy argument names must be used because the
+\code{mpi} and \code{mpi\_f08} modules guarantee keyword-based actual argument lists. 
+The argument name \mpiarg{type} was changed 
+  % into \mpiarg{oldtype} 
+  in \mpifunc{MPI\_TYPE\_DUP},
+  % and into \mpiarg{datatype} in 
+    the Fortran \ftype{USER\_FUNCTION} of \mpifunc{MPI\_OP\_CREATE},
+    % and in 
+    \mpifunc{MPI\_TYPE\_SET\_ATTR},
+    \mpifunc{MPI\_TYPE\_GET\_ATTR},
+    \mpifunc{MPI\_TYPE\_DELETE\_ATTR},
+    \mpifunc{MPI\_TYPE\_SET\_NAME},
+    \mpifunc{MPI\_TYPE\_GET\_NAME},
+    \mpifunc{MPI\_TYPE\_MATCH\_SIZE},
+  the callback prototype definition  
+    \mpicallback{MPI\_Type\_delete\_attr\_function},
+  and the predefined callback function
+% RAB: The predefined callbacks are "constant" "function" pointers, therefore in both indexes
+% WDG: Use mpiconstfunc for these entries; this ensures consistent indexing
+    \mpiconstfunc{MPI\_TYPE\_NULL\_DELETE\_FN};
+\mpiarg{function} was changed
+  % into \mpiarg{user\_fn} 
+    in \mpifunc{MPI\_OP\_CREATE},
+  % into \mpiarg{comm\_errhandler\_fn} in
+       \mpifunc{MPI\_COMM\_CREATE\_ERRHANDLER},
+  % into \mpiarg{win\_errhandler\_fn} in
+       \mpifunc{MPI\_WIN\_CREATE\_ERRHANDLER},
+  % into \mpiarg{file\_errhandler\_fn} in
+       \mpifunc{MPI\_FILE\_CREATE\_ERRHANDLER}, and
+  % into \mpiarg{handler\_fn} in
+       \mpifunc{MPI\_ERRHANDLER\_CREATE}.
+For consistency reasons, \mpiarg{INOUBUF} was changed to \mpiarg{INOUTBUF}
+  in \mpifunc{MPI\_REDUCE\_LOCAL},
+and \mpiarg{intracomm} to \mpiarg{newintracomm} 
+  in \mpifunc{MPI\_INTERCOMM\_MERGE}.
+
+% 34.--- MPI-3.0 Ticket 322 
+\item 
+Section~\ref{subsec:context-cachecomm} on page~\pageref{subsec:context-cachecomm}. 
+\newline 
+It was clarified that in Fortran, the flag values 
+returned by a \mpiarg{comm\_copy\_attr\_fn} callback,
+% RAB: The predefined callbacks are "constant" "function" pointers, therefore in both indexes
+including \mpiconstfunc{MPI\_COMM\_NULL\_COPY\_FN}
+and \mpiconstfunc{MPI\_COMM\_DUP\_FN}, 
+are \code{.FALSE.} and \code{.TRUE.}; see \mpifunc{MPI\_COMM\_CREATE\_KEYVAL}.
+
+% 35.--- MPI-3.0 Ticket 245-Q
+\item 
+Section~\ref{sec:misc-memalloc} on page~\pageref{sec:misc-memalloc}.
+\newline 
+With the \code{mpi} and \code{mpi\_f08} Fortran modules, 
+\mpifunc{MPI\_ALLOC\_MEM} now also supports \ftype{TYPE(C\_PTR)} C-pointers 
+instead of only returning an address-sized integer that may be usable together 
+with a nonstandard Cray-pointer.
+ 
+% 36.--- MPI-3.0 Ticket 237-I
+\item 
+Section~\ref{sec:f90-problems:derived-types} on page~\pageref{sec:f90-problems:derived-types}, and
+Section~\ref{sec:f90:requirements} on page~\pageref{sec:f90:requirements}.
+\newline 
+Fortran \ftype{SEQUENCE} and \ftype{BIND(C)} derived application types
+can now be used as buffers in \MPI/ operations.
+ 
+% 37.--- MPI-3.0 Ticket 238-J
+\item 
+Section~\ref{sec:misc-register} on page~\pageref{sec:misc-register} to 
+Section~\ref{sec:f90-problems:perm-data-movements} on page~\pageref{sec:f90-problems:perm-data-movements}, 
+Section~\ref{sec:f90:requirements} on page~\pageref{sec:f90:requirements}, and
+Section~\ref{f90:syncreg} on page~\pageref{f90:syncreg}.
+\newline 
+The sections about Fortran optimization problems and their solutions were
+partially rewritten and new methods are added, e.g., the use of the \ftype{ASYNCHRONOUS} attribute.
+The constant \mpiconst{MPI\_ASYNC\_PROTECTS\_NONBLOCKING} tells whether
+the semantics of the \ftype{ASYNCHRONOUS} attribute is extended to protect 
+nonblocking operations.
+The Fortran routine \mpifunc{MPI\_F\_SYNC\_REG} is added. 
+\MPIIIIDOTO/ compliance for an \MPI/ library together with a Fortran compiler is
+defined in Section~\ref{sec:f90:requirements}. 
+ 
+% 38.--- MPI-3.0 Ticket 242-N
+\item 
+Section~\ref{f90:mpif08} on page~\pageref{f90:mpif08}.
+\newline 
+Within the \code{mpi\_f08} Fortran module,
+dummy arguments are now declared with \ftype{INTENT=IN},
+\ftype{OUT}, or \ftype{INOUT} as defined in the \code{mpi\_f08} interfaces.
+ 
+% 39.--- MPI-3.0 Ticket 232-D
+\item 
+Section~\ref{f90:extended} on page~\pageref{f90:extended}, and
+Section~\ref{sec:f90:requirements} on page~\pageref{sec:f90:requirements}.
+\newline 
+The existing \code{mpi} Fortran module must implement compile-time argument checking. 
+ 
+% 40.--- MPI-3.0 Ticket 233-E
+\item 
+Section~\ref{f90:basic} on page~\pageref{f90:basic}.
+\newline 
+The use of the \code{mpif.h} Fortran include file is now strongly discouraged. 
+ 
+% 41.--- MPI-3.0 Ticket 230-B
+\item 
+Section~\ref{subsec:annexa-const},
+Table \textbf{Predefined functions} on page~\pageref{table:predefined-functions},
+Section~\ref{subsec:annexa-prototypes} on page~\pageref{subsec:annexa-prototypes},
+and Section~\ref{app:subsec:f08:context} on page~\pageref{app:subsec:f08:context}.
+\newline 
+Within the new \code{mpi\_f08} module, all callback prototype definitions are now
+defined with explicit interfaces \ftype{PROCEDURE(MPI\_...)} that have the \ftype{BIND(C)} 
+attribute; user-written callbacks must be modified if the \code{mpi\_f08} module is used.
+ 
+% 42.--- MPI-3.0 Ticket 250-V
+\item 
+Section~\ref{subsec:annexa-prototypes} on page~\pageref{subsec:annexa-prototypes}.
+\newline 
+In some routines, the Fortran callback prototype names were changed 
+from \mpiskipfunc{$\ldots$\_FN} to \mpiskipfunc{$\ldots$\_FUNCTION} to be 
+consistent with the other language bindings.
+ 
+\end{enumerate}
+
+
+% --- MPI-2.2 Ticket 100
+\section{Changes from Version 2.1 to Version 2.2}
+
+% The following MPI-2.2 tickets are handled in a special way: 
+%   #049 #061 #099 #100
+%
+% The following tickets do not have a change-log entry:
+%   #001 #008 #009 #010 #011 #013 #016 #017 #021 #030 #037 #040 #041 #042 #044 #051
+%   #053 #057 #060 #067 #070 #074 #077 #087 #089 #090 #091 #092 #093 #097
+%   #103 #104 #105 #107 #113 #115 #116 #118 #120 #121 #122 #123 #124 #128 #132 #135
+%   #136 #141 #142 #146 #148 #149
+%
+% The following tickets did not pass MPI-2.2 final votes 
+%   With changelogs: #59 #80 #127  (removed with "%---" )
+
+\begin{enumerate}
+
+% --- MPI-2.2 Ticket 65
+\item 
+Section~\ref{subsec:named-constants} on page~\pageref{subsec:named-constants}. 
+\newline 
+It is now guaranteed that predefined named constant handles (as other constants) can be used in initialization expressions or assignments, i.e., also before the call to \mpifunc{MPI\_INIT}.
+ 
+% --- MPI-2.2 Ticket 150
+\item
+Section~\ref{subsec:lang} on page~\pageref{subsec:lang}, % Sect. 2.6 p.15
+%-REMOVED-WITH-MPI-3.0: Section~\ref{terms-cpp} on page~\pageref{terms-cpp}, and % Sect. 2.6.4 p.18
+%-REMOVED-WITH-MPI-3.0:  Section~\ref{sec:cpp} on page~\pageref{sec:cpp}. % Sect. 16.1 p.449 newlabel
+and Section~\ref{sec:rm-cpp} on page~\pageref{sec:rm-cpp}. % Sect. 16.1 p.449 newlabel
+\newline
+The C++ language bindings have been deprecated and may be removed in a future version of the \MPI/ specification.
+
+% --- MPI-2.2 Ticket 63
+\item
+Section~\ref{subsec:pt2pt-messagedata} on page~\pageref{subsec:pt2pt-messagedata}. % Sect. 3.2.2 p.27
+\newline
+\mpidtype{MPI\_CHAR} for printable characters is now defined for C type char (instead of signed char). This change should not have any impact on applications nor on \MPI/ libraries (except some comment lines), because printable characters could and can be stored in any of the C types char, signed char, and unsigned char, and \mpidtype{MPI\_CHAR} is not allowed for predefined reduction operations.
+
+% --- MPI-2.2 Ticket 18
+\item
+\typeindex{MPI\_INT8\_T}\typeindex{MPI\_INT16\_T}\typeindex{MPI\_INT32\_T}\typeindex{MPI\_INT64\_T}%
+\typeindex{MPI\_UINT8\_T}\typeindex{MPI\_UINT16\_T}\typeindex{MPI\_UINT32\_T}\typeindex{MPI\_UINT64\_T}%
+Section~\ref{subsec:pt2pt-messagedata} on page~\pageref{subsec:pt2pt-messagedata}. % Sect. 3.2.2 p.27
+\newline
+\constskip{MPI\_(U)INT\{8,16,32,64\}\_T}, 
+\mpidtype{MPI\_AINT}, \mpidtype{MPI\_OFFSET}, \mpidtype{MPI\_C\_BOOL}, \mpidtype{MPI\_C\_COMPLEX}, \mpidtype{MPI\_C\_FLOAT\_COMPLEX}, \mpidtype{MPI\_C\_DOUBLE\_COMPLEX}, and \mpidtype{MPI\_C\_LONG\_DOUBLE\_COMPLEX} are now valid predefined \MPI/ datatypes. 
+
+% --- MPI-2.2 Ticket 45+98
+\item
+Section~\ref{sec:pt2pt-modes} on page~\pageref{sec:pt2pt-modes}, % Sect. 3.4 p.38
+Section~\ref{subsec:pt2pt-commstart} on page~\pageref{subsec:pt2pt-commstart}, % Sect. 3.7.2 p.49
+Section~\ref{sec:pt2pt-persistent} on page~\pageref{sec:pt2pt-persistent}, and % Sect. 3.9 p.68
+Section~\ref{sec:coll-intro} on page~\pageref{sec:coll-intro}. % Sect. 5.1 p.129 newlabel
+\newline
+The read access restriction on the send buffer for blocking, non blocking and collective API has been lifted. It is permitted to access for read the send buffer while the operation is in progress. 
+
+
+% --- MPI-2.2 Ticket 50
+\item
+Section~\ref{sec:pt2pt-nonblock} on page~\pageref{sec:pt2pt-nonblock}. % Sect. 3.7 p.47
+\newline
+The Advice to users for IBSEND and IRSEND was slightly changed.
+
+% --- MPI-2.2 Ticket 143
+\item
+Section~\ref{subsec:pt2pt-commend} on page~\pageref{subsec:pt2pt-commend}. % Sect. 3.7.3 p.52
+\newline
+The advice to free an active request was removed in the Advice to users for \mpifunc{MPI\_REQUEST\_FREE}.
+
+% --- MPI-2.2 Ticket 137
+\item
+Section~\ref{subsec:pt2pt-teststatus} on page~\pageref{subsec:pt2pt-teststatus}. % Sect. 3.7.6 p.63 newlabel
+\newline
+\mpifunc{MPI\_REQUEST\_GET\_STATUS} changed to permit inactive or null requests as input.
+
+% --- MPI-2.2 Ticket 31
+\item
+Section~\ref{sec:coll-alltoall} on page~\pageref{sec:coll-alltoall}. % Sect. 5.8 p.155
+\newline
+``In place'' option is added to \mpifunc{MPI\_ALLTOALL}, \mpifunc{MPI\_ALLTOALLV}, and \mpifunc{MPI\_ALLTOALLW} for intra-communicators.
+
+% --- MPI-2.2 Ticket 64
+\item
+Section~\ref{coll-predefined-op} on page~\pageref{coll-predefined-op}. % Sect. 5.9.2 p.161
+\newline
+Predefined parameterized datatypes (e.g., returned by\\\mpifunc{MPI\_TYPE\_CREATE\_F90\_REAL}) and optional named predefined datatypes (e.g. \mpidtype{MPI\_REAL8}) have been added to the list of valid datatypes in reduction operations.
+
+% --- MPI-2.2 Ticket 18
+\item
+\typeindex{MPI\_INT8\_T}\typeindex{MPI\_INT16\_T}\typeindex{MPI\_INT32\_T}\typeindex{MPI\_INT64\_T}%
+\typeindex{MPI\_UINT8\_T}\typeindex{MPI\_UINT16\_T}\typeindex{MPI\_UINT32\_T}\typeindex{MPI\_UINT64\_T}%
+Section~\ref{coll-predefined-op} on page~\pageref{coll-predefined-op}. % Sect. 5.9.2 p.161
+\newline
+\constskip{MPI\_(U)INT\{8,16,32,64\}\_T} are all considered C integer types for the purposes of the predefined reduction operators. \mpidtype{MPI\_AINT} and \mpidtype{MPI\_OFFSET} are considered Fortran integer types. \mpidtype{MPI\_C\_BOOL} is considered a Logical type. \mpidtype{MPI\_C\_COMPLEX}, \mpidtype{MPI\_C\_FLOAT\_COMPLEX}, \mpidtype{MPI\_C\_DOUBLE\_COMPLEX}, and \mpidtype{MPI\_C\_LONG\_DOUBLE\_COMPLEX} are considered Complex types.
+
+% --- MPI-2.2 Ticket 24
+\item
+Section~\ref{subsec:coll-process-local-reduction} on page~\pageref{subsec:coll-process-local-reduction}. % Sect. 5.9.7 p.173 NEWsection
+\newline
+The local routines \mpifunc{MPI\_REDUCE\_LOCAL} and \mpifunc{MPI\_OP\_COMMUTATIVE} have been added. 
+
+% --- MPI-2.2 Ticket 27
+\item
+Section~\ref{subsec:coll-reduce-scatter-block} on page~\pageref{subsec:coll-reduce-scatter-block}. % Sect. 5.10.1 p.174 NEWsection
+\newline
+The collective function \mpifunc{MPI\_REDUCE\_SCATTER\_BLOCK} is added to the \MPI/ standard.
+
+% --- MPI-2.2 Ticket 94
+\item
+Section~\ref{coll-exscan} on page~\pageref{coll-exscan}. % Sect. 5.11.2 p.175 newlabel
+\newline
+Added in place argument to \mpifunc{MPI\_EXSCAN}.
+
+% --- MPI-2.2 Ticket 19
+\item
+Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}, and % Sect. 6.4.2 p.194
+Section~\ref{sec:context-intercom} on page~\pageref{sec:context-intercom}. % Sect. 6.6 p.209 newlabel
+\newline
+Implementations that did not implement \mpifunc{MPI\_COMM\_CREATE} on inter\hyphen/communicators will need to add that functionality. As the standard described the behavior of this operation on inter-communicators, it is believed that most implementations already provide this functionality. Note also that the C++ binding for both \mpifunc{MPI\_COMM\_CREATE} and \mpifunc{MPI\_COMM\_SPLIT} explicitly allow Intercomms.
+
+% --- MPI-2.2 Ticket 66
+\item
+Section~\ref{subsec:context-intracomconst} on page~\pageref{subsec:context-intracomconst}. % Sect. 6.4.2 p.194
+\newline
+\mpifunc{MPI\_COMM\_CREATE} is extended to allow several disjoint subgroups as input if comm is an intra-communicator. If comm is an inter-communicator it was clarified that all processes in the same local group of comm must specify the same value for group.
+
+% --- MPI-2.2 Ticket 33
+\item
+%-REMOVED-WITH-MPI-3.0: \cdeclindex{MPI::Distgraphcomm}%
+Section~\ref{subsec:topol-distgraph-constructor} on page~\pageref{subsec:topol-distgraph-constructor}. % Sect. 7.5.3a p.247 NEWsection
+\newline
+New functions for a scalable distributed graph topology interface has been added. In this section, the functions \mpifunc{MPI\_DIST\_GRAPH\_CREATE\_ADJACENT} and \mpifunc{MPI\_DIST\_GRAPH\_CREATE}, the constants \mpiconst{MPI\_UNWEIGHTED}, and the derived C++ class Distgraphcomm were added.
+
+% --- MPI-2.2 Ticket 33
+\item
+{\raggedright
+Section~\ref{subsec:topol-inquiry} on page~\pageref{subsec:topol-inquiry}. % Sect. 7.5.4 p.248
+\newline
+For the scalable distributed graph topology interface, the 
+functions \mpifunc{MPI\_DIST\_GRAPH\_NEIGHBORS\_COUNT} 
+and \mpifunc{MPI\_DIST\_GRAPH\_NEIGHBORS} 
+and the constant \mpiconst{MPI\_DIST\_GRAPH} were added.
+
+}
+% --- MPI-2.2 Ticket 3
+\item
+Section~\ref{subsec:topol-inquiry} on page~\pageref{subsec:topol-inquiry}. % Sect. 7.5.4 p.248
+\newline
+Remove ambiguity regarding duplicated neighbors with \mpifunc{MPI\_GRAPH\_NEIGHBORS} and \mpifunc{MPI\_GRAPH\_NEIGHBORS\_COUNT}. 
+
+% --- MPI-2.2 Ticket 101
+\item
+Section~\ref{subsec:inquiry-version} on page~\pageref{subsec:inquiry-version}. % Sect. 8.1.1 p.259
+\newline
+The subversion number changed from 1 to 2.
+
+\mpicallbackindex{MPI\_Comm\_errhandler\_fn}\mpicallbackindex{MPI\_Comm\_errhandler\_function}% 
+\mpicallbackindex{MPI\_File\_errhandler\_fn}\mpicallbackindex{MPI\_File\_errhandler\_function}% 
+\mpicallbackindex{MPI\_Win\_errhandler\_fn}\mpicallbackindex{MPI\_Win\_errhandler\_function}% 
+% --- MPI-2.2 Ticket 7
+\item
+%corrected to
+Section~\ref{sec:errorhandler} on page~\pageref{sec:errorhandler}, % Sect. 8.3 p.264
+Section~\ref{sec:deprecated:since22} on page~\pageref{sec:deprecated:since22}, and % Sect. 15.2 p.448
+Annex~\ref{subsec:annexa-prototypes} on page~\pageref{subsec:annexa-prototypes}. % Sect. A.1.3 p.500 newlabel
+\newline
+Changed function pointer typedef names \constskip{MPI\_\{Comm,File,Win\}\_errhandler\_fn} to \constskip{MPI\_\{Comm,File,Win\}\_errhandler\_function}. Deprecated old ``\_fn'' names. 
+
+
+% --- MPI-2.2 Ticket 71
+\item
+Section~\ref{subsec:inquiry-startup-userfunc} on page~\pageref{subsec:inquiry-startup-userfunc}. % Sect. 8.7.1 p.283 newlabel
+\newline
+Attribute deletion callbacks on \mpiconst{MPI\_COMM\_SELF} are now called in LIFO order. Implementors must now also register all implementation-internal attribute deletion callbacks on \mpiconst{MPI\_COMM\_SELF} before returning from \mpifunc{MPI\_INIT}/\mpifunc{MPI\_INIT\_THREAD}.
+
+% --- MPI-2.2 Ticket 43
+\item
+Section~\ref{sec:1sided-accumulate} on page~\pageref{sec:1sided-accumulate}. % Sect. 11.3.4 p.331
+\newline
+The restriction added in \MPI/ 2.1 that the operation \mpiconst{MPI\_REPLACE} in \mpifunc{MPI\_ACCUMULATE} can be used only with predefined datatypes has been removed. \mpiconst{MPI\_REPLACE} can now be used even with derived datatypes, as it was in \MPI/ 2.0. Also, a clarification has been made that \mpiconst{MPI\_REPLACE} can be used only in \mpifunc{MPI\_ACCUMULATE}, not in collective operations that do reductions, such as \mpifunc{MPI\_REDUCE} and others.
+
+% --- MPI-2.2 Ticket 6
+\item
+\mpifuncindex{MPI\_GREQUEST\_START}% 
+Section~\ref{sec:ei-gr} on page~\pageref{sec:ei-gr}. % Sect. 12.2 p.357
+\newline
+Add ``\code{*}'' to the \mpiarg{query\_fn}, \mpiarg{free\_fn}, and \mpiarg{cancel\_fn} arguments to the C++ binding for \mpiskipfunc{MPI::Grequest::Start()} for consistency with the rest of \MPI/ functions that take function pointer arguments. 
+
+% --- MPI-2.2 Ticket 18
+\item
+{\raggedright
+\typeindex{MPI\_INT8\_T}\typeindex{MPI\_INT16\_T}\typeindex{MPI\_INT32\_T}\typeindex{MPI\_INT64\_T}%
+\typeindex{MPI\_UINT8\_T}\typeindex{MPI\_UINT16\_T}\typeindex{MPI\_UINT32\_T}\typeindex{MPI\_UINT64\_T}%
+Section~\ref{subsec:ext32} on page~\pageref{subsec:ext32}, and  % Sect. 13.5.2 p.414
+Table~\ref{table:io:extsizes} on page~\pageref{table:io:extsizes}. % Tab. 13.2 p.416
+\newline
+\constskip{MPI\_(U)INT\{8,16,32,64\}\_T}, \mpidtype{MPI\_AINT}, \mpidtype{MPI\_OFFSET}, \mpidtype{MPI\_C\_COMPLEX}, \mpidtype{MPI\_C\_FLOAT\_COMPLEX}, \mpidtype{MPI\_C\_DOUBLE\_COMPLEX},\\\mpidtype{MPI\_C\_LONG\_DOUBLE\_COMPLEX}, and \mpidtype{MPI\_C\_BOOL} are added as predefined datatypes in the
+\mpistring{external32} representation.
+
+}
+% --- MPI-2.2 Ticket 55
+\item
+Section~\ref{sec:misc-attr} on page~\pageref{sec:misc-attr}. % Sect. 16.3.7 p.486
+\newline
+% {\bf !!!TODO!!! See Ticket -- proposed text:} 
+The description was modified that it only describes how an \MPI/ implementation behaves, but not how \MPI/ stores attributes internally. The erroneous \MPIIIDOTI/ Example 16.17 was replaced with three new examples \ref{exa:misc-attr:c}, \ref{exa:misc-attr:f-old}, and \ref{exa:misc-attr:f-new} on pages~\pageref{exa:misc-attr:c:pagebegin}--\pageref{exa:misc-attr:f-new:pagebegin} explicitly detailing cross-language attribute behavior. Implementations that matched the behavior of the old example will need to be updated.  
+
+% --- MPI-2.2 Ticket 4
+\item
+Annex~\ref{subsec:annexa-const} on page~\pageref{subsec:annexa-const}. % Sect. A.1.1 p.491
+\newline
+Removed type \constskip{MPI::Fint} (compare \mpictype{MPI\_Fint} in 
+Section~\ref{subsec:annexa-type} on page~\pageref{subsec:annexa-type}). % Sect. A.1.2 p. 499 newlabel
+
+% --- MPI-2.2 Ticket 18
+\item
+\typeindex{MPI\_INT8\_T}\typeindex{MPI\_INT16\_T}\typeindex{MPI\_INT32\_T}\typeindex{MPI\_INT64\_T}%
+\typeindex{MPI\_UINT8\_T}\typeindex{MPI\_UINT16\_T}\typeindex{MPI\_UINT32\_T}\typeindex{MPI\_UINT64\_T}%
+% Annex~\ref{sec:lang:const} on page~\pageref{sec:lang:const}, % Sect. A.1 p.491 
+% It is better to use the following reference: 
+Annex~\ref{subsec:annexa-const} on page~\pageref{subsec:annexa-const}. % Sect. A.1.1 p.491
+Table \textbf{Named Predefined Datatypes}. % on p.494
+\newline
+Added \constskip{MPI\_(U)INT\{8,16,32,64\}\_T}, \mpidtype{MPI\_AINT}, \mpidtype{MPI\_OFFSET}, \mpidtype{MPI\_C\_BOOL}, \mpidtype{MPI\_C\_FLOAT\_COMPLEX}, \mpidtype{MPI\_C\_COMPLEX}, \mpidtype{MPI\_C\_DOUBLE\_COMPLEX}, and \mpidtype{MPI\_C\_LONG\_DOUBLE\_COMPLEX} are added as predefined datatypes.
+
+  
+\end{enumerate}
+
+\section{Changes from Version 2.0 to Version 2.1} 
+\label{sec:changes:last}
+ 
+
+\begin{enumerate}
+
+\item
+Section~\ref{subsec:pt2pt-messagedata} on page~\pageref{subsec:pt2pt-messagedata},
+%-REMOVED-WITH-MPI-3.0:                Section~\ref{sec:c++datatypes} on page~\pageref{sec:c++datatypes},
+                                       and Annex~\ref{sec:lang:const} on page~\pageref{sec:lang:const}. 
+% --- MPI-2.1, Ballot 1, Item 16 ---
+\newline
+In addition, the \mpidtype{MPI\_LONG\_LONG} should be added as an optional
+type; it is a synonym for \mpidtypeskip{MPI\_LONG\_LONG\_INT}.
+
+\item
+Section~\ref{subsec:pt2pt-messagedata} on page~\pageref{subsec:pt2pt-messagedata},
+%-REMOVED-WITH-MPI-3.0:                Section~\ref{sec:c++datatypes} on page~\pageref{sec:c++datatypes},
+                                       and Annex~\ref{sec:lang:const} on page~\pageref{sec:lang:const}. 
+% --- MPI-2.1, Review Item 15.h' ---
+\newline
+\mpidtype{MPI\_LONG\_LONG\_INT}, \mpidtype{MPI\_LONG\_LONG} (as synonym),\\\mpidtype{MPI\_UNSIGNED\_LONG\_LONG},   
+\mpidtype{MPI\_SIGNED\_CHAR},
+and \mpidtype{MPI\_WCHAR} are moved from optional to official and they are therefore
+defined for all three language bindings.
+
+\item
+Section~\ref{subsec:pt2pt-status} on page~\pageref{subsec:pt2pt-status}.
+% --- MPI-2.1, Ballot 2, Item 1 ---
+\newline
+\mpifunc{MPI\_GET\_COUNT} with zero-length datatypes:
+The value returned as the \mpiarg{count} argument of
+\mpifunc{MPI\_GET\_COUNT} for a datatype of length zero where zero bytes
+have been transferred is zero.  If the number of bytes transferred is
+greater than zero, \mpiconst{MPI\_UNDEFINED} is returned. 
+
+\item
+Section~\ref{sec:pt2pt-datatype} on page~\pageref{sec:pt2pt-datatype}.
+% --- MPI-2.1, Ballot 4, Item 20 ---
+\newline
+General rule about derived datatypes:
+Most datatype constructors have replication count or block length arguments.
+Allowed values are 
+{nonnegative}
+integers. If the value is zero, no elements are
+generated in the type map and there is no effect on datatype bounds or
+extent. 
+
+\item
+Section~\ref{canonical_pack} on page~\pageref{canonical_pack}.
+% --- MPI-2.1, Ballot 2, Item 4 ---
+\newline
+\mpidtype{MPI\_BYTE} should be used to send and receive data that is packed
+using \mpifunc{MPI\_PACK\_EXTERNAL}.
+
+\item
+Section~\ref{subsec:coll-all-reduce} on page~\pageref{subsec:coll-all-reduce}.
+% --- MPI-2.1, Ballot 2, Item 8 ---
+\newline
+If \mpiarg{comm} is an inter-communicator in \mpifunc{MPI\_ALLREDUCE}, then
+both groups should
+provide \mpiarg{count} and \mpiarg{datatype} arguments that specify the same type
+signature
+(i.e., it is not necessary that both groups provide the same \mpiarg{count} value). 
+
+\item
+Section~\ref{subsec:context-grpacc} on page~\pageref{subsec:context-grpacc}.
+% --- MPI-2.1, Ballot 2, Item 2 ---
+\newline
+\mpifunc{MPI\_GROUP\_TRANSLATE\_RANKS} and \mpiconst{MPI\_PROC\_NULL}:
+\mpiconst{MPI\_PROC\_NULL} is a valid rank for input to
+\mpifunc{MPI\_GROUP\_TRANSLATE\_RANKS}, which returns
+\mpiconst{MPI\_PROC\_NULL} as the translated rank.
+
+\item
+Section~\ref{sec:caching} on page~\pageref{sec:caching}.
+% --- MPI-2.1, Ballot 2, Item 9 ---
+\newline
+About the attribute caching functions: 
+\begin{implementors}
+High-quality implementations should raise an error when a keyval
+\mpifuncindex{MPI\_TYPE\_CREATE\_KEYVAL}%
+\mpifuncindex{MPI\_COMM\_CREATE\_KEYVAL}%
+\mpifuncindex{MPI\_WIN\_CREATE\_KEYVAL}%
+that was created by a call to \mpiskipfunc{MPI\_\XXX/\_CREATE\_KEYVAL} is
+used with an object of the wrong type with a call to
+\mpiskipfunc{MPI\_YYY\_GET\_ATTR}, \mpiskipfunc{MPI\_YYY\_SET\_ATTR}, \mpiskipfunc{MPI\_YYY\_DELETE\_ATTR}, or
+\mpiskipfunc{MPI\_YYY\_FREE\_KEYVAL}. To do so, it is necessary to maintain, with
+each keyval, information on the type of the associated user
+function.
+\end{implementors}
+
+\item
+Section~\ref{sec:ei-naming} on page~\pageref{sec:ei-naming}.
+% --- MPI-2.1, Ballot 4, Item 13.iii ---
+\newline
+In \mpifunc{MPI\_COMM\_GET\_NAME}: 
+In C, a null character is additionally stored at \mpiarg{name{[}resultlen{]}}. 
+\mpiarg{resultlen} cannot be larger then 
+{\mpiconst{MPI\_MAX\_OBJECT\_NAME}}-1. 
+In Fortran, name is padded on the right with blank characters. 
+\mpiarg{resultlen} cannot be larger then 
+{\mpiconst{MPI\_MAX\_OBJECT\_NAME}}. 
+
+\item
+Section~\ref{subsec:topol-overview} on page~\pageref{subsec:topol-overview}.
+% --- MPI-2.1, Ballot 4, Item 11.c ---
+\newline
+About \mpifunc{MPI\_GRAPH\_CREATE} and \mpifunc{MPI\_CART\_CREATE}:
+All input arguments must have identical values on all processes
+of the group of \mpiarg{comm\_old}. 
+
+\item
+Section~\ref{subsec:topol-cartesian-constructor} on page~\pageref{subsec:topol-cartesian-constructor}.
+% --- MPI-2.1, Ballot 4, Item 10.d ---
+\newline
+In \mpifunc{MPI\_CART\_CREATE}:
+If \mpiarg{ndims} is zero then a zero-dimensional Cartesian topology is created. The
+call is erroneous if it specifies a grid that is larger than the group size or if
+\mpiarg{ndims} is negative.
+
+\item
+Section~\ref{subsec:topol-graph-constructor} on page~\pageref{subsec:topol-graph-constructor}.
+% --- MPI-2.1, Ballot 4, Item 11.a ---
+\newline
+In \mpifunc{MPI\_GRAPH\_CREATE}:
+If the graph is empty, i.e., \mpiarg{nnodes}\mpicode{ = 0}, 
+then \mpiconst{MPI\_COMM\_NULL} is returned in all processes. 
+
+\item
+Section~\ref{subsec:topol-graph-constructor} on page~\pageref{subsec:topol-graph-constructor}.
+% --- MPI-2.1, Ballot 4, Item 11.b ---
+\newline
+In \mpifunc{MPI\_GRAPH\_CREATE}:
+A single process is allowed to be defined multiple times in the list of
+neighbors of a process (i.e., there may be multiple edges between two
+processes). A process is also allowed to be a neighbor to itself (i.e., a self
+loop in the graph). The adjacency matrix is allowed to be nonsymmetric.
+\begin{users} 
+Performance implications of using multiple edges or a nonsymmetric
+adjacency matrix are not defined. The definition of a node-neighbor
+edge does not imply a direction of the communication.
+\end{users} 
+
+\item
+Section~\ref{subsec:topol-inquiry} on page~\pageref{subsec:topol-inquiry}.
+% --- MPI-2.1, Ballot 4, Item 10.b.i ---
+\newline
+In \mpifunc{MPI\_CARTDIM\_GET} and \mpifunc{MPI\_CART\_GET}: 
+If \mpiarg{comm} is associated with a zero-dimensional Cartesian topology,
+\mpifunc{MPI\_CARTDIM\_GET} returns \mpiarg{ndims=0} and \mpifunc{MPI\_CART\_GET} will keep
+all output arguments unchanged. 
+
+\item
+Section~\ref{subsec:topol-inquiry} on page~\pageref{subsec:topol-inquiry}.
+% --- MPI-2.1, Ballot 4, Item 10.b.ii ---
+\newline
+In \mpifunc{MPI\_CART\_RANK}:
+If \mpiarg{comm} is associated with a zero-dimensional Cartesian topology,
+\mpiarg{coord} is not significant and 0 is returned in \mpiarg{rank}. 
+
+\item
+Section~\ref{subsec:topol-inquiry} on page~\pageref{subsec:topol-inquiry}.
+% --- MPI-2.1, Ballot 4, Item 10.b.iii ---
+\newline
+In \mpifunc{MPI\_CART\_COORDS}:
+If \mpiarg{comm} is associated with a zero-dimensional Cartesian topology,
+\mpiarg{coords} will be unchanged. 
+
+\item
+Section~\ref{subsec:topol-shift} on page~\pageref{subsec:topol-shift}.
+% --- MPI-2.1, Ballot 4, Item 10.c ---
+\newline
+In \mpifunc{MPI\_CART\_SHIFT}:
+It is erroneous to call \mpifunc{MPI\_CART\_SHIFT} with a direction that is either
+negative or greater than or equal to the number of dimensions in the Cartesian
+communicator. This implies that it is erroneous to call \mpifunc{MPI\_CART\_SHIFT} with a
+\mpiarg{comm} that is associated with a zero-dimensional Cartesian topology.
+
+\item
+Section~\ref{subsec:topol-part} on page~\pageref{subsec:topol-part}.
+% --- MPI-2.1, Ballot 4, Item 10.a ---
+\newline
+In \mpifunc{MPI\_CART\_SUB}: 
+If all entries in \mpiarg{remain\_dims} are false or \mpiarg{comm} is already associated
+with a zero-dimensional Cartesian topology then \mpiarg{newcomm} is associated
+with a zero-dimensional Cartesian topology. 
+
+% --- MPI-2.2 Ticket 61
+\item[18.1.] 
+Section~\ref{subsec:inquiry-version} on page~\pageref{subsec:inquiry-version}.
+\newline
+The subversion number changed from 0 to 1.
+ 
+ 
+\item
+Section~\ref{subsec:inquiry-inquiry} on page~\pageref{subsec:inquiry-inquiry}.
+% --- MPI-2.1, Ballot 4, Item 13.i ---
+\newline
+In \mpifunc{MPI\_GET\_PROCESSOR\_NAME}: 
+In C, a null character is additionally stored at \mpiarg{name[resultlen]}. 
+\mpiarg{resultlen} cannot be larger then \mpiconst{MPI\_MAX\_PROCESSOR\_NAME}-1. 
+In Fortran, name is padded on the right with blank characters. 
+\mpiarg{resultlen} cannot be larger then \mpiconst{MPI\_MAX\_PROCESSOR\_NAME}. 
+
+\item
+Section~\ref{sec:errorhandler} on page~\pageref{sec:errorhandler}.
+% --- MPI-2.1, Ballot 2, Item 3 ---
+\newline
+\mpifuncindex{MPI\_COMM\_GET\_ERRHANDLER}%
+\mpifuncindex{MPI\_WIN\_GET\_ERRHANDLER}%
+\mpifuncindex{MPI\_FILE\_GET\_ERRHANDLER}%
+\mpiskipfunc{MPI\_\{COMM,WIN,FILE\}\_GET\_ERRHANDLER} behave as if a
+new error handler object is created.
+That is, once the error handler is no longer needed,
+\mpifunc{MPI\_ERRHANDLER\_FREE} should be called with the error handler returned
+from \mpifunc{MPI\_ERRHANDLER\_GET} or
+\mpiskipfunc{MPI\_\{COMM,WIN,FILE\}\_GET\_ERRHANDLER}
+to mark the error handler for deallocation.
+This provides behavior similar to that of \mpifunc{MPI\_COMM\_GROUP} and
+\mpifunc{MPI\_GROUP\_FREE}.
+
+\item
+Section~\ref{sec:inquiry-startup} on page~\pageref{sec:inquiry-startup}, see explanations to \mpifunc{MPI\_FINALIZE}.
+% --- MPI-2.1, Ballot 1, Item 1 ---
+\newline
+\mpifunc{MPI\_FINALIZE} is collective over all connected processes.
+If no processes were spawned, accepted or connected then this means
+over \mpiconst{MPI\_COMM\_WORLD}; otherwise it is collective over the
+union of all processes that have been and continue to be connected,
+as explained in Section~\ref{subsec:disconnect} on page~\pageref{subsec:disconnect}.
+
+\item
+Section~\ref{sec:inquiry-startup} on page~\pageref{sec:inquiry-startup}.
+% --- MPI-2.1, Ballot 4, Item 15.b ---
+\newline
+About \mpifunc{MPI\_ABORT}:
+\begin{users} 
+Whether the errorcode is returned from the executable or
+from the \MPI/ process startup mechanism (e.g., mpiexec), is an aspect of
+quality of the \MPI/ library but not mandatory.
+\end{users} 
+\begin{implementors} 
+Where possible, a high-quality implementation will
+try to return the errorcode from the \MPI/ process startup mechanism (e.g.
+mpiexec or singleton init).
+\end{implementors} 
+
+\item
+Section~\ref{subsec:info} on page~\pageref{subsec:info}.
+% --- MPI-2.1, Ballot 4, Item 4 ---
+\newline
+An implementation must support info objects as caches for arbitrary (\mpishortarg{key},
+\mpishortarg{value}) pairs, regardless of whether it recognizes the key. Each function that
+\cdeclindex{MPI\_Info}%
+takes hints in the form of an \mpictype{MPI\_Info} must be prepared to ignore any key it
+does not recognize. This description of info objects does not attempt to
+define how a particular function should react if it recognizes a key but not the
+associated value. 
+\mpifunc{MPI\_INFO\_GET\_NKEYS}, \mpifunc{MPI\_INFO\_GET\_NTHKEY},
+\mpifunc{MPI\_INFO\_GET\_VALUELEN}, and \mpifunc{MPI\_INFO\_GET}
+must retain all (\mpiarg{key},\mpiarg{value})
+pairs so that layered functionality can also use the \mpiarg{Info} object. 
+
+\item\label{item:changes:RMA:a}
+Section~\ref{sec:onesided-putget} on page~\pageref{sec:onesided-putget}.
+% --- MPI-2.1, Ballot 2, Item 6 ---
+\newline
+\mpiconst{MPI\_PROC\_NULL} is a valid target rank in the \MPI/ \RMA/ calls
+\mpifunc{MPI\_ACCUMULATE}, \mpifunc{MPI\_GET}, and \mpifunc{MPI\_PUT}.  
+The effect is the same as for \mpiconst{MPI\_PROC\_NULL} in \MPI/ point-to-point
+communication.
+See also item~\ref{item:changes:RMA:b} in this list. 
+
+\item\label{item:changes:RMA:b}
+Section~\ref{sec:onesided-putget} on page~\pageref{sec:onesided-putget}.
+% --- MPI-2.1, Ballot 4, Item 6 ---
+\newline
+After any \RMA/ operation with rank \mpiconst{MPI\_PROC\_NULL}, it is still necessary to
+finish the \RMA/ epoch with the synchronization method that started the epoch. 
+See also item~\ref{item:changes:RMA:a} in this list. 
+
+\item
+Section~\ref{sec:1sided-accumulate} on page~\pageref{sec:1sided-accumulate}.
+% --- MPI-2.1, Ballot 2, Item 7 ---
+\newline
+\mpiconst{MPI\_REPLACE}
+in \mpifunc{MPI\_ACCUMULATE}, 
+like the other predefined operations, 
+is defined only for the predefined \MPI/ datatypes.
+
+\item
+Section~\ref{sec:io-info} on page~\pageref{sec:io-info}.
+% --- MPI-2.1, Ballot 4, Item 18 ---
+\newline
+About \mpifunc{MPI\_FILE\_SET\_VIEW} and \mpifunc{MPI\_FILE\_SET\_INFO}:
+When an info object that specifies a subset of valid hints is passed to
+\mpifunc{MPI\_FILE\_SET\_VIEW} or \mpifunc{MPI\_FILE\_SET\_INFO}, 
+there will be no effect on
+previously set or defaulted hints that the \mpiarg{info} does not specify. 
+
+\item
+Section~\ref{sec:io-info} on page~\pageref{sec:io-info}.
+% --- MPI-2.1, Ballot 4, Item 17 ---
+\newline
+About \mpifunc{MPI\_FILE\_GET\_INFO}:
+If no hint exists 
+for the file associated with \mpiarg{fh}, 
+a handle to a newly created info object is returned that
+contains no key/value pair. 
+
+\item
+Section~\ref{sec:io-view} on page~\pageref{sec:io-view}.
+% --- MPI-2.1, Ballot 2, Item 10 ---
+\newline
+If a file does not have the mode \mpiconst{MPI\_MODE\_SEQUENTIAL},
+then \mpiconst{MPI\_DISPLACEMENT\_CURRENT} is invalid as \mpiarg{disp} in 
+\mpifunc{MPI\_FILE\_SET\_VIEW}.  
+
+\item
+Section~\ref{subsec:ext32} on page~\pageref{subsec:ext32}.
+% --- MPI-2.1, Ballot 1, Item 7 ---
+\newline
+The bias of 16 byte doubles was defined with 10383. The correct value is 16383. 
+
+\item
+%-REMOVED-WITH-MPI-3.0: Section~\ref{sec:c++ClassMemberFunctions} on page~\pageref{sec:c++ClassMemberFunctions}.
+\MPIIIDOTII/, Section 16.1.4 (Section was removed in \MPIIIIDOTO/).
+% --- MPI-2.1, Ballot 1, Item 8 ---
+\newline
+In the example in this section,
+the buffer should be declared as \code{const void* buf}. 
+
+\item
+Section~\ref{f90:types} on page~\pageref{f90:types}.
+% --- MPI-2.1, Ballot 4, Item 16 ---
+\newline
+About \mpiskipfunc{MPI\_TYPE\_CREATE\_F90\_\XXX/}:
+\begin{implementors}
+An application may often repeat a call to
+\mpiskipfunc{MPI\_TYPE\_CREATE\_F90\_\XXX/} with the same combination of 
+(\mpiarg{\XXX/},\mpiarg{p},\mpiarg{r}).
+The application is not allowed to free the returned predefined, unnamed
+datatype handles. To prevent the creation of a potentially huge amount of
+handles, the \MPI/ implementation should return the same datatype handle for
+the same (\mpiarg{REAL/COMPLEX/INTEGER},\mpiarg{p},\mpiarg{r}) combination. 
+Checking for the
+combination (\mpiarg{p},\mpiarg{r}) in the preceding call to 
+\mpiskipfunc{MPI\_TYPE\_CREATE\_F90\_\XXX/} and
+using a hash-table to find formerly generated handles should limit the
+overhead of finding a previously generated datatype with same combination
+of (\mpiarg{\XXX/},\mpiarg{p},\mpiarg{r}).
+\end{implementors}
+
+\item
+Section~\ref{subsec:annexa-const} on page~\pageref{subsec:annexa-const}.
+% --- MPI-2.1, Ballot 3, Item 12 ---
+\newline
+\mpiconst{MPI\_BOTTOM} is defined as
+\code{void * const MPI::BOTTOM}. 
+ 
+\end{enumerate}

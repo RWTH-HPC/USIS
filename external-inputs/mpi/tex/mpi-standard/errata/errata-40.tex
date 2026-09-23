@@ -1,0 +1,242 @@
+% This document is made by doing:
+%   MAKE-MPI-CHAPTER errata-40.tex
+%   use ghostview to strip the first two pages off
+%   update change data in docs.html
+%   put on home page in compressed and uncompressed format
+
+\def\mf#1{{{\sf MPI\_#1}}}
+\def\cf#1{{{\tt #1}}}
+
+% For each batch of errata, we surround it with
+% \ifbati (ii, etc)
+% \fi % bati (ii, etc)
+
+\def\pending{\textbf{Pending Errata:}}
+
+% Is this a draft or an official version?
+\newif\ifdraft
+\drafttrue
+%\draftfalse
+%
+% Macro to point at the discussion.  This is soley to help in generating the
+% HTML online version
+\def\webdiscussion#1{\relax}
+%
+% This errata contains the current list of both accepted and
+% pending items, in page order.  Each has a comment (at the top!) that
+% gives the state
+% The categories are
+%   Original (posted on the forum)
+%   May-1-01     (first batch)
+
+\chapter*{Errata for \mpiivdoto/}
+
+This document was processed on \today.
+\vskip 0.3truein
+
+The known corrections to \mpiivdoto/ are listed in this document.  All
+page and line numbers are for the official version of the \mpiivdoto/
+document available from the \MPI/ Forum home page at
+\url{www.mpi-forum.org}.  Information on reporting mistakes in the
+\mpi/ documents is also located on the \MPI/ Forum home page.
+
+\ifdraft
+This is a \textbf{DRAFT} and is not official.  It may contain errata items
+that are currently under discussion and have not yet been voted in by
+the MPI Forum.  Such items are marked as \pending.
+\fi
+
+\begin{itemize}
+
+% Example of an errate item
+%\item Page 53, lines 24--25 reads:
+%
+%\begin{quote}
+%Any other type of request is and the request handle is set to \const{MPI\_REQUEST\_NULL}. \mpifunc{MPI\_WAIT} is a non-local operation.
+%\end{quote}
+%
+%\noindent but should be:
+%
+%\begin{quote}
+%Any other type of request is deallocated and the request handle is set to \const{MPI\_REQUEST\_NULL}. \mpifunc{MPI\_WAIT} is a non-local operation.
+%\end{quote}
+%
+\item Page 113, lines 6--7 read:
+\begin{verbatim}
+     MPI_Psend_init(message, partitions, count, xfer_type, dest, tag,
+          info, MPI_COMM_WORLD, &request);
+\end{verbatim}
+but should be
+\begin{verbatim}
+     MPI_Psend_init(message, partitions, count, xfer_type, dest, tag,
+                    MPI_COMM_WORLD, info, &request);
+\end{verbatim}
+
+\item Page 113, lines 25--26 read:
+\begin{verbatim}
+     MPI_Precv_init(message, partitions, count, xfer_type, source, tag,
+           info, MPI_COMM_WORLD, &request);
+\end{verbatim}
+but should be
+\begin{verbatim}
+     MPI_Precv_init(message, partitions, count, xfer_type, source, tag,
+                    MPI_COMM_WORLD, info, &request);
+\end{verbatim}
+
+\item Page 114, lines 28--29 read:
+\begin{verbatim}
+     MPI_Psend_init(message, send_partitions, count, send_type, dest, tag,
+               info, MPI_COMM_WORLD, request);
+\end{verbatim}
+but should be
+\begin{verbatim}
+     MPI_Psend_init(message, send_partitions, count, send_type, dest, tag,
+                    MPI_COMM_WORLD, info, &request);
+\end{verbatim}
+
+\item Page 115, lines 12--13 read:
+\begin{verbatim}
+     MPI_Precv_init(message, recv_partitions, recv_partlength, MPI_DOUBLE,
+               source, tag, info, MPI_COMM_WORLD, &request);
+\end{verbatim}
+but should be
+\begin{verbatim}
+     MPI_Precv_init(message, recv_partitions, recv_partlength, MPI_DOUBLE,
+                    source, tag, MPI_COMM_WORLD, info, &request);
+\end{verbatim}
+
+\item Page 115ff, Example 4.4 has several corrections, including
+                    a \texttt{firstprivate(send\_partitions)} at page
+                    116, line 24;
+                    a \texttt{firstprivate(recv\_partitions)} at page
+                    116, line 43, and corrected code for page 117,
+                    lines 1--28.
+% Fixd with PR 726
+\item Page 116, lines 21--22 read:
+\begin{verbatim}
+     MPI_Psend_init(message, send_partitions, 1, send_type, dest, tag,
+               info, MPI_COMM_WORLD, &request);
+\end{verbatim}
+but should be
+\begin{verbatim}
+     MPI_Psend_init(message, send_partitions, 1, send_type, dest, tag,
+                    MPI_COMM_WORLD, info, &request);
+\end{verbatim}
+
+\item Page 116, lines 40--41 read:
+\begin{verbatim}
+     MPI_Precv_init(message, recv_partitions, recv_partlength, MPI_DOUBLE,
+               source, tag, info, MPI_COMM_WORLD, &request);
+\end{verbatim}
+but should be
+\begin{verbatim}
+     MPI_Precv_init(message, recv_partitions, recv_partlength,
+                    MPI_DOUBLE, source, tag, MPI_COMM_WORLD, info,
+                    &request);
+\end{verbatim}
+
+\item Page 383, line 36, add\\
+
+Passing \const{MPI\_COMM\_NULL} as \mpiarg{comm} will return the string
+\mpistring{MPI\_COMM\_NULL}.\\
+
+Similarly, on page 385, after line 24, add\\
+
+Passing \const{MPI\_DATATYPE\_NULL} as \mpiarg{datatype} will return the string
+\mpistring{MPI\_DATATYPE\_NULL}.\\
+
+and similarly, on page 386, after line 21, add\\
+
+Passing \const{MPI\_WIN\_NULL} as \mpiarg{win} will
+return the string \mpistring{MPI\_WIN\_NULL}.
+
+%% Errata from PR652
+
+\item Page 407, lines 7--10 reads:\\
+\funcargalone{\OUT}{coords}{integer array (of size \mpiarg{maxdims}) containing the Cartesian coordinates of specified process (array of integers)}
+
+but should read\\
+\funcargalone{\OUT}{coords}{coordinates of the \MPI/ process with the rank \mpiarg{rank} in Cartesian structure}
+
+The behavior when \mpiarg{maxdims} is less than the number of dimensions of the
+Cartesian topology is clarified.
+
+%% Errata from PR 690
+
+\item Page 484, line 23 reads\\
+\mpibind{MPI\_Info\_create\_env(\gb{}int~argc, char~argv[], MPI\_Info~*info)}
+but should read\\
+\mpibind{MPI\_Info\_create\_env(\gb{}int~argc, char~*argv[], MPI\_Info~*info)}
+
+\item Page 521, line 7. Add
+\begin{quote}
+The \mpi/ procedures described in this section require the \wpm{}, meaning that \mpifunc{MPI\_INIT} or \mpifunc{MPI\_INIT\_THREAD}  has been used to initialize \mpi/.
+\end{quote}
+to the end of the paragraph in Section 11.7.
+
+\item Page 601, lines 28--31: the definition of \mpifunc{MPI\_WIN\_TEST} was clarified.
+The new text reads:
+
+\mpifunc{MPI\_WIN\_TEST} is a local procedure.
+Repeated calls to \mpifunc{MPI\_WIN\_TEST} with the same \mpiarg{win} argument
+will eventually return \mpiarg{flag}\code{ = true} once all accesses to the
+local window by the group to which it was exposed by the corresponding
+\mpifunc{MPI\_WIN\_POST} call have been completed as indicated by matching
+\mpifunc{MPI\_WIN\_COMPLETE} calls, and \mpiarg{flag}\code{ = false} otherwise.
+
+%% PR 729. This was voted in as an errato, so is added here.
+
+\item Page 607, replace lines 40--44 with:
+\begin{quote}
+For windows in the separate memory model,
+a call to \mpifunc{MPI\_WIN\_SYNC} synchronizes the private and public window
+copies of \mpiarg{win} at the calling \MPI/ process, as described in
+Section~12.7.
+
+In the unified memory model, \mpifunc{MPI\_WIN\_SYNC} may be used to
+order load and store accesses to shared memory and to ensure
+visibility of store updates in shared memory
+for other threads and \MPI/ processes.
+
+A call to \mpifunc{MPI\_WIN\_SYNC} does not open or close an epoch and
+does not complete any pending \RMA/ operations. A call
+to \mpifunc{MPI\_WIN\_SYNC} does not
+guarantee \mpitermni{progress}\mpitermindex{progress!one-sided
+communication}\mpitermindex{progress!load/store access
+synchronization} of any pending \MPI/ operation.
+
+\end{quote}
+
+%% PR 747.
+
+\item Page 640, after line 36, is missing \mpifunc{MPI\_Status\_set\_elements\_c}:\\
+\mpibind{MPI\_Status\_set\_elements\_c(\gb{}MPI\_Status~*status, MPI\_Datatype~datatype, MPI\_Count~count)}
+
+Several lists of routines need to have this routine added as well.
+
+\item Page 733, line 6.  Add after the end:
+
+\begin{quote}
+It is erroneous to
+bind a control variable, performance variable, or event to a handle that
+would not be valid to use as an input argument to another \MPI/ call (excluding
+calls to the \MPI/ Tool Information Interface) at the same point of
+execution.
+\end{quote}
+
+%% PR 161
+
+\item Pages 743--754. Several functions marked handles as \IN{} rather
+than \INOUT{}. These are:
+
+\mpifunc{MPI\_T\_CVAR\_WRITE}, page 743, line 38\\
+\mpifunc{MPI\_T\_PVAR\_HANDLE\_ALLOC}, page 751, line 2\\
+\mpifunc{MPI\_T\_PVAR\_HANDLE\_FREE}, page 751, line 44\\
+\mpifunc{MPI\_T\_PVAR\_START}, page 752, line 17\\
+\mpifunc{MPI\_T\_PVAR\_STOP}, page 752, line 36\\
+\mpifunc{MPI\_T\_PVAR\_WRITE}, page 753, line 32, and\\
+\mpifunc{MPI\_T\_PVAR\_RESET}, page 754, line 8.
+
+%% PR 754, issue 443
+
+\end{itemize}

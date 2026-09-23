@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/RWTH-HPC/USIS/v0.1.0/curated/schemas/field-provenance.schema.json",
+  "title": "Field provenance table",
+  "description": "Validates curated/field-provenance.json -- the table that assigns every schema field path an automation tier and an owning workflow stage. This file is hand-edited and is read by ten modules; most importantly workflow/staging/derive_schema.py derives every stage's staging schema from it, so a typo here silently changes what each stage is allowed to emit. That is what this schema exists to catch. It deliberately does NOT check that the paths listed actually exist in api-schema.json, nor that every schema leaf is covered -- derive_schema.py already raises ProvenanceGapError on an uncovered leaf at run time, which is a stronger check than a schema can express.",
+  "type": "object",
+  "required": ["tiers", "fields"],
+  "properties": {
+    "$comment": { "type": "string" },
+    "schema_ref": {
+      "type": "string",
+      "description": "Path to the api-schema.json version these paths were classified against."
+    },
+    "workflow_ref": {
+      "type": "string",
+      "description": "Path to the workflow document defining the stage letters used below."
+    },
+    "tiers": {
+      "type": "object",
+      "description": "tier name -> prose definition. The key set is the closed tier vocabulary; every fields[].tier must be one of these keys, which a JSON Schema cannot express directly -- workflow/validate/test_curated.py checks that cross-reference.",
+      "additionalProperties": { "type": "string" }
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "tier", "stage", "rationale"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Dotted path into an entry, with a literal '[]' segment for array items (e.g. 'parameters[].kind') and an optional trailing '.*' wildcard covering everything beneath a container (e.g. 'semantics.memory.*'). Both spellings of a conditional container may appear -- 'semantics.atomic.*' for its leaves and 'semantics.atomic' for the whole object -- and they may carry different tiers; that is deliberate, see workflow/supplement/propose.py's _stage_c_via_supplement."
+          },
+          "tier": {
+            "type": "string",
+            "enum": ["syntactic", "derived", "semantic", "semantic_heuristic", "formal", "authoring_only", "supplement"],
+            "description": "Which automation tier owns this field. Must also appear as a key in `tiers`."
+          },
+          "stage": {
+            "type": "string",
+            "enum": ["B", "C", "D", "E"],
+            "description": "The workflow stage that populates it. B=Extract, C=Classify Semantics, D=Generate Formal, E=post-merge derivation (relationships.supersedes). Both tier and stage gate whether a field is required at a given staging schema -- see derive_schema.py's STAGE_TIERS/STAGE_LETTERS."
+          },
+          "stage_c_mechanism": {
+            "type": ["string", "null"],
+            "enum": ["supplement", null],
+            "description": "Set to 'supplement' for the pure-prose fields no automated stage will ever populate, so an ABSENT value is supplement-eligible rather than 'the owning stage hasn't run yet'. Null or omitted otherwise."
+          },
+          "supplement_reliance": {
+            "type": ["string", "null"],
+            "description": "Per-PPM prose note on how much of this field's coverage currently comes from the supplement source rather than the primary source."
+          },
+          "final_null_fill": {
+            "type": ["string", "null"],
+            "description": "Prose note on how this path gets its final null, for the paths where that is not obvious. Present on exactly one field today (identity.deprecated_in), recording that no stage writes a default null and the key stays absent until workflow/concretize/materialize_nulls.py fills it once at the end. A note, not a flag -- materialize_nulls.py decides from the schema's own nullability, not from this field."
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why this field carries this tier. Load-bearing prose: three fields were once filled corpus-wide under a plausible-but-wrong reading of an empty description (2026-07-21 field audit)."
+          }
+        }
+      }
+    }
+  }
+}

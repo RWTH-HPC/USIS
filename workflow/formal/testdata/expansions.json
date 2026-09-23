@@ -1,0 +1,3050 @@
+{
+  "$comment": "Pinned expansions: for each binding in curated/shapes/bindings.json, the semantics.formal block that expand() must produce, byte for byte. A test fixture, deliberately NOT regenerated -- that is the whole point. Each value here was verified by a human once; if expand.py or a shape template changes, workflow/formal/test_shapes.py fails against these rather than silently producing a different corpus. Recomputing them would make the test compare expand() to expand() and check nothing. Keyed 'ppm:function', joined against bindings.json.",
+  "expansions": {
+    "mpi:mpi_accumulate": {
+      "data_flow": [
+        {
+          "buffer": "param:origin_addr",
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "rma_target_prior"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "param:op",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:win",
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:target_rank"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_allgather": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuf",
+          "extent": {
+            "count_ref": "param:sendcount",
+            "datatype_ref": "param:sendtype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:recvcount",
+            "datatype_ref": "param:recvtype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "gathered",
+            "placement_offset": "rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)",
+            "ref": "df_read",
+            "scope": "all_participant_instances"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_allreduce": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "param:op",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_barrier": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_bcast": {
+      "data_flow": [
+        {
+          "buffer": "param:buffer",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "root",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:buffer",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "rank == param:root"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_file_write_at_all_begin": {
+      "data_flow": [
+        {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_io",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "self",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:fh",
+            "epoch_scope": null,
+            "event_type": "open_epoch",
+            "group_ref": null,
+            "id": "io_event",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    },
+    "mpi:mpi_file_write_at_all_end": {
+      "data_flow": [
+        {
+          "buffer": "param:buf",
+          "extent": null,
+          "id": "df_io",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "self",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:fh",
+            "epoch_scope": null,
+            "event_type": "close_epoch",
+            "group_ref": null,
+            "id": "io_event",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    },
+    "mpi:mpi_gather": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuf",
+          "extent": {
+            "count_ref": "param:sendcount",
+            "datatype_ref": "param:sendtype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:sendcount",
+            "datatype_ref": "param:sendtype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": "rank_in(param:comm) * extent_size(param:sendcount, param:sendtype)",
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "rank == param:root"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_get": {
+      "data_flow": [
+        {
+          "buffer": "param:win",
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "target",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:origin_addr",
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:target_rank"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_irecv": {
+      "data_flow": [
+        {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_recv_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "receiver",
+          "source": {
+            "kind": "matched",
+            "via": "local_complete"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [
+        {
+          "handle": "param:request",
+          "handle_kind": "REQUEST",
+          "role": "create"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "receiver",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:request",
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "receiver"
+          }
+        ],
+        "matching": {
+          "kind": "tag_match",
+          "match_keys": [
+            "param:comm",
+            "param:tag",
+            "param:source"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": false
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_isend": {
+      "data_flow": [
+        {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_send_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "sender",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [
+        {
+          "handle": "param:request",
+          "handle_kind": "REQUEST",
+          "role": "create"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "sender",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:request",
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "sender"
+          }
+        ],
+        "matching": {
+          "kind": "tag_match",
+          "match_keys": [
+            "param:comm",
+            "param:tag",
+            "param:dest",
+            "self_rank_as_source"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": false
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_put": {
+      "data_flow": [
+        {
+          "buffer": "param:origin_addr",
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:win",
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:target_rank"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_recv": {
+      "data_flow": [
+        {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_recv_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "receiver",
+          "source": {
+            "kind": "matched",
+            "via": "local_complete"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "receiver",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "receiver"
+          }
+        ],
+        "matching": {
+          "kind": "tag_match",
+          "match_keys": [
+            "param:comm",
+            "param:tag",
+            "param:source"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": false
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_reduce": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "param:op",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "root",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "rank == param:root"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_reduce_scatter_block": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuf",
+          "extent": null,
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": null,
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "param:op",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:recvcount",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "offset": "rank_in(param:comm) * extent_size(param:recvcount, param:datatype)",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_scan": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "instances_before_self_in_order"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "param:op",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_scatter": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuf",
+          "extent": {
+            "count_ref": "param:recvcount",
+            "datatype_ref": "param:recvtype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "root",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:recvcount",
+            "datatype_ref": "param:recvtype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": "rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)",
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "structural",
+            "offset": "rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "rank == param:root"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_send": {
+      "data_flow": [
+        {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_send_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "sender",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "sender",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "sender"
+          }
+        ],
+        "matching": {
+          "kind": "tag_match",
+          "match_keys": [
+            "param:comm",
+            "param:tag",
+            "param:dest",
+            "self_rank_as_source"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": false
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_wait": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "param:request",
+          "handle_kind": "REQUEST",
+          "role": "destroy"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "waiter",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": null,
+        "ordering": []
+      }
+    },
+    "mpi:mpi_win_complete": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:win",
+            "epoch_scope": "access",
+            "event_type": "close_epoch",
+            "group_ref": null,
+            "id": "epoch_event",
+            "participant": "self"
+          }
+        ],
+        "matching": {
+          "kind": "group_match",
+          "match_keys": [],
+          "matched_across": "paired_call",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_win_create": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "param:win",
+          "handle_kind": "WINDOW",
+          "role": "create"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:win",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    },
+    "mpi:mpi_win_fence": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:win",
+            "epoch_scope": null,
+            "event_type": "close_epoch",
+            "group_ref": null,
+            "id": "close_prior",
+            "participant": "self"
+          },
+          {
+            "bound_to": "param:win",
+            "epoch_scope": null,
+            "event_type": "open_epoch",
+            "group_ref": null,
+            "id": "open_next",
+            "participant": "self"
+          }
+        ],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_win_free": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "param:win",
+          "handle_kind": "WINDOW",
+          "role": "destroy"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:win",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    },
+    "mpi:mpi_win_lock": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:rank"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:win",
+            "epoch_scope": "access",
+            "event_type": "open_epoch",
+            "group_ref": null,
+            "id": "epoch_event",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    },
+    "mpi:mpi_win_post": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:win",
+            "epoch_scope": "exposure",
+            "event_type": "open_epoch",
+            "group_ref": "param:group",
+            "id": "epoch_event",
+            "participant": "self"
+          }
+        ],
+        "matching": {
+          "kind": "group_match",
+          "match_keys": [],
+          "matched_across": "paired_call",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_win_start": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:win",
+            "epoch_scope": "access",
+            "event_type": "open_epoch",
+            "group_ref": "param:group",
+            "id": "epoch_event",
+            "participant": "self"
+          }
+        ],
+        "matching": {
+          "kind": "group_match",
+          "match_keys": [],
+          "matched_across": "paired_call",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "mpi:mpi_win_unlock": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:rank"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:win",
+            "epoch_scope": "access",
+            "event_type": "close_epoch",
+            "group_ref": null,
+            "id": "epoch_event",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    },
+    "mpi:mpi_win_wait": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:win",
+            "epoch_scope": "exposure",
+            "event_type": "close_epoch",
+            "group_ref": null,
+            "id": "epoch_event",
+            "participant": "self"
+          }
+        ],
+        "matching": {
+          "kind": "group_match",
+          "match_keys": [],
+          "matched_across": "paired_call",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nccl:ncclAllGather": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuff",
+          "extent": {
+            "count_ref": "param:sendcount",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuff",
+          "extent": {
+            "count_ref": "param:sendcount",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "gathered",
+            "placement_offset": "rank_in(param:comm) * extent_size(param:sendcount, param:datatype)",
+            "ref": "df_read",
+            "scope": "all_participant_instances"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nccl:ncclAllReduce": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuff",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "param:op",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuff",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nccl:ncclBroadcast": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuff",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "root",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuff",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "rank == param:root"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nccl:ncclCommDestroy": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "param:comm",
+          "handle_kind": "COMMUNICATOR",
+          "role": "destroy"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:comm",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "member"
+          }
+        ],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nccl:ncclCommInitRank": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "param:comm",
+          "handle_kind": "COMMUNICATOR",
+          "role": "create"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in all_pes"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:comm",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "member"
+          }
+        ],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nccl:ncclRecv": {
+      "data_flow": [
+        {
+          "buffer": "param:recvbuff",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_recv_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "receiver",
+          "source": {
+            "kind": "matched",
+            "via": "local_complete"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "receiver",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "receiver"
+          }
+        ],
+        "matching": {
+          "kind": "peer_match",
+          "match_keys": [
+            "param:comm",
+            "param:peer"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": true
+        },
+        "ordering": []
+      }
+    },
+    "nccl:ncclReduce": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuff",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "param:op",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuff",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "root",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "rank == param:root"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nccl:ncclReduceScatter": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuff",
+          "extent": null,
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": null,
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "param:op",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:recvbuff",
+          "extent": {
+            "count_ref": "param:recvcount",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "offset": "rank_in(param:comm) * extent_size(param:recvcount, param:datatype)",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:comm"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nccl:ncclSend": {
+      "data_flow": [
+        {
+          "buffer": "param:sendbuff",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "id": "df_send_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "sender",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "sender",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "sender"
+          }
+        ],
+        "matching": {
+          "kind": "peer_match",
+          "match_keys": [
+            "param:comm",
+            "param:peer"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": true
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_barrier": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:team"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_broadcastmem": {
+      "data_flow": [
+        {
+          "buffer": "param:src",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:byte"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "root",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:byte"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "rank == param:PE_root"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:team"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_fence": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "fence_point",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_free": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "param:ptr",
+          "handle_kind": "SYMMETRIC_ALLOCATION",
+          "role": "destroy"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in all_pes"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:ptr",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "member"
+          }
+        ],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_int_atomic_add": {
+      "data_flow": [
+        {
+          "buffer": "param:value",
+          "extent": null,
+          "id": "df_operand_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": null,
+          "id": "df_rmw",
+          "inputs": [
+            {
+              "ref": "df_operand_read",
+              "scope": "rma_target_prior"
+            }
+          ],
+          "offset": null,
+          "op": "read_modify_write",
+          "operation_ref": "literal:add",
+          "participant": "target",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:pe"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_int_sum_reduce": {
+      "data_flow": [
+        {
+          "buffer": "param:src",
+          "extent": {
+            "count_ref": "param:nreduce",
+            "datatype_ref": "type:int"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": {
+            "count_ref": "param:nreduce",
+            "datatype_ref": "type:int"
+          },
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "literal:sum",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": {
+            "count_ref": "param:nreduce",
+            "datatype_ref": "type:int"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:team"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_malloc": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "return_value",
+          "handle_kind": "SYMMETRIC_ALLOCATION",
+          "role": "create"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in all_pes"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "return_value",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "member"
+          }
+        ],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_{T}_get": {
+      "data_flow": [
+        {
+          "buffer": "param:source",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "target",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:pe"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_{T}_p": {
+      "data_flow": [
+        {
+          "buffer": "param:value",
+          "extent": null,
+          "id": "df_value_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": null,
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_value_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:pe"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_{T}_put": {
+      "data_flow": [
+        {
+          "buffer": "param:source",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:pe"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "nvshmem:nvshmem_{T}_put_signal": {
+      "data_flow": [
+        {
+          "buffer": "param:source",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        },
+        {
+          "buffer": "param:signal",
+          "extent": null,
+          "id": "df_signal_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:sig_addr",
+          "extent": null,
+          "id": "df_signal_update",
+          "inputs": [],
+          "offset": null,
+          "op": "read_modify_write",
+          "operation_ref": "param:sig_op",
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_signal_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:pe"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "signal_delivered",
+            "participant": "target"
+          }
+        ],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": [
+          {
+            "after": "signal_delivered",
+            "before": "df_write",
+            "scope": "same_participant_instance"
+          }
+        ]
+      }
+    },
+    "shmem:shmem_broadcastmem": {
+      "data_flow": [
+        {
+          "buffer": "param:source",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:byte"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "root",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:byte"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "rank == param:PE_root"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:team"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "shmem:shmem_fence": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "fence_point",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    },
+    "shmem:shmem_free": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "param:ptr",
+          "handle_kind": "SYMMETRIC_ALLOCATION",
+          "role": "destroy"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in all_pes"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "param:ptr",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "member"
+          }
+        ],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "shmem:shmem_int_sum_reduce": {
+      "data_flow": [
+        {
+          "buffer": "param:source",
+          "extent": {
+            "count_ref": "param:nreduce",
+            "datatype_ref": "type:int32"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": {
+            "count_ref": "param:nreduce",
+            "datatype_ref": "type:int32"
+          },
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "literal:sum",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": {
+            "count_ref": "param:nreduce",
+            "datatype_ref": "type:int32"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:team"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "shmem:shmem_malloc": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "return_value",
+          "handle_kind": "SYMMETRIC_ALLOCATION",
+          "role": "create"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in all_pes"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "return_value",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "member"
+          }
+        ],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "shmem:shmem_team_sync": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "rank in param:team"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    },
+    "shmem:shmem_{T}_atomic_add": {
+      "data_flow": [
+        {
+          "buffer": "param:value",
+          "extent": null,
+          "id": "df_operand_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": null,
+          "id": "df_rmw",
+          "inputs": [
+            {
+              "ref": "df_operand_read",
+              "scope": "rma_target_prior"
+            }
+          ],
+          "offset": null,
+          "op": "read_modify_write",
+          "operation_ref": "literal:add",
+          "participant": "target",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:pe"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "shmem:shmem_{T}_get": {
+      "data_flow": [
+        {
+          "buffer": "param:source",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "target",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:pe"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "shmem:shmem_{T}_p": {
+      "data_flow": [
+        {
+          "buffer": "param:value",
+          "extent": null,
+          "id": "df_value_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": null,
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_value_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:pe"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    },
+    "shmem:shmem_{T}_put": {
+      "data_flow": [
+        {
+          "buffer": "param:source",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "param:dest",
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "rank == param:pe"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    }
+  }
+}

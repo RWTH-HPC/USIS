@@ -1,0 +1,297 @@
+.TH SHMEM_TEST 3 "Open Source Software Solutions, Inc." "OpenSHMEM Library Documentation"
+./ sectionStart
+.SH NAME
+shmem_test \- 
+Indicate whether a variable on the local PE meets the specified condition.
+
+./ sectionEnd
+
+
+./ sectionStart
+.SH   SYNOPSIS
+./ sectionEnd
+
+./ sectionStart
+.SS C11:
+
+.B int
+.B shmem\_test(TYPE
+.IB "*ivar" ,
+.B int
+.IB "cmp" ,
+.B TYPE
+.I cmp_value
+.B );
+
+
+
+./ sectionEnd
+
+
+where TYPE is one of the standard AMO types specified by
+Table 6,
+
+./ sectionStart
+.B ***************DEPRECATED***************
+./ sectionEnd
+
+or TYPE is one of \{short, unsigned short\}.
+
+./ sectionStart
+.B ****************************************
+./ sectionEnd
+
+./ sectionStart
+.SS C/C++:
+
+.B int
+.B shmem\_TYPENAME\_test(TYPE
+.IB "*ivar" ,
+.B int
+.IB "cmp" ,
+.B TYPE
+.I cmp_value
+.B );
+
+
+
+./ sectionEnd
+
+
+where TYPE is one of the standard AMO types and has a
+corresponding TYPENAME specified by Table 6,
+
+./ sectionStart
+.B ***************DEPRECATED***************
+./ sectionEnd
+
+or TYPE is one of \{short, unsigned short\} and
+has a corresponding TYPENAME specified by Table 12.
+
+./ sectionStart
+.B ****************************************
+./ sectionEnd
+
+./ sectionStart
+
+.SH DESCRIPTION
+.SS Arguments
+.BR "IN " -
+.I ivar
+- Symmetric address of a remotely accessible data object.
+The type of 
+.I ivar
+should match that implied in the SYNOPSIS section.
+
+
+.BR "IN " -
+.I cmp
+- The comparison operator that compares 
+.I ivar
+with
+.IR "cmp\_value" .
+
+
+
+.BR "IN " -
+.I cmp\_value
+- The value against which the object pointed to
+by 
+.I ivar
+will be compared.
+The type of 
+.I cmp\_value
+should match that implied in the SYNOPSIS section.
+./ sectionEnd
+
+
+./ sectionStart
+
+.SS API Description
+
+.B shmem\_test
+tests the numeric comparison of the symmetric object
+pointed to by 
+.I ivar
+with the value 
+.I cmp\_value
+according to the
+comparison operator 
+.IR "cmp" .
+The 
+.I ivar
+object at the
+calling PE may be updated by an AMO performed by a thread located
+within the calling PE or within another PE.
+
+Implementations must ensure that 
+.B shmem\_test
+does not return 1 before
+the update of the memory indicated by 
+.I ivar
+is fully complete.
+
+./ sectionEnd
+
+
+./ sectionStart
+
+.SS Return Values
+
+.B shmem\_test
+returns 1 if the comparison of the symmetric object
+pointed to by 
+.I ivar
+with the value 
+.I cmp\_value
+according to the
+comparison operator 
+.I cmp
+evaluates to true; otherwise, it returns 0.
+
+./ sectionEnd
+
+
+
+./ sectionStart
+.SS Examples
+
+
+The following example demonstrates the use of 
+.B shmem\_test
+to
+wait on an array of symmetric objects and return the index of an
+element that satisfies the specified condition.
+
+.nf
+#include <shmem.h>
+#include <stdio.h>
+
+int user_wait_any(long *ivar, int count, int cmp, long value) {
+ int idx = 0;
+ while (!shmem_test(&ivar[idx], cmp, value))
+   idx = (idx + 1) % count;
+ return idx;
+}
+
+int main(void) {
+ shmem_init();
+ const int mype = shmem_my_pe();
+ const int npes = shmem_n_pes();
+
+ long *wait_vars = shmem_calloc(npes, sizeof(long));
+ if (mype == 0) {
+   int who = user_wait_any(wait_vars, npes, SHMEM_CMP_NE, 0);
+   printf("PE %d observed first update from PE %d\\n", mype, who);
+ }
+ else
+   shmem_atomic_set(&wait_vars[mype], mype, 0);
+
+ shmem_free(wait_vars);
+ shmem_finalize();
+ return 0;
+}
+.fi
+
+
+
+
+.SS Table 6:
+Standard AMO Types and Names
+.TP 25
+.B \TYPE
+.B \TYPENAME
+.TP
+int
+int
+.TP
+long
+long
+.TP
+long long
+longlong
+.TP
+unsigned int
+uint
+.TP
+unsigned long
+ulong
+.TP
+unsigned long long
+ulonglong
+.TP
+int32\_t
+int32
+.TP
+int64\_t
+int64
+.TP
+uint32\_t
+uint32
+.TP
+uint64\_t
+uint64
+.TP
+size\_t
+size
+.TP
+ptrdiff\_t
+ptrdiff
+
+.TP
+./ sectionStart
+.B ***************DEPRECATED***************
+./ sectionEnd
+
+.SS Table 12:
+Point-to-Point Synchronization Types and Names
+.TP 25
+.B \TYPE
+.B \TYPENAME
+.TP
+short
+short
+.TP
+int
+int
+.TP
+long
+long
+.TP
+long long
+longlong
+.TP
+unsigned short
+ushort
+.TP
+unsigned int
+uint
+.TP
+unsigned long
+ulong
+.TP
+unsigned long long
+ulonglong
+.TP
+int32\_t
+int32
+.TP
+int64\_t
+int64
+.TP
+uint32\_t
+uint32
+.TP
+uint64\_t
+uint64
+.TP
+size\_t
+size
+.TP
+ptrdiff\_t
+ptrdiff
+
+.TP
+./ sectionStart
+.B ****************************************
+./ sectionEnd

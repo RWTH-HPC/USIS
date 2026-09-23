@@ -1,0 +1,370 @@
+{
+  "mpi:mpi_send": {
+    "identity": {
+      "model": "mpi",
+      "name": "MPI_Send",
+      "api_group": "point_to_point",
+      "since": "MPI-1.0",
+      "deprecated_in": null,
+      "standard_refs": [
+        "MPI-4.1 \u00a73.2.1"
+      ],
+      "desc": "Blocking send of a message to a destination process.",
+      "type_family": null
+    },
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "mpi.h",
+        "signature": "int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)"
+      },
+      "fortran90": {
+        "name": "MPI_SEND",
+        "expressible": true,
+        "use_colons": false,
+        "index_overload": null,
+        "not_with_mpif": false
+      },
+      "fortran08": {
+        "name": "MPI_Send",
+        "expressible": true,
+        "abstract_interface": true,
+        "module": "mpi_f08"
+      },
+      "lis": {
+        "expressible": true
+      },
+      "cpp": {
+        "expressible": true,
+        "class_method": "Comm::Send"
+      }
+    },
+    "execution": {
+      "blocking": true,
+      "execute_once": false,
+      "collective": false,
+      "thread_safety": "multiple",
+      "launch": "cpu",
+      "runs_on": "cpu",
+      "gpu_scope": null,
+      "stages": [
+        "s",
+        "c"
+      ],
+      "locality": "both",
+      "completion": "c",
+      "procedure_class": "b-op"
+    },
+    "semantics": {
+      "collective": null,
+      "point_to_point": {
+        "direction": "send",
+        "synchronous": false,
+        "buffered": false,
+        "ready": false
+      },
+      "one_sided": null,
+      "atomic": null,
+      "memory": {
+        "local_completion": "after_return",
+        "remote_completion": null,
+        "buffer_reuse": "after_return",
+        "fence_semantics": "none",
+        "symmetric_heap": false,
+        "memory_model": null
+      },
+      "formal": {
+        "participants": [
+          {
+            "id": "sender",
+            "role_kind": "initiator",
+            "calls_function": true,
+            "cardinality": "one",
+            "selector": "self"
+          }
+        ],
+        "data_flow": [
+          {
+            "id": "df_read",
+            "participant": "sender",
+            "op": "read",
+            "buffer": "param:buf",
+            "extent": {
+              "count_ref": "param:count",
+              "datatype_ref": "param:datatype"
+            },
+            "offset": null,
+            "inputs": [],
+            "operation_ref": null,
+            "valid_during": null,
+            "source": null
+          }
+        ],
+        "sync": {
+          "events": [],
+          "ordering": [],
+          "matching": {
+            "kind": "tag_match",
+            "match_keys": [
+              "param:comm",
+              "param:tag",
+              "param:dest",
+              "self_rank_as_source"
+            ],
+            "matched_across": "paired_call",
+            "program_order_required": false
+          }
+        },
+        "handle_lifecycle": []
+      }
+    },
+    "parameters": [
+      {
+        "name": "buf",
+        "kind": "BUFFER",
+        "direction": "in",
+        "desc": "Initial address of send buffer.",
+        "binding_type": {
+          "c": "const void*",
+          "fortran90": "TYPE(*), DIMENSION(..)",
+          "fortran08": "TYPE(*), DIMENSION(..)",
+          "lis": null,
+          "cpp": "const void*"
+        },
+        "asynchronous": false,
+        "constant": true,
+        "pointer": true,
+        "array_type": "variable",
+        "func_type": null,
+        "length": "count",
+        "parameter_bindings": [
+          "c",
+          "c_large",
+          "fortran90",
+          "fortran08",
+          "cpp"
+        ],
+        "root_only": false,
+        "constraints": {
+          "not_null": true,
+          "value_range": null,
+          "paired_with": "count"
+        },
+        "memory_space": "either"
+      },
+      {
+        "name": "count",
+        "kind": "COUNT",
+        "direction": "in",
+        "desc": "Number of elements in send buffer.",
+        "binding_type": {
+          "c": "int",
+          "fortran90": "INTEGER",
+          "fortran08": "INTEGER",
+          "lis": null,
+          "cpp": "int"
+        },
+        "asynchronous": false,
+        "constant": true,
+        "pointer": false,
+        "array_type": null,
+        "func_type": null,
+        "length": null,
+        "parameter_bindings": [
+          "c",
+          "fortran90",
+          "fortran08",
+          "cpp"
+        ],
+        "root_only": false,
+        "constraints": {
+          "not_null": false,
+          "value_range": ">= 0",
+          "paired_with": "buf"
+        },
+        "memory_space": null
+      },
+      {
+        "name": "datatype",
+        "kind": "DATATYPE",
+        "direction": "in",
+        "desc": "Datatype of each send buffer element.",
+        "binding_type": {
+          "c": "MPI_Datatype",
+          "fortran90": "TYPE(MPI_Datatype)",
+          "fortran08": "TYPE(MPI_Datatype)",
+          "lis": null,
+          "cpp": "const MPI_Datatype&"
+        },
+        "asynchronous": false,
+        "constant": true,
+        "pointer": false,
+        "array_type": null,
+        "func_type": null,
+        "length": null,
+        "parameter_bindings": [
+          "c",
+          "fortran90",
+          "fortran08",
+          "cpp"
+        ],
+        "root_only": false,
+        "constraints": {
+          "not_null": true,
+          "value_range": null,
+          "paired_with": null
+        },
+        "memory_space": null
+      },
+      {
+        "name": "dest",
+        "kind": "RANK",
+        "direction": "in",
+        "desc": "Rank of destination process.",
+        "binding_type": {
+          "c": "int",
+          "fortran90": "INTEGER",
+          "fortran08": "INTEGER",
+          "lis": null,
+          "cpp": "int"
+        },
+        "asynchronous": false,
+        "constant": true,
+        "pointer": false,
+        "array_type": null,
+        "func_type": null,
+        "length": null,
+        "parameter_bindings": [
+          "c",
+          "fortran90",
+          "fortran08",
+          "cpp"
+        ],
+        "root_only": false,
+        "constraints": {
+          "not_null": false,
+          "value_range": "0 <= dest < comm_size(comm)",
+          "paired_with": null
+        },
+        "memory_space": null
+      },
+      {
+        "name": "tag",
+        "kind": "TAG",
+        "direction": "in",
+        "desc": "Message tag.",
+        "binding_type": {
+          "c": "int",
+          "fortran90": "INTEGER",
+          "fortran08": "INTEGER",
+          "lis": null,
+          "cpp": "int"
+        },
+        "asynchronous": false,
+        "constant": true,
+        "pointer": false,
+        "array_type": null,
+        "func_type": null,
+        "length": null,
+        "parameter_bindings": [
+          "c",
+          "fortran90",
+          "fortran08",
+          "cpp"
+        ],
+        "root_only": false,
+        "constraints": {
+          "not_null": false,
+          "value_range": "0 <= tag <= MPI_TAG_UB",
+          "paired_with": null
+        },
+        "memory_space": null
+      },
+      {
+        "name": "comm",
+        "kind": "COMMUNICATOR",
+        "direction": "in",
+        "desc": "Communicator.",
+        "binding_type": {
+          "c": "MPI_Comm",
+          "fortran90": "INTEGER",
+          "fortran08": "TYPE(MPI_Comm)",
+          "lis": null,
+          "cpp": "const MPI_Comm&"
+        },
+        "asynchronous": false,
+        "constant": true,
+        "pointer": false,
+        "array_type": null,
+        "func_type": null,
+        "length": null,
+        "parameter_bindings": [
+          "c",
+          "fortran90",
+          "fortran08",
+          "cpp"
+        ],
+        "root_only": false,
+        "constraints": {
+          "not_null": true,
+          "value_range": "comm != MPI_COMM_NULL",
+          "paired_with": null
+        },
+        "memory_space": null
+      }
+    ],
+    "return": {
+      "kind": "ERROR_CODE",
+      "value_kind": null,
+      "binding_type": {
+        "c": "int",
+        "fortran90": "INTEGER",
+        "fortran08": "INTEGER",
+        "lis": null,
+        "cpp": "void"
+      },
+      "possible_errors": [
+        "MPI_ERR_COMM",
+        "MPI_ERR_COUNT",
+        "MPI_ERR_TYPE",
+        "MPI_ERR_RANK",
+        "MPI_ERR_TAG"
+      ],
+      "possible_successes": [
+        "MPI_SUCCESS"
+      ]
+    },
+    "tool_integration": {
+      "profiling_name": "PMPI_Send",
+      "invariants": [
+        "comm != MPI_COMM_NULL",
+        "count >= 0",
+        "dest >= 0 && dest < comm_size(comm)"
+      ],
+      "buffer_aliasing": "forbidden",
+      "context_dependencies": [
+        {
+          "field": "param:buf.memory_space",
+          "default_value": "host",
+          "depends_on": [
+            "pointer provenance of the argument bound to buf",
+            "whether the MPI implementation was built with CUDA-aware support"
+          ],
+          "note": "A code generator cannot resolve this from the symbol alone; requires the consumer's own pointer-provenance analysis."
+        }
+      ]
+    },
+    "relationships": {
+      "variants": {
+        "nonblocking": "mpi:mpi_isend",
+        "blocking": null,
+        "persistent": "mpi:mpi_send_init",
+        "neighborhood": null,
+        "host": null,
+        "gpu": null
+      },
+      "superseded_by": null,
+      "supersedes": []
+    }
+  }
+}

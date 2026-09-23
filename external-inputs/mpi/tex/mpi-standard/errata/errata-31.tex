@@ -1,0 +1,149 @@
+% This document is made by doing:
+%   MAKE-MPI-CHAPTER errata-20.tex
+%   use ghostview to strip the first two pages off
+%   update change data in docs.html
+%   put on home page in compressed and uncompressed format
+
+\def\mf#1{{{\sf MPI\_#1}}}
+\def\cf#1{{{\tt #1}}}
+
+% For each batch of errata, we surround it with
+% \ifbati (ii, etc)
+% \fi % bati (ii, etc)
+
+\def\pending{\textbf{Pending Errata:}}
+
+% Is this a draft or an official version?
+\newif\ifdraft
+\drafttrue
+%\draftfalse
+%
+% Macro to point at the discussion.  This is soley to help in generating the
+% HTML online version
+\def\webdiscussion#1{\relax}
+%
+% This errata contains the current list of both accepted and
+% pending items, in page order.  Each has a comment (at the top!) that
+% gives the state
+% The categories are
+%   Original (posted on the forum)
+%   May-1-01     (first batch)
+
+\chapter*{Errata for \mpiiiidoti/}
+
+This document was processed on \today.
+\vskip 0.3truein
+
+The known corrections to \mpiiiidoti/ are listed in this document.  All
+page and line numbers are for the official version of the \mpiiiidoti/
+document available from the \MPI/ Forum home page at
+\url{www.mpi-forum.org}.  Information on reporting mistakes in the
+\mpi/ documents is also located on the \MPI/ Forum home page.
+
+\ifdraft
+This is a \textbf{DRAFT} and is not official.  It may contain errata items
+that are currently under discussion and have not yet been voted in by
+the MPI Forum.  Such items are marked as \pending.
+\fi
+
+\begin{itemize}
+
+\item Page 53, lines 24--25 reads:
+
+\begin{quote}
+Any other type of request is and the request handle is set to \const{MPI\_REQUEST\_NULL}. \mpifunc{MPI\_WAIT} is a non-local operation.
+\end{quote}
+
+\noindent but should be:
+
+\begin{quote}
+Any other type of request is deallocated and the request handle is set to \const{MPI\_REQUEST\_NULL}. \mpifunc{MPI\_WAIT} is a non-local operation.
+\end{quote}
+
+\item Page 330 lines 17--18 reads:
+
+\begin{verbatim}
+!   Set process grid size and periodicity
+CALL MPI_DIMS_CREATE(comm, ndims, dims, ierr)
+\end{verbatim}
+
+\noindent but should read:
+
+\begin{verbatim}
+CALL MPI_COMM_SIZE(comm, comm_size, ierr)
+!   Set process grid size and periodicity
+CALL MPI_DIMS_CREATE(comm_size, ndims, dims, ierr)
+\end{verbatim}
+In addition, add \texttt{comm\_size} to the declaration on line 11:
+\begin{verbatim}
+INTEGER comm, comm_size, comm_cart, dims(ndims), ierr
+\end{verbatim}
+
+%\From{Pavan Balaji}
+
+%% Removed this because it is not an errata; rather, this was an improved
+%% version of an example.
+%% \item Page 180, lines 29--42 provides two examples defining
+%%   \const{MPI\_2REAL} and \const{MPI\_FLOAT\_INT}.  These examples were
+%%   both changed from pseudocode to C code.  The \const{MPI\_FLOAT\_INT}
+%%   construction example was changed to show the theoretical
+%%   construction of \const{MPI\_SHORT\_INT}, because it likely includes
+%%   padding between the two structure members.
+
+\item Page 577, line 7 reads:
+\begin{verbatim}
+if (err!=MPI_SUCCESS || err!=MPI_T_ERR_INVALID_INDEX) return err;
+\end{verbatim}
+
+\noindent but should read:
+
+\begin{verbatim}
+if (err!=MPI_SUCCESS && err!=MPI_T_ERR_INVALID_INDEX) return err;
+\end{verbatim}
+
+\item Page 483, line 47 reads:
+\begin{verbatim}
+LOGICAL, INTENT(OUT) ::  flag
+\end{verbatim}
+
+\noindent but should read:
+\begin{verbatim}
+LOGICAL, INTENT(IN) ::  flag
+\end{verbatim}
+
+\item Page 448, line 3 reads:
+\begin{quote}
+\mpifunc{MPI\_WIN\_ALLOCATE} (Section 11.2.2), or attached with \mpifunc{MPI\_WIN\_ATTACH}
+\end{quote}
+
+\noindent but should read:
+\begin{quote}
+\mpifunc{MPI\_WIN\_ALLOCATE} (Section 11.2.2), \mpifunc{MPI\_WIN\_ALLOCATE\_SHARED}
+(Section 11.2.3), or attached with \mpifunc{MPI\_WIN\_ATTACH}
+\end{quote}
+
+\item Page 658, lines 9 and 28 are missing a \texttt{const}. Specifically,
+line 9 reads:\\
+\mpibind{MPI\_Status\_f2f08(\gb{}MPI\_Fint~*f\_status, MPI\_F08\_status~*f08\_status)}
+but should read:\\
+\mpibind{MPI\_Status\_f2f08(\gb{}const~MPI\_Fint~*f\_status, MPI\_F08\_status~*f08\_status)}
+
+and line 28 reads:\\
+\mpibind{MPI\_Status\_f082f(\gb{}MPI\_F08\_status~*f08\_status, MPI\_Fint~*f\_status)}
+but should read:\\
+\mpibind{MPI\_Status\_f082f(\gb{}const~MPI\_F08\_status~*f08\_status, MPI\_Fint~*f\_status)}
+
+
+\item Page 690, line 23 should have new text added below it:
+
+\begin{verbatim}
+mpi_assert_allow_overtaking
+mpi_assert_exact_length
+mpi_assert_no_any_source
+mpi_assert_no_any_tag
+mpi_assert_strict_start_ordering
+mpi_optimization_goal
+mpi_reuse_count
+\end{verbatim}
+
+\end{itemize}

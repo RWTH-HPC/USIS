@@ -1,0 +1,56 @@
+\apisummary{
+    Returns a local pointer to a symmetric data object on the specified \ac{PE} in the world team.
+}
+
+\begin{apidefinition}
+
+\begin{Csynopsis}
+void *@\FuncDecl{shmem\_ptr}@(const void *dest, int pe);
+\end{Csynopsis}
+
+\begin{apiarguments}
+\apiargument{IN}{dest}{The symmetric address of the remotely accessible data
+    object to be referenced.}
+\apiargument{IN}{pe}{An integer that indicates the \ac{PE} number on which \dest{} is to
+    be accessed.}
+\end{apiarguments}
+
+\apidescription{
+    \FUNC{shmem\_ptr} returns an address that may be used to directly reference
+    \dest{} on the specified \ac{PE} in the world team.  This address can be
+    assigned to a pointer.  After that, ordinary loads and stores to \dest{} may
+    be performed.  The address returned by \FUNC{shmem\_ptr} is a local address
+    to a remotely accessible data object.  Providing this address to an argument
+    of an \openshmem routine that requires a symmetric address results in
+    undefined behavior.
+
+    The \FUNC{shmem\_ptr} routine can provide efficient means to accomplish
+    communication, for example when a sequence of reads and writes to a data
+    object on a remote \ac{PE} does not match the access pattern provided in an
+    \openshmem data transfer routine like \FUNC{shmem\_put} or
+    \FUNC{shmem\_iget}.
+}
+
+\apireturnvalues{
+    A local pointer to the remotely accessible \dest{} data object is returned
+    when it can be accessed using memory loads and stores.  Otherwise, a null
+    pointer is returned.
+}
+
+\apinotes{
+    When calling \FUNC{shmem\_ptr}, \dest{} is the address of the referenced
+    symmetric data object on the calling \ac{PE}.
+}
+
+\begin{apiexamples}
+
+\apicexample
+    {In the following \Cstd[11] example, \ac{PE} 0 uses the \FUNC{shmem\_ptr}
+    routine to query a pointer and directly access the \VAR{dest} array on
+    \ac{PE} 1:}
+    {./example_code/shmem_ptr_example.c}
+    {}
+
+\end{apiexamples}
+
+\end{apidefinition}

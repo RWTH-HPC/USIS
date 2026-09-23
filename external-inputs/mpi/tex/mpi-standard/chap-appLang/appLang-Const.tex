@@ -1,0 +1,2262 @@
+%: in the macros ONEc, TWOc, MERGEc, REVIEWc, and FINALc, \constskip was substituted by \const
+% :s/&[^&]*\\\\/\\\\/     Last column removal
+% :s/&[^&]*&/\&/          Middle column removal
+ 
+ 
+% In the discussion, it was proposed to keep Language Bindings at the end.
+% Last chapter and first Annex should not have same title, therefore title of the Annex changed:
+% \chapter{Language Binding}
+\chapter{Language Bindings Summary}
+\mpitermtitleindex{language binding!summary}
+\label{sec:lang}
+\label{chap:lang}
+\label{chap:binding}
+
+In this section we summarize the specific bindings for 
+C and Fortran.
+First we present the constants, type definitions, info values and keys. Then we present the routine prototypes separately for each binding.
+Listings are alphabetical within chapter.
+
+All ABI values must be cast to the appropriate type if the type of the constant
+is not a C \ctype{int} or Fortran \ftype{INTEGER}.
+For example, when \mpiconst{MPI\_COMM\_WORLD} is said to be 257,
+the implementation will use \code{((MPI\_Comm)257)} in C.
+ 
+\section{Defined  Values and Handles}
+\label{sec:lang:const}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Defined Constants}
+\mpitermtitleindex{constants}
+\label{subsec:annexa-const}
+
+The C and Fortran names are listed below.
+Constants described as ``integer constant expression'' may
+be implemented as literal integer constants of the specified integer type substituted by the preprocessor or (where possible) as enum members.
+\begin{center}
+\begin{tabular}{l|l}
+% This first part of the error class list contains all MPI-1 error classes.
+% All error classes that were introduced later are intended to go to the second list
+% part for now. (Only exception here is MPI_ERR_LASTCODE from MPI-1 that marks
+% the end of the list)
+\multicolumn{2}{c}{\textbf{Error classes}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\error{MPI\_SUCCESS}       &  0 \\
+\error{MPI\_ERR\_BUFFER}   &  1 \\
+\error{MPI\_ERR\_COUNT}    &  2 \\
+\error{MPI\_ERR\_TYPE}     &  3 \\
+\error{MPI\_ERR\_TAG}      &  4 \\
+\error{MPI\_ERR\_COMM}     &  5 \\
+\error{MPI\_ERR\_RANK}     &  6 \\
+\error{MPI\_ERR\_REQUEST}  &  7 \\
+\error{MPI\_ERR\_ROOT}     &  8 \\
+\error{MPI\_ERR\_GROUP}    &  9 \\
+\error{MPI\_ERR\_OP}       & 10 \\
+\error{MPI\_ERR\_TOPOLOGY} & 11 \\
+\error{MPI\_ERR\_DIMS}     & 12 \\
+\error{MPI\_ERR\_ARG}      & 13 \\
+\error{MPI\_ERR\_UNKNOWN}  & 14 \\
+\error{MPI\_ERR\_TRUNCATE} & 15 \\
+\error{MPI\_ERR\_OTHER}    & 16 \\
+\error{MPI\_ERR\_INTERN}   & 17 \\
+\error{MPI\_ERR\_PENDING}  & 18 \\
+\hline
+\multicolumn{2}{r}{\textbf{(Continued on next page)}} \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Error classes (continued)}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+% MPI-2.2 (and later) - Use \error instead of \errorskip to be consistent with the
+% use of \const for some of the other error classes elsewhere in this appendix.
+\error{MPI\_ERR\_IN\_STATUS}             & 19 \\
+\error{MPI\_ERR\_ACCESS}                 & 20 \\
+\error{MPI\_ERR\_AMODE}                  & 21 \\
+\error{MPI\_ERR\_ASSERT}                 & 22 \\
+\error{MPI\_ERR\_BAD\_FILE}              & 23 \\
+\error{MPI\_ERR\_BASE}                   & 24 \\
+\error{MPI\_ERR\_CONVERSION}             & 25 \\
+\error{MPI\_ERR\_DISP}                   & 26 \\
+\error{MPI\_ERR\_DUP\_DATAREP}           & 27 \\
+\error{MPI\_ERR\_FILE\_EXISTS}           & 28 \\
+\error{MPI\_ERR\_FILE\_IN\_USE}          & 29 \\
+\error{MPI\_ERR\_FILE}                   & 30 \\
+\error{MPI\_ERR\_INFO\_KEY}              & 31 \\
+\error{MPI\_ERR\_INFO\_NOKEY}            & 32 \\
+\error{MPI\_ERR\_INFO\_VALUE}            & 33 \\
+\error{MPI\_ERR\_INFO}                   & 34 \\
+\error{MPI\_ERR\_IO}                     & 35 \\
+\error{MPI\_ERR\_KEYVAL}                 & 36 \\
+\error{MPI\_ERR\_LOCKTYPE}               & 37 \\
+\error{MPI\_ERR\_NAME}                   & 38 \\
+\error{MPI\_ERR\_NO\_MEM}                & 39 \\
+\error{MPI\_ERR\_NOT\_SAME}              & 40 \\
+\error{MPI\_ERR\_NO\_SPACE}              & 41 \\
+\error{MPI\_ERR\_NO\_SUCH\_FILE}         & 42 \\
+\error{MPI\_ERR\_PORT}                   & 43 \\
+\error{MPI\_ERR\_QUOTA}                  & 44 \\
+\error{MPI\_ERR\_READ\_ONLY}             & 45 \\
+\error{MPI\_ERR\_RMA\_ATTACH}            & 46 \\
+\error{MPI\_ERR\_RMA\_CONFLICT}          & 47 \\
+\error{MPI\_ERR\_RMA\_RANGE}             & 48 \\
+\error{MPI\_ERR\_RMA\_SHARED}            & 49 \\
+\error{MPI\_ERR\_RMA\_SYNC}              & 50 \\
+\error{MPI\_ERR\_SERVICE}                & 51 \\
+\error{MPI\_ERR\_SIZE}                   & 52 \\
+\error{MPI\_ERR\_SPAWN}                  & 53 \\
+\error{MPI\_ERR\_UNSUPPORTED\_DATAREP}   & 54 \\
+\error{MPI\_ERR\_UNSUPPORTED\_OPERATION} & 55 \\
+\error{MPI\_ERR\_WIN}                    & 56 \\
+\error{MPI\_ERR\_RMA\_FLAVOR}            & 57 \\
+\error{MPI\_ERR\_PROC\_ABORTED}          & 58 \\
+\error{MPI\_ERR\_VALUE\_TOO\_LARGE}      & 59 \\
+\error{MPI\_ERR\_SESSION}                & 60 \\
+\error{MPI\_ERR\_ERRHANDLER}             & 61 \\
+\error{MPI\_ERR\_ABI}                    & 62 \\
+
+\hline
+\multicolumn{2}{r}{\textbf{(Continued on next page)}} \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Error classes (continued)}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+% MPI-2.2 (and later) - Use \error instead of \errorskip to be consistent with the
+% use of \const for some of the other error classes elsewhere in this appendix.
+\error{MPI\_ERR\_PROC\_FAILED}           & 63 \\
+\error{MPI\_ERR\_REVOKED}                & 64 \\
+\error{MPI\_ERR\_PROC\_FAILED\_PENDING}  & 65 \\
+\error{MPI\_T\_ERR\_CANNOT\_INIT}        &  1001 \\
+\error{MPI\_T\_ERR\_NOT\_ACCESSIBLE}     &  1002 \\
+\error{MPI\_T\_ERR\_NOT\_INITIALIZED}    &  1003 \\
+\error{MPI\_T\_ERR\_NOT\_SUPPORTED}      &  1004 \\
+\error{MPI\_T\_ERR\_MEMORY}              &  1005 \\
+\error{MPI\_T\_ERR\_INVALID}             &  1006 \\
+\error{MPI\_T\_ERR\_INVALID\_INDEX}      &  1007 \\
+\error{MPI\_T\_ERR\_INVALID\_ITEM}       &  1008 \\
+\error{MPI\_T\_ERR\_INVALID\_SESSION}    &  1009 \\
+\error{MPI\_T\_ERR\_INVALID\_HANDLE}     &  1010 \\
+\error{MPI\_T\_ERR\_INVALID\_NAME}       &  1011 \\
+\error{MPI\_T\_ERR\_OUT\_OF\_HANDLES}    &  1012 \\
+\error{MPI\_T\_ERR\_OUT\_OF\_SESSIONS}   &  1013 \\
+\error{MPI\_T\_ERR\_CVAR\_SET\_NOT\_NOW} &  1014 \\
+\error{MPI\_T\_ERR\_CVAR\_SET\_NEVER}    &  1015 \\
+\error{MPI\_T\_ERR\_PVAR\_NO\_WRITE}     &  1016 \\
+\error{MPI\_T\_ERR\_PVAR\_NO\_STARTSTOP} &  1017 \\
+\error{MPI\_T\_ERR\_PVAR\_NO\_ATOMIC}    &  1018 \\
+\error{MPI\_ERR\_LASTCODE}               & 16383 \\
+\hline
+\end{tabular}
+\end{center}
+ 
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Buffer address constants}} \\ 
+\hline
+{\small C type: \ctype{void * const}} & \multirow{2}{*}{ABI value in \code{mpi.h}} \\
+{\small Fortran type: (predefined memory location)$^1$} & \\
+\hline
+\mpiconst{MPI\_BOTTOM}            & \code{((void*)0)} \\
+\mpiconst{MPI\_IN\_PLACE}         & \code{((void*)1)} \\
+\mpiconst{MPI\_BUFFER\_AUTOMATIC} & \code{((void*)2)} \\
+\hline
+\multicolumn{2}{l}{$^1$ Note that in Fortran these constants are not usable for initialization} \\ 
+\multicolumn{2}{l}{\hspace{4pt} expressions or assignment. See \sectionref{subsec:named-constants}.} \\ 
+\end{tabular}
+\end{center}
+ 
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Constants specifying empty or ignored input}} \\ 
+\hline
+C/Fortran name                                   & \multirow{2}{*}{ABI value in \code{mpi.h}}   \\
+  \hspace{5mm}{\small C type / Fortran type$^1$} \\ 
+\hline
+\mpiconst{MPI\_ARGVS\_NULL}  & 0                    \\
+  \hspace{5mm}{\small\ctype{char***} / 2-dim.~array of \ftype{CHARACTER*(*)}}    \\
+\mpiconst{MPI\_ARGV\_NULL}   & 0                     \\
+  \hspace{5mm}{\small\ctype{char**} / array of \ftype{CHARACTER*(*)}}    \\
+%-Rab   \hspace{5mm}{\small \hspace{12mm} {/ array of \ftype{CHARACTER*(*)}}} \\ 
+\hline
+\mpiconst{MPI\_ERRCODES\_IGNORE} & 0                     \\
+  \hspace{5mm}{\small\ctype{int*} / \ftype{INTEGER}} array    \\
+%-Rab   \hspace{5mm}{\small \hspace{8mm} {/ not defined}} \\ 
+\mpiconst{MPI\_STATUSES\_IGNORE} & 0   \\
+  \hspace{5mm}{\small\mpictype{MPI\_Status*} \cdeclindex{MPI\_Status}  / \ftype{INTEGER, DIMENSION(MPI\_STATUS\_SIZE,*)}}    \\
+  \hspace{5mm}{\small or \mpiftype{TYPE(MPI\_Status), DIMENSION(*)}} \\
+%-Rab   \hspace{5mm}{\small \hspace{20mm} {/ not defined}} \\ 
+%-Rab % -- substituted by 244-P --   {\hspace{5mm}{\small or \ftype{TYPE(MPI\_Status), DIMENSION(*)}}} \\
+\mpiconst{MPI\_STATUS\_IGNORE}  & 0            \\
+  \hspace{5mm}{\small\mpictype{MPI\_Status*} \cdeclindex{MPI\_Status}  / \ftype{INTEGER, DIMENSION(MPI\_STATUS\_SIZE)}}    \\
+  \hspace{5mm}{\small or \mpiftype{TYPE(MPI\_Status)}} \\
+\mpiconst{MPI\_UNWEIGHTED} & 10                \\
+  \hspace{5mm}{\small\ctype{int*} / \ftype{INTEGER}} array    \\
+\mpiconst{MPI\_WEIGHTS\_EMPTY} & 11            \\
+  \hspace{5mm}{\small\ctype{int*} / \ftype{INTEGER}} array    \\
+\hline
+\multicolumn{2}{l}{$^1$ Note that in Fortran these constants are not usable for initialization} \\
+\multicolumn{2}{l}{\hspace{4pt} expressions or assignment. See \sectionref{subsec:named-constants}.} \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Maximum sizes for strings}} \\ 
+\hline
+%
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_MAX\_DATAREP\_STRING}          &  128 \\
+\mpiconst{MPI\_MAX\_ERROR\_STRING}            &  512 \\
+\mpiconst{MPI\_MAX\_INFO\_KEY}                &  256 \\
+\mpiconst{MPI\_MAX\_INFO\_VAL}                & 1024 \\
+\mpiconst{MPI\_MAX\_LIBRARY\_VERSION\_STRING} & 8192 \\
+\mpiconst{MPI\_MAX\_OBJECT\_NAME}             &  128 \\
+\mpiconst{MPI\_MAX\_PORT\_NAME}               & 1024 \\
+\mpiconst{MPI\_MAX\_PROCESSOR\_NAME}          &  256 \\
+\mpiconst{MPI\_MAX\_STRINGTAG\_LEN}           & 1024 \\
+\mpiconst{MPI\_MAX\_PSET\_NAME\_LEN}          & 1024 \\
+\hline
+\end{tabular}
+\end{center}
+ 
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Mode constants}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+% files
+\mpiconst{MPI\_MODE\_APPEND}            &   1 \\
+\mpiconst{MPI\_MODE\_CREATE}            &   2 \\
+\mpiconst{MPI\_MODE\_DELETE\_ON\_CLOSE} &   4 \\
+\mpiconst{MPI\_MODE\_EXCL}              &   8 \\
+\mpiconst{MPI\_MODE\_RDONLY}            &  16 \\
+\mpiconst{MPI\_MODE\_RDWR}              &  32 \\
+\mpiconst{MPI\_MODE\_SEQUENTIAL}        &  64 \\
+\mpiconst{MPI\_MODE\_UNIQUE\_OPEN}      & 128 \\
+\mpiconst{MPI\_MODE\_WRONLY}            & 256 \\
+% windows
+\mpiconst{MPI\_MODE\_NOCHECK}   &  1024 \\
+\mpiconst{MPI\_MODE\_NOPRECEDE} &  2048 \\
+\mpiconst{MPI\_MODE\_NOPUT}     &  4096 \\
+\mpiconst{MPI\_MODE\_NOSTORE}   &  8192 \\
+\mpiconst{MPI\_MODE\_NOSUCCEED} & 16384 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Assorted constants}} \\ 
+\hline
+% 
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_ANY\_SOURCE}     & -1 \\
+\mpiconst{MPI\_ANY\_TAG}        & -2 \\
+\mpiconst{MPI\_PROC\_NULL}      & -3 \\
+\mpiconst{MPI\_ROOT}            & -4 \\
+\mpiconst{MPI\_UNDEFINED}       & -32766 \\
+\mpiconst{MPI\_BSEND\_OVERHEAD} &  512 \\
+\hline
+\label{table:appendix-assorted-constants}
+\end{tabular}
+\end{center}
+ 
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Threads constants}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_THREAD\_SINGLE}     &    0 \\
+\mpiconst{MPI\_THREAD\_FUNNELED}   & 1024 \\
+\mpiconst{MPI\_THREAD\_SERIALIZED} & 2048 \\
+\mpiconst{MPI\_THREAD\_MULTIPLE}   & 4096 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{File operation constants}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_ORDER\_C}               & 12 (\code{0xC}) \\
+\mpiconst{MPI\_ORDER\_FORTRAN}         & 15 (\code{0xF}) \\
+
+\mpiconst{MPI\_DISTRIBUTE\_NONE}       & 16 \\
+\mpiconst{MPI\_DISTRIBUTE\_BLOCK}      & 17 \\
+\mpiconst{MPI\_DISTRIBUTE\_CYCLIC}     & 18 \\
+\mpiconst{MPI\_DISTRIBUTE\_DFLT\_DARG} & 19 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Datatype decoding constants}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI values} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_COMBINER\_NAMED}               & 101 \\
+\mpiconst{MPI\_COMBINER\_DUP}                 & 102 \\
+\mpiconst{MPI\_COMBINER\_CONTIGUOUS}          & 103 \\
+\mpiconst{MPI\_COMBINER\_VECTOR}              & 104 \\
+\mpiconst{MPI\_COMBINER\_HVECTOR}             & 105 \\
+\mpiconst{MPI\_COMBINER\_INDEXED}             & 106 \\
+\mpiconst{MPI\_COMBINER\_HINDEXED}            & 107 \\
+\mpiconst{MPI\_COMBINER\_INDEXED\_BLOCK}      & 108 \\
+\mpiconst{MPI\_COMBINER\_HINDEXED\_BLOCK}     & 109 \\
+\mpiconst{MPI\_COMBINER\_STRUCT}              & 110 \\
+\mpiconst{MPI\_COMBINER\_SUBARRAY}            & 111 \\
+\mpiconst{MPI\_COMBINER\_DARRAY}              & 112 \\
+\mpiconst{MPI\_COMBINER\_F90\_REAL}           & 113 \\
+\mpiconst{MPI\_COMBINER\_F90\_COMPLEX}        & 114 \\
+\mpiconst{MPI\_COMBINER\_F90\_INTEGER}        & 115 \\
+\mpiconst{MPI\_COMBINER\_RESIZED}             & 116 \\
+\mpiconst{MPI\_COMBINER\_VALUE\_INDEX}        & 117 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{F90 datatype matching constants}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+%\mpiconst{MPI\_TYPECLASS\_LOGICAL}  & 191 \\
+\mpiconst{MPI\_TYPECLASS\_INTEGER}  & 192 \\
+\mpiconst{MPI\_TYPECLASS\_REAL}     & 193 \\
+\mpiconst{MPI\_TYPECLASS\_COMPLEX}  & 194 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l} % MPI-2.1 - review item 33.i
+\multicolumn{2}{c}{\textbf{Results of communicator and group comparisons}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_IDENT}     & 201 \\
+\mpiconst{MPI\_CONGRUENT} & 202 \\
+\mpiconst{MPI\_SIMILAR}   & 203 \\
+\mpiconst{MPI\_UNEQUAL}   & 204 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Topologies}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_CART}        & 211 \\
+\mpiconst{MPI\_GRAPH}       & 212 \\
+\mpiconst{MPI\_DIST\_GRAPH} & 213 \\
+\hline
+\end{tabular}
+\end{center}
+ 
+\begin{center}
+\begin{tabular}{l|l} % MPI-3.0 Ticket 287
+\multicolumn{2}{l}{\textbf{Communicator split type constants}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_COMM\_TYPE\_SHARED}           & 221 \\
+\mpiconst{MPI\_COMM\_TYPE\_HW\_UNGUIDED}     & 222 \\
+\mpiconst{MPI\_COMM\_TYPE\_HW\_GUIDED}       & 223 \\
+\mpiconst{MPI\_COMM\_TYPE\_RESOURCE\_GUIDED} & 224 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{l}{\textbf{Window lock type constants}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_LOCK\_EXCLUSIVE} & 301 \\
+\mpiconst{MPI\_LOCK\_SHARED}    & 302 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l} % MPI-3.0 Ticket 270
+\multicolumn{2}{l}{\textbf{\MPI/ window create flavors}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_WIN\_FLAVOR\_CREATE}   & 311 \\
+\mpiconst{MPI\_WIN\_FLAVOR\_ALLOCATE} & 312 \\
+\mpiconst{MPI\_WIN\_FLAVOR\_DYNAMIC}  & 313 \\
+\mpiconst{MPI\_WIN\_FLAVOR\_SHARED}   & 314 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l} % MPI-3.0 Ticket 270
+\multicolumn{2}{l}{\textbf{\MPI/ window models}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} &\\
+\hline
+\mpiconst{MPI\_WIN\_UNIFIED}  & 321 \\
+\mpiconst{MPI\_WIN\_SEPARATE} & 322 \\
+\hline
+\end{tabular}
+\end{center}
+
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{l}{\textbf{File positioning constants}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} &\\
+\hline
+\mpiconst{MPI\_SEEK\_CUR}              & 401 \\
+\mpiconst{MPI\_SEEK\_END}              & 402 \\
+\mpiconst{MPI\_SEEK\_SET}              & 403 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{File operation constants}} \\
+\hline
+{\small C type: integer constant expression of type \mpictype{MPI\_Offset}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \mpiftypekind{OFFSET}} & \\
+\hline
+\mpiconst{MPI\_DISPLACEMENT\_CURRENT} & -1 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Environmental inquiry and predefined attribute keys}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+% reserve positive values for user attributes
+\mpiconst{MPI\_KEYVAL\_INVALID}     &   0 \\
+\hline
+\mpiconst{MPI\_TAG\_UB}             & 501 \\
+\mpiconst{MPI\_IO}                  & 502 \\
+\mpiconst{MPI\_HOST} (deprecated)   & 503 \\
+\mpiconst{MPI\_WTIME\_IS\_GLOBAL}   & 504 \\
+\mpiconst{MPI\_APPNUM}              & 505 \\
+\mpiconst{MPI\_LASTUSEDCODE}        & 506 \\
+\mpiconst{MPI\_UNIVERSE\_SIZE}      & 507 \\
+\hline
+\mpiconst{MPI\_WIN\_BASE}           & 601 \\
+\mpiconst{MPI\_WIN\_DISP\_UNIT}     & 602 \\
+\mpiconst{MPI\_WIN\_SIZE}           & 603 \\
+\mpiconst{MPI\_WIN\_CREATE\_FLAVOR} & 604 \\
+\mpiconst{MPI\_WIN\_MODEL}          & 605 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l}
+\multicolumn{1}{c}{\textbf{Fortran support method specific constants}} \\ 
+\hline
+{\small Fortran type: \ftype{LOGICAL}} \\ %& ABI value \\
+\hline
+\mpiconst{MPI\_SUBARRAYS\_SUPPORTED} (Fortran only) \\ %& \code{.FALSE.} \\
+\mpiconst{MPI\_ASYNC\_PROTECTS\_NONBLOCKING} (Fortran only) \\ %& See text$^1$. \\
+\hline
+%\multicolumn{2}{l}{$^1$ Section \ref{sec:fortran-abi}.} \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Status array size and reserved index values (Fortran only)}} \\
+\hline
+{\small Fortran type: \ftype{INTEGER}} & ABI value\\
+\hline 
+\mpiconst{MPI\_STATUS\_SIZE} & 8 \\
+\mpiconst{MPI\_SOURCE}       & 1 \\
+\mpiconst{MPI\_TAG}          & 2 \\
+\mpiconst{MPI\_ERROR}        & 3 \\
+\hline
+\end{tabular}
+\end{center}
+
+\label{subsec:annexa-const:MPI_F_STATUS-constants}
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Fortran status array size and reserved index values (C only)}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & ABI value \\
+\hline
+\mpiconst{MPI\_F\_STATUS\_SIZE} & 8 \\
+\mpiconst{MPI\_F\_SOURCE}       & 0 \\
+\mpiconst{MPI\_F\_TAG}          & 1 \\
+\mpiconst{MPI\_F\_ERROR}        & 2 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Variable address size (Fortran only)}} \\ 
+\hline
+{\small Fortran type: \ftype{INTEGER}} & ABI value (from \code{ISO\_C\_BINDING}) \\
+\hline 
+%\mpiconst{MPI\_INTEGER\_KIND} & \code{c\_int} \\
+\mpiconstmain{MPI\_ADDRESS\_KIND} & \code{c\_intptr\_t} \\
+\mpiconstmain{MPI\_OFFSET\_KIND}  & \code{c\_int64\_t} \\
+\mpiconstmain{MPI\_COUNT\_KIND}   & \code{c\_int64\_t} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Reserved communicators}} \\
+\hline
+{\small C type: \mpictype{MPI\_Comm} \cdeclindex{MPI\_Comm}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} {\small or \mpiftype{TYPE(MPI\_Comm)}} \\
+\hline
+\mpiconst{MPI\_COMM\_NULL}  & 256 \\
+\mpiconst{MPI\_COMM\_WORLD} & 257 \\
+\mpiconst{MPI\_COMM\_SELF}  & 258 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+\multicolumn{3}{c}{\textbf{Named predefined datatypes}} \\
+\hline
+{\small C type: \mpictype{MPI\_Datatype} \cdeclindex{MPI\_Datatype}} & \multirow{3}{*}{C types} & \multirow{3}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+{\small or \mpiftype{TYPE(MPI\_Datatype)}} & \\
+\hline
+\type{MPI\_DATATYPE\_NULL}                   & \ctype{}                          & 512 \\
+\type{MPI\_AINT}                             & \mpictype{MPI\_Aint}                 & 513 \\
+\type{MPI\_COUNT}                            & \mpictype{MPI\_Count}                & 514 \\
+\type{MPI\_OFFSET}                           & \mpictype{MPI\_Offset}               & 515 \\
+\type{MPI\_PACKED}                           & (any C datatype)                  & 519 \\
+\type{MPI\_SHORT}                            & \ctype{signed short}              & 520 \\
+\type{MPI\_INT}                              & \ctype{signed int}                & 521 \\
+\type{MPI\_LONG}                             & \ctype{signed long}               & 522 \\
+\type{MPI\_LONG\_LONG\_INT}                  & \ctype{signed long long}          & 523 \\
+\type{MPI\_LONG\_LONG} (as a synonym)        & \ctype{signed long long}          & 523 \\
+\type{MPI\_UNSIGNED\_SHORT}                  & \ctype{unsigned short}            & 524 \\
+\type{MPI\_UNSIGNED}                         & \ctype{unsigned int}              & 525 \\
+\type{MPI\_UNSIGNED\_LONG}                   & \ctype{unsigned long}             & 526 \\
+\type{MPI\_UNSIGNED\_LONG\_LONG}             & \ctype{unsigned long long}        & 527 \\
+\type{MPI\_FLOAT}                            & \ctype{float}                     & 528 \\
+\type{MPI\_C\_COMPLEX}                       & \ctype{float \_Complex}           & 530 \\
+\type{MPI\_C\_FLOAT\_COMPLEX} (as a synonym) & \ctype{float \_Complex}           & 530 \\
+\type{MPI\_DOUBLE}                           & \ctype{double}                    & 532 \\
+\type{MPI\_C\_DOUBLE\_COMPLEX}               & \ctype{double \_Complex}          & 534 \\
+\type{MPI\_LONG\_DOUBLE}                     & \ftype{long double}               & 544 \\
+\type{MPI\_C\_LONG\_DOUBLE\_COMPLEX}         & \ctype{long double \_Complex}     & 548 \\
+\type{MPI\_C\_BOOL}                          & \ctype{\_Bool}                    & 568 \\
+\type{MPI\_WCHAR}                            & \ctype{wchar\_t}$^{1,3}$          & 572 \\
+\type{MPI\_INT8\_T}                          & \ctype{int8\_t}                   & 576 \\
+\type{MPI\_UINT8\_T}                         & \ctype{uint8\_t}                  & 577 \\
+\type{MPI\_CHAR}                             & \ctype{char}$^1$                  & 579 \\
+\type{MPI\_SIGNED\_CHAR}                     & \ctype{signed char}$^2$           & 580 \\
+\type{MPI\_UNSIGNED\_CHAR}                   & \ctype{unsigned char}$^2$         & 581 \\
+\type{MPI\_BYTE}                             & (any C datatype)                  & 583 \\
+\type{MPI\_INT16\_T}                         & \ctype{int16\_t}                  & 584 \\
+\type{MPI\_UINT16\_T}                        & \ctype{uint16\_t}                 & 585 \\
+\type{MPI\_INT32\_T}                         & \ctype{int32\_t}                  & 592 \\
+\type{MPI\_UINT32\_T}                        & \ctype{uint32\_t}                 & 593 \\
+\type{MPI\_INT64\_T}                         & \ctype{int64\_t}                  & 600 \\
+\type{MPI\_UINT64\_T}                        & \ctype{uint64\_t}                 & 601 \\
+\hline
+\multicolumn{3}{l}{${}^1$ Treated as printable character.} \\
+\multicolumn{3}{l}{${}^2$ Treated as integral value.} \\
+\multicolumn{3}{l}{${}^3$ Defined in \code{<stddef.h>}.} \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+\multicolumn{3}{c}{\textbf{Named predefined datatypes}} \\
+\hline
+{\small C type: \mpictype{MPI\_Datatype} \cdeclindex{MPI\_Datatype}} & \multirow{3}{*}{Fortran types} & \multirow{3}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+{\small or \mpiftype{TYPE(MPI\_Datatype)}} & \\
+\hline
+\type{MPI\_LOGICAL}           & \ftype{LOGICAL}          & 536 \\
+\type{MPI\_INTEGER}           & \ftype{INTEGER}          & 537 \\
+\type{MPI\_REAL}              & \ftype{REAL}             & 538 \\
+\type{MPI\_COMPLEX}           & \ftype{COMPLEX}          & 539 \\
+\type{MPI\_DOUBLE\_PRECISION} & \ftype{DOUBLE PRECISION} & 540 \\
+\type{MPI\_CHARACTER}         & \ftype{CHARACTER(1)}     & 542 \\
+\type{MPI\_AINT}              & \mpiftypekind{ADDRESS}   & 513 \\
+\type{MPI\_COUNT}             & \mpiftypekind{COUNT}     & 514 \\
+\type{MPI\_OFFSET}            & \mpiftypekind{OFFSET}    & 515 \\
+\type{MPI\_BYTE}              & {(any Fortran type)}     & 583 \\ 
+\type{MPI\_PACKED}            & {(any Fortran type)}     & 519 \\ 
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+\multicolumn{3}{c}{\textbf{Named predefined datatypes}$^1$} \\
+\hline
+{\small C type: \mpictype{MPI\_Datatype} \cdeclindex{MPI\_Datatype}} & \multirow{3}{*}{C++ types} & \multirow{3}{*}{ABI value}  \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+{\small or \mpiftype{TYPE(MPI\_Datatype)}} & \\
+\hline
+\type{MPI\_CXX\_FLOAT\_COMPLEX}        & \ctype{std::complex<float>}       & 531 \\
+\type{MPI\_CXX\_DOUBLE\_COMPLEX}       & \ctype{std::complex<double>}      & 535 \\
+\type{MPI\_CXX\_LONG\_DOUBLE\_COMPLEX} & \ctype{std::complex<long double>} & 549 \\
+\type{MPI\_CXX\_BOOL}                  & \ctype{bool}                      & 569 \\
+\hline
+\multicolumn{3}{l}{$^1$         If an accompanying C++ compiler is missing, then the \MPI/ datatypes in this}\\ 
+\multicolumn{3}{l}{\hspace{4pt} table are not defined.} \\ 
+\end{tabular}
+\end{center}
+ 
+\begin{center}
+\begin{tabular}{l|l|l}
+\multicolumn{3}{c}{\textbf{Optional datatypes (Fortran)}}\\
+\hline
+{\small C type: \mpictype{MPI\_Datatype} \cdeclindex{MPI\_Datatype}} & \multirow{3}{*}{Fortran types} & \multirow{3}{*}{ABI value}  \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+{\small or \mpiftype{TYPE(MPI\_Datatype)}} & \\
+\hline
+\type{MPI\_DOUBLE\_COMPLEX} & \ftype{DOUBLE COMPLEX} & 541 \\
+\type{MPI\_LOGICAL1}        & \ftype{LOGICAL*1}      & 704 \\
+\type{MPI\_LOGICAL2}        & \ftype{LOGICAL*2}      & 712 \\
+\type{MPI\_LOGICAL4}        & \ftype{LOGICAL*4}      & 720 \\
+\type{MPI\_LOGICAL8}        & \ftype{LOGICAL*8}      & 728 \\
+\type{MPI\_LOGICAL16}       & \ftype{LOGICAL*16}     & 736 \\
+\type{MPI\_INTEGER1}        & \ftype{INTEGER*1}      & 705 \\
+\type{MPI\_INTEGER2}        & \ftype{INTEGER*2}      & 713 \\
+\type{MPI\_INTEGER4}        & \ftype{INTEGER*4}      & 721 \\
+\type{MPI\_INTEGER8}        & \ftype{INTEGER*8}      & 729 \\
+\type{MPI\_INTEGER16}       & \ftype{INTEGER*16}     & 737 \\
+\type{MPI\_REAL2}           & \ftype{REAL*2}         & 714 \\
+\type{MPI\_REAL4}           & \ftype{REAL*4}         & 722 \\
+\type{MPI\_REAL8}           & \ftype{REAL*8}         & 730 \\
+\type{MPI\_REAL16}          & \ftype{REAL*16}        & 738 \\
+\type{MPI\_COMPLEX4}        & \ftype{COMPLEX*4}      & 723 \\
+\type{MPI\_COMPLEX8}        & \ftype{COMPLEX*8}      & 731 \\
+\type{MPI\_COMPLEX16}       & \ftype{COMPLEX*16}     & 739 \\
+\type{MPI\_COMPLEX32}       & \ftype{COMPLEX*32}     & 747 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Datatypes for reduction functions (C)}} \\
+\hline
+{\small C type: \mpictype{MPI\_Datatype} \cdeclindex{MPI\_Datatype}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} {\small or \mpiftype{TYPE(MPI\_Datatype)}} \\
+\hline
+\type{MPI\_FLOAT\_INT}         & 552 \\
+\type{MPI\_DOUBLE\_INT}        & 553 \\
+\type{MPI\_LONG\_INT}          & 554 \\
+\type{MPI\_2INT}               & 555 \\
+\type{MPI\_SHORT\_INT}         & 556 \\
+\type{MPI\_LONG\_DOUBLE\_INT}  & 557 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Datatypes for reduction functions (Fortran)}} \\
+\hline
+{\small C type: \mpictype{MPI\_Datatype} \cdeclindex{MPI\_Datatype}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} {\small or \mpiftype{TYPE(MPI\_Datatype)}} \\
+\hline
+\type{MPI\_2REAL}              & 560 \\
+\type{MPI\_2DOUBLE\_PRECISION} & 561 \\
+\type{MPI\_2INTEGER}           & 562 \\
+\hline
+\end{tabular}
+\end{center}
+ 
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Predefined message handles}} \\
+\hline
+{\small C type: \mpictype{MPI\_Message} \cdeclindex{MPI\_Message}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} {\small or \mpiftype{TYPE(MPI\_Message)}} \\
+\hline
+\mpiconst{MPI\_MESSAGE\_NULL}     & 296 \\
+\mpiconst{MPI\_MESSAGE\_NO\_PROC} & 297 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Predefined error-handling specifiers}} \\
+\hline
+{\small C type: \mpictype{MPI\_Errhandler} \cdeclindex{MPI\_Errhandler}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} {\small or \mpiftype{TYPE(MPI\_Errhandler)}}   \\
+\hline
+\mpiconst{MPI\_ERRHANDLER\_NULL}   & 320 \\ 
+\mpiconst{MPI\_ERRORS\_ARE\_FATAL} & 321 \\
+\mpiconst{MPI\_ERRORS\_ABORT}      & 322 \\
+\mpiconst{MPI\_ERRORS\_RETURN}     & 323 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Environmental inquiry info key}} \\
+\hline
+{\small C type: \mpictype{MPI\_Info} \cdeclindex{MPI\_Info}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} {\small or \mpiftype{TYPE(MPI\_Info)}} \\
+\hline
+\mpiconst{MPI\_INFO\_NULL} & 304 \\
+\mpiconst{MPI\_INFO\_ENV}  & 305 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Collective operators}} \\ 
+\hline
+{\small C type: \mpictype{MPI\_Op} \cdeclindex{MPI\_Op}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} {\small or \mpiftype{TYPE(MPI\_Op)}} \\
+\hline
+\mpiconst{MPI\_OP\_NULL} & 32 \\
+\mpiconst{MPI\_SUM}      & 33 \\
+\mpiconst{MPI\_MIN}      & 34 \\
+\mpiconst{MPI\_MAX}      & 35 \\
+\mpiconst{MPI\_PROD}     & 36 \\
+\mpiconst{MPI\_BAND}     & 40 \\
+\mpiconst{MPI\_BOR}      & 41 \\
+\mpiconst{MPI\_BXOR}     & 42 \\
+\mpiconst{MPI\_LAND}     & 48 \\
+\mpiconst{MPI\_LOR}      & 49 \\
+\mpiconst{MPI\_LXOR}     & 50 \\
+\mpiconst{MPI\_MINLOC}   & 56 \\
+\mpiconst{MPI\_MAXLOC}   & 57 \\
+\mpiconst{MPI\_REPLACE}  & 60 \\
+\mpiconst{MPI\_NO\_OP}   & 61 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Predefined group handles}} \\
+\hline
+{\small C type: \mpictype{MPI\_Group} \cdeclindex{MPI\_Group}} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} {\small or \mpiftype{TYPE(MPI\_Group)}} \\
+\hline
+\mpiconst{MPI\_GROUP\_NULL}  & 264 \\ 
+\mpiconst{MPI\_GROUP\_EMPTY} & 265 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Other predefined handles}} \\ 
+\hline
+{C/Fortran name} & \multirow{2}{*}{ABI value} \\
+   \hspace{5mm}{\small C type / Fortran type} \\ 
+\hline
+\mpiconst{MPI\_REQUEST\_NULL} \\ 
+   \hspace{5mm}{\small \mpictype{MPI\_Request} \cdeclindex{MPI\_Request}    / \ftype{INTEGER}} 
+   {\small or \mpiftype{TYPE(MPI\_Request)}} & 384 \\
+\mpiconst{MPI\_FILE\_NULL} \\
+   \hspace{5mm}{\small \mpictype{MPI\_File} \cdeclindex{MPI\_File}       / \ftype{INTEGER}} 
+   {\small or \mpiftype{TYPE(MPI\_File)}} & 280 \\
+\mpiconst{MPI\_SESSION\_NULL} \\
+   \hspace{5mm}{\small \mpictype{MPI\_Session} \cdeclindex{MPI\_Session}    / \ftype{INTEGER}}
+   {\small or \mpiftype{TYPE(MPI\_Session)}} & 288 \\
+\mpiconst{MPI\_WIN\_NULL} \\
+   \hspace{5mm}{\small \mpictype{MPI\_Win} \cdeclindex{MPI\_Win}        / \ftype{INTEGER}} 
+   {\small or \mpiftype{TYPE(MPI\_Win)}} & 272 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\label{table:predefined-functions} 
+\begin{small}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Predefined functions}} \\
+\hline
+C/Fortran name                                                    & \\
+  \hspace{5mm}{\small C type}                                     & ABI value in \code{mpi.h} \\
+  \hspace{5mm}{\small / Fortran type with \code{mpi} module}      & \\
+  \hspace{5mm}{\small / Fortran type with \code{mpi\_f08} module} & \\
+\hline
+% RAB: The predefined callbacks are "constant" "function" pointers, therefore in both indexes
+% WDG: They are constant functions, but not user MPI functions.  The
+% mpicallback macro will place in the appropriate indices; do not add
+% extra ones here (discuss changing the mpicallback macro instead)
+\mpiconstfunc{MPI\_COMM\_NULL\_COPY\_FN} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Comm\_copy\_attr\_function}} & 0   \\
+  \hspace{5mm}{\small / \mpifcallback{COMM\_COPY\_ATTR\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Comm\_copy\_attr\_function)} $^1$} \\
+\mpiconstfunc{MPI\_COMM\_DUP\_FN} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Comm\_copy\_attr\_function}} & 1   \\
+  \hspace{5mm}{\small / \mpifcallback{COMM\_COPY\_ATTR\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Comm\_copy\_attr\_function)} $^1$} \\
+\mpiconstfunc{MPI\_COMM\_NULL\_DELETE\_FN} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Comm\_delete\_attr\_function}} & 0 \\
+  \hspace{5mm}{\small / \mpifcallback{COMM\_DELETE\_ATTR\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Comm\_delete\_attr\_function)} $^1$} \\
+\hline
+\mpiconstfunc{MPI\_WIN\_NULL\_COPY\_FN} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Win\_copy\_attr\_function}} & 0    \\
+  \hspace{5mm}{\small / \mpifcallback{WIN\_COPY\_ATTR\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Win\_copy\_attr\_function)} $^1$} \\
+\mpiconstfunc{MPI\_WIN\_DUP\_FN} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Win\_copy\_attr\_function}} & 1    \\
+  \hspace{5mm}{\small / \mpifcallback{WIN\_COPY\_ATTR\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Win\_copy\_attr\_function)} $^1$} \\
+\mpiconstfunc{MPI\_WIN\_NULL\_DELETE\_FN} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Win\_delete\_attr\_function}} & 0  \\
+  \hspace{5mm}{\small / \mpifcallback{WIN\_DELETE\_ATTR\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Win\_delete\_attr\_function)} $^1$} \\
+\hline
+\mpiconstfunc{MPI\_TYPE\_NULL\_COPY\_FN} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Type\_copy\_attr\_function}} & 0   \\
+  \hspace{5mm}{\small / \mpifcallback{TYPE\_COPY\_ATTR\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Type\_copy\_attr\_function)} $^1$} \\
+\mpiconstfunc{MPI\_TYPE\_DUP\_FN} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Type\_copy\_attr\_function}} & 1   \\
+  \hspace{5mm}{\small / \mpifcallback{TYPE\_COPY\_ATTR\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Type\_copy\_attr\_function)} $^1$} \\
+\mpiconstfunc{MPI\_TYPE\_NULL\_DELETE\_FN} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Type\_delete\_attr\_function}} & 0 \\
+  \hspace{5mm}{\small / \mpifcallback{TYPE\_DELETE\_ATTR\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Type\_delete\_attr\_function)} $^1$} \\
+\hline
+\mpiconstfunc{MPI\_CONVERSION\_FN\_NULL} \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Datarep\_conversion\_function}} & 0 \\
+  \hspace{5mm}{\small / \mpifcallback{DATAREP\_CONVERSION\_FUNCTION}} \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Datarep\_conversion\_function)} $^1$} \\
+\mpiconstfunc{MPI\_CONVERSION\_FN\_NULL\_C} \\
+  \hspace{5mm}{\small\mpicallback{MPI\_Datarep\_conversion\_function\_c}} & 0 \\
+  \hspace{5mm}{\small / (n/a) } \\
+  \hspace{5mm}{\small / \mpifcallbackskip{PROCEDURE(MPI\_Datarep\_conversion\_function\_c)} } \\
+\hline
+\multicolumn{2}{l}{$^1$         See the advice to implementors 
+                                (on page~\pageref{advice:context:predefined:Fortran:implementors})
+                                and advice to users (on page~\pageref{advice:context:predefined:Fortran:users})  } \\ 
+\multicolumn{2}{l}{\hspace{1em} on the predefined Fortran functions \mpiconstfunc{MPI\_COMM\_NULL\_COPY\_FN}, $\ldots$ in}\\
+\multicolumn{2}{l}{\hspace{1em} \sectionref{subsec:context-cachecomm}. }  
+\end{tabular}
+\end{small}
+\end{center}
+% 
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Deprecated predefined functions}} \\
+\hline
+{C/Fortran name} & \multirow{2}{*}{ABI value} \\
+  \hspace{5mm}{\small C type / Fortran type with \code{mpi} module } \\ 
+\hline
+% WDG: Use mpiconstfunc for the predefined function handles
+\mpiconstfunc{MPI\_NULL\_COPY\_FN} & 0 \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Copy\_function} / \mpifcallback{COPY\_FUNCTION}} \\
+\mpiconstfunc{MPI\_DUP\_FN} & 1 \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Copy\_function} / \mpifcallback{COPY\_FUNCTION}} \\
+\mpiconstfunc{MPI\_NULL\_DELETE\_FN} & 0 \\
+  \hspace{5mm}{\small\mpiccallback{MPI\_Delete\_function} / \mpifcallback{DELETE\_FUNCTION}} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{ll}
+\multicolumn{2}{c}{\textbf{C constants specifying ignored input (no Fortran)}} \\ 
+\hline
+C constant {\small (type: \mpictype{MPI\_Fint}\code{*})} & is equivalent to the Fortran constant \\
+\hline
+\mpiconst{MPI\_F\_STATUSES\_IGNORE} & \mpiconst{MPI\_STATUSES\_IGNORE} in \code{mpi} / \code{mpif.h} \\
+\mpiconst{MPI\_F\_STATUS\_IGNORE}   & \mpiconst{MPI\_STATUS\_IGNORE} in \code{mpi} / \code{mpif.h} \\
+\hline
+C constant {\small (type: \mpictype{MPI\_F08\_status}\code{*})} & is equivalent to the Fortran constant \\
+\hline
+\mpiconst{MPI\_F08\_STATUSES\_IGNORE} & \mpiconst{MPI\_STATUSES\_IGNORE} in \code{mpi\_f08} \\
+\mpiconst{MPI\_F08\_STATUS\_IGNORE}   & \mpiconst{MPI\_STATUS\_IGNORE} in \code{mpi\_f08} \\
+\hline
+\label{table:appendix-sentinel-ignore-constants}
+\end{tabular}
+\end{center}
+
+%%% Make sure that you also change these values in chap-inquiry/inquiry.tex
+%%% (Version Inquiries) or chap-abi/abi.tex
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{C preprocessor constants and Fortran parameters}} \\
+\hline
+{\small C type: C-preprocessor macro that expands to an \ctype{int} value} & \multirow{2}{*}{ABI value} \\
+{\small Fortran type: \ftype{INTEGER}} & \\
+\hline
+\mpiconst{MPI\_VERSION}         & N/A \\
+\mpiconst{MPI\_SUBVERSION}      & N/A \\
+\mpiconst{MPI\_ABI\_VERSION}    & 1 \\
+\mpiconst{MPI\_ABI\_SUBVERSION} & 0 \\
+\hline
+\multicolumn{2}{l}{The \MPI/ API version constants change with every release of the standard} \\
+\multicolumn{2}{l}{and are thus not constants in the ABI.  The \MPI/ ABI subversion will} \\
+\multicolumn{2}{l}{increment with every release of the standard, unless there is a breaking} \\
+\multicolumn{2}{l}{change, in which case the ABI version will increment and the subversion} \\
+\multicolumn{2}{l}{will reset to zero.} \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+\multicolumn{3}{c}{\textbf{Handles used in the \MPI/ tool information interface}} \\ 
+\hline
+\multicolumn{3}{c}{\textbf{Null Handles}} \\
+\hline
+Handle & Type & ABI value \\
+\hline
+\mpiconst{MPI\_T\_ENUM\_NULL} & \mpictype{MPI\_T\_enum}\cdeclindex{MPI\_T\_enum} & 0 \\
+\mpiconst{MPI\_T\_CVAR\_HANDLE\_NULL} & \mpictype{MPI\_T\_cvar\_handle}\cdeclindex{MPI\_T\_cvar\_handle} & 0 \\
+\mpiconst{MPI\_T\_PVAR\_HANDLE\_NULL} & \mpictype{MPI\_T\_pvar\_handle}\cdeclindex{MPI\_T\_pvar\_handle}  & 0 \\
+\mpiconst{MPI\_T\_PVAR\_SESSION\_NULL} & \mpictype{MPI\_T\_pvar\_session}\cdeclindex{MPI\_T\_pvar\_session} & 0 \\
+\hline
+\multicolumn{3}{c}{\textbf{Other Handles}} \\
+\hline
+Handle & Type & ABI value  \\
+\hline
+\mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES} & \mpictype{MPI\_T\_pvar\_handle} & 1 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Verbosity levels in the \MPI/ tool information interface}} \\ 
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & {ABI value} \\
+\hline
+\mpiconst{MPI\_T\_VERBOSITY\_USER\_BASIC}      & \code{0x09} \\
+\mpiconst{MPI\_T\_VERBOSITY\_USER\_DETAIL}     & \code{0x0a} \\
+\mpiconst{MPI\_T\_VERBOSITY\_USER\_ALL}        & \code{0x0c} \\
+\mpiconst{MPI\_T\_VERBOSITY\_TUNER\_BASIC}     & \code{0x11} \\
+\mpiconst{MPI\_T\_VERBOSITY\_TUNER\_DETAIL}    & \code{0x12} \\
+\mpiconst{MPI\_T\_VERBOSITY\_TUNER\_ALL}       & \code{0x14} \\
+\mpiconst{MPI\_T\_VERBOSITY\_MPIDEV\_BASIC}    & \code{0x21} \\
+\mpiconst{MPI\_T\_VERBOSITY\_MPIDEV\_DETAIL}   & \code{0x22} \\
+\mpiconst{MPI\_T\_VERBOSITY\_MPIDEV\_ALL}      & \code{0x24} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Constants to identify associations of variables}} \\
+\multicolumn{2}{c}{\textbf{in the \MPI/ tool information interface}} \\
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & {ABI value} \\
+\hline
+\mpiconst{MPI\_T\_BIND\_NO\_OBJECT}      & \code{1}  \\
+\mpiconst{MPI\_T\_BIND\_MPI\_COMM}       & \code{2}  \\
+\mpiconst{MPI\_T\_BIND\_MPI\_DATATYPE}   & \code{3}  \\
+\mpiconst{MPI\_T\_BIND\_MPI\_ERRHANDLER} & \code{4}  \\
+\mpiconst{MPI\_T\_BIND\_MPI\_FILE}       & \code{5}  \\
+\mpiconst{MPI\_T\_BIND\_MPI\_GROUP}      & \code{6}  \\
+\mpiconst{MPI\_T\_BIND\_MPI\_OP}         & \code{7}  \\
+\mpiconst{MPI\_T\_BIND\_MPI\_REQUEST}    & \code{8}  \\
+\mpiconst{MPI\_T\_BIND\_MPI\_WIN}        & \code{9}  \\
+\mpiconst{MPI\_T\_BIND\_MPI\_MESSAGE}    & \code{10} \\
+\mpiconst{MPI\_T\_BIND\_MPI\_INFO}       & \code{11} \\
+\mpiconst{MPI\_T\_BIND\_MPI\_SESSION}    & \code{12} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Constants describing the scope of a control variable}} \\
+\multicolumn{2}{c}{\textbf{in the \MPI/ tool information interface}} \\ 
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & {ABI value} \\
+\hline
+\mpiconst{MPI\_T\_SCOPE\_CONSTANT}  & \code{1} \\
+\mpiconst{MPI\_T\_SCOPE\_READONLY}  & \code{2} \\
+\mpiconst{MPI\_T\_SCOPE\_LOCAL}     & \code{3} \\
+\mpiconst{MPI\_T\_SCOPE\_GROUP}     & \code{4} \\
+\mpiconst{MPI\_T\_SCOPE\_GROUP\_EQ} & \code{5} \\
+\mpiconst{MPI\_T\_SCOPE\_ALL}       & \code{6} \\
+\mpiconst{MPI\_T\_SCOPE\_ALL\_EQ}   & \code{7} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Performance variable classes used by the}} \\
+\multicolumn{2}{c}{\textbf{\MPI/ tool information interface}}  \\ 
+\hline
+{\small C type: integer constant expression of type \ctype{int}} & {ABI value} \\
+\hline
+\mpiconst{MPI\_T\_PVAR\_CLASS\_STATE}         & \code{1}  \\
+\mpiconst{MPI\_T\_PVAR\_CLASS\_LEVEL}         & \code{2}  \\
+\mpiconst{MPI\_T\_PVAR\_CLASS\_SIZE}          & \code{3}  \\
+\mpiconst{MPI\_T\_PVAR\_CLASS\_PERCENTAGE}    & \code{4}  \\
+\mpiconst{MPI\_T\_PVAR\_CLASS\_HIGHWATERMARK} & \code{5}  \\
+\mpiconst{MPI\_T\_PVAR\_CLASS\_LOWWATERMARK}  & \code{6}  \\
+\mpiconst{MPI\_T\_PVAR\_CLASS\_COUNTER}       & \code{7}  \\
+\mpiconst{MPI\_T\_PVAR\_CLASS\_AGGREGATE}     & \code{8}  \\
+\mpiconst{MPI\_T\_PVAR\_CLASS\_TIMER}         & \code{9}  \\
+\mpiconst{MPI\_T\_PVAR\_CLASS\_GENERIC}       & \code{10} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Source event ordering guarantees in the}} \\
+\multicolumn{2}{c}{\textbf{\MPI/ tool information interface}} \\ 
+\hline
+{\small C type: \mpictype{MPI\_T\_source\_order}} & {ABI value} \\
+\hline
+\mpiconst{MPI\_T\_SOURCE\_ORDERED}   & 1 \\
+\mpiconst{MPI\_T\_SOURCE\_UNORDERED} & 2 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{l|l}
+\multicolumn{2}{c}{\textbf{Callback safety requirement levels used in the}} \\
+\multicolumn{2}{c}{\textbf{\MPI/ tool information interface}} \\ 
+\hline
+{\small C type: \mpictype{MPI\_T\_cb\_safety}} & {ABI value} \\
+\hline
+\mpiconst{MPI\_T\_CB\_REQUIRE\_NONE}                & \code{0x00} \\
+\mpiconst{MPI\_T\_CB\_REQUIRE\_MPI\_RESTRICTED}     & \code{0x03} \\
+\mpiconst{MPI\_T\_CB\_REQUIRE\_THREAD\_SAFE}        & \code{0x0F} \\
+\mpiconst{MPI\_T\_CB\_REQUIRE\_ASYNC\_SIGNAL\_SAFE} & \code{0x3F} \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Types} 
+\mpitermtitleindex{types}
+\label{subsec:annexa-type} % Sect. A.1.2 p. 499 newlabel
+The following are defined C type definitions included in the file
+\code{mpi.h}.
+\\[6pt]
+\code{/* C opaque types */} \\
+\mpictype{MPI\_Aint} \\
+\mpictype{MPI\_Count} \\
+\mpictype{MPI\_Fint} \\
+\mpictype{MPI\_Offset} \\
+\mpictype{MPI\_Status} \\
+\mpictype{MPI\_F08\_status} \\
+\code{ } \\
+\code{/* C handles to assorted structures */} \\
+\mpictype{MPI\_Comm} \\
+\mpictype{MPI\_Datatype} \\
+\mpictype{MPI\_Errhandler} \\
+\mpictype{MPI\_File} \\
+\mpictype{MPI\_Group} \\
+\mpictype{MPI\_Info} \\
+\mpictype{MPI\_Message} \\
+\mpictype{MPI\_Op} \\
+\mpictype{MPI\_Request} \\
+\mpictype{MPI\_Session} \\
+\mpictype{MPI\_Win} \\
+\code{ } \\
+\code{/* Types for the MPI\_T interface */}\\
+\mpictype{MPI\_T\_enum}\\
+\mpictype{MPI\_T\_cvar\_handle}\\
+\mpictype{MPI\_T\_pvar\_handle}\\
+\mpictype{MPI\_T\_pvar\_session}\\
+\mpictype{MPI\_T\_event\_instance}\\
+\mpictype{MPI\_T\_event\_registration}\\
+\mpictype{MPI\_T\_source\_order}\\
+\mpictype{MPI\_T\_cb\_safety}\\
+\code{}\\
+
+The following are defined Fortran type definitions included in the \code{mpi\_f08} and \code{mpi} modules.
+\\[6pt]
+\code{! Fortran opaque types in the mpi\_f08 and mpi modules} \\
+\mpiftype{TYPE(MPI\_Status)} \\
+\code{ } \\
+\code{! Fortran handles in the mpi\_f08 and mpi modules} \\
+\mpiftype{TYPE(MPI\_Comm)} \\
+\mpiftype{TYPE(MPI\_Datatype)} \\
+\mpiftype{TYPE(MPI\_Errhandler)} \\
+\mpiftype{TYPE(MPI\_File)} \\
+\mpiftype{TYPE(MPI\_Group)} \\
+\mpiftype{TYPE(MPI\_Info)} \\
+\mpiftype{TYPE(MPI\_Message)} \\
+\mpiftype{TYPE(MPI\_Op)} \\
+\mpiftype{TYPE(MPI\_Request)} \\
+\mpiftype{TYPE(MPI\_Session)} \\
+\mpiftype{TYPE(MPI\_Win)}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Prototype Definitions} 
+\mpitermtitleindex{prototype definitions}
+\mpitermtitleindex{callback functions!prototype definitions}
+\label{subsec:annexa-prototypes} % Sect. A.1.3 p.500 newlabel
+
+% 
+\subsubsection{C Bindings} 
+% 
+
+The following are defined C typedefs for user-defined functions, 
+also included in the file \code{mpi.h}.
+
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{verbatim}
+/* prototypes for user-defined functions */
+\end{verbatim}
+\begin{mpi-binding}
+    render("mpi_user_function", "c", nomain=True)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    render("mpi_comm_copy_attr_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_comm_delete_attr_function", "c", nomain=True)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    render("mpi_win_copy_attr_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_win_delete_attr_function", "c", nomain=True)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    render("mpi_type_copy_attr_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_type_delete_attr_function", "c", nomain=True)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    render("mpi_comm_errhandler_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_win_errhandler_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_file_errhandler_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_session_errhandler_function", "c", nomain=True)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    render("mpi_grequest_query_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_grequest_free_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_grequest_cancel_function", "c", nomain=True)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    render("mpi_datarep_extent_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_datarep_conversion_function", "c", nomain=True)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    render("mpi_t_event_cb_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_t_event_free_cb_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_t_event_dropped_cb_function", "c", nomain=True)
+\end{mpi-binding}
+
+\subsubsection{Fortran 2008 Bindings with the \texorpdfstring{\code{mpi\_f08}}{mpi\_f08} Module}
+
+The callback prototypes when using the Fortran \code{mpi\_f08} module are shown below:
+ 
+The user-function argument to \ffunc{MPI\_Op\_create}\mpifuncindex{MPI\_OP\_CREATE}
+and \MPIBCfunc{MPI\_Op\_create\_c} should be declared according to:
+ 
+\begin{mpi-binding}
+    render("mpi_user_function", "f08")
+\end{mpi-binding}
+ 
+%
+The copy and delete function arguments to \ffunc{MPI\_Comm\_create\_keyval}\mpifuncindex{MPI\_COMM\_CREATE\_KEYVAL} should be
+declared according to:
+%
+
+\begin{mpi-binding}
+    render("mpi_comm_copy_attr_function", "f08", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_comm_delete_attr_function", "f08", nomain=True)
+\end{mpi-binding}
+ 
+%
+The copy and delete function arguments to \ffunc{MPI\_Win\_create\_keyval}\mpifuncindex{MPI\_WIN\_CREATE\_KEYVAL} should be
+declared according to:
+%
+
+\begin{mpi-binding}
+    render("mpi_win_copy_attr_function", "f08", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_win_delete_attr_function", "f08", nomain=True)
+\end{mpi-binding}
+
+%
+The copy and delete function arguments to \ffunc{MPI\_Type\_create\_keyval}\mpifuncindex{MPI\_TYPE\_CREATE\_KEYVAL} should be
+declared according to:
+%
+
+\begin{mpi-binding}
+    render("mpi_type_copy_attr_function", "f08", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_type_delete_attr_function", "f08", nomain=True)
+\end{mpi-binding}
+
+%
+The handler-function argument to \ffunc{MPI\_Comm\_create\_errhandler}\mpifuncindex{MPI\_COMM\_CREATE\_ERRHANDLER}
+should be declared like this:
+%
+
+\begin{mpi-binding}
+    render("mpi_comm_errhandler_function", "f08", nomain=True)
+\end{mpi-binding}
+
+%
+The handler-function argument to \ffunc{MPI\_Win\_create\_errhandler}\mpifuncindex{MPI\_WIN\_CREATE\_ERRHANDLER}
+should be declared like this:
+%
+
+\begin{mpi-binding}
+    render("mpi_win_errhandler_function", "f08", nomain=True)
+\end{mpi-binding}
+
+%
+The handler-function argument to \ffunc{MPI\_File\_create\_errhandler}\mpifuncindex{MPI\_FILE\_CREATE\_ERRHANDLER}
+should be declared like this:
+%
+
+\begin{mpi-binding}
+    render("mpi_file_errhandler_function", "f08", nomain=True)
+\end{mpi-binding}
+
+%
+The handler-function argument to \ffunc{MPI\_Session\_create\_errhandler}\mpifuncindex{MPI\_SESSION\_CREATE\_ERRHANDLER}
+should be declared like this:
+%
+
+\begin{mpi-binding}
+    render("mpi_session_errhandler_function", "f08", nomain=True)
+\end{mpi-binding}
+
+%
+The query, free, and cancel function arguments to \ffunc{MPI\_Grequest\_start}\mpifuncindex{MPI\_GREQUEST\_START}
+should be declared according to:
+%
+
+\begin{mpi-binding}
+    render("mpi_grequest_query_function", "f08", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_grequest_free_function", "f08", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_grequest_cancel_function", "f08", nomain=True)
+\end{mpi-binding}
+
+%
+The extent and conversion function arguments to \ffunc{MPI\_Register\_datarep}\mpifuncindex{MPI\_REGISTER\_DATAREP}
+and \MPIBCfunc{MPI\_Register\_datarep\_c} should be declared  according to:
+%
+
+\begin{mpi-binding}
+    render("mpi_datarep_extent_function", "f08", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_datarep_conversion_function", "f08", nomain=True)
+\end{mpi-binding}
+
+\subsubsection{Fortran Bindings with \texorpdfstring{\code{mpif.h}}{mpif.h}
+ or the \texorpdfstring{\code{mpi}}{mpi} Module}
+
+With
+the Fortran \code{mpi} module or (deprecated) \code{mpif.h}, here are examples of how each of the user-defined
+subroutines should be declared.
+
+The user-function argument to \mpifunc{MPI\_OP\_CREATE} should be declared
+like this:
+
+\begin{mpi-binding}
+    render("mpi_user_function", "f90", nomain=True)
+\end{mpi-binding}
+
+The copy and delete function arguments to \mpifunc{MPI\_COMM\_CREATE\_KEYVAL} should be
+declared like these:
+
+\begin{mpi-binding}
+    render("mpi_comm_copy_attr_function", "f90", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_comm_delete_attr_function", "f90", nomain=True)
+\end{mpi-binding}
+
+The copy and delete function arguments to \mpifunc{MPI\_WIN\_CREATE\_KEYVAL} should be
+declared like these:
+
+\begin{mpi-binding}
+    render("mpi_win_copy_attr_function", "f90", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_win_delete_attr_function", "f90", nomain=True)
+\end{mpi-binding}
+
+The copy and delete function arguments to \mpifunc{MPI\_TYPE\_CREATE\_KEYVAL} should be
+declared like these:
+
+\begin{mpi-binding}
+    render("mpi_type_copy_attr_function", "f90", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_type_delete_attr_function", "f90", nomain=True)
+\end{mpi-binding}
+
+
+The handler-function argument to \mpifunc{MPI\_COMM\_CREATE\_ERRHANDLER}
+should be declared like this:
+
+\begin{mpi-binding}
+    render("mpi_comm_errhandler_function", "f90", nomain=True)
+\end{mpi-binding}
+
+The handler-function argument to \mpifunc{MPI\_WIN\_CREATE\_ERRHANDLER}
+should be declared like this:
+
+\begin{mpi-binding}
+    render("mpi_win_errhandler_function", "f90", nomain=True)
+\end{mpi-binding}
+
+The handler-function argument to \mpifunc{MPI\_FILE\_CREATE\_ERRHANDLER}
+should be declared like this:
+
+\begin{mpi-binding}
+    render("mpi_file_errhandler_function", "f90", nomain=True)
+\end{mpi-binding}
+
+The handler-function argument to \mpifunc{MPI\_SESSION\_CREATE\_ERRHANDLER}
+should be declared like this:
+
+\begin{mpi-binding}
+    render("mpi_session_errhandler_function", "f90", nomain=True)
+\end{mpi-binding}
+
+The query, free, and cancel function arguments to \mpifunc{MPI\_GREQUEST\_START}
+should be declared like these:
+
+\begin{mpi-binding}
+    render("mpi_grequest_query_function", "f90", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_grequest_free_function", "f90", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_grequest_cancel_function", "f90", nomain=True)
+\end{mpi-binding}
+
+The extent and conversion function arguments to \mpifunc{MPI\_REGISTER\_DATAREP}
+should be declared like these:
+
+\begin{mpi-binding}
+    render("mpi_datarep_extent_function", "f90", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_datarep_conversion_function", "f90", nomain=True)
+\end{mpi-binding}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Deprecated Prototype Definitions}
+\mpitermtitleindex{prototype definitions!deprecated}
+\mpitermtitleindex{callback functions!prototype definitions!deprecated}
+
+The following are defined C typedefs for deprecated user-defined functions, 
+also included in the file \code{mpi.h}.
+
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{verbatim}
+/* prototypes for user-defined functions */
+\end{verbatim}
+\begin{mpi-binding}
+    render("mpi_copy_function", "c", nomain=True)
+\end{mpi-binding}
+\begin{mpi-binding}
+    render("mpi_delete_function", "c", nomain=True)
+\end{mpi-binding}
+
+The following are deprecated Fortran user-defined callback subroutine
+prototypes.
+%
+The 
+deprecated copy and delete function arguments
+to \mpifunc{MPI\_KEYVAL\_CREATE} should be declared like these:
+
+\begin{mpi-binding}
+    render("mpi_copy_function", "f90", nomain=True)
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    render("mpi_delete_function", "f90", nomain=True)
+\end{mpi-binding}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{String Values}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Default Communicator Names}
+
+The following default communicator names are defined by \MPI/. \\[3pt]
+\mpistring{MPI\_COMM\_WORLD} \\
+\mpistring{MPI\_COMM\_SELF} \\
+\mpistring{MPI\_COMM\_PARENT}\\
+\mpistring{MPI\_COMM\_NULL}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Default Datatype Names}
+
+Named predefined datatypes have the default names of the datatype name.
+In addition, the following default datatype name is defined by \MPI/. \\[3pt]
+\mpistring{MPI\_DATATYPE\_NULL}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Default Window Names}
+
+The following default window name is defined by \MPI/. \\[3pt]
+\mpistring{MPI\_WIN\_NULL}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Reserved Data Representations}
+
+The following data representations are supported by \MPI/. \\[3pt]
+\mpistring{native} \\
+\mpistring{internal} \\
+\mpistring{external32}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Process Set Names}
+\mpitermtitleindex{process set names}
+ 
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{Process set name} & \textbf{Comment} \\
+\hline
+\mpistring{mpi://}      & reserved namespace \\
+\hline
+\mpistring{mpi://SELF}  & mandatory process set name \\
+\mpistring{mpi://WORLD} & mandatory process set name \\
+\hline
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Info Keys}
+\mpitermtitleindex{info object!keys}
+
+The following info keys are reserved. They are strings. \\[3pt]
+\infokey{access\_style} \\
+\infokey{accumulate\_ops}\\
+\infokey{accumulate\_ordering}\\
+\infokey{alloc\_shared\_noncontig}\\
+\infokey{appnum} \\
+\infokey{arch} \\
+\infokey{argv} \\
+\infokey{cb\_block\_size} \\
+\infokey{cb\_buffer\_size} \\
+\infokey{cb\_nodes} \\
+\infokey{chunked} \\
+\infokey{chunked\_item} \\
+\infokey{chunked\_size} \\
+\infokey{collective\_buffering} \\
+\infokey{command} \\
+\infokey{file} \\
+\infokey{file\_perm} \\
+\infokey{filename} \\
+\infokey{host} \\
+\infokey{io\_node\_list} \\
+\infokey{ip\_address} \\
+\infokey{ip\_port} \\
+\infokey{maxprocs} \\
+\infokey{mpi\_accumulate\_granularity} \\
+\infokey{mpi\_aint\_size} \\
+\infokey{mpi\_assert\_allow\_overtaking} \\
+\infokey{mpi\_assert\_exact\_length} \\
+\infokey{mpi\_assert\_memory\_alloc\_kinds} \\
+\infokey{mpi\_assert\_no\_any\_source} \\
+\infokey{mpi\_assert\_no\_any\_tag} \\
+\infokey{mpi\_complex4\_supported} \\
+\infokey{mpi\_complex8\_supported} \\
+\infokey{mpi\_complex16\_supported} \\
+\infokey{mpi\_complex32\_supported} \\
+\infokey{mpi\_count\_size} \\
+\infokey{mpi\_double\_complex\_supported} \\
+\infokey{mpi\_double\_precision\_size} \\
+\infokey{mpi\_hw\_resource\_type} \\
+\infokey{mpi\_initial\_errhandler} \\
+\infokey{mpi\_integer\_size} \\
+\infokey{mpi\_integer1\_supported} \\
+\infokey{mpi\_integer2\_supported} \\
+\infokey{mpi\_integer4\_supported} \\
+\infokey{mpi\_integer8\_supported} \\
+\infokey{mpi\_integer16\_supported} \\
+\infokey{mpi\_logical\_size} \\
+\infokey{mpi\_logical1\_supported} \\
+\infokey{mpi\_logical2\_supported} \\
+\infokey{mpi\_logical4\_supported} \\
+\infokey{mpi\_logical8\_supported} \\
+\infokey{mpi\_logical16\_supported} \\
+\infokey{mpi\_memory\_alloc\_kinds} \\
+\infokey{mpi\_minimum\_memory\_alignment} \\
+\infokey{mpi\_offset\_size} \\
+\infokey{mpi\_pset\_name} \\
+\infokey{mpi\_size} \\
+\infokey{mpi\_real\_size} \\
+\infokey{mpi\_real2\_supported} \\
+\infokey{mpi\_real4\_supported} \\
+\infokey{mpi\_real8\_supported} \\
+\infokey{mpi\_real16\_supported} \\
+\infokey{nb\_proc} \\
+\infokey{no\_locks} \\
+\infokey{num\_io\_nodes} \\
+\infokey{path} \\
+\infokey{same\_disp\_unit}\\
+\infokey{same\_size}\\
+\infokey{soft} \\
+\infokey{striping\_factor} \\
+\infokey{striping\_unit} \\
+\infokey{thread\_level} \\
+\infokey{wdir}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Info Values}
+\mpitermtitleindex{info object!values}
+
+The following info values are reserved. They are strings. \\[3pt]
+\infoval{alloc\_mem} \\
+\infoval{false} \\
+\infoval{mpi} \\
+\infoval{mpi\_errors\_abort} \\
+\infoval{mpi\_errors\_are\_fatal} \\
+\infoval{mpi\_errors\_return} \\
+\infoval{mpi\_shared\_memory}\\
+\infoval{MPI\_THREAD\_FUNNELED} \\
+\infoval{MPI\_THREAD\_MULTIPLE} \\
+\infoval{MPI\_THREAD\_SERIALIZED} \\
+\infoval{MPI\_THREAD\_SINGLE} \\
+\infoval{none} \\
+\infoval{random} \\
+\infoval{rar}\\
+\infoval{raw}\\
+\infoval{read\_mostly} \\
+\infoval{read\_once} \\
+\infoval{reverse\_sequential} \\
+\infoval{same\_op}\\
+\infoval{same\_op\_no\_op}\\
+\infoval{sequential} \\
+\infoval{system} \\
+\infoval{true} \\
+\infoval{war}\\
+\infoval{waw}\\
+\infoval{win\_allocate} \\
+\infoval{win\_allocate\_shared} \\
+\infoval{write\_mostly} \\
+\infoval{write\_once}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section[Summary of the Semantics of all Op.-Related Routines]{Summary of the Semantics of all Operation-Related \texorpdfstring{\MPI/}{MPI} Procedures}
+\label{sec:lang:semantics:summary}
+
+This annex 
+provides the list of \MPI/ procedures that are associated with an \MPI/ 
+operation, or inquiry procedures providing information about an operation.
+
+In many cases, the \MPI/ procedures and their properties are listed under certain constraints,
+e.g., a call to \mpifunc{MPI\_WAIT} that completes either a nonblocking or a persistent operation,
+or \RMA/ calls in combination with various synchronization methods.
+
+\paraheading{Table Legend:}
+{\small
+\begin{itemize}
+\item \textbf{Stages:} \mpilegend{i}=initialization, \mpilegend{s}=starting, \mpilegend{c}=completion, \mpilegend{f}=freeing.
+  The procedure does at least part
+  of the indicated stage(s).
+\item \textbf{Cpl:} \mpilegend{ic}=incomplete procedure, \mpilegend{c}=completing procedure, \mpilegend{f}=freeing procedure
+\item \textbf{Loc:} \mpilegend{l}=local procedure, \mpilegend{nl}=non-local procedure
+\item \textbf{$*$}: exceptions, e.g., \mpilegend{ic+nl} = incomplete+non-local, and \mpilegend{c+l} = completing+local (both are defined as blocking)
+\item \textbf{Blk:} \mpilegend{b}=blocking procedure, \mpilegend{nb}=nonblocking procedure. Note that from a user's view point, this column is only a hint. Relevant is,
+         whether a routine is local or not and which resources are blocked until when. See both previous and last columns.
+\item  \textbf{$\ddagger$}: exceptions, e.g., nonblocking procedures without prefix \mpicode{I}, or that prefix \mpicode{I} only marks immediate return.
+\item \textbf{Op:} part of operation type: \mpilegend{b-op} = blocking operation,
+ \mpilegend{nb-op} = nonblocking operation, \mpilegend{p-op} = persistent operation,
+ \mpilegend{pp-op} = persistent partitioned operation
+\item \textbf{Collective procedures:}
+\begin{itemize}
+     \item \mpilegend{C} = all processes of the group must call the procedure
+     \item \mpilegend{sq} = in the same sequence
+     \item \mpilegend{S1} = blocking synchronization, i.e., no process shall return from this procedure
+                      until all processes on the associated process group called this procedure
+     \item \mpilegend{W1} = the implementation is permitted to do S1 but not required to do S1
+     \item \mpilegend{S2} = start-complete-synchronization, i.e., no process shall complete the associated operation
+                      until all processes on the associated process group have called the associated starting procedure
+     \item \mpilegend{W2} = the implementation is permitted to do S2 but not required to do S2
+\end{itemize}
+%
+\item \textbf{Blocked resources:} They are blocked after the call until the end of the subsequent stage where this resource is not mentioned further in the table.
+\end{itemize}
+}
+
+\paraheading{Table Remarks:}
+{\small
+\begin{enumerate}
+\item \label{semantics:item1} Must not return before the corresponding \MPI/ receive operation is started.
+\item \label{semantics:item2} Not related to an \MPI/ operation.
+Prior to \MPIIVDOTO/, \mpifunc{MPI\_PROBE} and \mpifunc{MPI\_IPROBE}
+were also described as blocking and nonblocking.
+From \MPIIVDOTO/ onwards, only non-local and local are used to describe these procedures.
+\item \label{semantics:item3} Usually, \mpifunc{MPI\_WAIT} is non-local, but in this case it is local.
+\item \label{semantics:item4} In case of a \mpiskipfunc{MPI\_(I)BARRIER}\mpifuncindex{MPI\_BARRIER}\mpifuncindex{MPI\_IBARRIER} on an intra-communicator,
+      the \mpilegend{S1/S2} synchronization is required (instead of W1/W2).
+\item \label{semantics:item5} Collective: all processes must complete, but with the free choice of using \mpifunc{MPI\_WAIT}
+     or \mpifunc{MPI\_TEST} returning \mpiarg{flag}\code{ = TRUE}.
+\item \label{semantics:item6} It also may not return until \mpifunc{MPI\_INIT} was called in the children.
+\item \label{semantics:item7} Addresses are cached on the request handle.
+\item \label{semantics:item8}
+One of the rare cases that an incomplete call is non-local and therefore blocking.
+\item \label{semantics:item9} One shall not free or deallocate the buffer before the operation is freed, that is \mpifunc{MPI\_REQUEST\_FREE} returned.
+\item \label{semantics:item10} For \mpifunc{MPI\_WAIT} and \mpifunc{MPI\_TEST}, see corresponding lines for a) \mpifunc{MPI\_BSEND}, or b) \mpifunc{MPI\_IBCAST}.
+\item \label{semantics:item11}
+The prefix \mpicode{I} marks only that this procedure returns immediately.
+\item \label{semantics:item12}
+One of the exceptions that a completing and therefore blocking operation-related procedure is local.
+\item \label{semantics:item13} \mpiskipfunc{MPI\_(I)MPROBE}\mpifuncindex{MPI\_MPROBE}\mpifuncindex{MPI\_IMPROBE}
+      initializes the operation through generating the message handle
+      whereas
+      \mpiskipfunc{MPI\_(I)MRECV}\mpifuncindex{MPI\_MRECV}\mpifuncindex{MPI\_IMRECV}
+      initializes the receive buffer
+      (i.e., two \MPI/ procedures together implement the initialization stage).
+\item \label{semantics:item14} Nonblocking procedure without an \mpicode{I} prefix.
+\item \label{semantics:item15} Initialization stage (``\mpilegend{i}'') only if \mpiarg{flag}\code{ = TRUE} is returned else no operation is progressed.
+\item \label{semantics:item16} Collective: all processes must start, but with the free choice of using \mpifunc{MPI\_START}
+     or \mpifunc{MPI\_STARTALL} for a given persistent request handle
+     (i.e., if one process starts a persistent request handle then all processes
+     of the associated process group must start their corresponding request handle,
+     and if any process starts then all processes must complete their handles).
+\item \label{semantics:item17} In a correct \MPI/ program, a call to \mpifuncskip{MPI\_(I)RSEND} requires
+that the receiver has already started the corresponding receive.
+Under this assumption, the call to \mpifunc{MPI\_RSEND} and the call to
+\mpifunc{MPI\_WAIT} with an (active) ready send request handle are local.
+\item \label{semantics:item18} Based on their semantics, when called using an intra-communicator, \mpifunc{MPI\_ALLGATHER},
+     \mpifunc{MPI\_ALLTOALL}, and their \mpiskipfunc{V} and \mpiskipfunc{W}
+     variants, \mpifunc{MPI\_ALLREDUCE}, \mpifunc{MPI\_REDUCE\_SCATTER}, and  \mpifunc{MPI\_REDUCE\_SCATTER\_BLOCK}
+     must synchronize (i.e., \mpilegend{S1/S2} instead of  \mpilegend{W1/W2}) provided that all counts
+     and the size of all datatypes are larger than zero.
+\item \label{semantics:item19} \mpifunc{MPI\_COMM\_FREE} may return
+  before any pending communication has finished and the communicator
+  is deallocated. In contrast, \mpifunc{MPI\_COMM\_DISCONNECT} waits
+  for pending communicaton to finish and deallocates the
+  communicator before it returns. 
+\item \label{semantics:item20} The request handle is in the ``active'' state after \mpifunc{MPI\_START}, i.e., \mpifunc{MPI\_REQUEST\_FREE} is now forbidden.
+But the starting stage is not yet finished, and the contents of the buffer are not yet ``blocked.''
+An additional \mpifunc{MPI\_PREADY} and variants \mpiskipfunc{MPI\_PREADY\_RANGE}\mpiskipfunc{MPI\_PREADY\_LIST}
+are required to activate each partition of the send buffer to finish the starting stage.
+\item \label{semantics:item21} As part of the completion stage, the user is allowed to read part of the output buffer after returning
+from \mpifunc{MPI\_PARRIVED} with \mpiarg{flag}\code{ = TRUE} before completing the whole operation with a \mpifunc{MPI\_WAIT}/\mpifunc{MPI\_TEST} procedure.
+\item \label{semantics:item22} It initializes the attached buffer as completely free.
+\item \label{semantics:item23} It uses the attached buffer and performs all four stages on the send buffer. It occupies the needed part of the attached buffer. 
+\item \label{semantics:item24} It waits until the attached buffer is empty, i.e., all messages have been transmitted, and then releases the attached buffer.
+\item \label{semantics:item25} Although in case of \mpiarg{flag}\code{ = TRUE} the operation is completed,
+  a subsequent call to test, wait, or free must be executed for deallocating or inactivating
+  the request handle as final part of the stages c and f. It is listed only in this scenario,
+  but can be used everywhere, where \mpifunc{MPI\_TEST} can be called.
+\item \label{semantics:item26} It frees the request handle. If the related communication
+  operation is still ongoing then the completion and freeing stage can take place after the
+  procedure returned.
+\item \label{semantics:item27} Cancelling a send request is deprecated.
+\item \label{semantics:item28} Can also be applied to activ persistent requests.
+\item \label{semantics:item29} As an exception, \mpifunc{MPI\_WAIT} is local and
+  \mpifunc{MPI\_TEST} repeatedly called will eventually return \mpiarg{flag}\mpicode{=true}.
+  The cancelled send or receive operation is completed and the buffer can be reused. Whether the message is sent out from the buffer or received in the buffer, this part of the completion stage is only executed if a subsequent
+  \mpifunc{MPI\_TEST\_CANCELLED} for the returned status would
+  return \mpiarg{flag}\code{ = FALSE}.
+  The freeing stage will be performed only for non-persistent requests.
+\item \label{semantics:item30} In some cases, more than one \MPI/ procedure may be 
+  needed to implement one stage of an \MPI/ one-sided operation.
+  For details on the semantics of one-sided operations, see \namedref{Chapter}{sec:one-side-2}.
+\item \label{semantics:item31} Local completion only (at origin).
+\item \label{semantics:item32} Local completion only (at target).
+\item \label{semantics:item33} Completion at target and locally at origin.
+\item \label{semantics:item34} Return from \mpifunc{MPI\_WIN\_START} and these
+  subsequent procedures at the origin process may be delayed until \mpifunc{MPI\_WIN\_POST}
+  has been called at the target process (see \sectionref{sec:1sided-sync}
+  and \namedref{Example}{ex:1sided-start-complete}).
+\item \label{semantics:item35} Return from \mpifunc{MPI\_WIN\_LOCK} and these
+  subsequent procedures may be delayed until other origin processes have released
+  their lock (see \sectionref{sec:1sided-sync} and \namedref{Example}{ex:1sided-lock-unlock}).
+\item \label{semantics:item36} The init and freeing stages and the buffer address of
+  the target window only apply to \mpi/ processes in the role of a target of an \RMA/ operation.
+\item \label{semantics:item37} The freeing stage applies to operations only
+  and does not apply to any request.
+\item \label{semantics:item38} The same procedure call may serve different
+  stages for different operations, i.e.,
+  the completion of a previous \RMA/ and/or exposure epoch and/or
+  the start of a next \RMA/ and/or exposure epoch.
+\item \label{semantics:item39} In addition to the completion and freeing of
+  the \RMA/ operations prior the the flush call (stages ``\mpilegend{c+f}''),
+  this call initializes the next \RMA/ epoch (stage ``\mpilegend{i}'').
+\item \label{semantics:item40} The stages represent the invocation as part of an \RMA/ operation.
+  As collective procedure itself, it is a blocking procedure with all stages.
+\end{enumerate}
+}
+
+\clearpage
+\begin{tohtml}
+\begin{table}[htbp]
+\begin{centering}
+  \resizebox{\textwidth}{!} { %%ALLOWLATEX%
+    \setlength{\tabcolsep}{1.0mm} %%ALLOWLATEX%
+%    \hypersetup{linkcolor=black} % set~\ref color to black by default inside the table environment %%ALLOWLATEX%
+    \begin{tabular}{l|l|l|l|l|l|c|c|c|l}
+      \thickhline
+      \thickhline
+    \textbf{Procedure} & \textbf{Stages} & \textbf{Cpl} & \textbf{Loc} & \textbf{Blk} & \textbf{Op} &  \multicolumn{3}{c|}{\textbf{Collective}} &\textbf{Blocked resources} \\
+         &       &       &       &       &       & \textbf{C} & \textbf{sq} & \textbf{S/W} & \textbf{and remarks} \\
+      \thickhline
+      \thickhline
+      \multicolumn{10}{c}{\textbf{Chapter 3: Point-to-Point Communication}} \\
+      \thickhline
+      \thickhline
+    \mpifunc{MPI\_SEND} & i-s-c-f & c+f   & nl    & b     & b-op  & -     &       &       &  \\
+    \hline
+    \mpifunc{MPI\_SSEND} & i-s-c-f & c+f   & nl    & b     & b-op  & -     &       &       &\ref{semantics:item1}) \\
+    \hline
+    \mpifunc{MPI\_RSEND} & i-s-c-f & c+f & l$^*$ & b & b-op  & -     &       &       &\ref{semantics:item12})$^*$~\ref{semantics:item17}) \\
+    \thickhline
+    \thickhline
+    \mpifunc{MPI\_BUFFER\_ATTACH} & i-{-}-{-}-{-} &  & l &  & b-op  & -     &       &       & attached buffer~\ref{semantics:item22}) \\
+    \hline
+    \mpifunc{MPI\_BSEND} & i-s-c-f & c+f & l$^*$ & b & b-op  & -     &       &       & attached buffer~\ref{semantics:item23})~\ref{semantics:item12})$^*$ \\
+    \hline
+    \mpifunc{MPI\_BUFFER\_DETACH} & {-}-{-}-{-}-f & f & nl & b & b-op  & -     &       &       &\ref{semantics:item24}) \\
+    \thickhline
+    \thickhline
+    \mpifunc{MPI\_RECV} & i-s-c-f & c+f   & nl    & b     & b-op  & -     &       &       &  \\
+    \thickhline
+    \thickhline
+    \mpifunc{MPI\_ISEND}, \mpifunc{MPI\_ISSEND} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & -     &       &       & buffer \\
+    \hline
+    \mpifunc{MPI\_IRECV} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & -     &       &       & buffer \\
+    \hline
+    corresp. \mpifunc{MPI\_REQUEST\_GET\_STATUS} ret. \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & nb-op & -     &       &       &\ref{semantics:item25}) \\
+    \hline
+    corresp. \mpifunc{MPI\_REQUEST\_GET\_STATUS} ret. \mpicode{flag=TRUE} & {-}-{-}-c-{-} &       & l     &       & nb-op & -     &       &       &\ref{semantics:item25}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & nb-op & -     &       &       & buffer~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-f & c+f   & l     &       & nb-op & -     &       &       &  \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-f & c+f   & nl    &       & nb-op & -     &       &       & \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} (for active request) & {-}-{-}-{-}-{-} &  & l &       & nb-op & -     &       &       & buffer~\ref{semantics:item26}) \\
+    \thickhline
+    \thickhline
+    \mpifunc{MPI\_IBSEND}, \mpifunc{MPI\_IRSEND} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & -     &       &       & buffer \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & nb-op & -     &       &       & buffer~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-f & c+f   & l     &       & nb-op & -     &       &       &  \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-f & c+f   & l$^*$ &  & nb-op & -     &       &       &\ref{semantics:item3})$^*$~\ref{semantics:item17}) \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} (for active request) & {-}-{-}-{-}-{-} &  & l &       & nb-op & -     &       &       & buffer~\ref{semantics:item26}) \\
+    \thickhline
+    \thickhline
+    \mpifunc{MPI\_ISEND}, \mpifunc{MPI\_ISSEND}, \mpifunc{MPI\_IBSEND}, \mpifunc{MPI\_IRSEND} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & -     &       &       & buffer~\ref{semantics:item27} \\
+    \hline
+    \mpifunc{MPI\_IRECV} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & -     &       &       & buffer \\
+    \hline
+    corresponding \mpifunc{MPI\_CANCEL} & {-}-{-}-{-}-{-} &       & l     &       & nb-op & -     &       &       & buffer~\ref{semantics:item28}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & nb-op & -     &       &       & buffer~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-f & c+f   & l     &       & nb-op & -     &       &       &\ref{semantics:item29}) \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-f & c+f   & l$^*$ &       & nb-op & -     &       &       &\ref{semantics:item29}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST\_CANCELLED} & {-}-{-}-{-}-{-} &  & l &       & nb-op & -     &       &       &  \\
+    \thickhline
+    \thickhline
+    \mpifunc{MPI\_PROBE} & {-}-{-}-{-}-{-} & c     & nl    &       &       & -     &       &       &\ref{semantics:item2}) \\
+    \hline
+    \mpifunc{MPI\_IPROBE} & {-}-{-}-{-}-{-} & c & l$^\ddagger$ &  &       & -     &       &       &\ref{semantics:item2})~\ref{semantics:item11})$^\ddagger$ \\
+    \thickhline
+    \mpifunc{MPI\_MPROBE} & i-{-}-{-}-{-} & ic & nl$^*$ & b & b-op  & -     &       &       & message~\ref{semantics:item8})$^*$ \\
+    \hline
+    \mpifunc{MPI\_IMPROBE} & i-{-}-{-}-{-} & ic    & l     & nb    & b-op  & -     &       &       & message~\ref{semantics:item15}) \\
+    \hline
+    \mpifunc{MPI\_MRECV} of a probed message & i-s-c-f & c+f   & l     & b     & b-op  & -     &       &       &\ref{semantics:item13}) \\
+    \hline
+    \mpifunc{MPI\_IMRECV} of a probed message & i-s-{-}-{-} & ic    & l     & nb    & nb-op & -     &       &       & buffer~\ref{semantics:item13}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & nb-op & -     &       &       & buffer~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-f & c+f   & l     &       & nb-op & -     &       &       &  \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-f & c+f   & l     &       & nb-op & -     &       &       & \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} (for active request) & {-}-{-}-{-}-{-} &  & l &       & nb-op & -     &       &       & buffer~\ref{semantics:item26}) \\
+    \thickhline
+    \thickhline
+    \mpiskipfunc{MPI\_[S$|$B$|$R]SEND\_INIT}\mpifuncindex{MPI\_SEND\_INIT}\mpifuncindex{MPI\_SSEND\_INIT}\mpifuncindex{MPI\_BSEND\_INIT}\mpifuncindex{MPI\_RSEND\_INIT}, \mpifunc{MPI\_RECV\_INIT} & i-{-}-{-}-{-} & ic    & l     & nb$^\ddagger$ & p-op  & -     &       &       & buffer address~\ref{semantics:item9})~\ref{semantics:item14})$^\ddagger$ \\
+    \hline
+    corresponding \mpifunc{MPI\_START}, \mpifunc{MPI\_STARTALL} & {-}-s-{-}-{-} & ic    & l     & nb$^\ddagger$ & p-op  & -     &       &       & buffer address+contents~\ref{semantics:item7})~\ref{semantics:item14})$^\ddagger$ \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & p-op  & -     &       &       & buffer address+contents~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-{-} & c     & l     &       & p-op  & -     &       &       & buffer address~\ref{semantics:item7})~\ref{semantics:item9}) \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} (for \mpiskipfunc{MPI\_(B$|$R)SEND\_INIT}\mpifuncindex{MPI\_BSEND\_INIT}\mpifuncindex{MPI\_RSEND\_INIT} req.) & {-}-{-}-c-{-} & c     & l$^*$ &       & p-op  & -     &       &       & buffer address~\ref{semantics:item3})$^*$~\ref{semantics:item7})~\ref{semantics:item9})~\ref{semantics:item17})\\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} (for other request) & {-}-{-}-c-{-} & c     & nl    &       & p-op  & -     &       &       & buffer address~\ref{semantics:item7})~\ref{semantics:item9}) \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} (for active request) & {-}-{-}-{-}-{-} &  & l &       & nb-op & -     &       &       & buffer~\ref{semantics:item26}) \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} (for inactive request) & {-}-{-}-{-}-f & f     & l     &       & p-op  & -     &       &       &  \\
+    \hline
+    \mpifunc{MPI\_CANCEL} of nonblocking/persistent pt-to-pt &       &  & l     &       & p-op  & -     &       &       & \\
+      \thickhline
+      \thickhline
+    \mpiskipfunc{MPI\_SENDRECV[\_REPLACE]}\mpifuncindex{MPI\_SENDRECV}\mpifuncindex{MPI\_SENDRECV\_REPLACE} & i-s-c-f & c+f   & nl    & b     & b-op  & -     &       &       &  \\
+    \thickhline
+    \mpiskipfunc{MPI\_ISENDRECV[\_REPLACE]}\mpifuncindex{MPI\_ISENDRECV}\mpifuncindex{MPI\_ISENDRECV\_REPLACE} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & -     &       &       & buffer \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & nb-op & -     &       &       & buffer~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-f & c+f   & l     &       & nb-op & -     &       &       &  \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-f & c+f   & nl    &       & nb-op & -     &       &       & \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} (for active request) & {-}-{-}-{-}-{-} &  & l &       & nb-op & -     &       &       & buffer~\ref{semantics:item26}) \\
+    \thickhline
+    \thickhline
+    \multicolumn{10}{c}{\textbf{Chapter 4: Partitioned Point-to-Point Communication}} \\
+    \thickhline
+    \thickhline
+    \mpifunc{MPI\_PSEND\_INIT} & i-{-}-{-}-{-} & ic    & l     & nb$^\ddagger$ & pp-op  & -     &       &       & buffer address~\ref{semantics:item9})~\ref{semantics:item14})$^\ddagger$ \\
+    \hline
+    corresponding \mpifunc{MPI\_START}, \mpifunc{MPI\_STARTALL} & {-}-s-{-}-{-} & ic    & l     & nb$^\ddagger$ & pp-op  & -     &       &       & buffer address~\ref{semantics:item7})~\ref{semantics:item9})~\ref{semantics:item14})$^\ddagger$~\ref{semantics:item20}) \\
+    \hline
+    corresponding \mpifunc{MPI\_PREADY} and  variants %%\mpiskipfunc{MPI\_PREADY\_RANGE}\mpiskipfunc{MPI\_PREADY\_LIST}
+                       & {-}-s-{-}-{-} & ic    & l     & nb$^\ddagger$ & pp-op  & -     &       &       & buffer address+contents~\ref{semantics:item7})~\ref{semantics:item9})~\ref{semantics:item14})$^\ddagger$~\ref{semantics:item20}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & pp-op  & -     &       &       & buffer address+contents~\ref{semantics:item7})~\ref{semantics:item9}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-{-} & c     & l     &       & pp-op  & -     &       &       & buffer address~\ref{semantics:item7})~\ref{semantics:item9}) \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-{-} & c     & nl    &       & pp-op  & -     &       &       & buffer address~\ref{semantics:item7})~\ref{semantics:item9}) \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} (for inactive request) & {-}-{-}-{-}-f & f     & l     &       & pp-op  & -     &       &       &  \\
+    \thickhline
+    \mpifunc{MPI\_PRECV\_INIT} & i-{-}-{-}-{-} & ic    & l     & nb$^\ddagger$ & pp-op  & -     &       &       & buffer address~\ref{semantics:item9})~\ref{semantics:item14})$^\ddagger$ \\
+    \hline
+    corresponding \mpifunc{MPI\_START}, \mpifunc{MPI\_STARTALL} & {-}-s-{-}-{-} & ic    & l     & nb$^\ddagger$ & pp-op  & -     &       &       & buffer address+contents~\ref{semantics:item7})~\ref{semantics:item9})~\ref{semantics:item14})$^\ddagger$ \\
+    \hline
+    \mpifunc{MPI\_PARRIVED} returning \mpicode{flag=TRUE} & {-}-{-}-{c}-{-} & ic    & l     & & pp-op  & -     &       &       & buffer address+contents~\ref{semantics:item7})~\ref{semantics:item9})~\ref{semantics:item21}) \\
+    \hline
+    \mpifunc{MPI\_PARRIVED} returning \mpicode{flag=FALSE} &  {-}-{-}-{-}-{-} & ic    & l     & & pp-op  & -     &       &       & buffer address+contents~\ref{semantics:item7})~\ref{semantics:item9}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & pp-op  & -     &       &       & buffer address+contents~\ref{semantics:item7})~\ref{semantics:item9}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-{-} & c     & l     &       & pp-op  & -     &       &       & buffer address~\ref{semantics:item7})~\ref{semantics:item9})~\ref{semantics:item21}) \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-{-} & c     & nl    &       & pp-op  & -     &       &       & buffer address~\ref{semantics:item7})~\ref{semantics:item9})~\ref{semantics:item21}) \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} (for inactive request) & {-}-{-}-{-}-f & f     & l     &       & pp-op  & -     &       &       &  \\
+    \thickhline
+    \thickhline
+    \end{tabular}
+  }
+  \label{tab:semantics1}
+\end{centering}
+\end{table}
+\end{tohtml}
+
+\clearpage
+\begin{tohtml}
+\begin{table}[htbp]
+\begin{centering}
+  \resizebox{\textwidth}{!} { %%ALLOWLATEX%
+    \setlength{\tabcolsep}{1.0mm} %%ALLOWLATEX%
+%    \hypersetup{linkcolor=black} % set~\ref color to black by default inside the table environment %%ALLOWLATEX%
+    \begin{tabular}{l|l|l|l|l|l|c|c|c|l}
+      \thickhline
+      \thickhline
+    \textbf{Procedure} & \textbf{Stages} & \textbf{Cpl} & \textbf{Loc} & \textbf{Blk} & \textbf{Op} &  \multicolumn{3}{c|}{\textbf{Collective}} &\textbf{Blocked resources} \\
+         &       &       &       &       &       & \textbf{C} & \textbf{sq} & \textbf{S/W} & \textbf{and remarks} \\
+      \thickhline
+      \thickhline
+      \multicolumn{10}{c}{\textbf{Chapter 6: Collective Communication}} \\
+      \thickhline
+      \thickhline
+      \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_BCAST}, \mpifunc{MPI\_BARRIER}, \mpifunc{MPI\_GATHER}, \mpifunc{MPI\_GATHERV},
+      \mpifunc{MPI\_SCATTER}, \mpifunc{MPI\_SCATTERV}, \mpifunc{MPI\_ALLGATHER}, \mpifunc{MPI\_ALLGATHERV}, \mpifunc{MPI\_ALLTOALL},
+      \mpifunc{MPI\_ALLTOALLV}, \mpifunc{MPI\_ALLTOALLW}, \mpifunc{MPI\_REDUCE}, \mpifunc{MPI\_ALLREDUCE},
+      \mpifunc{MPI\_REDUCE\_SCATTER\_BLOCK}, \mpifunc{MPI\_REDUCE\_SCATTER}, \mpifunc{MPI\_SCAN}, \mpifunc{MPI\_EXSCAN}} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    &\ref{semantics:item4})~\ref{semantics:item18}) \\
+    \thickhline
+    \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_IBCAST},
+      \mpifunc{MPI\_IBARRIER}, \mpifunc{MPI\_IGATHER},
+      \mpifunc{MPI\_ISCATTER}, \mpifunc{MPI\_IALLGATHER},
+      \mpifunc{MPI\_IALLTOALL}, \mpifunc{MPI\_IREDUCE},
+      \mpifunc{MPI\_IALLREDUCE}, \mpifunc{MPI\_IREDUCE\_SCATTER\_BLOCK},
+      \mpifunc{MPI\_ISCAN}, \mpifunc{MPI\_IEXSCAN}} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & C     & sq    &       & buffer \\
+    \hline
+    \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_IGATHERV},
+      \mpifunc{MPI\_ISCATTERV}, \mpifunc{MPI\_IALLGATHERV},
+      \mpifunc{MPI\_IALLTOALLV}, \mpifunc{MPI\_IALLTOALLW},
+      \mpifunc{MPI\_IREDUCE\_SCATTER}}  & i-s-{-}-{-} & ic    & l     & nb    & nb-op & C     & sq    &       & buffer, array arguments \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & nb-op &       &       &       & buffer, array arguments~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-f & c+f   & l     &       & nb-op & C     &       & W2    &\ref{semantics:item4})~\ref{semantics:item5})~\ref{semantics:item18}) \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-f & c+f   & nl    &       & nb-op & C     &       & W2    &\ref{semantics:item4})~\ref{semantics:item5})~\ref{semantics:item18}) \\
+    \thickhline
+     \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_BCAST\_INIT}, \mpifunc{MPI\_BARRIER\_INIT},
+      \mpifunc{MPI\_GATHER\_INIT}, \mpifunc{MPI\_SCATTER\_INIT},
+      \mpifunc{MPI\_ALLGATHER\_INIT}, \mpifunc{MPI\_ALLTOALL\_INIT}, \mpifunc{MPI\_REDUCE\_INIT},
+      \mpifunc{MPI\_ALLREDUCE\_INIT}, \mpifunc{MPI\_REDUCE\_SCATTER\_BLOCK\_INIT},
+      \mpifunc{MPI\_SCAN\_INIT}, \mpifunc{MPI\_EXSCAN\_INIT}} & i-{-}-{-}-{-} & ic & nl$^*$ & b & p-op  & C     & sq    & W1    & buffer address~\ref{semantics:item8})$^*$~\ref{semantics:item9}) \\
+    \hline
+    \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_GATHERV\_INIT}, \mpifunc{MPI\_SCATTERV\_INIT},
+      \mpifunc{MPI\_ALLGATHERV\_INIT}, \mpifunc{MPI\_ALLTOALLV\_INIT},
+      \mpifunc{MPI\_ALLTOALLW\_INIT},
+      \mpifunc{MPI\_REDUCE\_SCATTER\_INIT}} & i-{-}-{-}-{-} & ic & nl$^*$ & b & p-op  & C     & sq    & W1    & \multicolumn{1}{p{14em}}{buffer address, array arguments~\ref{semantics:item8})$^*$~\ref{semantics:item9})} \\
+    \hline
+    corresponding \mpifunc{MPI\_START}, \mpifunc{MPI\_STARTALL} & {-}-s-{-}-{-} & ic    & l     & nb$^\ddagger$ & p-op  & C     &       &       & buf.addr.+contents~\ref{semantics:item7})~\ref{semantics:item14})$^\ddagger$~\ref{semantics:item16}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & p-op  &       &       &       & buf addr+contents \& arr-args~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-{-} & c     & l     &       & p-op  & C     &       & W2    & buf-addr \& arr-args~\ref{semantics:item4})~\ref{semantics:item5})~\ref{semantics:item7})~\ref{semantics:item9})~\ref{semantics:item18}) \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-{-} & c     & nl    & & p-op & C     &       & W2    & \multicolumn{1}{p{14em}}{buffer address and array arguments cached on the request handle~\ref{semantics:item4})~\ref{semantics:item5})~\ref{semantics:item7})~\ref{semantics:item9})~\ref{semantics:item18})} \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} & {-}-{-}-{-}-f & f     & l     &  & p-op  &       &       &       &  \\
+    \thickhline
+    \thickhline
+    \multicolumn{10}{c}{\textbf{Chapter 7: Groups, Contexts, Communicators, and Caching}} \\
+    \thickhline
+    \thickhline
+    \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_COMM\_CREATE}, \mpifunc{MPI\_COMM\_DUP}, \mpifunc{MPI\_COMM\_DUP\_WITH\_INFO},
+      \mpifunc{MPI\_COMM\_SPLIT}, \mpifunc{MPI\_COMM\_SPLIT\_TYPE}, \mpifunc{MPI\_COMM\_SET\_INFO}} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    & coll. over comm arg. \\
+    \hline
+    \mpifunc{MPI\_COMM\_CREATE\_GROUP} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    & coll. over group arg. \\
+    \thickhline
+    \mpifunc{MPI\_INTERCOMM\_CREATE},\mpifunc{MPI\_INTERCOMM\_MERGE} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    & \multicolumn{1}{p{14em}}{coll. over union of\newline{}local \& remote group} \\
+    \thickhline
+    \mpifunc{MPI\_COMM\_IDUP} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & C     & sq    &       & communicator handle \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & nb-op &       &       &       &  \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-f & c+f     & l     &       & nb-op & C     &       & W2    &\ref{semantics:item5}) \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-f & c+f     & nl    &       & nb-op & C     &       & W2    &\ref{semantics:item5}) \\
+    \thickhline
+    \mpifunc{MPI\_COMM\_FREE} & i-s-{-}-{-} &  ic    & nl    & b     & nb-op  & C     & sq    & W1    &\ref{semantics:item19}) \\
+    \hline
+    \mpifunc{MPI\_COMM\_DISCONNECT} & i-s-c-f & c+f     & nl    & b     & b-op  & C     & sq    & W1    &\ref{semantics:item19})  \\
+    \thickhline
+    \thickhline
+    \end{tabular}
+  }
+  \label{tab:semantics2}
+\end{centering}
+\end{table}
+\end{tohtml}
+
+
+\clearpage
+\begin{tohtml}
+\begin{table}[htbp]
+\begin{centering}
+  \resizebox{\textwidth}{!} { %%ALLOWLATEX%
+    \setlength{\tabcolsep}{1.0mm} %%ALLOWLATEX%
+%    \hypersetup{linkcolor=black} % set~\ref color to black by default inside the table environment %%ALLOWLATEX%
+    \begin{tabular}{l|l|l|l|l|l|c|c|c|l}
+    \thickhline
+    \thickhline
+    \textbf{Procedure} & \textbf{Stages} & \textbf{Cpl} & \textbf{Loc} & \textbf{Blk} & \textbf{Op} &  \multicolumn{3}{c|}{\textbf{Collective}} &\textbf{Blocked resources} \\
+         &       &       &       &       &       & \textbf{C} & \textbf{sq} & \textbf{S/W} & \textbf{and remarks} \\
+      \thickhline
+      \thickhline
+    \multicolumn{10}{c}{\textbf{Chapter 8: Process Topologies}} \\
+    \thickhline
+    \thickhline
+    \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_CART\_CREATE}, \mpifunc{MPI\_CART\_SUB}, \mpifunc{MPI\_GRAPH\_CREATE},
+    \mpifunc{MPI\_DIST\_GRAPH\_CREATE\_ADJACENT}, \mpifunc{MPI\_DIST\_GRAPH\_CREATE}} & i-s-c-f & c     & nl    & b     & b-op  & C     & sq    & W1    & coll. over comm arg. \\
+    \thickhline
+    \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_NEIGHBOR\_ALLGATHER},
+      \mpifunc{MPI\_NEIGHBOR\_ALLGATHERV},
+      \mpifunc{MPI\_NEIGHBOR\_ALLTOALL},
+      \mpifunc{MPI\_NEIGHBOR\_ALLTOALLV}, \mpifunc{MPI\_NEIGHBOR\_ALLTOALLW}} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    & \\
+    \thickhline
+    \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_INEIGHBOR\_ALLGATHER}, \mpifunc{MPI\_INEIGHBOR\_ALLTOALL}} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & C     & sq    &       & buffer \\
+    \hline
+   \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_INEIGHBOR\_ALLGATHERV},
+      \mpifunc{MPI\_INEIGHBOR\_ALLTOALLV},
+      \mpifunc{MPI\_INEIGHBOR\_ALLTOALLW}}  & i-s-{-}-{-} & ic    & l     & nb    & nb-op & C     & sq    &       & buffer, array arguments \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & nb-op &       &       &       & buffer, array arguments~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-f & c+f   & l     &       & nb-op & C     &       & W2    &\ref{semantics:item5}) \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-f & c+f   & nl    &       & nb-op & C     &       & W2    &\ref{semantics:item5}) \\
+    \thickhline
+    \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_NEIGHBOR\_ALLGATHER\_INIT},
+      \mpifunc{MPI\_NEIGHBOR\_ALLTOALL\_INIT}} & i-{-}-{-}-{-} & ic & nl$^*$ & b & p-op  & C     & sq    & W1    & buffer address~\ref{semantics:item8})$^*$~\ref{semantics:item9}) \\
+    \hline
+     \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_NEIGHBOR\_ALLGATHERV\_INIT},
+      \mpifunc{MPI\_NEIGHBOR\_ALLTOALLV\_INIT},
+      \mpifunc{MPI\_NEIGHBOR\_ALLTOALLW\_INIT}}  & i-{-}-{-}-{-} & ic & nl$^*$ & b & p-op  & C     & sq    & W1    & \multicolumn{1}{p{14em}}{buffer address, array arguments~\ref{semantics:item8})$^*$~\ref{semantics:item9})} \\
+    \hline
+    corresponding \mpifunc{MPI\_START}, \mpifunc{MPI\_STARTALL} & {-}-s-{-}-{-} & ic    & l     & nb$^\ddagger$ & p-op  & C     &       &       & buf.addr.+contents~\ref{semantics:item7})~\ref{semantics:item14})$^\ddagger$~\ref{semantics:item16}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &       & l     &       & p-op  &       &       &       & buf addr+contents \& arr-args~\ref{semantics:item7}) \\
+    \hline
+    corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-{-} & c     & l     &       & p-op  & C     &       & W2    & buf-addr \& arr-args~\ref{semantics:item5})~\ref{semantics:item7})~\ref{semantics:item9}) \\
+    \hline
+    corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-{-} & c     & nl    & & p-op & C     &       & W2    & \multicolumn{1}{p{14em}}{buffer address and array arguments cached on the request handle~\ref{semantics:item5})~\ref{semantics:item7})~\ref{semantics:item9})} \\
+    \hline
+    corresponding \mpifunc{MPI\_REQUEST\_FREE} & {-}-{-}-{-}-f & f     & l     &  & p-op  &       &       &       &  \\
+    \thickhline
+    \thickhline
+    \multicolumn{10}{c}{\textbf{Chapter 11: Process Initialization, Creation, and Management}} \\
+    \thickhline
+    \thickhline
+    \mpifunc{MPI\_INIT}, \mpifunc{MPI\_INIT\_THREAD} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    & \multicolumn{1}{p{14em}}{collective over\newline{}\mpiconst{MPI\_COMM\_WORLD}} \\
+    \hline
+    \mpifunc{MPI\_FINALIZE} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    & \multicolumn{1}{p{14em}}{collective over all connected processes} \\
+    \thickhline
+    \mpifunc{MPI\_SESSION\_INIT} &  {-}-{-}-{-}-{-} &  & l &  &  &  &  &  &\ref{semantics:item2}) \\
+    \hline
+    \mpifunc{MPI\_SESSION\_FINALIZE} & i-s-c-f & c+f & nl & b & b-op  & C  & sq & W1 & \multicolumn{1}{p{14em}}{collective over connected processes scoped by the session} \\
+    \thickhline
+    \thickhline
+    \mpifunc{MPI\_COMM\_SPAWN}, \ldots\mpiskipfunc{\_MULTIPLE}\mpifuncindex{MPI\_COMM\_SPAWN\_MULTIPLE} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    & \multicolumn{1}{p{14em}}{collective over comm~\ref{semantics:item6})} \\
+    \hline
+    \mpifunc{MPI\_COMM\_ACCEPT}, \mpifunc{MPI\_COMM\_CONNECT} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    & \multicolumn{1}{p{14em}}{collective over comm} \\
+    \thickhline
+    \thickhline
+    \end{tabular}
+  }
+  \label{tab:semantics3}
+\end{centering}
+\end{table}
+\end{tohtml}
+
+\clearpage
+\begin{tohtml}
+\begin{table}[htbp]
+\begin{centering}
+  \resizebox{\textwidth}{!} { %%ALLOWLATEX%
+    \setlength{\tabcolsep}{1.0mm} %%ALLOWLATEX%
+%    \hypersetup{linkcolor=black} % set \ref color to black by default inside the table environment %%ALLOWLATEX%
+    \begin{tabular}{l|l|l|l|l|l|c|c|c|l}
+    \thickhline
+    \thickhline
+    \textbf{Procedure} & \textbf{Stages} & \textbf{Cpl} & \textbf{Loc} & \textbf{Blk} & \textbf{Op} &  \multicolumn{3}{c|}{\textbf{Collective}} &\textbf{Blocked resources} \\
+    &       &       &       &       &       & \textbf{C} & \textbf{sq} & \textbf{S/W} & \textbf{and remarks} \\
+
+      \thickhline
+      \thickhline
+      \multicolumn{10}{c}{\textbf{Chapter 12: One-Sided Communication}} \\
+      \thickhline
+      \thickhline
+      \multicolumn{10}{c}{Window Allocation and Destruction} \\
+      \thickhline
+      \thickhline
+      \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_WIN\_CREATE}, \mpifunc{MPI\_WIN\_ALLOCATE}, \mpifunc{MPI\_WIN\_ALLOCATE\_SHARED}, \mpifunc{MPI\_WIN\_CREATE\_DYNAMIC}} & i-{-}-{-}-{-} & & nl & & & C & sq & W1 & window buffer address~\ref{semantics:item36})~\ref{semantics:item40}) \\
+      \hline
+      \mpifunc{MPI\_WIN\_SET\_INFO} & i-{-}-{-}-{-} & & nl & & & C & sq & W1 & window buffer address~\ref{semantics:item40}) \\
+      \hline
+      \mpifunc{MPI\_WIN\_FREE} & {-}-{-}-{-}-f & f & nl & & & C & sq & W1 &\ref{semantics:item36})~\ref{semantics:item40}) \\
+      \thickhline
+      \thickhline
+      \multicolumn{10}{c}{With Fence Synchronization in the Role of an Origin Process} \\
+      \thickhline
+      \thickhline
+      \mpifunc{MPI\_WIN\_FENCE} & i-{-}-{-}-{-} & {-} & nl & & & C & sq & W1 &\ref{semantics:item30})~\ref{semantics:item38}) \\
+      \hline
+      \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_PUT}, \mpifunc{MPI\_GET}, \mpifunc{MPI\_ACCUMULATE}, \mpifunc{MPI\_GET\_ACCUMULATE}, \mpifunc{MPI\_COMPARE\_AND\_SWAP}, \mpifunc{MPI\_FETCH\_AND\_OP}} & i-s-{-}-{-} & ic & l & nb & nb-op & - & & & argument buffer~\ref{semantics:item14})~\ref{semantics:item30}) \\
+      \hline
+      \mpifunc{MPI\_WIN\_FENCE} & {-}-{-}-c-f & c+f & nl & & & C & sq & W1 &\ref{semantics:item31})~\ref{semantics:item38}) \\
+      \thickhline
+      \thickhline
+
+      \multicolumn{10}{c}{With Fence Synchronization in the Role of a Target Process} \\
+      \thickhline
+      \thickhline
+      \mpifunc{MPI\_WIN\_FENCE} & {-}-s-{-}-{-} & ic & nl & & & C & sq & W1 & window buffer address+content~\ref{semantics:item38}) \\
+      \hline
+      \mpifunc{MPI\_WIN\_FENCE} & {-}-{-}-c-{-} & c & nl & & & C & sq & W1 & window buffer address~\ref{semantics:item32})~\ref{semantics:item38}) \\
+
+      \thickhline
+      \thickhline
+      \multicolumn{10}{c}{With General Active Target Synchronization in the Role of an Origin Process} \\
+      \thickhline
+      \thickhline
+      %\mpifunc{MPI\_WIN\_POST} & {-}-{-}-{-}-{-} &  & l & & & C & & & \\
+      %\hline
+      \mpifunc{MPI\_WIN\_START} & i-{-}-{-}-{-} & & nl & & & - & & &\ref{semantics:item30})~\ref{semantics:item34}) \\
+      \hline
+      \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_PUT}, \mpifunc{MPI\_GET}, \mpifunc{MPI\_ACCUMULATE}, \mpifunc{MPI\_GET\_ACCUMULATE}, \mpifunc{MPI\_COMPARE\_AND\_SWAP}, \mpifunc{MPI\_FETCH\_AND\_OP}} & i-s-{-}-{-} & ic & l & nb & nb-op & - & & & argument buffer~\ref{semantics:item14})~\ref{semantics:item30})~\ref{semantics:item34}) \\
+      \hline
+      \mpifunc{MPI\_WIN\_COMPLETE} & {-}-{-}-c-f & c+f & l & & & - & & &\ref{semantics:item31})~\ref{semantics:item34}) \\
+
+      \thickhline
+      \thickhline
+      \multicolumn{10}{c}{With General Active Target Synchronization in the Role of a Target Process}\\
+      \thickhline
+      \thickhline
+
+      \mpifunc{MPI\_WIN\_POST} & {-}-s-{-}-{-} & ic & l & & & - & & & window buffer address+content \\
+      \hline
+      \mpifunc{MPI\_WIN\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &  & l   &       & &  - &    & & \\
+      \hline
+      \mpifunc{MPI\_WIN\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-{-} & c  & l     &       &  & - &     & & window buffer address~\ref{semantics:item32}) \\
+      \hline
+      \mpifunc{MPI\_WIN\_WAIT} & {-}-{-}-c-{-} & c & nl & & & - & & & window buffer address~\ref{semantics:item32}) \\
+      \hline
+
+      \thickhline
+      \thickhline
+      \multicolumn{10}{c}{With Lock/Unlock Synchronization in the Role of an Origin Process} \\
+      \thickhline
+      \thickhline
+      \mpifunc{MPI\_WIN\_LOCK}, \mpifunc{MPI\_WIN\_LOCK\_ALL} & i-{-}-{-}-{-} & & nl & & & - & & &\ref{semantics:item30})~\ref{semantics:item35}) \\
+      \hline
+      \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_PUT}, \mpifunc{MPI\_GET}, \mpifunc{MPI\_ACCUMULATE}, \mpifunc{MPI\_GET\_ACCUMULATE}, \mpifunc{MPI\_COMPARE\_AND\_SWAP}, \mpifunc{MPI\_FETCH\_AND\_OP}} & i-s-{-}-{-} & ic & l & nb & nb-op & - & & & argument buffer~\ref{semantics:item14})~\ref{semantics:item30})~\ref{semantics:item35}) \\
+      \hline
+      \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_RPUT}, \mpifunc{MPI\_RGET}, \mpifunc{MPI\_RACCUMULATE}, \mpifunc{MPI\_RGET\_ACCUMULATE}} & i-s-{-}-{-} & ic & l & nb & nb-op & - & & & argument buffer~\ref{semantics:item14})~\ref{semantics:item30})~\ref{semantics:item35})  \\
+    \hline
+      corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=FALSE} & {-}-{-}-{-}-{-} &   & l     &       & nb-op  &  - &       &       & argument buffer~\ref{semantics:item7}) \\
+      \hline
+      corresponding \mpifunc{MPI\_TEST} returning \mpicode{flag=TRUE} & {-}-{-}-c-f & c+f  & l     &       & nb-op  & - &       & &\ref{semantics:item30})~\ref{semantics:item31}) \\
+      \hline
+      corresponding \mpifunc{MPI\_WAIT} & {-}-{-}-c-f & c+f & l$^*$ & & nb-op & - & & &\ref{semantics:item30})~\ref{semantics:item31})~\ref{semantics:item35}) \\
+      \hline
+      \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_WIN\_FLUSH\_LOCAL}, \mpifunc{MPI\_WIN\_FLUSH\_LOCAL\_ALL}} & {i}-{-}-c-f & c+f & l & & & - & & &\ref{semantics:item30})~\ref{semantics:item31})~\ref{semantics:item35})~\ref{semantics:item37})~\ref{semantics:item39}) \\
+      \hline
+      \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_WIN\_FLUSH}, \mpifunc{MPI\_WIN\_FLUSH\_ALL}} & {i}-{-}-c-f & c+f & l & & & - & & &\ref{semantics:item30})~\ref{semantics:item33})~\ref{semantics:item35})~\ref{semantics:item37})~\ref{semantics:item39}) \\
+      \hline
+      \multicolumn{1}{p{24em}|}{\mpifunc{MPI\_WIN\_UNLOCK}, \mpifunc{MPI\_WIN\_UNLOCK\_ALL}} & {-}-{-}-c-f & c+f & l & & & - & & &\ref{semantics:item30})~\ref{semantics:item33})~\ref{semantics:item35})~\ref{semantics:item37}) \\
+      \thickhline
+      \thickhline
+    \end{tabular}
+  }
+  \label{tab:semantics4}
+\end{centering}
+\end{table}
+\end{tohtml}
+
+\clearpage
+\begin{tohtml}
+\begin{table}[htbp]
+\begin{centering}
+  \resizebox{\textwidth}{!} { %%ALLOWLATEX%
+    \setlength{\tabcolsep}{1.0mm} %%ALLOWLATEX%
+%    \hypersetup{linkcolor=black} % set \ref color to black by default inside the table environment %%ALLOWLATEX%
+    \begin{tabular}{l|l|l|l|l|l|c|c|c|l}
+    \thickhline
+    \thickhline
+    \textbf{Procedure} & \textbf{Stages} & \textbf{Cpl} & \textbf{Loc} & \textbf{Blk} & \textbf{Op} &  \multicolumn{3}{c|}{\textbf{Collective}} &\textbf{Blocked resources} \\
+         &       &       &       &       &       & \textbf{C} & \textbf{sq} & \textbf{S/W} & \textbf{and remarks} \\
+    \thickhline
+    \thickhline
+      \multicolumn{10}{c}{\textbf{Chapter 14: I/O}} \\
+      \thickhline
+      \thickhline
+ \multicolumn{1}{p{24em}|}{\mpiskipfunc{MPI\_FILE\_READ/WRITE[\_AT$|$\_SHARED]}\mpifuncindex{MPI\_FILE\_READ}\mpifuncindex{MPI\_FILE\_READ\_AT}\mpifuncindex{MPI\_FILE\_READ\_SHARED}\mpifuncindex{MPI\_FILE\_WRITE}\mpifuncindex{MPI\_FILE\_WRITE\_AT}\mpifuncindex{MPI\_FILE\_WRITE\_SHARED},\newline{}\mpiskipfunc{MPI\_FILE\_DELETE/SEEK/GET\_VIEW}\mpifuncindex{MPI\_FILE\_DELETE}\mpifuncindex{MPI\_FILE\_SEEK}\mpifuncindex{MPI\_FILE\_GET\_VIEW}} & i-s-c-f & c+f & l$^*$ & b & b-op  & -     &       &       &\ref{semantics:item12})$^*$ \\
+    \hline
+    \multicolumn{1}{p{24em}|}{\mpiskipfunc{MPI\_FILE\_READ/WRITE\_AT\_ALL}\mpifuncindex{MPI\_FILE\_READ\_AT\_ALL}\mpifuncindex{MPI\_FILE\_WRITE\_AT\_ALL},\newline{}\mpiskipfunc{MPI\_FILE\_READ/WRITE\_ALL$|$ORDERED}\mpifuncindex{MPI\_FILE\_READ\_ALL}\mpifuncindex{MPI\_FILE\_READ\_ORDERED}\mpifuncindex{MPI\_FILE\_WRITE\_ALL}\mpifuncindex{MPI\_FILE\_WRITE\_ORDERED},\newline{}\mpiskipfunc{MPI\_FILE\_OPEN/CLOSE/SEEK\_SHARED}\mpifuncindex{MPI\_FILE\_OPEN}\mpifuncindex{MPI\_FILE\_CLOSE}\mpifuncindex{MPI\_FILE\_SEEK\_SHARED},\newline{}\mpiskipfunc{MPI\_FILE\_PREALLOCATE/SYNC}\mpifuncindex{MPI\_FILE\_PREALLOCATE}\mpifuncindex{MPI\_FILE\_SYNC},\newline{}\mpiskipfunc{MPI\_FILE\_SET\_VIEW/SIZE/INFO/ATOMICITY}\mpifuncindex{MPI\_FILE\_SET\_VIEW}\mpifuncindex{MPI\_FILE\_SET\_SIZE}\mpifuncindex{MPI\_FILE\_SET\_INFO}\mpifuncindex{MPI\_FILE\_SET\_ATOMICITY}} & i-s-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    &  \\
+    \thickhline
+    \mpiskipfunc{MPI\_FILE\_IREAD/IWRITE[\_AT$|$\_SHARED]}\mpifuncindex{MPI\_FILE\_IREAD}\mpifuncindex{MPI\_FILE\_IREAD\_AT}\mpifuncindex{MPI\_FILE\_IREAD\_SHARED}\mpifuncindex{MPI\_FILE\_IWRITE}\mpifuncindex{MPI\_FILE\_IWRITE\_AT}\mpifuncindex{MPI\_FILE\_IWRITE\_SHARED} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & -     &       &       & buffer~\ref{semantics:item10}a) \\
+    \thickhline
+    \mpiskipfunc{MPI\_FILE\_IREAD/IWRITE[\_AT]\_ALL}\mpifuncindex{MPI\_FILE\_IREAD\_ALL}\mpifuncindex{MPI\_FILE\_IREAD\_AT\_ALL}\mpifuncindex{MPI\_FILE\_IWRITE\_ALL}\mpifuncindex{MPI\_FILE\_IWRITE\_AT\_ALL} & i-s-{-}-{-} & ic    & l     & nb    & nb-op & C     & sq    &       & buffer~\ref{semantics:item10}b) \\
+    \thickhline
+    \multicolumn{1}{p{24em}|}{\mpiskipfunc{MPI\_FILE\_READ/WRITE[\_AT]\_ALL\_BEGIN}\mpifuncindex{MPI\_FILE\_READ\_ALL\_BEGIN}\mpifuncindex{MPI\_FILE\_READ\_AT\_ALL\_BEGIN}\mpifuncindex{MPI\_FILE\_WRITE\_ALL\_BEGIN}\mpifuncindex{MPI\_FILE\_WRITE\_AT\_ALL\_BEGIN}\newline{}\mpiskipfunc{MPI\_FILE\_READ/WRITE\_ORDERED\_BEGIN}\mpifuncindex{MPI\_FILE\_READ\_ORDERED\_BEGIN}\mpifuncindex{MPI\_FILE\_WRITE\_ORDERED\_BEGIN}} & i-s-{-}-{-} & ic & nl$^*$ & b & b-op  & C     & sq    & W1    & buffer~\ref{semantics:item8})$^*$ \\
+    \hline
+    \multicolumn{1}{p{24em}|}{\mpiskipfunc{MPI\_FILE\_READ/WRITE[\_AT]\_ALL\_END}\mpifuncindex{MPI\_FILE\_READ\_ALL\_END}\mpifuncindex{MPI\_FILE\_READ\_AT\_ALL\_END}\mpifuncindex{MPI\_FILE\_WRITE\_ALL\_END}\mpifuncindex{MPI\_FILE\_WRITE\_AT\_ALL\_END}\newline{}\mpiskipfunc{MPI\_FILE\_READ/WRITE\_ORDERED\_END}\mpifuncindex{MPI\_FILE\_READ\_ORDERED\_END}\mpifuncindex{MPI\_FILE\_WRITE\_ORDERED\_END}} & {-}-{-}-c-f & c+f   & nl    & b     & b-op  & C     & sq    & W1    &  \\
+      \thickhline
+      \thickhline
+    \end{tabular}
+  }
+  \label{tab:semantics5}
+\end{centering}
+\end{table}
+\end{tohtml}

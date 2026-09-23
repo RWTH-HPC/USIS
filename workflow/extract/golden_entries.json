@@ -1,0 +1,3547 @@
+{
+  "cuda:cudaFree": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "cuda_runtime_api.h",
+        "signature": "__host__ __cudart_builtin__ cudaError_t cudaFree(void *devPtr)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "Frees memory on the device",
+      "model": "cuda",
+      "name": "cudaFree",
+      "since": null,
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "void *",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Device pointer to memory to free",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "devPtr",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "cudaError_t",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "cuda:cudaGetDriverEntryPoint": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "cuda_runtime_api.h",
+        "signature": "__host__ cudaError_t cudaGetDriverEntryPoint(const char *symbol, void **funcPtr, unsigned long long flags, enum cudaDriverEntryPointQueryResult *driverStatus)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": "CUDA-13.0",
+      "desc": "Returns the requested driver API function pointer",
+      "model": "cuda",
+      "name": "cudaGetDriverEntryPoint",
+      "since": null,
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "const char *",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": "The base name of the driver API function to look for. As an example, for the driver API cuMemAlloc_v2, symbol would be cuMemAlloc. Note that the API will use the CUDA runtime version to return the address to the most recent ABI compatible driver symbol, cuMemAlloc or cuMemAlloc_v2.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "symbol",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "void **",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Location to return the function pointer to the requested driver function",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "funcPtr",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "unsigned long long",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Flags to specify search options.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "flags",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "enum cudaDriverEntryPointQueryResult *",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Optional location to store the status of finding the symbol from the driver. See cudaDriverEntryPointQueryResult for possible values.",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "driverStatus",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "cudaError_t",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "cuda:cudaMalloc": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "cuda_runtime_api.h",
+        "signature": "__host__ __cudart_builtin__ cudaError_t cudaMalloc(void **devPtr, size_t size)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "Allocate memory on the device",
+      "model": "cuda",
+      "name": "cudaMalloc",
+      "since": null,
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "void **",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Pointer to allocated device memory",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "devPtr",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "size_t",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Requested allocation size in bytes",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "size",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "cudaError_t",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "cuda:cudaMemcpy": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "cuda_runtime_api.h",
+        "signature": "__host__ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "Copies data between host and device",
+      "model": "cuda",
+      "name": "cudaMemcpy",
+      "since": null,
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "void *",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Destination memory address",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "dst",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "const void *",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": "Source memory address",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "src",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "size_t",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Size in bytes to copy",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "count",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "enum cudaMemcpyKind",
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Type of transfer",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "kind",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "cudaError_t",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "mpi:mpi_bcast": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "mpi.h",
+        "signature": "int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm)"
+      },
+      "cpp": null,
+      "fortran08": {
+        "abstract_interface": true,
+        "expressible": true,
+        "module": "mpi_f08",
+        "name": "MPI_Bcast"
+      },
+      "fortran90": {
+        "expressible": true,
+        "index_overload": null,
+        "name": "MPI_BCAST",
+        "not_with_mpif": false,
+        "use_colons": false
+      },
+      "lis": {
+        "expressible": true
+      }
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "mpi",
+      "name": "MPI_Bcast",
+      "since": null,
+      "standard_refs": [
+        "Collective Communication - Broadcast (MPI-5.1)"
+      ],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "void *buffer",
+          "cpp": null,
+          "fortran08": "TYPE(*), DIMENSION(..) :: buffer",
+          "fortran90": "<type> buffer(*)",
+          "lis": "(choice)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "starting address of buffer",
+        "direction": "inout",
+        "func_type": null,
+        "length": null,
+        "name": "buffer",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int count",
+          "cpp": null,
+          "fortran08": "INTEGER, INTENT(IN) :: count",
+          "fortran90": "INTEGER count",
+          "lis": "(nonnegative integer)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "number of entries in buffer",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "count",
+        "parameter_bindings": [
+          "c",
+          "c_large",
+          "fortran08",
+          "fortran90",
+          "lis",
+          "lis_large"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "MPI_Datatype datatype",
+          "cpp": null,
+          "fortran08": "TYPE(MPI_Datatype), INTENT(IN) :: datatype",
+          "fortran90": "INTEGER datatype",
+          "lis": "(handle)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "datatype of buffer",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "datatype",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int root",
+          "cpp": null,
+          "fortran08": "INTEGER, INTENT(IN) :: root",
+          "fortran90": "INTEGER root",
+          "lis": "(integer)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "rank of the root",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "root",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "MPI_Comm comm",
+          "cpp": null,
+          "fortran08": "TYPE(MPI_Comm), INTENT(IN) :: comm",
+          "fortran90": "INTEGER comm",
+          "lis": "(handle)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "communicator",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "comm",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int *ierror",
+          "cpp": null,
+          "fortran08": "INTEGER, OPTIONAL, INTENT(OUT) :: ierror",
+          "fortran90": "INTEGER ierror",
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "ierror",
+        "parameter_bindings": [
+          "fortran08",
+          "fortran08_optional",
+          "fortran90",
+          "fortran90_optional"
+        ],
+        "pointer": null,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "PMPI_Bcast"
+    }
+  },
+  "mpi:mpi_isend": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "mpi.h",
+        "signature": "int MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)"
+      },
+      "cpp": null,
+      "fortran08": {
+        "abstract_interface": true,
+        "expressible": true,
+        "module": "mpi_f08",
+        "name": "MPI_Isend"
+      },
+      "fortran90": {
+        "expressible": true,
+        "index_overload": null,
+        "name": "MPI_ISEND",
+        "not_with_mpif": false,
+        "use_colons": false
+      },
+      "lis": {
+        "expressible": true
+      }
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "mpi",
+      "name": "MPI_Isend",
+      "since": null,
+      "standard_refs": [
+        "Point-to-Point Communication - Nonblocking Communication (MPI-5.1)"
+      ],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": true,
+        "binding_type": {
+          "c": "const void *buf",
+          "cpp": null,
+          "fortran08": "TYPE(*), DIMENSION(..), INTENT(IN), ASYNCHRONOUS :: buf",
+          "fortran90": "<type> buf(*)",
+          "lis": "(choice)"
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": "initial address of send buffer",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "buf",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int count",
+          "cpp": null,
+          "fortran08": "INTEGER, INTENT(IN) :: count",
+          "fortran90": "INTEGER count",
+          "lis": "(nonnegative integer)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "number of elements in send buffer",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "count",
+        "parameter_bindings": [
+          "c",
+          "c_large",
+          "fortran08",
+          "fortran90",
+          "lis",
+          "lis_large"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "MPI_Datatype datatype",
+          "cpp": null,
+          "fortran08": "TYPE(MPI_Datatype), INTENT(IN) :: datatype",
+          "fortran90": "INTEGER datatype",
+          "lis": "(handle)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "datatype of each send buffer element",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "datatype",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int dest",
+          "cpp": null,
+          "fortran08": "INTEGER, INTENT(IN) :: dest",
+          "fortran90": "INTEGER dest",
+          "lis": "(integer)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "rank of destination",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "dest",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int tag",
+          "cpp": null,
+          "fortran08": "INTEGER, INTENT(IN) :: tag",
+          "fortran90": "INTEGER tag",
+          "lis": "(integer)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "message tag",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "tag",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "MPI_Comm comm",
+          "cpp": null,
+          "fortran08": "TYPE(MPI_Comm), INTENT(IN) :: comm",
+          "fortran90": "INTEGER comm",
+          "lis": "(handle)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "comm",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "MPI_Request *request",
+          "cpp": null,
+          "fortran08": "TYPE(MPI_Request), INTENT(OUT) :: request",
+          "fortran90": "INTEGER request",
+          "lis": "(handle)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "request",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int *ierror",
+          "cpp": null,
+          "fortran08": "INTEGER, OPTIONAL, INTENT(OUT) :: ierror",
+          "fortran90": "INTEGER ierror",
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "ierror",
+        "parameter_bindings": [
+          "fortran08",
+          "fortran08_optional",
+          "fortran90",
+          "fortran90_optional"
+        ],
+        "pointer": null,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "PMPI_Isend"
+    }
+  },
+  "mpi:mpi_send": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "mpi.h",
+        "signature": "int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)"
+      },
+      "cpp": null,
+      "fortran08": {
+        "abstract_interface": true,
+        "expressible": true,
+        "module": "mpi_f08",
+        "name": "MPI_Send"
+      },
+      "fortran90": {
+        "expressible": true,
+        "index_overload": null,
+        "name": "MPI_SEND",
+        "not_with_mpif": false,
+        "use_colons": false
+      },
+      "lis": {
+        "expressible": true
+      }
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "mpi",
+      "name": "MPI_Send",
+      "since": null,
+      "standard_refs": [
+        "Point-to-Point Communication - Blocking Send and Receive Operations (MPI-5.1)"
+      ],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "const void *buf",
+          "cpp": null,
+          "fortran08": "TYPE(*), DIMENSION(..), INTENT(IN) :: buf",
+          "fortran90": "<type> buf(*)",
+          "lis": "(choice)"
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": "initial address of send buffer",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "buf",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int count",
+          "cpp": null,
+          "fortran08": "INTEGER, INTENT(IN) :: count",
+          "fortran90": "INTEGER count",
+          "lis": "(nonnegative integer)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "number of elements in send buffer",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "count",
+        "parameter_bindings": [
+          "c",
+          "c_large",
+          "fortran08",
+          "fortran90",
+          "lis",
+          "lis_large"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "MPI_Datatype datatype",
+          "cpp": null,
+          "fortran08": "TYPE(MPI_Datatype), INTENT(IN) :: datatype",
+          "fortran90": "INTEGER datatype",
+          "lis": "(handle)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "datatype of each send buffer element",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "datatype",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int dest",
+          "cpp": null,
+          "fortran08": "INTEGER, INTENT(IN) :: dest",
+          "fortran90": "INTEGER dest",
+          "lis": "(integer)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "rank of destination",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "dest",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int tag",
+          "cpp": null,
+          "fortran08": "INTEGER, INTENT(IN) :: tag",
+          "fortran90": "INTEGER tag",
+          "lis": "(integer)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "message tag",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "tag",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "MPI_Comm comm",
+          "cpp": null,
+          "fortran08": "TYPE(MPI_Comm), INTENT(IN) :: comm",
+          "fortran90": "INTEGER comm",
+          "lis": "(handle)"
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "comm",
+        "parameter_bindings": [
+          "c",
+          "fortran08",
+          "fortran90",
+          "lis"
+        ],
+        "pointer": null,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int *ierror",
+          "cpp": null,
+          "fortran08": "INTEGER, OPTIONAL, INTENT(OUT) :: ierror",
+          "fortran90": "INTEGER ierror",
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "ierror",
+        "parameter_bindings": [
+          "fortran08",
+          "fortran08_optional",
+          "fortran90",
+          "fortran90_optional"
+        ],
+        "pointer": null,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "PMPI_Send"
+    }
+  },
+  "nccl:ncclAllReduce": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "nccl.h",
+        "signature": "ncclResult_t ncclAllReduce(const void*sendbuff, void*recvbuff, size_t count, ncclDataType_t datatype, ncclRedOp_t op, ncclComm_t comm, cudaStream_t stream)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "nccl",
+      "name": "ncclAllReduce",
+      "since": null,
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "sendbuff",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "recvbuff",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "count",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "datatype",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "op",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "comm",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "stream",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "ncclResult_t",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "pncclAllReduce"
+    }
+  },
+  "nccl:ncclBroadcast": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "nccl.h",
+        "signature": "ncclResult_t ncclBroadcast(const void*sendbuff, void*recvbuff, size_t count, ncclDataType_t datatype, int root, ncclComm_t comm, cudaStream_t stream)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "nccl",
+      "name": "ncclBroadcast",
+      "since": null,
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "sendbuff",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "recvbuff",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "count",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "datatype",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "root",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "comm",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "stream",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "ncclResult_t",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "pncclBroadcast"
+    }
+  },
+  "nccl:ncclSend": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "nccl.h",
+        "signature": "ncclResult_t ncclSend(const void*sendbuff, size_t count, ncclDataType_t datatype, int peer, ncclComm_t comm, cudaStream_t stream)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "nccl",
+      "name": "ncclSend",
+      "since": null,
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "sendbuff",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "count",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "datatype",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "peer",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "comm",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "stream",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "ncclResult_t",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "pncclSend"
+    }
+  },
+  "nvshmem:nvshmem_barrier": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "nvshmem_coll_api.h",
+        "signature": "__host__ __device__ int nvshmem_barrier(nvshmem_team_t team)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "nvshmem",
+      "name": "nvshmem_barrier",
+      "since": null,
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "The team over which to perform the barrier.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "team",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "nvshmem:nvshmem_broadcastmem": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "nvshmem_coll_api.h",
+        "signature": "__host__ __device__ int nvshmem_broadcastmem(nvshmem_team_t team, void*dest, const void*src, size_t nelems, int PE_root)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "nvshmem",
+      "name": "nvshmem_broadcastmem",
+      "since": null,
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "The team over which to perform the operation.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "team",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Symmetric address of destination data object. The type of dest should match that implied in the SYNOPSIS section.",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "dest",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "src",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "The number of elements in source and dest arrays. For nvshmem_broadcastmem, elements are bytes; for nvshmem_broadcast{32,64}, elements are 4 or 8 bytes, respectively.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "nelems",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Zero-based ordinal of the PE, with respect to the team, from which the data is copied.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "PE_root",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "nvshmem:nvshmem_{T}_atomic_fetch_add": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "nvshmem_api.h",
+        "signature": "__host__ __device__ {CT} nvshmem_{T}_atomic_fetch_add({CT}*dest, {CT} value, int pe)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "nvshmem",
+      "name": "nvshmem_{T}_atomic_fetch_add",
+      "since": null,
+      "standard_refs": [],
+      "type_family": [
+        "uint",
+        "ulong",
+        "ulonglong",
+        "int32",
+        "uint32",
+        "int64",
+        "uint64",
+        "int",
+        "long",
+        "longlong",
+        "size",
+        "ptrdiff"
+      ]
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "inout",
+        "func_type": null,
+        "length": null,
+        "name": "dest",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "value",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "pe",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "{CT}",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "value"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "nvshmem:nvshmem_{T}_broadcast": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "nvshmem_coll_api.h",
+        "signature": "__host__ __device__ int nvshmem_{T}_broadcast(nvshmem_team_t team, {CT}*dest, const {CT}*src, size_t nelem, int PE_root)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "nvshmem",
+      "name": "nvshmem_{T}_broadcast",
+      "since": null,
+      "standard_refs": [],
+      "type_family": [
+        "bfloat16",
+        "half",
+        "float",
+        "double",
+        "char",
+        "short",
+        "schar",
+        "int",
+        "long",
+        "longlong",
+        "uchar",
+        "ushort",
+        "uint",
+        "ulong",
+        "ulonglong",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64",
+        "size",
+        "ptrdiff"
+      ]
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "The team over which to perform the operation.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "team",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Symmetric address of destination data object. The type of dest should match that implied in the SYNOPSIS section.",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "dest",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "src",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "nelem",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Zero-based ordinal of the PE, with respect to the team, from which the data is copied.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "PE_root",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "nvshmem:nvshmem_{T}_g": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "nvshmem_api.h",
+        "signature": "__host__ __device__ {CT} nvshmem_{T}_g(const {CT}*src, int pe)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "nvshmem",
+      "name": "nvshmem_{T}_g",
+      "since": null,
+      "standard_refs": [],
+      "type_family": [
+        "bfloat16",
+        "half",
+        "float",
+        "double",
+        "char",
+        "short",
+        "schar",
+        "int",
+        "long",
+        "longlong",
+        "uchar",
+        "ushort",
+        "uint",
+        "ulong",
+        "ulonglong",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64",
+        "size",
+        "ptrdiff"
+      ]
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "src",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "pe",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "{CT}",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "value"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "nvshmem:nvshmem_{T}_sum_reduce": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "nvshmem_coll_api.h",
+        "signature": "__host__ __device__ int nvshmem_{T}_sum_reduce(nvshmem_team_t team, {CT}*dest, const {CT}*src, size_t nreduce)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "nvshmem",
+      "name": "nvshmem_{T}_sum_reduce",
+      "since": null,
+      "standard_refs": [],
+      "type_family": [
+        "uchar",
+        "ushort",
+        "uint",
+        "ulong",
+        "ulonglong",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64",
+        "size",
+        "char",
+        "schar",
+        "short",
+        "int",
+        "long",
+        "longlong",
+        "bfloat16",
+        "half",
+        "float",
+        "double"
+      ]
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "The team over which to perform the operation.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "team",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Symmetric address of an array, of length nreduce elements, to receive the result of the all or local reduction routines. The type of dest should match that implied in the SYNOPSIS section.",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "dest",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": "Tensor corresponding to the source data tile for the collective.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "src",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "The number of elements in the dest and source arrays.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "nreduce",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "openmp:omp_get_submemspace": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "omp.h",
+        "signature": "omp_memspace_handle_t omp_get_submemspace(omp_memspace_handle_t, int, int *)"
+      },
+      "cpp": null,
+      "fortran08": {
+        "abstract_interface": false,
+        "expressible": true,
+        "module": "omp_lib",
+        "name": "omp_get_submemspace"
+      },
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": null,
+      "model": "openmp",
+      "name": "omp_get_submemspace",
+      "since": null,
+      "standard_refs": [
+        "Memory Management Routines - omp_get_submemspace Routine (OpenMP-6.0)"
+      ],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "omp_memspace_handle_t",
+          "cpp": null,
+          "fortran08": "integer(kind=omp_memspace_handle_kind), intent(in) :: memspace",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "memspace",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int",
+          "cpp": null,
+          "fortran08": "integer, intent(in) :: num_resources",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "num_resources",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int *",
+          "cpp": null,
+          "fortran08": "integer, intent(in) :: resources",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "resources",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": true,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "omp_memspace_handle_t",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "value"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "openmp:omp_get_thread_num": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "omp.h",
+        "signature": "int omp_get_thread_num(void)"
+      },
+      "cpp": null,
+      "fortran08": {
+        "abstract_interface": false,
+        "expressible": true,
+        "module": "omp_lib",
+        "name": "omp_get_thread_num"
+      },
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "The omp_get_thread_num routine returns the thread number, within the current team, of the calling thread.",
+      "model": "openmp",
+      "name": "omp_get_thread_num",
+      "since": null,
+      "standard_refs": [
+        "Parallel Region Support Routines - omp_get_thread_num Routine (OpenMP-6.0)"
+      ],
+      "type_family": null
+    },
+    "parameters": [],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "value"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "openmp:omp_set_affinity_format": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "omp.h",
+        "signature": "void omp_set_affinity_format(const char *format)"
+      },
+      "cpp": null,
+      "fortran08": {
+        "abstract_interface": false,
+        "expressible": true,
+        "module": "omp_lib",
+        "name": "omp_set_affinity_format"
+      },
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "The omp_set_affinity_format routine sets the affinity format to be used on the device by setting the value of the affinity-format-var ICV.",
+      "model": "openmp",
+      "name": "omp_set_affinity_format",
+      "since": null,
+      "standard_refs": [
+        "Thread Affinity Routines - omp_set_affinity_format Routine (OpenMP-6.0)"
+      ],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "const char *",
+          "cpp": null,
+          "fortran08": "character(len=*), intent(in) :: format",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "format",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": true,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "void",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "void"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "openmp:omp_set_lock": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "omp.h",
+        "signature": "void omp_set_lock(omp_lock_t *lock)"
+      },
+      "cpp": null,
+      "fortran08": {
+        "abstract_interface": false,
+        "expressible": true,
+        "module": "omp_lib",
+        "name": "omp_set_lock"
+      },
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "These routines provide a means of setting an OpenMP lock. The calling task region behaves as if it was suspended until the lock can be set by this task.",
+      "model": "openmp",
+      "name": "omp_set_lock",
+      "since": null,
+      "standard_refs": [
+        "Lock Routines - omp_set_lock Routine (OpenMP-6.0)"
+      ],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "omp_lock_t *",
+          "cpp": null,
+          "fortran08": "integer(kind=omp_lock_kind), intent(inout) :: svar",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "inout",
+        "func_type": null,
+        "length": null,
+        "name": "lock",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": true,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "void",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "void"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "openmp:omp_target_memcpy": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "omp.h",
+        "signature": "int omp_target_memcpy(void *dst, const void *src, size_t length, size_t dst_offset, size_t src_offset, int dst_device_num, int src_device_num)"
+      },
+      "cpp": null,
+      "fortran08": {
+        "abstract_interface": false,
+        "expressible": true,
+        "module": "omp_lib",
+        "name": "omp_target_memcpy"
+      },
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "The omp_target_memcpy routine copies memory between any combination of host and device pointers.",
+      "model": "openmp",
+      "name": "omp_target_memcpy",
+      "since": null,
+      "standard_refs": [
+        "Device Memory Routines - omp_target_memcpy Routine (OpenMP-6.0)"
+      ],
+      "type_family": null
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "void *",
+          "cpp": null,
+          "fortran08": "type(c_ptr), value :: dst",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "dst",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "const void *",
+          "cpp": null,
+          "fortran08": "type(c_ptr), value :: src",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "src",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "size_t",
+          "cpp": null,
+          "fortran08": "integer(kind=c_size_t), value :: length",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "length",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "size_t",
+          "cpp": null,
+          "fortran08": "integer(kind=c_size_t), value :: dst_offset",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "dst_offset",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "size_t",
+          "cpp": null,
+          "fortran08": "integer(kind=c_size_t), value :: src_offset",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "src_offset",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int",
+          "cpp": null,
+          "fortran08": "integer(kind=c_int), value :: dst_device_num",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "dst_device_num",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": "int",
+          "cpp": null,
+          "fortran08": "integer(kind=c_int), value :: src_device_num",
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": null,
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "src_device_num",
+        "parameter_bindings": [
+          "c",
+          "fortran08"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": null
+    }
+  },
+  "shmem:shmem_barrier_all": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "shmem.h",
+        "signature": "void shmem_barrier_all()"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "Registers the arrival of a PE at a barrier and blocks the PE until all other PE arrive at the barrier and all local updates and remote memory updates on the default context are completed.",
+      "model": "shmem",
+      "name": "shmem_barrier_all",
+      "since": "OpenSHMEM-1.0",
+      "standard_refs": [],
+      "type_family": null
+    },
+    "parameters": [],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "void",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "void"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "pshmem_barrier_all"
+    }
+  },
+  "shmem:shmem_{T}_and_reduce": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "shmem.h",
+        "signature": "int shmem_{T}_and_reduce(shmem_team_t team, {CT} * dest, const {CT} * source, size_t nreduce)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "The following functions perform reduction operations across all PE in a set of PE.",
+      "model": "shmem",
+      "name": "shmem_{T}_and_reduce",
+      "since": "OpenSHMEM-1.5",
+      "standard_refs": [],
+      "type_family": [
+        "uchar",
+        "ushort",
+        "uint",
+        "ulong",
+        "ulonglong",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64",
+        "size"
+      ]
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "The team over which to perform the operation.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "team",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Symmetric address of an array, of length nreduce elements, to receive the result of the reduction routines. The type of dest should match that implied in the SYNOPSIS section.",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "dest",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": "Symmetric address of an array, of length nreduce elements, that contains one element for each separate reduction routine. The type of source should match that implied in the SYNOPSIS section.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "source",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "In active-set based API calls, nreduce must be of type integer.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "nreduce",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "pshmem_{T}_and_reduce"
+    }
+  },
+  "shmem:shmem_{T}_broadcast": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "shmem.h",
+        "signature": "int shmem_{T}_broadcast(shmem_team_t team, {CT} * dest, const {CT} * source, size_t nelems, int PE_root)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "Broadcasts a block of data from one PE to one or more destination PE.",
+      "model": "shmem",
+      "name": "shmem_{T}_broadcast",
+      "since": "OpenSHMEM-1.5",
+      "standard_refs": [],
+      "type_family": [
+        "float",
+        "double",
+        "longdouble",
+        "char",
+        "schar",
+        "short",
+        "int",
+        "long",
+        "longlong",
+        "uchar",
+        "ushort",
+        "uint",
+        "ulong",
+        "ulonglong",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64",
+        "size",
+        "ptrdiff"
+      ]
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "The team over which to perform the operation.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "team",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Symmetric address of destination data object. The type of dest should match that implied in the SYNOPSIS section.",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "dest",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": "Symmetric address of the source data object. The type of source should match that implied in the SYNOPSIS section.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "source",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "The number of elements in source and dest arrays. For shmem_broadcastmem, elements are bytes; for shmem_broadcast{32,64}, elements are 4 or 8 bytes, respectively.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "nelems",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Zero-based ordinal of the PE, with respect to the calling PE, from which the data is copied.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "PE_root",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "int",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "ERROR_CODE"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "pshmem_{T}_broadcast"
+    }
+  },
+  "shmem:shmem_{T}_put": {
+    "bindings": {
+      "c": {
+        "expressible": true,
+        "header": "shmem.h",
+        "signature": "void shmem_{T}_put({CT} * dest, const {CT} * source, size_t nelems, int pe)"
+      },
+      "cpp": null,
+      "fortran08": null,
+      "fortran90": null,
+      "lis": null
+    },
+    "execution": {},
+    "identity": {
+      "deprecated_in": null,
+      "desc": "The put routines provide a method for copying data from a contiguous local data object to a data object on a specified PE.",
+      "model": "shmem",
+      "name": "shmem_{T}_put",
+      "since": "OpenSHMEM-1.0",
+      "standard_refs": [],
+      "type_family": [
+        "float",
+        "double",
+        "longdouble",
+        "char",
+        "schar",
+        "short",
+        "int",
+        "long",
+        "longlong",
+        "uchar",
+        "ushort",
+        "uint",
+        "ulong",
+        "ulonglong",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64",
+        "size",
+        "ptrdiff"
+      ]
+    },
+    "parameters": [
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Symmetric address of the destination data object. The type of dest should match that implied in the SYNOPSIS section.",
+        "direction": "out",
+        "func_type": null,
+        "length": null,
+        "name": "dest",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": true,
+        "constraints": {},
+        "desc": "Local address of the data object containing the data to be copied. The type of source should match that implied in the SYNOPSIS section.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "source",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": true,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "Number of elements in the dest and source arrays. For shmem_putmem and shmem_ctx_putmem, elements are bytes.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "nelems",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      },
+      {
+        "array_type": null,
+        "asynchronous": false,
+        "binding_type": {
+          "c": null,
+          "cpp": null,
+          "fortran08": null,
+          "fortran90": null,
+          "lis": null
+        },
+        "constant": false,
+        "constraints": {},
+        "desc": "PE number of the remote PE relative to the team associated with the given ctx when provided, or the default context otherwise.",
+        "direction": "in",
+        "func_type": null,
+        "length": null,
+        "name": "pe",
+        "parameter_bindings": [
+          "c"
+        ],
+        "pointer": false,
+        "root_only": false
+      }
+    ],
+    "relationships": {},
+    "return": {
+      "binding_type": {
+        "c": "void",
+        "cpp": null,
+        "fortran08": null,
+        "fortran90": null,
+        "lis": null
+      },
+      "kind": "void"
+    },
+    "semantics": {},
+    "tool_integration": {
+      "profiling_name": "pshmem_{T}_put"
+    }
+  }
+}

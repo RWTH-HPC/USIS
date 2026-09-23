@@ -1,0 +1,74 @@
+version = 1
+
+# Everything this project writes: the workflow, the schema family and curated
+# inputs, the docs and figures. Covered here rather than in-file because most of
+# it is JSON, which has no comment syntax. The vendored trees below override it.
+[[annotations]]
+path = ["**"]
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 Semih Burak, RWTH Aachen University"
+
+# Vendored sources under external-inputs/. Declared here rather than in-file on
+# purpose: the extractors read these files, so they stay byte-identical to
+# upstream, and a path glob survives the next re-import. Files that already
+# carry their own SPDX tags upstream (the NCCL/NVSHMEM headers, LLVM's omp.h)
+# keep them; these entries cover the rest of each tree.
+
+# MPI: the MPI Forum's LaTeX sources and apis.json, and MPICH.
+[[annotations]]
+path = ["external-inputs/mpi/tex/**"]
+SPDX-License-Identifier = "LicenseRef-MPI-Standard"
+SPDX-FileCopyrightText = "University of Tennessee, Knoxville, Tennessee"
+
+[[annotations]]
+path = ["external-inputs/mpi/implementation/**"]
+SPDX-License-Identifier = "LicenseRef-MPICH"
+SPDX-FileCopyrightText = "Argonne National Laboratory"
+
+# OpenSHMEM: the specification's LaTeX sources, and Sandia OpenSHMEM.
+[[annotations]]
+path = ["external-inputs/shmem/tex/**"]
+SPDX-License-Identifier = "LicenseRef-OpenSHMEM-Specification"
+SPDX-FileCopyrightText = "Open Source Software Solutions, Inc. (OSSS)"
+
+[[annotations]]
+path = ["external-inputs/shmem/implementation/**"]
+SPDX-License-Identifier = "BSD-3-Clause-Open-MPI"
+SPDX-FileCopyrightText = ["2011 Sandia Corporation",
+                          "2023 Intel Corporation",
+                          "2023 Cornelis Networks, Inc."]
+
+# NCCL and NVSHMEM headers (Apache-2.0; some NCCL files keep an in-file BSD tag).
+[[annotations]]
+path = ["external-inputs/nccl/implementation/**"]
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "NVIDIA Corporation & Affiliates"
+
+[[annotations]]
+path = ["external-inputs/nvshmem/implementation/**"]
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2017-2026 NVIDIA Corporation"
+
+# OpenMP: the ARB's interface files and the 5.2/6.0 specification sliced per
+# routine (PDF, text, Markdown), and LLVM's runtime header.
+[[annotations]]
+path = ["external-inputs/openmp/standard/**", "external-inputs/openmp/docs/**"]
+SPDX-License-Identifier = "LicenseRef-OpenMP-ARB"
+SPDX-FileCopyrightText = "1997-2024 OpenMP Architecture Review Board"
+
+[[annotations]]
+path = ["external-inputs/openmp/implementation/**"]
+SPDX-License-Identifier = "Apache-2.0 WITH LLVM-exception"
+SPDX-FileCopyrightText = "LLVM Project contributors"
+
+# Our own READMEs inside the vendored trees (origin, version, retrieval method,
+# licence note). Last so that they win over the tree-wide entries above.
+[[annotations]]
+path = ["external-inputs/openmp/standard/openmp-arb-6.0/README.md",
+        "external-inputs/openmp/docs/*/README.md",
+        "external-inputs/openmp/implementation/llvm-20.1.7/README.md",
+        "external-inputs/cuda/**/README.md",
+        "external-inputs/nccl/docs/**/README.md",
+        "external-inputs/nvshmem/docs/**/README.md"]
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 Semih Burak, RWTH Aachen University"

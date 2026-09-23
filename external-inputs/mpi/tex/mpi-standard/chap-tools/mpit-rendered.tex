@@ -1,0 +1,2793 @@
+% LLNL-MI-422102-DRAFT
+
+\section{The \texorpdfstring{\MPI/}{MPI} Tool Information Interface}
+\mpitermtitleindex{tool information interface}
+\label{sec:mpit}
+
+\MPI/ implementations often use internal variables to control their
+behavior and performance and rely on internal events for their
+implementation.  Understanding and manipulating these variables and
+tracking these events
+can provide a more efficient execution environment or improve performance
+for many applications.  This section describes the \MPI/ tool information
+interface, which provides a mechanism for \MPI/ implementors to expose
+variables, each of which represents a particular property, setting, or
+performance measurement from within the \MPI/ implementation, as
+well as expose events that can be tracked by tools.  The
+interface is split into three parts: the first part provides information
+about, and supports the setting of, control variables through which the \MPI/
+implementation tunes its configuration.  The second part provides access to
+performance variables that can provide insight into internal performance
+information of the \MPI/ implementation. The third part enables tools
+to query available events within an \MPI/ implementation and
+register callbacks for them.
+
+To avoid restrictions on the \MPI/ implementation, the \MPI/ tool
+information interface allows the implementation to specify which control variables,
+performance variables, and events exist.  Additionally, the user of the \MPI/ tool
+information interface can obtain metadata about each available variable or event,
+such as its datatype, and a textual description.  The \MPI/ tool
+information interface provides the necessary routines to find all variables and events
+that exist in a particular \MPI/ implementation; to query their properties;
+to retrieve descriptions about their meaning; to access and, if
+appropriate, to alter their values; and (in case of events) set callbacks triggered
+by them.
+
+Variables, events, and categories across connected \MPI/ processes with equivalent names
+are required to have the same meaning (see the definition of ``equivalent''
+as related to strings in Section~\ref{sec:mpit:strings}).  Furthermore,
+enumerations with equivalent names across connected \MPI/ processes are required
+to have the same meaning, but are allowed to comprise different enumeration
+items.  Enumeration items that have equivalent names across connected
+\MPI/ processes in enumerations with the same meaning must also have the same
+meaning.  In order for variables and categories to have the same meaning,
+routines in the tools information interface that return details for those
+variables and categories have requirements on what parameters must be
+identical.  These requirements are specified in their respective sections.
+
+\begin{rationale}
+The intent of requiring the same meaning for entities with equivalent names
+is to enforce consistency across connected \MPI/ processes.  For example,
+variables describing the number of packets sent on different types of
+network devices should have different names to reflect their potentially
+different meanings.
+\end{rationale}
+
+The \MPI/ tool information interface can be used independently from the
+\MPI/ communication functionality.  In particular, the routines of this
+interface can be called before \MPIisinitialized/ and
+after \MPIisfinalized/.  In order to support this behavior cleanly,
+the \MPI/ tool information interface uses separate initialization and
+finalization routines.  All identifiers used in the \MPI/ tool information
+interface have the prefix \code{MPI\_T\_}.
+
+On success, all \MPI/ tool information interface routines return
+\error{MPI\_SUCCESS}, otherwise they return an appropriate and unique
+return code indicating the reason why the call was not successfully
+completed.  Details on return codes can be found in
+Section~\ref{sec:mpit:retcodes}.  However, unsuccessful calls to the \MPI/
+tool information interface are not fatal and do not impact the execution of
+subsequent \MPI/ routines.
+
+Since the \MPI/ tool information interface primarily focuses on tools and
+support libraries, \MPI/ implementations are only required to provide C
+bindings for functions and constants introduced in this section.  Except
+where otherwise noted, all conventions and principles governing the C
+bindings of the \MPI/ API also apply to the \MPI/ tool information
+interface, which is available by including the \code{mpi.h} header file.
+All routines in this interface have local semantics.
+
+\begin{users}
+The number and type of control variables, performance variables, and events can vary
+between \MPI/ implementations, platforms and different builds of the same
+implementation on the same platform as well as between runs.  Hence, any
+application relying on a particular variable will not be portable.
+Further, there is no guarantee that the number of variables and variable
+indices are the same across connected \MPI/ processes.
+
+This interface is primarily intended for performance monitoring tools,
+support tools, and libraries controlling the application's environment.
+When maximum portability is desired, application programmers should either
+avoid using the \MPI/ tool information interface or avoid being dependent
+on the existence of a particular control or performance variable or of a
+particular event.
+\end{users}
+
+
+
+\subsection{Verbosity Levels}
+\mpitermtitleindex{verbosity level!tool information interface}
+\mpitermindex{tool information interface!verbosity level}
+\label{sec:mpit:verbose}
+
+The \MPI/ tool information interface provides access to internal
+configuration and performance information through a set of control and
+performance variables defined by the \MPI/ implementation.  Since some
+implementations may export a large number of variables, variables are
+classified by a verbosity level that categorizes both their intended
+audience (end users, performance tuners or \MPI/ implementors) and a
+relative measure of level of detail (basic, detailed or all).  These
+verbosity levels are described by a single integer.
+Table~\ref{table:tools:mpit:verbosity} lists the constants for all possible
+verbosity levels.  The values of the constants are monotonic in the order
+listed in the table; i.e., \mpiconst{MPI\_T\_VERBOSITY\_USER\_BASIC}  $<$
+\mpiconst{MPI\_T\_VERBOSITY\_USER\_DETAIL}  $<$ \dots $<$
+\mpiconst{MPI\_T\_VERBOSITY\_MPIDEV\_ALL}.
+
+% This could be a constlist
+\begin{table}[t]
+\caption{\MPI/ tool information interface verbosity levels}
+\label{table:tools:mpit:verbosity}
+\begin{center}
+\setlength{\tabcolsep}{3pt}%%ALLOWLATEX%% % to help fit in page width
+\begin{tabular}{|l|l|}
+\hline
+\mpiconstmain{MPI\_T\_VERBOSITY\_USER\_BASIC} &  Basic information of interest to users\\
+\mpiconstmain{MPI\_T\_VERBOSITY\_USER\_DETAIL} & Detailed information of interest to users\\
+\mpiconstmain{MPI\_T\_VERBOSITY\_USER\_ALL} &  All remaining information of interest to users\\
+\hline
+\mpiconstmain{MPI\_T\_VERBOSITY\_TUNER\_BASIC} &  Basic information required for tuning\\
+\mpiconstmain{MPI\_T\_VERBOSITY\_TUNER\_DETAIL} &  Detailed information required for tuning\\
+\mpiconstmain{MPI\_T\_VERBOSITY\_TUNER\_ALL} & All remaining information required for tuning\\
+\hline
+\mpiconstmain{MPI\_T\_VERBOSITY\_MPIDEV\_BASIC} &  Basic information for \MPI/ implementors\\
+\mpiconstmain{MPI\_T\_VERBOSITY\_MPIDEV\_DETAIL} &  Detailed information for \MPI/ implementors\\
+\mpiconstmain{MPI\_T\_VERBOSITY\_MPIDEV\_ALL} &  All remaining information for \MPI/ implementors\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\subsection{Binding \texorpdfstring{\MPI/}{MPI} Tool Information Interface Variables to \texorpdfstring{\MPI/}{MPI} Objects}
+\label{sec:mpit:assoc}
+
+Each \MPI/ tool information interface variable provides access to a
+particular control setting or performance property of the \MPI/
+implementation.  A variable may refer to a specific \MPI/ object such as a
+communicator, datatype, or one-sided communication window, or the variable
+may refer more generally to the \MPI/ environment of the process.  Except
+for the last case, the variable must be bound to exactly one \MPI/ object
+before it can be used.  Table~\ref{table:tools:mpit:assoc} lists all \MPI/
+object types to which an \MPI/ tool information interface variable can be
+bound, together with the matching constant that \MPI/ tool information
+interface routines return to identify the object type. It is erroneous to
+bind a control variable, performance variable, or event to a handle that
+would not be valid to use as an input argument to another \MPI/ call (excluding
+calls to the \MPI/ Tool Information Interface) at the same point of
+execution.
+
+\begin{table}[ht]
+\caption{Constants to identify associations of variables}
+\label{table:tools:mpit:assoc}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Constant} & \textbf{\MPI/ object}\\
+\hline
+\mpiconstmain{MPI\_T\_BIND\_NO\_OBJECT} & N/A; applies globally to entire \MPI/ process\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_COMM} & \MPI/ communicator\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_DATATYPE} & \MPI/ datatype\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_ERRHANDLER} & \MPI/ error handler\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_FILE} & \MPI/ file handle\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_GROUP} & \MPI/ group\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_OP} & \MPI/ reduction operator\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_REQUEST} & \MPI/ request\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_WIN} & \MPI/ window\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_MESSAGE} & \MPI/ message object\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_INFO} & \MPI/ info object\\
+\mpiconstmain{MPI\_T\_BIND\_MPI\_SESSION} & \MPI/ session\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\begin{rationale}
+Some variables have meanings tied to a specific \MPI/ object.  Examples
+include the number of send or receive operations that use a particular
+datatype, the number of times a particular error handler has been called,
+or the communication protocol and ``eager limit'' used for a particular
+communicator.  Creating a new \MPI/ tool information interface variable for
+each \MPI/ object would cause the number of variables to grow without
+bound, since they cannot be reused to avoid naming conflicts.  By
+associating \MPI/ tool information interface variables with a specific
+\MPI/ object, the \MPI/ implementation only must specify and maintain a
+single variable, which can then be applied to as many \MPI/ objects of the
+respective type as created during the program's execution.
+\end{rationale}
+
+
+
+\subsection{Convention for Returning Strings}
+\label{sec:mpit:strings}
+
+Several \MPI/ tool information interface functions return one or more
+strings.  These functions have two arguments for each string to be
+returned: an \OUT\ parameter that identifies a pointer to the buffer in
+which the string will be returned, and an \INOUT\ parameter to pass the
+length of the buffer.  The user is responsible for the memory allocation of
+the buffer and must pass the size of the buffer ($n$) as the length
+argument.  Let $n$ be the length value specified to the function.  On
+return, the function writes at most $n-1$ of the string's characters into
+the buffer, followed by a null terminator.  If the returned string's length
+is greater than or equal to $n$, the string will be truncated to $n-1$
+characters.  In this case, the length of the string plus one (for the
+terminating null character) is returned in the length argument.  If the
+user passes the null pointer as the buffer argument or passes 0 as the
+length argument, the function does not return the string and only returns
+the length of the string plus one in the length argument.  If the user
+passes the null pointer as the length argument, the buffer argument is
+ignored and nothing is returned.
+
+\MPI/ implementations behave as if they have an internal character array
+that is copied to the output character array supplied by the user.  Such
+output strings are only defined to be equivalent if their notional
+source-internal character arrays are identical (up to and including the
+null terminator), even if the output string is truncated due to a small
+input length parameter $n$.
+
+
+
+\subsection{Initialization and Finalization}
+\label{sec:mpit:init}
+
+The \MPI/ tool information interface requires a separate set of
+initialization and finalization routines.
+
+\begin{funcdef}{MPI\_T\_INIT\_THREAD}{(\mbox{required}, \mbox{provided})}
+\funcarg{\IN}{required}{desired level of thread support (integer)}
+\funcarg{\OUT}{provided}{provided level of thread support (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_init\_thread}{(\gb{}int~required, int~*provided)}
+
+All programs or tools that use the \MPI/ tool information interface must
+initialize the \MPI/ tool information interface in the processes that will
+use the interface before calling any other of its routines.  A user can
+initialize the \MPI/ tool information interface by calling
+\mpifunc{MPI\_T\_INIT\_THREAD}, which can be called multiple times.  In
+addition, this routine initializes the thread environment for all routines
+in the \mpi/ tool information interface.  Calling this routine when the
+\MPI/ tool information interface is already initialized has no effect
+beyond increasing the reference count of how often the interface has been
+initialized.  The argument \mpiarg{required} is used to specify the desired
+level of thread support.  The possible values and their semantics are
+identical to the ones that can be used with \mpifunc{MPI\_INIT\_THREAD}
+listed in Section~\ref{sec:ei-threads}.  The call returns in
+\mpiarg{provided} information about the actual level of thread support that
+will be provided by the \MPI/ implementation for calls to \MPI/ tool
+information interface routines.  It can be one of the four values listed in
+Section~\ref{sec:ei-threads}.
+
+The \MPI/ specification does not require all \MPI/ processes to exist
+before \MPIisinitialized/.  If the \MPI/ tool information
+interface is used before initialization of \MPI/, the user is
+responsible for ensuring that the \MPI/ tool information interface is
+initialized on all processes it is used in.  Processes created by the \MPI/
+implementation during initialization inherit the status of the \MPI/
+tool information interface (whether it is initialized or not as well as all
+active sessions and handles) from the process from which they are created.
+
+Processes created at runtime as a result of calls to \MPI/'s dynamic
+process management require their own initialization before they can use the
+\MPI/ tool information interface.
+
+\begin{users}
+If \mpifunc{MPI\_T\_INIT\_THREAD} is called before
+\mpifunc{MPI\_INIT\_THREAD}, the requested and provided thread level for
+\mpifunc{MPI\_T\_INIT\_THREAD} may influence the behavior and return value
+of \mpifunc{MPI\_INIT\_THREAD}.  The same is true for the reverse order.
+Likewise, when using the \spm{} (Section~\ref{sec:model_sessions}), the requested
+and provided thread level for \mpifunc{MPI\_T\_INIT\_THREAD} may influence
+the behavior and return values of \mpifunc{MPI\_SESSION\_INIT} (see Section~\ref{sec:model_sessions}), with the
+same being true for the reverse order.
+\end{users}
+
+\begin{implementors}
+\MPI/ implementations should strive to make as many control or performance
+variables available before \MPI/ initialization (instead of adding them
+during initialization) to allow tools the most flexibility.  In
+particular, control variables should be available before
+\MPI/ initialization if their value cannot be changed after
+\MPI/ initialization.
+\end{implementors}
+
+\begin{funcdefna}{MPI\_T\_FINALIZE}{()}
+\end{funcdefna}
+\mpibindmain{MPI\_T\_finalize}{(void)}
+
+This routine finalizes the use of the \MPI/ tool information interface and
+may be called as often as the corresponding \mpifunc{MPI\_T\_INIT\_THREAD}
+routine up to the current point of execution.  Calling it more times
+returns a corresponding return code.  As long as the number of calls to
+\mpifunc{MPI\_T\_FINALIZE} is smaller than the number of calls to
+\mpifunc{MPI\_T\_INIT\_THREAD} up to the current point of execution, the
+\MPI/ tool information interface remains initialized and calls to its
+routines are permissible.  Further, additional calls to
+\mpifunc{MPI\_T\_INIT\_THREAD} after one or more calls to
+\mpifunc{MPI\_T\_FINALIZE} are permissible.
+
+Once \mpifunc{MPI\_T\_FINALIZE} is called the same number of times as the
+routine \mpifunc{MPI\_T\_INIT\_THREAD} up to the current point of
+execution, the \MPI/ tool information interface is no longer initialized.
+The user can reinitialize the interface by a subsequent call
+to \mpifunc{MPI\_T\_INIT\_THREAD}.
+
+At the end of the program execution, unless \mpifunc{MPI\_ABORT} is called,
+an application must have called \mpifunc{MPI\_T\_INIT\_THREAD} and
+\mpifunc{MPI\_T\_FINALIZE} an equal number of times.
+
+
+
+\subsection{Datatype System}
+\label{sec:types}
+
+All variables managed through the \MPI/ tool information interface
+represent their values through typed buffers of a given length and type
+using an \MPI/ datatype (similar to regular send/receive buffers).  Since
+the initialization of the \MPI/ tool information interface is separate from
+the initialization of \MPI/, \MPI/ tool information interface routines can
+be called before \MPI/ initialization.  Consequently, these routines can
+also use \MPI/ datatypes before \MPI/ initialization.  Therefore, within the
+context of the \MPI/ tool information interface, it is permissible to use a
+subset of \MPI/ datatypes as specified below before \MPI/ initialization.
+
+
+\begin{table}[ht]
+\caption{\MPI/ datatypes that can be used by the \MPI/ tool information interface}
+\label{table:tools:mpit:datatypes}
+\begin{center}
+\begin{tabular}{l}
+\type{MPI\_INT} \\
+\type{MPI\_INT32\_T}\\
+\type{MPI\_INT64\_T}\\
+\type{MPI\_UNSIGNED} \\
+\type{MPI\_UNSIGNED\_LONG} \\
+\type{MPI\_UNSIGNED\_LONG\_LONG} \\
+\type{MPI\_UINT32\_T}\\
+\type{MPI\_UINT64\_T}\\
+\type{MPI\_COUNT}\\
+\type{MPI\_CHAR} \\
+\type{MPI\_DOUBLE} \\
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{rationale}
+The \MPI/ tool information interface relies mainly on unsigned datatypes
+for integer values since most variables are expected to represent counters
+or resource sizes.  \type{MPI\_INT} is provided for additional flexibility
+and is expected to be used mainly for control variables and enumeration
+types (see below).
+
+Providing all basic datatypes, in particular providing all signed and
+unsigned variants of integer types, would lead to a larger number of types,
+which tools need to interpret.  This would cause unnecessary complexity in
+the implementation of tools based on the \MPI/ tool information interface.
+\end{rationale}
+
+The \MPI/ tool information interface only relies on a subset of the basic
+\MPI/ datatypes and does not use any derived \MPI/ datatypes.
+Table~\ref{table:tools:mpit:datatypes} lists all \MPI/ datatypes that can
+be returned by the \MPI/ tool information interface to represent its
+variables.
+
+The use of the datatype \type{MPI\_CHAR} in the \MPI/ tool information
+interface implies a null-terminated character array, i.e., a string in the
+C language.  If a variable has type \type{MPI\_CHAR}, the value of the
+\mpiarg{count} parameter returned by \mpifunc{MPI\_T\_CVAR\_HANDLE\_ALLOC}
+and \mpifunc{MPI\_T\_PVAR\_HANDLE\_ALLOC} must  be large enough to include
+any valid value, including its terminating null character.  The contents of
+returned \type{MPI\_CHAR} arrays are only defined from index 0 through the
+location of the first null character.
+
+\begin{rationale}
+The \MPI/ tool information interface requires a significantly simpler type
+system than \MPI/ itself.  Therefore, only its required subset must be
+present before \MPI/ initialization and \MPI/ implementations do not need
+to initialize the complete \MPI/ datatype system.
+\end{rationale}
+
+For variables of type \type{MPI\_INT}, an \MPI/ implementation can provide
+additional information by associating names with a fixed number of values.
+We refer to this information in the following as an enumeration.  In this
+case, the respective calls that provide additional metadata for each
+control or performance variable, i.e., \mpifunc{MPI\_T\_CVAR\_GET\_INFO}
+(Section~\ref{sec:mpit:cvar}), \mpifunc{MPI\_T\_PVAR\_GET\_INFO}
+(Section~\ref{sec:mpit:pvar}), and \mpifunc{MPI\_T\_EVENT\_GET\_INFO}
+(Section~\ref{sec:mpit:events}), return a handle of type
+\mpictypemain{MPI\_T\_enum} that can be passed to the
+following functions to extract additional information.  Thus, the \MPI/
+implementation can describe variables with a fixed set of values that each
+represents a particular state.  Each enumeration type can have $N$
+different values, with a fixed $N$ that can be queried using
+\mpifunc{MPI\_T\_ENUM\_GET\_INFO}.
+
+\cdeclindex{MPI\_T\_enum}
+\begin{funcdef}{MPI\_T\_ENUM\_GET\_INFO}{(\mbox{enumtype}, \mbox{num}, \mbox{name}, \mbox{name\_len})}
+\funcarg{\IN}{enumtype}{enumeration to be queried (handle)}
+\funcarg{\OUT}{num}{number of discrete values represented by this enumeration (integer)}
+\funcarg{\OUT}{name}{buffer to return the string containing the name of the enumeration item (string)}
+\funcarg{\INOUT}{name\_len}{length of the string and/or buffer for \mpiarg{name} (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_enum\_get\_info}{(\gb{}MPI\_T\_enum~enumtype, int~*num, char~*name, int~*name\_len)}
+
+If \mpiarg{enumtype} is a valid enumeration, this routine returns the
+number of items represented by this enumeration type as well as its name.
+$N$ must be greater than $0$, i.e., the enumeration must represent at least
+one value.
+
+
+\textoutdesc{name}{the name of the enumeration}
+
+The routine is required to return a name of at least length one.  This name
+must be unique with respect to all other names for enumerations that the
+\MPI/ implementation uses.
+
+
+Names associated with individual values in each enumeration
+\mpiarg{enumtype} can be queried using \mpifunc{MPI\_T\_ENUM\_GET\_ITEM}.
+
+
+\cdeclindex{MPI\_T\_enum}
+\begin{funcdef}{MPI\_T\_ENUM\_GET\_ITEM}{(\mbox{enumtype}, \mbox{index}, \mbox{value}, \mbox{name}, \mbox{name\_len})}
+\funcarg{\IN}{enumtype}{enumeration to be queried (handle)}
+\funcarg{\IN}{index}{number of the value to be queried in this enumeration (integer)}
+\funcarg{\OUT}{value}{variable value (integer)}
+\funcarg{\OUT}{name}{buffer to return the string containing the name of the enumeration item (string)}
+\funcarg{\INOUT}{name\_len}{length of the string and/or buffer for \mpiarg{name} (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_enum\_get\_item}{(\gb{}MPI\_T\_enum~enumtype, int~index, int~*value, char~*name, int~*name\_len)}
+
+\textoutdesc{name}{the name of the enumeration item}
+
+If completed successfully, the routine returns the name/value pair that
+describes the enumeration at the specified index.  The call is further
+required to return a name of at least length one.  This name must be unique
+with respect to all other names of items for the same enumeration.
+
+
+\subsection{Control Variables}
+\mpitermtitleindex{control variable!tool information interface}
+\mpitermindex{tool information interface!control variable}
+\label{sec:mpit:cvar}
+
+The routines described in this section of the \MPI/ tool information
+interface specification focus on the ability to list, query, and possibly
+set control variables exposed by the \MPI/ implementation.  These variables
+can typically be used by the user to fine tune properties and configuration
+settings of the \MPI/ implementation.  On many systems, such variables can
+be set using environment variables, although other configuration mechanisms
+may be available, such as configuration files or central configuration
+registries.  A typical example that is available in several existing \MPI/
+implementations is the ability to specify an ``eager limit,'' i.e., an
+upper bound on the size of messages sent or received using an eager
+protocol.
+
+
+\subsubsection{Control Variable Query Functions}
+
+An \MPI/ implementation exports a set of $N$ control variables through the
+\MPI/ tool information interface.  If $N$ is zero, then the \MPI/
+implementation does not export any control variables, otherwise the
+provided control variables are indexed from $0$ to $N-1$.  This index
+number is used in subsequent calls to identify the individual variables.
+
+An \MPI/ implementation is allowed to increase the number of control
+variables during the execution of an \MPI/ application when new variables
+become available through dynamic loading.  However, \MPI/ implementations
+are not allowed to change the index of a control variable or to delete a
+variable once it has been added to the set.  When a variable becomes
+inactive, e.g., through dynamic unloading, accessing its value should
+return a corresponding return code.
+
+\begin{users}
+While the \MPI/ tool information interface guarantees that indices or
+variable properties do not change during a particular run of an \MPI/
+program, it does not provide a similar guarantee between runs.
+\end{users}
+
+The following function can be used to query the number of control
+variables, $\mpiarg{num\_cvar}$:
+
+\begin{funcdef}{MPI\_T\_CVAR\_GET\_NUM}{(\mbox{num\_cvar})}
+\funcarg{\OUT}{num\_cvar}{returns number of control variables (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_cvar\_get\_num}{(\gb{}int~*num\_cvar)}
+
+The function \mpifunc{MPI\_T\_CVAR\_GET\_INFO} provides access to
+additional information for each variable.
+
+\cdeclindex{MPI\_T\_enum}
+\begin{funcdef}{MPI\_T\_CVAR\_GET\_INFO}{(\mbox{cvar\_index}, \mbox{name}, \mbox{name\_len}, \mbox{verbosity}, \mbox{datatype}, \mbox{enumtype}, \mbox{desc}, \mbox{desc\_len}, \mbox{bind}, \mbox{scope})}
+\funcarg{\IN}{cvar\_index}{index of the control variable to be queried, value between $0$ and $\mpiarg{num\_cvar}-1$ (integer)}
+\funcarg{\OUT}{name}{buffer to return the string containing the name of the control variable (string)}
+\funcarg{\INOUT}{name\_len}{length of the string and/or buffer for \mpiarg{name} (integer)}
+\funcarg{\OUT}{verbosity}{verbosity level of this variable (integer)}
+\funcarg{\OUT}{datatype}{\mpi/ datatype of the information stored in the control variable (handle)}
+\funcarg{\OUT}{enumtype}{optional descriptor for enumeration information (handle)}
+\funcarg{\OUT}{desc}{buffer to return the string containing a description of the control variable (string)}
+\funcarg{\INOUT}{desc\_len}{length of the string and/or buffer for \mpiarg{desc} (integer)}
+\funcarg{\OUT}{bind}{type of \mpi/ object to which this variable must be bound (integer)}
+\funcarg{\OUT}{scope}{scope of when changes to this variable are possible (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_cvar\_get\_info}{(\gb{}int~cvar\_index, char~*name, int~*name\_len, int~*verbosity, MPI\_Datatype~*datatype, MPI\_T\_enum~*enumtype, char~*desc, int~*desc\_len, int~*bind, int~*scope)}
+
+After a successful call to \mpifunc{MPI\_T\_CVAR\_GET\_INFO} for a
+particular variable, subsequent calls to this routine that query
+information about the same variable must return the same information.  An
+\MPI/ implementation is not allowed to alter any of the returned values.
+
+If any \OUT\ parameter to \mpifunc{MPI\_T\_CVAR\_GET\_INFO} is a
+\code{NULL} pointer, the implementation will ignore the parameter and not
+return a value for the parameter.
+
+
+\textoutdesc{name}{the name of the control variable}
+
+If completed successfully, the routine is required to return a name of at
+least length one.  The name must be unique with respect to all other names
+for control variables used by the \MPI/ implementation.
+
+The argument \mpiarg{verbosity} returns the verbosity level of the variable
+(see Section~\ref{sec:mpit:verbose}).
+
+The argument \mpiarg{datatype} returns the \MPI/ datatype that is used to
+represent the control variable.
+
+If the variable is of type \type{MPI\_INT}, \MPI/ can optionally specify
+an enumeration for the values represented by this variable and return it in
+\mpiarg{enumtype}.  In this case, \MPI/ returns an enumeration identifier,
+which can then be used to gather more information as described in
+Section~\ref{sec:types}.  Otherwise, \mpiarg{enumtype} is set to
+\mpiconstmain{MPI\_T\_ENUM\_NULL}.  If the datatype is not \type{MPI\_INT} or the
+argument \mpiarg{enumtype} is the null pointer, no enumeration type is
+returned.
+
+\textoutdesc{desc}{a description of the control variable}
+
+Returning a description is optional.  If an \mpi/ implementation does not
+return a description, the first character for \mpiarg{desc} must be set to
+the null character and \mpiarg{desc\_len} must be set to one at the return
+of this call.
+
+The parameter \mpiarg{bind} returns the type of the \MPI/ object to which
+the variable must be bound or the value \mpiconst{MPI\_T\_BIND\_NO\_OBJECT}
+(see Section~\ref{sec:mpit:assoc}).
+
+The scope of a variable determines whether changing a variable's value is
+either local to the \MPI/ process or must be done by the user across multiple
+connected \MPI/ processes.  The latter is further split into variables that require changes
+in a group of \MPI/ processes and those that require collective changes among all
+connected \MPI/ processes.  Both cases can require variables on all participating \MPI/ processes either to be set
+to consistent (but potentially different) values or to equal values.
+The description provided with the variable
+must contain an explanation about the requirements and/or restrictions for
+setting the particular variable.
+
+On successful return from \mpifunc{MPI\_T\_CVAR\_GET\_INFO}, the argument
+\mpiarg{scope} will be set to one of the constants listed in
+Table~\ref{table:tools:mpit:scopes}.
+
+If the name of a control variable is equivalent across connected \MPI/ processes,
+the following \OUT\  parameters must be identical:
+\mpiarg{verbosity}, \mpiarg{datatype}, \mpiarg{enumtype}, \mpiarg{bind},
+and \mpiarg{scope}.  The returned description must be equivalent.
+
+\begin{table}[t]
+\caption{Scopes for control variables}
+\label{table:tools:mpit:scopes}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Scope Constant} & \textbf{Description} \\
+\hline
+\mpiconstmain{MPI\_T\_SCOPE\_CONSTANT} & read-only, value is constant \\
+\mpiconstmain{MPI\_T\_SCOPE\_READONLY} & read-only, cannot be written, but can change \\
+\mpiconstmain{MPI\_T\_SCOPE\_LOCAL} & may be writeable, writing only affects the calling \\
+& \MPI/ process \\
+\mpiconstmain{MPI\_T\_SCOPE\_GROUP} & may be writeable, must be set to consistent values\\
+& across a group of connected \MPI/ processes \\
+\mpiconstmain{MPI\_T\_SCOPE\_GROUP\_EQ} & may be writeable, must be set to the same value\\
+& across a group of connected \MPI/ processes \\
+\mpiconstmain{MPI\_T\_SCOPE\_ALL} & may be writeable, must be set to consistent values\\
+& across all connected \MPI/ processes \\
+\mpiconstmain{MPI\_T\_SCOPE\_ALL\_EQ} & may be writeable, must be set to the same value\\
+& across all connected \MPI/ processes \\
+\hline
+\end{tabular}
+\end{center}
+\end{table} 
+
+\begin{users}
+The \mpiarg{scope} of a variable only indicates if a variable might be
+changeable; it is not a guarantee that it can be changed at any time.
+\end{users}
+
+
+\begin{funcdef}{MPI\_T\_CVAR\_GET\_INDEX}{(\mbox{name}, \mbox{cvar\_index})}
+\funcarg{\IN}{name}{name of the control variable (string)}
+\funcarg{\OUT}{cvar\_index}{index of the control variable (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_cvar\_get\_index}{(\gb{}const~char~*name, int~*cvar\_index)}
+
+\mpifunc{MPI\_T\_CVAR\_GET\_INDEX} is a function for retrieving the index of a control variable given a known variable name.
+The \mpiarg{name} parameter is provided by the caller, and \mpiarg{cvar\_index} is returned by the \MPI/ implementation.
+The \mpiarg{name} parameter is a string terminated with a null character.
+
+This routine returns \error{MPI\_SUCCESS} on success and returns
+\error{MPI\_T\_ERR\_INVALID\_NAME} if \mpiarg{name} does not match the name
+of any control variable provided by the implementation at the time of the
+call.
+
+\begin{rationale}
+This routine is provided to enable fast retrieval of control variables by a
+tool, assuming it knows the name of the variable for which it is looking.
+The number of variables exposed by the implementation can change over time,
+so it is not possible for the tool to simply iterate over the list of
+variables once at initialization.  Although using \MPI/ implementation
+specific variable names is not portable across \MPI/ implementations, tool
+developers may choose to take this route for lower overhead at runtime
+because the tool will not have to iterate over the entire set of variables
+to find a specific one.
+\end{rationale}
+
+\begin{example}
+\exindex{Tool information interface!listing names of all control variables}%
+\Exindex{C}{Listing names of control variables}{MPI\_T\_cvar\_get\_info}
+Querying and printing the names of all available control variables.
+
+%%HEADER
+%%LANG: C
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[]) {
+    int  i, err, num, namelen, bind, verbose, scope;
+    int  threadsupport;
+    char name[100];
+
+    MPI_Datatype datatype;
+
+    err=MPI_T_init_thread(MPI_THREAD_SINGLE, &threadsupport);
+    if (err!=MPI_SUCCESS)
+        return err;
+
+    err=MPI_T_cvar_get_num(&num);
+    if (err!=MPI_SUCCESS)
+        return err;
+
+    for (i=0; i<num; i++) {
+        namelen=100;
+        err=MPI_T_cvar_get_info(i, name, &namelen,
+                                &verbose, &datatype, NULL,
+                                NULL, NULL, /*no description */
+                                &bind, &scope);
+        if (err!=MPI_SUCCESS && err!=MPI_T_ERR_INVALID_INDEX)
+            return err;
+        printf("Var %i: %s\n", i, name);
+    }
+
+    err=MPI_T_finalize();
+    if (err!=MPI_SUCCESS)
+        return 1;
+    else
+        return 0;
+}
+\end{lstlisting}
+
+\end{example}
+
+\subsubsection{Handle Allocation and Deallocation}
+
+Before reading or writing the value of a variable, a user must first
+allocate a handle of type
+\mpictypemain{MPI\_T\_cvar\_handle} for the
+variable by binding it to an \MPI/ object (see also
+Section~\ref{sec:mpit:assoc}).
+
+\begin{rationale}
+Handles used in the \MPI/ tool information interface are distinct from
+handles used in the remaining parts of the \MPI/ standard because they must
+be usable before \MPIisinitialized/ and after \MPIisfinalized/.
+Further, accessing handles, in particular for performance variables, can be
+time critical and having a separate handle space enables optimizations.
+\end{rationale}
+
+\cdeclindex{MPI\_T\_cvar\_handle}
+\begin{funcdef}{MPI\_T\_CVAR\_HANDLE\_ALLOC}{(\mbox{cvar\_index}, \mbox{obj\_handle}, \mbox{handle}, \mbox{count})}
+\funcarg{\IN}{cvar\_index}{index of control variable for which handle is to be allocated (index)}
+\funcarg{\IN}{obj\_handle}{reference to a handle of the \mpi/ object to which this variable is supposed to be bound (pointer)}
+\funcarg{\OUT}{handle}{allocated handle (handle)}
+\funcarg{\OUT}{count}{number of elements used to represent this variable (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_cvar\_handle\_alloc}{(\gb{}int~cvar\_index, void~*obj\_handle, MPI\_T\_cvar\_handle~*handle, int~*count)}
+
+This routine binds the control variable specified by the argument
+\mpishortarg{index} to an \MPI/ object.  The object is passed in the
+argument \mpiarg{obj\_handle} as an address to a local variable that
+stores the object's handle.  The argument \mpiarg{obj\_handle} is ignored
+if the \mpifunc{MPI\_T\_CVAR\_GET\_INFO} call for this control variable
+returned \mpiconst{MPI\_T\_BIND\_NO\_OBJECT} in the argument
+\mpishortarg{bind}.  The handle allocated to reference the variable is
+returned in the argument \mpishortarg{handle}.  Upon successful return,
+\mpishortarg{count} contains the number of elements (of the datatype
+returned by a previous \mpifunc{MPI\_T\_CVAR\_GET\_INFO} call) used to
+represent this variable.
+
+\begin{users}
+The \mpiarg{count} can be different based on the \MPI/ object to which the
+control variable was bound.  For example, variables bound to communicators
+could have a count that matches the size of the communicator.
+
+It is not portable to pass references to predefined \MPI/ object handles,
+such as \mpiconst{MPI\_COMM\_WORLD} to this routine, since their
+implementation depends on the \MPI/ library.  Instead, such object handles
+should be stored in a local variable and the address of this local variable
+should be passed into \mpifunc{MPI\_T\_CVAR\_HANDLE\_ALLOC}.
+\end{users}
+
+The value of \mpiarg{cvar\_index} should be in the range from $0$ to
+$\mpiarg{num\_cvar}-1$, where $\mpiarg{num\_cvar}$ is the number of available control
+variables as determined from a prior call to
+\mpifunc{MPI\_T\_CVAR\_GET\_NUM}.  The type of the \MPI/ object it
+references must be consistent with the type returned in the \mpiarg{bind}
+argument in a prior call to \mpifunc{MPI\_T\_CVAR\_GET\_INFO}.
+
+\cdeclindex{MPI\_T\_cvar\_handle}
+\begin{funcdef}{MPI\_T\_CVAR\_HANDLE\_FREE}{(\mbox{handle})}
+\funcarg{\INOUT}{handle}{handle to be freed (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_cvar\_handle\_free}{(\gb{}MPI\_T\_cvar\_handle~*handle)}
+
+When a handle is no longer needed, a user of the \MPI/ tool information
+interface should call \mpifunc{MPI\_T\_CVAR\_HANDLE\_FREE} to free the
+handle and the associated resources in the \MPI/ implementation.  On a
+successful return, \MPI/ sets the handle to
+\mpiconstmain{MPI\_T\_CVAR\_HANDLE\_NULL}.
+
+
+\subsubsection{Control Variable Access Functions}
+
+\cdeclindex{MPI\_T\_cvar\_handle}
+\begin{funcdef}{MPI\_T\_CVAR\_READ}{(\mbox{handle}, \mbox{buf})}
+\funcarg{\IN}{handle}{handle to the control variable to be read (handle)}
+\funcarg{\OUT}{buf}{initial address of storage location for variable value (choice)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_cvar\_read}{(\gb{}MPI\_T\_cvar\_handle~handle, void~*buf)}
+
+This routine queries the value of a control variable identified by the
+argument \mpiarg{handle} and stores the result in the buffer identified by
+the parameter \mpiarg{buf}.  The user must ensure that the buffer is of the
+appropriate size to hold the entire value of the control variable (based on
+the returned datatype and count from prior corresponding calls to
+\mpifunc{MPI\_T\_CVAR\_GET\_INFO} and
+\mpifunc{MPI\_T\_CVAR\_HANDLE\_ALLOC}, respectively).
+
+\cdeclindex{MPI\_T\_cvar\_handle}
+\begin{funcdef}{MPI\_T\_CVAR\_WRITE}{(\mbox{handle}, \mbox{buf})}
+\funcarg{\INOUT}{handle}{handle to the control variable to be written (handle)}
+\funcarg{\IN}{buf}{initial address of storage location for variable value (choice)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_cvar\_write}{(\gb{}MPI\_T\_cvar\_handle~handle, const~void~*buf)}
+
+This routine sets the value of the control variable identified by the
+argument \mpiarg{handle} to the data stored in the buffer identified by the
+parameter \mpiarg{buf}.  The user must ensure that the buffer is of the
+appropriate size to hold the entire value of the control variable (based on
+the returned datatype and count from prior corresponding calls to
+\mpifunc{MPI\_T\_CVAR\_GET\_INFO} and
+\mpifunc{MPI\_T\_CVAR\_HANDLE\_ALLOC}, respectively).
+
+If the variable has a global scope (as returned by a prior corresponding
+\mpifunc{MPI\_T\_CVAR\_GET\_INFO} call), any write call to this variable
+must be issued by the user in all connected (as defined in
+Section~\ref{subsec:disconnect}) \MPI/ processes.  If the variable has
+group scope, any write call to this variable must be issued by the user in
+all \MPI/ processes in the group, which must be described by the \MPI/
+implementation in the description returned by the call to \mpifunc{MPI\_T\_CVAR\_GET\_INFO}.
+
+In both cases, the user must ensure that the writes in all participating \MPI/ processes are
+consistent.  If the scope is either \mpiconst{MPI\_T\_SCOPE\_ALL\_EQ} or
+\mpiconst{MPI\_T\_SCOPE\_GROUP\_EQ} this means that the variable in all
+connected \MPI/ processes or \MPI/ processes of the group, respectively, must be set to the same value.
+
+If it is not possible to change the variable at the time the call is made,
+the function returns either \errormain{MPI\_T\_ERR\_CVAR\_SET\_NOT\_NOW}, if
+there may be a later time at which the variable could be set, or
+\errormain{MPI\_T\_ERR\_CVAR\_SET\_NEVER}, if the variable cannot be set for
+the remainder of the application's execution.
+
+\begin{example}
+\exindex{Tool information interface!reading the value of a control variable}%
+\Exindex{C}{Reading a control
+  variable}{MPI\_T\_cvar\_handle\_alloc,MPI\_T\_cvar\_read,MPI\_T\_cvar\_handle\_free}%
+Reading the value of a control variable.
+
+%%HEADER
+%%LANG: C
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+int getValue_int_comm(int index, MPI_Comm comm, int *val) {
+    int err,count;
+    MPI_T_cvar_handle handle;
+
+    /* This example assumes that the variable index */
+    /* can be bound to a communicator */
+
+    err=MPI_T_cvar_handle_alloc(index, &comm, &handle, &count);
+    if (err!=MPI_SUCCESS)
+        return err;
+
+    /* The following assumes that the variable is */
+    /* represented by a single integer */
+
+    err=MPI_T_cvar_read(handle,val);
+    if (err!=MPI_SUCCESS)
+        return err;
+
+    err=MPI_T_cvar_handle_free(&handle);
+    return err;
+}
+\end{lstlisting}
+\end{example}
+
+
+\subsection{Performance Variables}
+\mpitermtitleindex{performance variable!tool information interface}
+\mpitermindex{tool information interface!performance variable}
+\label{sec:mpit:pvar}
+
+The following section focuses on the ability to list and to query
+performance variables provided by the \MPI/ implementation.  Performance
+variables provide insight into \MPI/ implementation-specific internals and
+can represent information such as the state of the \MPI/ implementation
+(e.g., waiting blocked, receiving, not active), aggregated timing data for
+submodules, or queue sizes and lengths.
+
+
+\begin{rationale}
+The interface for performance variables is separate from the interface for
+control variables, since performance variables have different requirements
+and parameters.  By keeping them separate, the interface provides cleaner
+semantics and allows for more performance optimization opportunities.
+\end{rationale}
+
+Some performance variables and classes refer to \mpitermdefni{events}.
+\mpitermdefindex{event!tool information interface}%
+\mpitermdefindex{tool information interface!event}%
+In general,
+such events describe state transitions within software or hardware related
+to the performance of an \MPI/ application. The events offered through the
+callback-driven event-notification interface described in
+Section~\ref{sec:mpit:events} also refer to such state transitions;
+however, the set of state transitions referred to by performance variables and
+events as described in Section~\ref{sec:mpit:events} may not be identical.
+
+\subsubsection{Performance Variable Classes}
+\label{sec:tools:mpit:classes}
+
+Each performance variable is associated with a class that describes its
+basic semantics, possible datatypes, basic behavior, its starting value,
+whether it can overflow, and when and how an \MPI/ implementation can
+change the variable's value.  The starting value is the value that is
+assigned to the variable the first time that it is used or whenever it is
+reset.
+
+\begin{users}
+If a performance variable belongs to a class that can overflow, it is up to
+the user to protect against this overflow, e.g., by frequently reading and
+resetting the variable value.
+\end{users}
+
+\begin{implementors}
+\MPI/ implementations should use large enough datatypes for each
+performance variable to avoid overflows under normal circumstances.
+\end{implementors}
+
+The classes are defined by the following constants:
+
+\begin{sloppy}
+
+\begin{description}
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_STATE}:]A performance variable in this
+  class represents a set of discrete states.  Variables of this class are
+  represented by \type{MPI\_INT} and can be set by the \MPI/
+  implementation at any time.  Variables of this type should be described
+  further using an enumeration, as discussed in Section~\ref{sec:types}.
+  The starting value is the current state of the implementation at the time
+  that the starting value is set.  \MPI/ implementations must ensure that
+  variables of this class cannot overflow.
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_LEVEL}:]A performance variable in this
+  class represents a value that describes the utilization level of a
+  resource.  The value of a variable of this class can change at any time
+  to match the current utilization level of the resource.  Values returned
+  from variables in this class are nonnegative and represented by one of
+  the following datatypes: \type{MPI\_UNSIGNED},
+  \type{MPI\_UNSIGNED\_LONG}, \type{MPI\_UNSIGNED\_LONG\_LONG},
+  \type{MPI\_DOUBLE}.  The starting value is the current utilization level
+  of the resource at the time that the starting value is set.  \MPI/
+  implementations must ensure that variables of this class cannot overflow.
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_SIZE}:]A performance variable in this
+  class represents a value that is the size of a resource.  Values returned
+  from variables in this class are nonnegative and represented by one of
+  the following datatypes: \type{MPI\_UNSIGNED},
+  \type{MPI\_UNSIGNED\_LONG}, \type{MPI\_UNSIGNED\_LONG\_LONG},
+  \type{MPI\_DOUBLE}.  The starting value is the current size of the
+  resource at the time that the starting value is set.  \MPI/
+  implementations must ensure that variables of this class cannot overflow.
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_PERCENTAGE}:]The value of a performance
+  variable in this class represents the percentage utilization of a finite
+  resource.  The value of a variable of this class can change at any time
+  to match the current utilization level of the resource.  It will be
+  returned as an \type{MPI\_DOUBLE} datatype.  The value must always be
+  between 0.0 (resource not used at all) and 1.0 (resource completely
+  used).  The starting value is the current percentage utilization level of
+  the resource at the time that the starting value is set.  \MPI/
+  implementations must ensure that variables of this class cannot overflow.
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_HIGHWATERMARK}:]A performance variable
+  in this class represents a value that describes the maximum observed
+  utilization of a resource.  The value of a variable of this class is
+  nonnegative and grows monotonically from the initialization or reset of
+  the variable.  It can be represented by one of the following datatypes:
+  \type{MPI\_UNSIGNED}, \type{MPI\_UNSIGNED\_LONG},
+  \type{MPI\_UNSIGNED\_LONG\_LONG}, \type{MPI\_DOUBLE}.  The starting
+  value is the current utilization level of the resource at the time that
+  the variable is started or reset.  \MPI/ implementations must ensure that
+  variables of this class cannot overflow.
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_LOWWATERMARK}:]A performance variable in
+  this class represents a value that describes the minimum observed
+  utilization of a resource.  The value of a variable of this class is
+  nonnegative and decreases monotonically from the initialization or reset
+  of the variable.  It can be represented by one of the following
+  datatypes: \type{MPI\_UNSIGNED}, \type{MPI\_UNSIGNED\_LONG},
+  \type{MPI\_UNSIGNED\_LONG\_LONG}, \type{MPI\_DOUBLE}.  The starting
+  value is the current utilization level of the resource at the time that
+  the variable is started or reset.  \MPI/ implementations must ensure that
+  variables of this class cannot overflow.
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_COUNTER}:]A performance variable in this
+  class counts the number of occurrences of a specific event (e.g., the
+  number of memory allocations within an \MPI/ library).  The value of a
+  variable of this class increases monotonically from the initialization or
+  reset of the performance variable by one for each specific event that is
+  observed.  Values must be nonnegative and represented by one of the
+  following datatypes: \type{MPI\_UNSIGNED}, \type{MPI\_UNSIGNED\_LONG},
+  \type{MPI\_UNSIGNED\_LONG\_LONG}.  The starting value for variables of
+  this class is 0.  Variables of this class can overflow.
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_AGGREGATE}:]The value of a performance
+  variable in this class is an aggregated value that represents a sum of
+  arguments processed during a specific event (e.g., the amount of memory
+  allocated by all memory allocations).  This class is similar to the
+  counter class, but instead of counting individual events, the value can
+  be incremented by arbitrary amounts.  The value of a variable of this
+  class increases monotonically from the initialization or reset of the
+  performance variable.  It must be nonnegative and represented by one of
+  the following datatypes: \type{MPI\_UNSIGNED},
+  \type{MPI\_UNSIGNED\_LONG}, \type{MPI\_UNSIGNED\_LONG\_LONG},
+  \type{MPI\_DOUBLE}.  The starting value for variables of this class is
+  0.  Variables of this class can overflow.
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_TIMER}:]The value of a performance
+  variable in this class represents the aggregated time that the \MPI/
+  implementation spends executing a particular event, type of event, or
+  section of the \MPI/ library.  This class has the same basic semantics as
+  \mpiconst{MPI\_T\_PVAR\_CLASS\_AGGREGATE}, but explicitly records a timing
+  value.  The value of a variable of this class increases monotonically
+  from the initialization or reset of the performance variable.  It must be
+  nonnegative and represented by one of the following datatypes:
+  \type{MPI\_UNSIGNED}, \type{MPI\_UNSIGNED\_LONG},
+  \type{MPI\_UNSIGNED\_LONG\_LONG}, \type{MPI\_DOUBLE}.  The starting
+  value for variables of this class is 0.  If the type \type{MPI\_DOUBLE}
+  is used, the units that represent time in this datatype must match the
+  units used by \mpifunc{MPI\_WTIME}.  Otherwise, the time units should be
+  documented, e.g., in the description returned by
+  \mpifunc{MPI\_T\_PVAR\_GET\_INFO}.  Variables of this class can overflow.
+
+\item[\mpiconstmain{MPI\_T\_PVAR\_CLASS\_GENERIC}:]This class can be used to
+  describe a variable that does not fit into any of the other classes.  For
+  variables in this class, the starting value is variable-specific and
+  implementation-defined.
+
+\end{description}
+
+\end{sloppy}
+
+\subsubsection{Performance Variable Query Functions}
+
+An \MPI/ implementation exports a set of $N$ performance variables through
+the \MPI/ tool information interface.  If $N$ is zero, then the \MPI/
+implementation does not export any performance variables; otherwise the
+provided performance variables are indexed from $0$ to $N-1$.  This index
+number is used in subsequent calls to identify the individual variables.
+
+An \MPI/ implementation is allowed to increase the number of performance
+variables during the execution of an \MPI/ application when new variables
+become available through dynamic loading.  However, \MPI/ implementations
+are not allowed to change the index of a performance variable or to delete
+a variable once it has been added to the set.  When a variable becomes
+inactive, e.g., through dynamic unloading, accessing its value should
+return a corresponding return code.
+
+The following function can be used to query the number of performance
+variables, $\mpiarg{num\_pvar}$:
+
+\begin{funcdef}{MPI\_T\_PVAR\_GET\_NUM}{(\mbox{num\_pvar})}
+\funcarg{\OUT}{num\_pvar}{returns number of performance variables (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_get\_num}{(\gb{}int~*num\_pvar)}
+
+The function \mpifunc{MPI\_T\_PVAR\_GET\_INFO} provides access to
+additional information for each variable.
+
+
+\cdeclindex{MPI\_T\_enum}
+\begin{funcdef}{MPI\_T\_PVAR\_GET\_INFO}{(\mbox{pvar\_index}, \mbox{name}, \mbox{name\_len}, \mbox{verbosity}, \mbox{var\_class}, \mbox{datatype}, \mbox{enumtype}, \mbox{desc}, \mbox{desc\_len}, \mbox{bind}, \mbox{readonly}, \mbox{continuous}, \mbox{atomic})}
+\funcarg{\IN}{pvar\_index}{index of the performance variable to be queried between $0$ and $\mpiarg{num\_pvar}-1$ (integer)}
+\funcarg{\OUT}{name}{buffer to return the string containing the name of the performance variable (string)}
+\funcarg{\INOUT}{name\_len}{length of the string and/or buffer for \mpiarg{name} (integer)}
+\funcarg{\OUT}{verbosity}{verbosity level of this variable (integer)}
+\funcarg{\OUT}{var\_class}{class of performance variable (integer)}
+\funcarg{\OUT}{datatype}{\mpi/ datatype of the information stored in the performance variable (handle)}
+\funcarg{\OUT}{enumtype}{optional descriptor for enumeration information (handle)}
+\funcarg{\OUT}{desc}{buffer to return the string containing a description of the performance variable (string)}
+\funcarg{\INOUT}{desc\_len}{length of the string and/or buffer for \mpiarg{desc} (integer)}
+\funcarg{\OUT}{bind}{type of \mpi/ object to which this variable must be bound (integer)}
+\funcarg{\OUT}{readonly}{flag indicating whether the variable can be written/reset (integer)}
+\funcarg{\OUT}{continuous}{flag indicating whether the variable can be started and stopped or is continuously active (integer)}
+\funcarg{\OUT}{atomic}{flag indicating whether the variable can be atomically read and reset (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_get\_info}{(\gb{}int~pvar\_index, char~*name, int~*name\_len, int~*verbosity, int~*var\_class, MPI\_Datatype~*datatype, MPI\_T\_enum~*enumtype, char~*desc, int~*desc\_len, int~*bind, int~*readonly, int~*continuous, int~*atomic)}
+
+After a successful call to \mpifunc{MPI\_T\_PVAR\_GET\_INFO} for a
+particular variable, subsequent calls to this routine that query
+information about the same variable must return the same information.  An
+\MPI/ implementation is not allowed to alter any of the returned values.
+
+If any \OUT\ parameter to \mpifunc{MPI\_T\_PVAR\_GET\_INFO} is a
+\code{NULL} pointer, the implementation will ignore the parameter and not
+return a value for the parameter.
+
+\textoutdesc{name}{the name of the performance variable} If completed
+successfully, the routine is required to return a name of at least length
+one.
+
+The argument \mpiarg{verbosity} returns the verbosity level of the variable
+(see Section~\ref{sec:mpit:verbose}).
+
+The class of the performance variable is returned in the parameter
+\mpiarg{var\_class}.  The class must be one of the constants defined in
+Section~\ref{sec:tools:mpit:classes}.
+
+The combination of the name and the class of the performance variable must
+be unique with respect to all other names for  performance variables used
+by the \MPI/ implementation.
+
+\begin{implementors}
+Groups of variables that belong closely together, but have different
+classes, can have the same name.  This choice is useful, e.g., to refer to
+multiple variables that describe a single resource (like the level, the
+total size, as well as high- and low-water marks).
+\end{implementors}
+
+The argument \mpiarg{datatype} returns the \MPI/ datatype that is used to
+represent the performance variable.
+
+If the variable is of type \type{MPI\_INT}, \MPI/ can optionally specify
+an enumeration for the values represented by this variable and return it in
+\mpiarg{enumtype}.  In this case, \MPI/ returns an enumeration identifier,
+which can then be used to gather more information as described in
+Section~\ref{sec:types}.  Otherwise, \mpiarg{enumtype} is set to
+\mpiconst{MPI\_T\_ENUM\_NULL}.  If the datatype is not \type{MPI\_INT} or the
+argument \mpiarg{enumtype} is the null pointer, no enumeration type is
+returned.
+
+Returning a description is optional.  If an \mpi/ implementation does not
+return a description, the first character for \mpiarg{desc} must be set to
+the null character and \mpiarg{desc\_len} must be set to one at the return
+from this function.
+
+The parameter \mpiarg{bind} returns the type of the \MPI/ object to which
+the variable must be bound or the value \mpiconst{MPI\_T\_BIND\_NO\_OBJECT}
+(see Section~\ref{sec:mpit:assoc}).
+
+Upon return, the argument \mpiarg{readonly} is set to zero if the variable
+can be written or reset by the user.  It is set to one if the variable can
+only be read.
+
+Upon return, the argument \mpiarg{continuous} is set to zero if the
+variable can be started and stopped by the user, i.e., it is possible for
+the user to control if and when the value of a variable is updated.  It is
+set to one if the variable is always active and cannot be controlled by the
+user.
+
+Upon return, the argument \mpiarg{atomic} is set to zero if the variable
+cannot be read and reset atomically.  Only variables for which the call
+sets \mpiarg{atomic} to one can be used in a call to
+\mpifunc{MPI\_T\_PVAR\_READRESET}.
+
+If a performance variable has an equivalent name and has the same class
+across connected \MPI/ processes, the following \OUT\  parameters must be
+identical: \mpiarg{verbosity}, \mpiarg{varclass}, \mpiarg{datatype},
+\mpiarg{enumtype}, \mpiarg{bind}, \mpiarg{readonly}, \mpiarg{continuous},
+and \mpiarg{atomic}.  The returned description must be equivalent.
+
+\begin{funcdef}{MPI\_T\_PVAR\_GET\_INDEX}{(\mbox{name}, \mbox{var\_class}, \mbox{pvar\_index})}
+\funcarg{\IN}{name}{the name of the performance variable (string)}
+\funcarg{\IN}{var\_class}{the class of the performance variable (integer)}
+\funcarg{\OUT}{pvar\_index}{the index of the performance variable (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_get\_index}{(\gb{}const~char~*name, int~var\_class, int~*pvar\_index)}
+
+\mpifunc{MPI\_T\_PVAR\_GET\_INDEX} is a function for retrieving the index
+of a performance variable given a known variable name and class.  The
+\mpiarg{name} and \mpiarg{var\_class} parameters are provided by the
+caller, and \mpiarg{pvar\_index} is returned by the \MPI/ implementation.
+The \mpiarg{name} parameter is a string terminated with a null character.
+
+This routine returns \error{MPI\_SUCCESS} on success and returns
+\error{MPI\_T\_ERR\_INVALID\_NAME} if \mpiarg{name} does not match the name
+of any performance variable of the specified \mpiarg{var\_class} provided
+by the implementation at the time of the call.
+
+\begin{rationale}
+This routine is provided to enable fast retrieval of performance variables
+by a tool, assuming it knows the name of the variable for which it is
+looking.  The number of variables exposed by the implementation can change
+over time, so it is not possible for the tool to simply iterate over the
+list of variables once at initialization.  Although using \MPI/
+implementation specific variable names is not portable across \MPI/
+implementations, tool developers may choose to take this route for lower
+overhead at runtime because the tool will not have to iterate over the
+entire set of variables to find a specific one.
+\end{rationale}
+
+\subsubsection{Performance Experiment Sessions}
+\label{sec:mpit:sessions}
+
+Within a single program, multiple components can use the \MPI/ tool
+information interface.  To avoid collisions with respect to accesses to
+performance variables, users of the \MPI/ tool information interface must
+first create a performance experiment session.  Subsequent calls that
+access performance variables can then be made within the context of this
+performance experiment session.   Starting, stopping, reading, writing, or
+resetting a variable in one performance experiment session shall not
+influence whether a variable is started, stopped, read, written, or reset
+in another performance experiment session.
+
+\cdeclindex{MPI\_T\_pvar\_session}
+\begin{funcdef}{MPI\_T\_PVAR\_SESSION\_CREATE}{(\mbox{pe\_session})}
+\funcarg{\OUT}{pe\_session}{identifier of performance experiment session (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_session\_create}{(\gb{}MPI\_T\_pvar\_session~*pe\_session)}
+
+This call creates a new performance experiment session for accessing performance variables and
+returns a handle for this performance experiment session in the argument \mpiarg{pe\_session} of type
+\mpictypemain{MPI\_T\_pvar\_session}.
+
+\cdeclindex{MPI\_T\_pvar\_session}
+\begin{funcdef}{MPI\_T\_PVAR\_SESSION\_FREE}{(\mbox{pe\_session})}
+\funcarg{\INOUT}{pe\_session}{identifier of performance experiment session (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_session\_free}{(\gb{}MPI\_T\_pvar\_session~*pe\_session)}
+
+This call frees an existing performance experiment session.  Calls to the \MPI/ tool information
+interface  can no longer be made within the context of a performance experiment session after it
+is freed.  On a successful return, \MPI/ sets the performance experiment session identifier to
+\mpiconstmain{MPI\_T\_PVAR\_SESSION\_NULL}.
+
+
+\subsubsection{Handle Allocation and Deallocation}
+
+Before using a performance variable, a user must first allocate a handle of
+type \mpictypemain{MPI\_T\_pvar\_handle} for
+the variable by binding it to an \MPI/ object (see also
+Section~\ref{sec:mpit:assoc}).
+
+\cdeclindex{MPI\_T\_pvar\_handle}
+\cdeclindex{MPI\_T\_pvar\_session}
+\begin{funcdef}{MPI\_T\_PVAR\_HANDLE\_ALLOC}{(\mbox{pe\_session}, \mbox{pvar\_index}, \mbox{obj\_handle}, \mbox{handle}, \mbox{count})}
+\funcarg{\INOUT}{pe\_session}{identifier of performance experiment session (handle)}
+\funcarg{\IN}{pvar\_index}{index of performance variable for which handle is to be allocated (integer)}
+\funcarg{\IN}{obj\_handle}{reference to a handle of the \mpi/ object to which this variable is supposed to be bound (pointer)}
+\funcarg{\OUT}{handle}{allocated handle (handle)}
+\funcarg{\OUT}{count}{number of elements used to represent this variable (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_handle\_alloc}{(\gb{}MPI\_T\_pvar\_session~pe\_session, int~pvar\_index, void~*obj\_handle, MPI\_T\_pvar\_handle~*handle, int~*count)}
+
+This routine binds the performance variable specified by the argument
+\mpiarg{index} to an \MPI/ object  in the performance experiment session identified by the
+parameter \mpishortarg{pe\_session}.  The object is passed in the argument
+\mpiarg{obj\_handle} as an address to a local variable that stores the
+object's handle.  The argument \mpiarg{obj\_handle} is ignored if the
+\mpifunc{MPI\_T\_PVAR\_GET\_INFO} call for this performance variable
+returned \mpiconst{MPI\_T\_BIND\_NO\_OBJECT} in the argument \mpiarg{bind}.
+The handle allocated to reference the variable is returned in the argument
+\mpiarg{handle}.  Upon successful return, \mpiarg{count} contains the
+number of elements (of the datatype returned by a previous
+\mpifunc{MPI\_T\_PVAR\_GET\_INFO} call) used to represent this variable.
+
+\begin{users}
+The \mpiarg{count} can be different based on the \MPI/ object to which the
+performance variable was bound.  For example, variables bound to
+communicators could have a count that matches the size of the communicator.
+
+It is not portable to pass references to predefined \MPI/ object handles,
+such as \mpiconst{MPI\_COMM\_WORLD}, to this routine, since their
+implementation depends on the \MPI/ library.  Instead, such an object
+handle should be stored in a local variable and the address of this local
+variable should be passed into \mpifunc{MPI\_T\_PVAR\_HANDLE\_ALLOC}.
+\end{users}
+
+The value of index should be in the range from $0$ to $\mpiarg{num\_pvar}-1$,
+where $\mpishortarg{num\_pvar}$ is the number of available performance
+variables as determined from a prior call to
+\mpifunc{MPI\_T\_PVAR\_GET\_NUM}.  The type of the \MPI/ object it
+references must be consistent with the type returned in the \mpiarg{bind}
+argument in a prior call to \mpifunc{MPI\_T\_PVAR\_GET\_INFO}.
+
+For all routines in the rest of this section that take both \mpiarg{handle}
+and \mpiarg{pe\_session} as \IN\ or \INOUT\ arguments, if the \mpiarg{handle}
+argument passed in is not associated with the \mpiarg{pe\_session} argument,
+\errormain{MPI\_T\_ERR\_INVALID\_HANDLE} is returned.
+
+\cdeclindex{MPI\_T\_pvar\_handle}%
+\cdeclindex{MPI\_T\_pvar\_session}%
+\begin{funcdef}{MPI\_T\_PVAR\_HANDLE\_FREE}{(\mbox{pe\_session}, \mbox{handle})}
+\funcarg{\INOUT}{pe\_session}{identifier of performance experiment session (handle)}
+\funcarg{\INOUT}{handle}{handle to be freed (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_handle\_free}{(\gb{}MPI\_T\_pvar\_session~pe\_session, MPI\_T\_pvar\_handle~*handle)}
+
+When a handle is no longer needed, a user of the \MPI/ tool information
+interface should call \mpifunc{MPI\_T\_PVAR\_HANDLE\_FREE} to free the
+handle in the performance experiment session identified by the parameter \mpiarg{pe\_session} and the
+associated resources in the \MPI/  implementation.  On a successful return,
+\MPI/ sets the handle to \mpiconstmain{MPI\_T\_PVAR\_HANDLE\_NULL}.
+
+
+\subsubsection{Starting and Stopping of Performance Variables}
+
+Performance variables that have the continuous flag set during the query
+procedure are continuously updated once a handle has been allocated.
+Such variables may be queried at any time, but they cannot be started or
+stopped by the user.  All other variables are in a stopped state after
+their handle has been allocated; their values are not updated until they
+have been started by the user.
+
+\cdeclindex{MPI\_T\_pvar\_handle}
+\cdeclindex{MPI\_T\_pvar\_session} 
+\begin{funcdef}{MPI\_T\_PVAR\_START}{(\mbox{pe\_session}, \mbox{handle})}
+\funcarg{\IN}{pe\_session}{identifier of performance experiment session (handle)}
+\funcarg{\INOUT}{handle}{handle of a performance variable (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_start}{(\gb{}MPI\_T\_pvar\_session~pe\_session, MPI\_T\_pvar\_handle~handle)}
+
+This functions starts the performance variable with the handle identified
+by the parameter \mpiarg{handle} in the performance experiment session identified by the parameter
+\mpiarg{pe\_session}.
+
+If the constant \mpiconstmain{MPI\_T\_PVAR\_ALL\_HANDLES} is passed in
+\mpiarg{handle}, the \MPI/ implementation attempts to start all variables
+within the performance experiment session identified by the parameter \mpishortarg{pe\_session} for
+which handles have been allocated.  In this case, the routine returns
+\error{MPI\_SUCCESS} if all variables are started successfully (even if
+there are no noncontinuous variables to be started), otherwise
+\errormain{MPI\_T\_ERR\_PVAR\_NO\_STARTSTOP} is returned.  Continuous variables
+and variables that are already started are ignored when
+\mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES} is specified.
+
+\cdeclindex{MPI\_T\_pvar\_handle} 
+\cdeclindex{MPI\_T\_pvar\_session}
+\begin{funcdef}{MPI\_T\_PVAR\_STOP}{(\mbox{pe\_session}, \mbox{handle})}
+\funcarg{\IN}{pe\_session}{identifier of performance experiment session (handle)}
+\funcarg{\INOUT}{handle}{handle of a performance variable (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_stop}{(\gb{}MPI\_T\_pvar\_session~pe\_session, MPI\_T\_pvar\_handle~handle)}
+
+This functions stops the performance variable with the handle identified by
+the parameter \mpiarg{handle} in the performance experiment session identified by the parameter
+\mpiarg{pe\_session}.
+
+If the constant \mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES} is passed in
+\mpiarg{handle}, the \MPI/ implementation attempts to stop all variables
+within the performance experiment session identified by the parameter \mpishortarg{pe\_session} for
+which handles have been allocated.  In this case, the routine returns
+\error{MPI\_SUCCESS} if all variables are stopped successfully (even if
+there are no noncontinuous variables to be stopped), otherwise
+\error{MPI\_T\_ERR\_PVAR\_NO\_STARTSTOP} is returned.  Continuous variables
+and variables that are already stopped are ignored when
+\mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES} is specified.
+
+
+\subsubsection{Performance Variable Access Functions}
+
+\cdeclindex{MPI\_T\_pvar\_handle} 
+\cdeclindex{MPI\_T\_pvar\_session}
+\begin{funcdef}{MPI\_T\_PVAR\_READ}{(\mbox{pe\_session}, \mbox{handle}, \mbox{buf})}
+\funcarg{\IN}{pe\_session}{identifier of performance experiment session (handle)}
+\funcarg{\IN}{handle}{handle of a performance variable (handle)}
+\funcarg{\OUT}{buf}{initial address of storage location for variable value (choice)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_read}{(\gb{}MPI\_T\_pvar\_session~pe\_session, MPI\_T\_pvar\_handle~handle, void~*buf)}
+
+The \mpifunc{MPI\_T\_PVAR\_READ} call queries the value of the performance
+variable with the handle \mpiarg{handle} in the performance experiment session identified by the
+parameter \mpiarg{pe\_session} and stores the result in the buffer identified
+by the parameter \mpiarg{buf}.  The user must ensure that the
+buffer is of the appropriate size to hold the entire value of the
+performance variable (based on the datatype and count returned by the
+corresponding previous calls to \mpifunc{MPI\_T\_PVAR\_GET\_INFO} and
+\mpifunc{MPI\_T\_PVAR\_HANDLE\_ALLOC}, respectively).
+
+The constant \mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES} cannot be used as an
+argument for the function \mpifunc{MPI\_T\_PVAR\_READ}.
+
+\cdeclindex{MPI\_T\_pvar\_handle} 
+\cdeclindex{MPI\_T\_pvar\_session}
+\begin{funcdef}{MPI\_T\_PVAR\_WRITE}{(\mbox{pe\_session}, \mbox{handle}, \mbox{buf})}
+\funcarg{\IN}{pe\_session}{identifier of performance experiment session (handle)}
+\funcarg{\INOUT}{handle}{handle of a performance variable (handle)}
+\funcarg{\IN}{buf}{initial address of storage location for variable value (choice)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_write}{(\gb{}MPI\_T\_pvar\_session~pe\_session, MPI\_T\_pvar\_handle~handle, const~void~*buf)}
+
+The \mpifunc{MPI\_T\_PVAR\_WRITE} call attempts to write the value of the
+performance variable with the handle identified by the parameter
+\mpiarg{handle} in the performance experiment session identified by the parameter
+\mpiarg{pe\_session}.  The value to be written is passed in the buffer
+identified by the parameter \mpiarg{buf}.  The user must ensure that the
+buffer is of the appropriate size to hold the entire value of the
+performance variable (based on the datatype and count returned by the
+corresponding previous calls to \mpifunc{MPI\_T\_PVAR\_GET\_INFO} and
+\mpifunc{MPI\_T\_PVAR\_HANDLE\_ALLOC}, respectively).
+
+If it is not possible to change the variable, the function returns
+\errormain{MPI\_T\_ERR\_PVAR\_NO\_WRITE}.
+
+The constant \mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES} cannot be used as an
+argument for the  function \mpifunc{MPI\_T\_PVAR\_WRITE}.
+
+\cdeclindex{MPI\_T\_pvar\_handle} 
+\cdeclindex{MPI\_T\_pvar\_session}
+\begin{funcdef}{MPI\_T\_PVAR\_RESET}{(\mbox{pe\_session}, \mbox{handle})}
+\funcarg{\IN}{pe\_session}{identifier of performance experiment session (handle)}
+\funcarg{\INOUT}{handle}{handle of a performance variable (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_reset}{(\gb{}MPI\_T\_pvar\_session~pe\_session, MPI\_T\_pvar\_handle~handle)}
+
+The \mpifunc{MPI\_T\_PVAR\_RESET} call sets the performance variable with
+the handle identified by the parameter \mpiarg{handle} to its starting
+value specified in Section~\ref{sec:tools:mpit:classes}.  If it is not
+possible to change the variable, the function returns
+\error{MPI\_T\_ERR\_PVAR\_NO\_WRITE}.
+
+If the constant \mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES} is passed in
+\mpiarg{handle}, the \MPI/ implementation attempts to reset all variables
+within the performance experiment session identified by the parameter \mpiarg{pe\_session} for which
+handles have been allocated.  In this case, the routine returns
+\error{MPI\_SUCCESS} if all variables are reset successfully (even if there
+are no valid handles or all are read-only), otherwise
+\error{MPI\_T\_ERR\_PVAR\_NO\_WRITE} is returned.  Read-only variables are
+ignored when \mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES} is specified.
+
+
+\cdeclindex{MPI\_T\_pvar\_handle} 
+\cdeclindex{MPI\_T\_pvar\_session}
+\begin{funcdef}{MPI\_T\_PVAR\_READRESET}{(\mbox{pe\_session}, \mbox{handle}, \mbox{buf})}
+\funcarg{\IN}{pe\_session}{identifier of performance experiment session (handle)}
+\funcarg{\INOUT}{handle}{handle of a performance variable (handle)}
+\funcarg{\OUT}{buf}{initial address of storage location for variable value (choice)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_pvar\_readreset}{(\gb{}MPI\_T\_pvar\_session~pe\_session, MPI\_T\_pvar\_handle~handle, void~*buf)}
+
+This call atomically combines the functionality of
+\mpifunc{MPI\_T\_PVAR\_READ} and \mpifunc{MPI\_T\_PVAR\_RESET} with the
+same semantics as if these two calls were called separately.  If the
+variable cannot be read and reset atomically, this routine returns
+\errormain{MPI\_T\_ERR\_PVAR\_NO\_ATOMIC}.
+
+The constant \mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES} cannot be used as an
+argument for the  function \mpifunc{MPI\_T\_PVAR\_READRESET}.
+
+\begin{implementors}
+Sampling-based tools rely on the ability to call the \MPI/ tool information
+interface, in particular routines to start, stop, read, write, and reset
+performance variables, from any program context, including asynchronous
+contexts such as signal handlers.  \MPI/ implementations should strive, if
+possible in their particular environment, to enable these usage scenarios
+for all or a subset of the routines mentioned above.  If implementing only
+a subset, the read, write, and reset routines are typically the most
+critical for sampling-based tools.  An \MPI/ implementation should clearly
+document any restrictions on the program contexts in which the \MPI/ tool
+information interface can be used.  Restrictions might include guaranteeing
+usage outside of all signals or outside a specific set of signals.  Any
+restrictions could be documented, for example, through the description
+returned by \mpifunc{MPI\_T\_PVAR\_GET\_INFO}.
+\end{implementors}
+
+\begin{rationale}
+All routines to read, to write or to reset performance variables require
+the performance experiment session argument.  This requirement keeps the interface consistent and
+allows the use of \mpiconst{MPI\_T\_PVAR\_ALL\_HANDLES}  where appropriate.
+Further, this opens up additional performance optimizations for the
+implementation of handles.
+\end{rationale}
+
+
+\begin{example}
+\exindex{Tool information interface!basic usage of performance variables}%
+Detecting receives with long unexpected message queues.
+\Exindex{C}{Basic usage of performance variables}{MPI\_T\_init\_thread,MPI\_T\_pvar\_get\_info,MPI\_T\_pvar\_session\_create,MPI\_T\_pvar\_handle\_alloc,MPI\_T\_pvar\_start,MPI\_T\_pvar\_read,MPI\_T\_pvar\_handle\_free,MPI\_T\_pvar\_handle\_free,MPI\_T\_finalize}
+
+The following example shows a sample tool to identify receive operations
+that occur during times with long message queues.  This examples assumes
+that the \MPI/ implementation exports a variable with the name
+``\code{MPI\_T\_UMQ\_LENGTH}'' to represent the current length of the
+unexpected message queue.  The tool is implemented as a \mpiskipfunc{PMPI}
+tool using the
+\MPI/ profiling interface.
+
+The tool consists of three parts: (1) the initialization (by intercepting
+the call to \mpifunc{MPI\_INIT}), (2) the test for long unexpected message
+queues (by intercepting calls to \mpifunc{MPI\_RECV}), and (3) the clean-up
+phase (by intercepting the call to \mpifunc{MPI\_FINALIZE}).  To capture
+all receives, the example would have to be extended to have similar
+wrappers for all receive operations.
+
+\paraheading{Part 1---Initialization:}
+During initialization, the tool searches for the variable and, once the
+right index is found, allocates a performance experiment session and a handle for the variable
+with the found index, and starts the performance variable.
+
+%%HEADER
+%%LANG: C
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C},basicstyle=\lstsmall]
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <mpi.h>
+
+/* Global variables for the tool */
+static MPI_T_pvar_session pe_session;
+static MPI_T_pvar_handle handle;
+
+int MPI_Init(int *argc, char ***argv ) {
+    int  err, num, i, index, namelen, verbosity;
+    int  var_class, bind, threadsup;
+    int  readonly, continuous, atomic, count;
+    char name[18];
+
+    MPI_Comm     comm;
+    MPI_Datatype datatype;
+    MPI_T_enum   enumtype;
+
+    err=PMPI_Init(argc, argv);
+    if (err!=MPI_SUCCESS)
+        return err;
+
+    err=PMPI_T_init_thread(MPI_THREAD_SINGLE, &threadsup);
+    if (err!=MPI_SUCCESS)
+        return err;
+
+    err=PMPI_T_pvar_get_num(&num);
+    if (err!=MPI_SUCCESS)
+        return err;
+
+    index=-1;
+    i=0;
+    while ((i<num) && (index<0) && (err==MPI_SUCCESS)) {
+        /* Pass a buffer that is at least one character longer than */
+        /* the name of the variable being searched for to avoid */
+        /* finding variables that have a name that has a prefix */
+        /* equal to the name of the variable being searched. */
+        namelen=18;
+        err=PMPI_T_pvar_get_info(i, name, &namelen, &verbosity,
+                                 &var_class, &datatype, &enumtype,
+                                 NULL, NULL, &bind,&readonly,
+                                 &continuous, &atomic);
+        if (strcmp(name,"MPI_T_UMQ_LENGTH")==0) index=i;
+        i++;
+    }
+    if (err!=MPI_SUCCESS)
+        return err;
+
+    /* this could be handled in a more flexible way for a generic tool */
+    assert(index>=0);
+    assert(var_class==MPI_T_PVAR_CLASS_LEVEL);
+    assert(datatype==MPI_INT);
+    assert(bind==MPI_T_BIND_MPI_COMM);
+
+    /* Create a session */
+    err=PMPI_T_pvar_session_create(&pe_session);
+    if (err!=MPI_SUCCESS) return err;
+
+    /* Get a handle and bind to MPI_COMM_WORLD */
+    comm=MPI_COMM_WORLD;
+    err=PMPI_T_pvar_handle_alloc(pe_session, index, &comm, &handle,
+                                 &count);
+    if (err!=MPI_SUCCESS) return err;
+
+    /* this could be handled in a more flexible way for a generic tool */
+    assert(count==1);
+
+    /* Start variable */
+    err=PMPI_T_pvar_start(pe_session, handle);
+    if (err!=MPI_SUCCESS) return err;
+
+    return MPI_SUCCESS;
+}
+\end{lstlisting}
+
+\paraheading{Part 2---Testing the Queue Lengths During Receives:}
+During every receive operation, the tool reads the unexpected queue length
+through the matching performance variable and compares it against a
+predefined threshold.
+
+%%HEADER
+%%LANG: C
+%%DECL: MPI_T_pvar_session pe_session; MPI_T_pvar_handle handle;
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C},basicstyle=\lstsmall]
+#define THRESHOLD 5
+
+int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source,
+             int tag, MPI_Comm comm, MPI_Status *status)
+{
+        int value, err;
+
+        if (comm==MPI_COMM_WORLD) {
+                err=PMPI_T_pvar_read(pe_session, handle, &value);
+                if ((err==MPI_SUCCESS) && (value>THRESHOLD))
+                {
+                        /* tool identified receive called with long UMQ */
+                        /* execute tool functionality, */
+                        /* e.g., gather and print call stack */
+                }
+        }
+
+        return PMPI_Recv(buf, count, datatype, source, tag, comm, status);
+}
+\end{lstlisting}
+
+\paraheading{Part 3---Termination:}
+In the wrapper for \mpifunc{MPI\_FINALIZE}, the \MPI/ tool information
+interface is finalized.
+
+%%HEADER
+%%LANG: C
+%%DECL: MPI_T_pvar_session pe_session; MPI_T_pvar_handle handle;
+%%SUBST: return:if (err) return err;return
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+int MPI_Finalize(void)
+{
+    int err;
+
+    err=PMPI_T_pvar_handle_free(pe_session, &handle);
+    err=PMPI_T_pvar_session_free(&pe_session);
+    err=PMPI_T_finalize();
+    return PMPI_Finalize();
+}
+\end{lstlisting}
+
+
+\end{example}
+
+\subsection{Events}
+\mpitermtitleindex{event!tool information interface}
+\mpitermindex{tool information interface!event}
+\label{sec:mpit:events}
+
+During the execution of an \MPI/ application, the \MPI/ implementation can
+raise \mpitermni{events}\mpitermdefindex{event!tool information interface}
+\mpitermdefindex{tool information interface!event} of a specific type to inform the user of a state change
+in the implementation.  \mpitermdefni{Event types}\mpitermdefindex{event type!tool information interface}\mpitermdefindex{tool information interface!event type}
+describe specific state changes
+within the \MPI/ implementation.  In comparison to aggregate performance
+variables, events provide per-instance information on such state changes.
+The \MPI/ implementation is said to \mpitermdef{raise an event} when it invokes a
+callback function previously registered by the user for the corresponding event
+type.  Each callback invocation for a specific event instance has a
+timestamp associated with it, which can be queried by the user, describing
+the time when the event was observed by the implementation. This decouples
+the observation of the state change from the communication of this
+information to the user.  A timestamp in this context is a count of clock
+ticks elapsed since some time in the past and represented as a variable of
+type \mpictype{MPI\_Count}.
+
+\subsubsection{Event Sources}
+\label{sec:tools:sources}
+
+As a means to manage multiple state changes to be observed concurrently by
+different parts of the software and hardware system, the event interface of
+the \MPI/ Tool Information Interface uses the concept of \emph{sources}.  A
+source in this context is a concept describing the logical entity raising
+the event. A source may or may not directly represent a concrete part of
+the software or hardware system. This concept is used primarily to describe
+partial ordering of events across different components where total ordering
+cannot necessarily be determined or is too costly to enforce. 
+
+The following function can be used to query the number of event sources, \mpiarg{num\_sources}:
+
+\begin{funcdef}{MPI\_T\_SOURCE\_GET\_NUM}{(\mbox{num\_sources})}
+\funcarg{\OUT}{num\_sources}{returns number of event sources (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_source\_get\_num}{(\gb{}int~*num\_sources)}
+
+The number of available event sources can be queried with a call to
+\mpifunc{MPI\_T\_SOURCE\_GET\_NUM}.  An \MPI/ implementation is allowed to
+increase the number of sources during the execution of an \MPI/ process.
+However, \MPI/ implementations are not allowed to change the index of an
+event source or to delete an event source once it has been made visible to
+the user (e.g., if new event sources become available via dynamic loading
+of additional components in the \MPI/ implementation).
+
+\cdeclindex{MPI\_T\_source\_order}
+\begin{funcdef}{MPI\_T\_SOURCE\_GET\_INFO}{(\mbox{source\_index}, \mbox{name}, \mbox{name\_len}, \mbox{desc}, \mbox{desc\_len}, \mbox{ordering}, \mbox{ticks\_per\_second}, \mbox{max\_ticks}, \mbox{info})}
+\funcarg{\IN}{source\_index}{index of the source to be queried between $0$ and $\mpiarg{num\_sources}-1$ (integer)}
+\funcarg{\OUT}{name}{buffer to return the string containing the name of the source (string)}
+\funcarg{\INOUT}{name\_len}{length of the string and/or buffer for \mpiarg{name} (integer)}
+\funcarg{\OUT}{desc}{buffer to return the string containing the description of the source (string)}
+\funcarg{\INOUT}{desc\_len}{length of the string and/or buffer for \mpiarg{desc} (integer)}
+\funcarg{\OUT}{ordering}{flag indicating chronological ordering guarantees given by the source (integer)}
+\funcarg{\OUT}{ticks\_per\_second}{the number of ticks per second for the timer of this source (integer)}
+\funcarg{\OUT}{max\_ticks}{the maximum count of ticks reported by this source before overflow occurs (integer)}
+\funcarg{\OUT}{info}{optional info object (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_source\_get\_info}{(\gb{}int~source\_index, char~*name, int~*name\_len, char~*desc, int~*desc\_len, MPI\_T\_source\_order~*ordering, MPI\_Count~*ticks\_per\_second, MPI\_Count~*max\_ticks, MPI\_Info~*info)}
+
+A call to \mpifunc{MPI\_T\_SOURCE\_GET\_INFO} returns additional
+information on the source identified by the \mpiarg{source\_index}
+argument.
+
+\textoutdesc{name}{the name of the source}
+
+\textoutdesc{desc}{the description of the source}
+
+The \mpiarg{ordering} argument is of type \mpictypemain{MPI\_T\_source\_order} and returns whether event callbacks of this
+source will be invoked in chronological order, i.e., the timestamps reported by
+\mpifunc{MPI\_T\_EVENT\_GET\_TIMESTAMP} of subsequent events of the same source are
+monotonically increasing. The value of \mpiarg{ordering} can be
+\mpiconstmain{MPI\_T\_SOURCE\_ORDERED} or \mpiconstmain{MPI\_T\_SOURCE\_UNORDERED}.
+
+The \mpiarg{ticks\_per\_seconds} argument returns the number of ticks elapsed in
+one second for the timer used for the specific source.
+
+The \mpiarg{max\_ticks} argument returns the largest number of ticks
+reported by this source as a timestamp before the value overflows.
+
+\begin{users}
+    As the size of \mpictype{MPI\_Count} is defined in relation to the types
+    \mpictype{MPI\_Aint} and \mpictype{MPI\_Offset}, the effective size of
+    \mpictype{MPI\_Count} may lead to overflows of the timestamp values
+    reported.  Users can use the argument \mpiarg{max\_ticks} to
+    mitigate resulting problems.
+\end{users}
+
+
+\textoutoptinfo{info}{this source}
+
+\begin{funcdef}{MPI\_T\_SOURCE\_GET\_TIMESTAMP}{(\mbox{source\_index}, \mbox{timestamp})}
+\funcarg{\IN}{source\_index}{index of the source (integer)}
+\funcarg{\OUT}{timestamp}{current timestamp from specified source (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_source\_get\_timestamp}{(\gb{}int~source\_index, MPI\_Count~*timestamp)}
+
+To enable proper query of a reference timestamp for a specific source, a
+user can obtain a current timestamp using
+\mpifunc{MPI\_T\_SOURCE\_GET\_TIMESTAMP}.  The argument
+\mpiarg{source\_index} identifies the index of the source to query.  The
+call returns \error{MPI\_SUCCESS} and a current timestamp in the argument
+\mpiarg{timestamp} if the source supports ad-hoc generation of timestamps.
+The call returns \error{MPI\_T\_ERR\_INVALID\_INDEX} if the index does not
+identify a valid source.  The call returns
+\errormain{MPI\_T\_ERR\_NOT\_SUPPORTED} if the source does not support the
+ad-hoc generation of timestamps.
+
+
+\subsubsection{Callback Safety Requirements}
+\cdeclmainindex{MPI\_T\_cb\_safety}
+
+The actions a user is allowed to perform inside a callback function may vary
+with its execution context.  As the user has no control over the execution
+context of specific callback function invocations, \MPI/ provides a way to
+communicate this information using callback safety levels.
+
+\begin{table}[t]
+\caption{Hierarchy of safety requirement levels for event callback routines}
+\label{table:tools:mpit:cbsafety}
+\begin{center}
+\begin{tabular}{|l|}
+\hline
+\textbf{Safety Requirement} \\
+\hline
+\mpiconst{MPI\_T\_CB\_REQUIRE\_NONE} \\
+\mpiconst{MPI\_T\_CB\_REQUIRE\_MPI\_RESTRICTED} \\
+\mpiconst{MPI\_T\_CB\_REQUIRE\_THREAD\_SAFE} \\
+\mpiconst{MPI\_T\_CB\_REQUIRE\_ASYNC\_SIGNAL\_SAFE} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Table~\ref{table:tools:mpit:cbsafety} provides the hierarchy of
+callback safety requirements levels within user-defined callback functions.
+The \MPI/ implementation provides the
+safety requirement as an argument to the callback when it is invoked.
+
+The level of \mpiconstmain{MPI\_T\_CB\_REQUIRE\_NONE} is the lowest
+level and does not impose any restrictions on the callback function.  
+
+The level of \mpiconstmain{MPI\_T\_CB\_REQUIRE\_MPI\_RESTRICTED} restricts the
+set of \MPI/ functions that can be called from inside the callback to 
+all functions with the prefix \mpiskipfunc{MPI\_T} as well as \mpifunc{MPI\_WTICK} 
+and \mpifunc{MPI\_WTIME}.
+
+\begin{users}
+    While some \MPI/ functions are safe to be called inside a callback
+    function used in the \MPI/ tool information interface---which
+    may in some implementations be issued from asynchronous
+    contexts such as signal handlers---this does not imply that those \MPI/
+    functions are generally safe to be called in asynchronous contexts such as
+    signal handlers.
+\end{users}
+
+The level of \mpiconstmain{MPI\_T\_CB\_REQUIRE\_THREAD\_SAFE} includes all the
+limitations of \mpiconst{MPI\_T\_CB\_REQUIRE\_MPI\_RESTRICTED} and
+additionally requires the callback to be reentrant and thread-safe\mpitermindex{threads!thread-safe}.  This
+means the callback must allow its execution to be
+interrupted by or happen concurrently with any other callback including
+itself.
+
+The level of \mpiconstmain{MPI\_T\_CB\_REQUIRE\_ASYNC\_SIGNAL\_SAFE} includes all
+the limitations of \mpiconst{MPI\_T\_CB\_REQUIRE\_THREAD\_SAFE} and
+additionally requires the callback to meet the safety requirements 
+needed to support invocations from asynchronous contexts, such
+as signal handlers.
+
+\begin{users}
+    It is always safe to assume the highest restrictions for a callback
+    invocation (i.e., \mpiconst{MPI\_T\_CB\_REQUIRE\_ASYNC\_SIGNAL\_SAFE}).
+    By evaluating the specific requirements at runtime, a tool may obtain
+    more freedom of action within the callback.
+\end{users}
+
+\begin{implementors}
+    A high-quality implementation will strive to set callback safety
+    requirements to the most permissive level for a given callback
+    invocation.
+\end{implementors}
+
+All functions with the prefix \mpiskipfunc{MPI\_T}, except those listed in
+Table~\ref{table:mpit:mpi_restricted}, may return the return code
+\errormain{MPI\_T\_ERR\_NOT\_ACCESSIBLE}
+to indicate that the user may not access this function at this time.
+The functions (and their respective \mpiskipfunc{PMPI} versions) listed in
+Table~\ref{table:mpit:mpi_restricted} are exceptions to this rule and shall
+not return \error{MPI\_T\_ERR\_NOT\_ACCESSIBLE}.
+
+\begin{table}[t]
+    \caption{\label{table:mpit:mpi_restricted}List of \MPI/ functions that when called from within a callback function may not return \error{MPI\_T\_ERR\_NOT\_ACCESSIBLE}}
+\begin{center}
+    \begin{tabular}{l}
+        \mpifunc{MPI\_T\_EVENT\_COPY} \\
+        \mpifunc{MPI\_T\_EVENT\_GET\_SOURCE} \\
+        \mpifunc{MPI\_T\_EVENT\_GET\_TIMESTAMP} \\
+        \mpifunc{MPI\_T\_EVENT\_READ} \\
+        \mpifunc{MPI\_T\_PVAR\_READ} \\
+        \mpifunc{MPI\_T\_PVAR\_READRESET} \\
+        \mpifunc{MPI\_T\_PVAR\_RESET} \\
+        \mpifunc{MPI\_T\_PVAR\_START} \\
+        \mpifunc{MPI\_T\_PVAR\_STOP} \\
+        \mpifunc{MPI\_T\_PVAR\_WRITE} \\
+        \mpifunc{MPI\_T\_SOURCE\_GET\_TIMESTAMP} \\
+    \end{tabular}
+\end{center}
+\end{table}
+
+\begin{rationale}
+    A call may be implemented in a way that is not safe for all execution
+    contexts of a callback function, e.g., inside a signal handler. An \MPI/
+    implementation therefore needs a way to communicate its inability to perform
+    a certain action due to the execution context of a callback invocation.
+\end{rationale}
+
+\begin{implementors}
+    A high-quality implementation shall not return \error{MPI\_T\_ERR\_NOT\_ACCESSIBLE}
+    except where absolutely necessary.
+\end{implementors}
+
+\begin{users}
+    Users intercepting calls into the \MPI/ tool information interface using
+    the \mpiskipfunc{PMPI} interface must ensure that the safety requirements for the calling
+    context are met.  This means that users may have to implement the
+    wrapper with the highest safety level used by the \MPI/ implementation.
+\end{users}
+
+
+\subsubsection{Event Type Query Functions}
+
+An \MPI/ implementation exports a set of $N$ event types through the \MPI/
+tool information interface. If $N$ is zero, then the \MPI/ implementation
+does not export any event types; otherwise, the provided event types
+are indexed from $0$ to $N-1$. This index number is used in subsequent
+calls to identify a specific event type.
+
+An \MPI/ implementation is allowed to increase the number of event types
+during the execution of an \MPI/ process.
+However, \MPI/ implementations are not
+allowed to change the index of an event type or to delete an event type
+once it has been made visible to the user (e.g., if new event types
+become available via dynamic loading of additional components in the
+\MPI/ implementation).
+
+The following function can be used to query the number of event types, \mpiarg{num\_events}:
+
+\begin{funcdef}{MPI\_T\_EVENT\_GET\_NUM}{(\mbox{num\_events})}
+\funcarg{\OUT}{num\_events}{returns number of event types (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_get\_num}{(\gb{}int~*num\_events)}
+
+The function \mpifunc{MPI\_T\_EVENT\_GET\_INFO} provides access to
+additional information about a specific event type.
+
+\cdeclindex{MPI\_T\_enum}
+\begin{funcdef}{MPI\_T\_EVENT\_GET\_INFO}{(\mbox{event\_index}, \mbox{name}, \mbox{name\_len}, \mbox{verbosity}, \mbox{array\_of\_datatypes}, \mbox{array\_of\_displacements}, \mbox{num\_elements}, \mbox{enumtype}, \mbox{info}, \mbox{desc}, \mbox{desc\_len}, \mbox{bind})}
+\funcarg{\IN}{event\_index}{index of the event type to be queried between $0$ and $\mpiarg{num\_events}-1$ (integer)}
+\funcarg{\OUT}{name}{buffer to return the string containing the name of the event type (string)}
+\funcarg{\INOUT}{name\_len}{length of the string and/or buffer for \mpiarg{name} (integer)}
+\funcarg{\OUT}{verbosity}{verbosity level of this event type (integer)}
+\funcarg{\OUT}{array\_of\_datatypes}{array of \mpi/ basic datatypes used to encode the event data (array of handles)}
+\funcarg{\OUT}{array\_of\_displacements}{array of byte displacements of the elements in the event buffer (array of nonnegative integers)}
+\funcarg{\INOUT}{num\_elements}{length of \mpiarg{array\_of\_datatypes} and \mpiarg{array\_of\_displacements} arrays (nonnegative integer)}
+\funcarg{\OUT}{enumtype}{optional descriptor for enumeration information (handle)}
+\funcarg{\OUT}{info}{optional info object (handle)}
+\funcarg{\OUT}{desc}{buffer to return the string containing a description of the event type (string)}
+\funcarg{\INOUT}{desc\_len}{length of the string and/or buffer for \mpiarg{desc} (integer)}
+\funcarg{\OUT}{bind}{type of \mpi/ object to which an event of this type must be bound (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_get\_info}{(\gb{}int~event\_index, char~*name, int~*name\_len, int~*verbosity, MPI\_Datatype~array\_of\_datatypes[], MPI\_Aint~array\_of\_displacements[], int~*num\_elements, MPI\_T\_enum~*enumtype, MPI\_Info~*info, char~*desc, int~*desc\_len, int~*bind)}
+
+After a successful call to \mpifunc{MPI\_T\_EVENT\_GET\_INFO} for a
+particular event type, subsequent calls to this routine that query
+information about the same event type must return the same information.  If
+any \INOUT\ or \OUT\ argument to
+\mpifunc{MPI\_T\_EVENT\_GET\_INFO} is a \code{NULL} pointer, the
+implementation will ignore the argument and not return a value for the
+specific argument.
+
+\textoutdesc{name}{the name of the event type} If completed successfully,
+the routine is required to return a name of at least length one.  The name
+of the event type must be unique with respect to all other names for event
+types used by the \MPI/ implementation.
+
+The argument \mpiarg{verbosity} returns the verbosity level of the event
+type (see Section~\ref{sec:mpit:verbose}).
+
+The argument \mpiarg{array\_of\_datatypes} returns an array of \MPI/
+datatype handles that describe the elements returned for an instance
+of the event type with index \mpiarg{event\_index}.
+The event data can either be queried element by element with 
+\mpifunc{MPI\_T\_EVENT\_READ} or copied
+into a contiguous event buffer with \mpifunc{MPI\_T\_EVENT\_COPY}. 
+For the latter case, the 
+argument \mpiarg{array\_of\_displacements} returns an 
+array of byte displacements in the event buffer in ascending order starting with zero.
+
+The user is responsible
+for the memory allocation for the \mpiarg{array\_of\_datatypes} and
+\mpiarg{array\_of\_displacements} arrays. The number of elements
+in each array is supplied by the user in \mpiarg{num\_elements}.
+If the number of elements used by the event type is larger
+than the value of \mpiarg{num\_elements} provided by the user, the number
+of datatype handles and displacements returned in the corresponding arrays
+is truncated to the value of \mpiarg{num\_elements} passed in by the user.
+If the user passes the \code{NULL} pointer for \mpiarg{array\_of\_datatypes} 
+or \mpiarg{array\_of\_displacements}, the respective arguments are ignored.
+Unless the user passes the \code{NULL} pointer for \mpiarg{num\_elements}, 
+the function returns the number of elements required for this event type. 
+If the user passes the \code{NULL} pointer for \mpiarg{num\_elements}, 
+the arguments \mpiarg{num\_elements},
+\mpiarg{array\_of\_datatypes}, and \mpiarg{array\_of\_displacements} are
+ignored.
+
+
+\MPI/ can optionally return an enumeration identifier in the
+\mpiarg{enumtype} argument, describing the individual elements in the
+\mpiarg{array\_of\_datatypes} argument. Otherwise, \mpiarg{enumtype} is set
+to \mpiconst{MPI\_T\_ENUM\_NULL}. If the argument to \mpiarg{enumtype}
+provided by the user is the \code{NULL} pointer, no enumeration
+type is returned.
+
+\textoutoptinfo{info}{a registration handle for this event type}
+
+\textoutdesc{desc}{the description of the event type} Returning a
+description is optional.  If an \mpi/ implementation does not return a
+description, the first character for \mpiarg{desc} must be set to the null
+character and \mpiarg{desc\_len} must be set to one at the return from this
+function.
+
+The parameter \mpiarg{bind} returns the type of the \MPI/ object to which
+the event type must be bound or the value \mpiconst{MPI\_T\_BIND\_NO\_OBJECT}
+(see Section~\ref{sec:mpit:assoc}).
+
+If an event type has an equivalent name across connected \MPI/ processes, the
+following \OUT\ parameters must be identical: \mpiarg{verbosity},
+\mpiarg{array\_of\_datatypes}, \mpiarg{num\_elements}, \mpiarg{enumtype},
+and \mpiarg{bind}.  The returned description must be equivalent.
+As the argument \mpiarg{array\_of\_displacements} is process dependent, it
+may differ across connected \MPI/ processes.
+
+This routine returns \error{MPI\_SUCCESS} on success and returns
+\error{MPI\_T\_ERR\_INVALID\_INDEX} if \mpiarg{event\_index} does not match
+a valid event type index provided by the implementation at the time of the
+call.
+
+\begin{funcdef}{MPI\_T\_EVENT\_GET\_INDEX}{(\mbox{name}, \mbox{event\_index})}
+\funcarg{\IN}{name}{name of the event type (string)}
+\funcarg{\OUT}{event\_index}{index of the event type (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_get\_index}{(\gb{}const~char~*name, int~*event\_index)}
+
+\mpifunc{MPI\_T\_EVENT\_GET\_INDEX} returns the index of an event type
+identified by a known event type name.  The \mpiarg{name} parameter is
+provided by the caller, and \mpiarg{event\_index} is returned by the \MPI/
+implementation. The \mpiarg{name} parameter is a string terminated with a
+null character.
+
+This routine returns \error{MPI\_SUCCESS} on success and returns
+\error{MPI\_T\_ERR\_INVALID\_NAME} if \mpiarg{name} does not match the name
+of any event type provided by the implementation at the time of the call.
+
+\begin{rationale}
+This routine is provided to enable fast retrieval of an event index by a 
+tool, assuming it knows the name of the event type for which it is looking.
+The number of event types exposed by the implementation can change over
+time, so it is not possible for the tool to simply iterate over the list of
+event types once at initialization.  Although using \MPI/ implementation
+specific event type names is not portable across \MPI/ implementations, tool
+developers may choose to take this route for lower overhead at runtime
+because the tool will not have to iterate over the entire set of event types 
+to find a specific one.
+\end{rationale}
+
+
+\subsubsection{Handle Allocation and Deallocation}
+\label{sec:tools:mpit:eventalloc}
+
+Before the \MPI/ implementation calls a callback function on the occurrence of
+a specific event, the user needs to register a callback function to be called for
+that event type and obtain a handle of type
+\mpictypemain{MPI\_T\_event\_registration}.
+
+\cdeclindex{MPI\_T\_event\_registration}
+\begin{funcdef}{MPI\_T\_EVENT\_HANDLE\_ALLOC}{(\mbox{event\_index}, \mbox{obj\_handle}, \mbox{info}, \mbox{event\_registration})}
+\funcarg{\IN}{event\_index}{index of event type for which the registration handle is to be allocated (integer)}
+\funcarg{\IN}{obj\_handle}{reference to a handle of the \mpi/ object to which this event is supposed to be bound (pointer)}
+\funcarg{\IN}{info}{info object (handle)}
+\funcarg{\OUT}{event\_registration}{event registration (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_handle\_alloc}{(\gb{}int~event\_index, void~*obj\_handle, MPI\_Info~info, MPI\_T\_event\_registration~*event\_registration)}
+
+\mpifunc{MPI\_T\_EVENT\_HANDLE\_ALLOC} creates a \mpitermdef{registration handle}
+for the event type identified by \mpiarg{event\_index}. Furthermore,
+if required by the event type, the registration handle is bound to the
+object referred to by the argument \mpiarg{obj\_handle}.  The argument
+\mpiarg{obj\_handle} is ignored if the \mpifunc{MPI\_T\_EVENT\_GET\_INFO}
+call for this event type returned \mpiconst{MPI\_T\_BIND\_NO\_OBJECT} in the
+argument \mpishortarg{bind}.  The user can pass hints for the handle
+allocation to the \MPI/ implementation via the \mpiarg{info} argument.  The
+allocated event-registration handle is returned in the argument
+\mpiarg{event\_registration}.
+
+\cdeclindex{MPI\_T\_event\_registration}
+\begin{funcdef}{MPI\_T\_EVENT\_HANDLE\_SET\_INFO}{(\mbox{event\_registration}, \mbox{info})}
+\funcarg{\INOUT}{event\_registration}{event registration (handle)}
+\funcarg{\IN}{info}{info object (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_handle\_set\_info}{(\gb{}MPI\_T\_event\_registration~event\_registration, MPI\_Info~info)}
+
+\mpifunc{MPI\_T\_EVENT\_HANDLE\_SET\_INFO} updates the hints of the
+event-registration handle associated with \mpiarg{event\_registration} using the
+hints provided in \mpiarg{info}. A call to this procedure has no effect on previously
+set or defaulted hints that are not specified by \mpiarg{info}. It also has
+no effect on previously set or defaulted hints that are specified by info,
+but are ignored by the \MPI/ implementation in this call to
+\mpifunc{MPI\_T\_EVENT\_HANDLE\_SET\_INFO}.
+
+
+\begin{users}
+    Some info items that an implementation can use when it creates an
+    event-registration handle cannot easily be changed once the
+    registration handle is created. Thus, an implementation may ignore
+    hints issued in this call that it would have accepted in a handle
+    allocation call. An implementation may also be unable to update certain
+    info hints in a call to \mpifunc{MPI\_T\_EVENT\_HANDLE\_SET\_INFO}.
+    \mpifunc{MPI\_T\_EVENT\_HANDLE\_GET\_INFO} can be used to determine
+    whether info changes were ignored by the implementation.
+\end{users}
+
+
+\cdeclindex{MPI\_T\_event\_registration}
+\begin{funcdef}{MPI\_T\_EVENT\_HANDLE\_GET\_INFO}{(\mbox{event\_registration}, \mbox{info\_used})}
+\funcarg{\IN}{event\_registration}{event registration (handle)}
+\funcarg{\OUT}{info\_used}{info object (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_handle\_get\_info}{(\gb{}MPI\_T\_event\_registration~event\_registration, MPI\_Info~*info\_used)}
+
+\mpifunc{MPI\_T\_EVENT\_HANDLE\_GET\_INFO} returns a new info object
+containing the hints of the event-registration handle associated with
+\mpiarg{event\_registration}.  The current setting of all hints related to
+this registration handle is returned in \mpiarg{info\_used}.  An \MPI/
+implementation is required to return all hints that are supported by the
+implementation and have default values specified; any user-supplied hints
+that were not ignored by the implementation; and any additional hints that
+were set by the implementation.  If no such hints exist, a handle to a
+newly created info object is returned that contains no key/value pairs.
+The user is responsible for freeing \mpiarg{info\_used} via
+\mpifunc{MPI\_INFO\_FREE}.
+
+
+\begin{funcdef}{MPI\_T\_EVENT\_REGISTER\_CALLBACK}{(\mbox{event\_registration}, \mbox{cb\_safety}, \mbox{info}, \mbox{user\_data}, \mbox{event\_cb\_function})}
+\funcarg{\INOUT}{event\_registration}{event registration (handle)}
+\funcarg{\IN}{cb\_safety}{maximum callback safety level (integer)}
+\funcarg{\IN}{info}{info object (handle)}
+\funcarg{\IN}{user\_data}{pointer to a user-controlled buffer}
+\funcarg{\IN}{event\_cb\_function}{pointer to user-defined callback function (function)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_register\_callback}{(\gb{}MPI\_T\_event\_registration~event\_registration, MPI\_T\_cb\_safety~cb\_safety, MPI\_Info~info, void~*user\_data, MPI\_T\_event\_cb\_function~event\_cb\_function)}
+\cdeclindex{MPI\_T\_cb\_safety}
+\cdeclindex{MPI\_T\_event\_registration}
+\mpicallbackindex{MPI\_T\_event\_cb\_function}
+
+\mpifunc{MPI\_T\_EVENT\_REGISTER\_CALLBACK} associates a user-defined
+function pointed to by \mpiarg{event\_cb\_function} with an
+allocated event-registration handle.
+The maximum callback safety level supported
+by the callback function is passed in the argument \mpiarg{cb\_safety}.  
+The safety levels are defined in Table~\ref{table:tools:mpit:cbsafety}.
+A user can
+register multiple callback functions for a given event-registration handle, potentially
+specifying one for each callback safety level. 
+Registering a callback function for a specific callback safety level
+overwrites any previously-registered callback function pointer and info
+object associated with the event
+registration for the specific callback safety level. If
+\mpiarg{event\_cb\_function} is the \code{NULL} pointer, an existing association
+of a callback function for that callback safety level is removed.
+
+When an event is triggered, the implementation will select from all registered callbacks
+the callback with the lowest safety level valid in the context in which the callback
+is invoked.  In situations where the required callback
+safety level exceeds the highest level for which a callback function is 
+registered for a given registration handle, the event instance is dropped.  
+
+At callback invocation time, the implementation passes the pointer to a user-defined memory region specified during
+callback registration with the argument \mpiarg{user\_data}.
+
+The user can pass hints for
+the registration of the specified callback function to the \MPI/ implementation via the \mpiarg{info}
+argument.
+
+\begin{users}
+    As event instances can be raised as soon as the registration handle is
+    associated with the first callback function, the callback function with
+    the highest callback safety guarantees should be registered before any
+    further registrations for lower callback safety guarantees, to avoid
+    dropped events due to insufficient callback safety guarantees.
+\end{users}
+
+The callback function passed to \mpifunc{MPI\_T\_EVENT\_REGISTER\_CALLBACK}
+in the argument \mpiarg{event\_cb\_function} needs to have the following
+type:
+
+\mpitypedefbindvoidmain{MPI\_T\_event\_cb\_function}{(\gb{}MPI\_T\_event\_instance~event\_instance, MPI\_T\_event\_registration~event\_registration, MPI\_T\_cb\_safety~cb\_safety, void~*user\_data)}
+
+The argument \mpiarg{event\_instance} corresponds to a handle for the
+opaque event-instance object of type 
+\mpictypemain{MPI\_T\_event\_instance}. 
+This handle is only valid inside the
+corresponding invocation of the function to which it is passed.  The
+argument \mpiarg{event\_registration} corresponds to the event-registration handle
+returned by \mpifunc{MPI\_T\_EVENT\_HANDLE\_ALLOC} for the user function to
+the same event type and bound object combination.  The handle can be used
+to identify the specific event registration information, such as event type
+and bound object, or even to deallocate the handle from within the callback
+invocation.
+The argument \mpiarg{cb\_safety} describes the safety requirements the
+callback function must fulfill in the current invocation.  The argument
+\mpiarg{user\_data} is the pointer to user-allocated memory that was
+passed to the \MPI/ implementation during callback registration.
+
+\cdeclindex{MPI\_T\_cb\_safety}
+\cdeclindex{MPI\_T\_event\_registration}
+\begin{funcdef}{MPI\_T\_EVENT\_CALLBACK\_SET\_INFO}{(\mbox{event\_registration}, \mbox{cb\_safety}, \mbox{info})}
+\funcarg{\INOUT}{event\_registration}{event registration (handle)}
+\funcarg{\IN}{cb\_safety}{callback safety level (integer)}
+\funcarg{\IN}{info}{info object (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_callback\_set\_info}{(\gb{}MPI\_T\_event\_registration~event\_registration, MPI\_T\_cb\_safety~cb\_safety, MPI\_Info~info)}
+
+\mpifunc{MPI\_T\_EVENT\_CALLBACK\_SET\_INFO} updates the hints of the
+callback function registered for the callback safety level specified by
+\mpiarg{cb\_safety} of the event-registration handle associated with
+\mpiarg{event\_registration} using the hints provided in \mpiarg{info}.
+A call to this procedure has no effect on previously set or defaulted hints that are
+not specified by \mpiarg{info}. It also has no effect on previously set or
+defaulted hints that are specified by info, but are ignored by the \MPI/
+implementation in this call to
+\mpifunc{MPI\_T\_EVENT\_CALLBACK\_SET\_INFO}.
+
+\cdeclindex{MPI\_T\_cb\_safety}
+\cdeclindex{MPI\_T\_event\_registration}
+\begin{funcdef}{MPI\_T\_EVENT\_CALLBACK\_GET\_INFO}{(\mbox{event\_registration}, \mbox{cb\_safety}, \mbox{info\_used})}
+\funcarg{\IN}{event\_registration}{event registration (handle)}
+\funcarg{\IN}{cb\_safety}{callback safety level (integer)}
+\funcarg{\OUT}{info\_used}{info object (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_callback\_get\_info}{(\gb{}MPI\_T\_event\_registration~event\_registration, MPI\_T\_cb\_safety~cb\_safety, MPI\_Info~*info\_used)}
+
+\mpifunc{MPI\_T\_EVENT\_CALLBACK\_GET\_INFO} returns a new info object
+containing the hints of the callback function registered for the callback
+safety level specified by \mpiarg{cb\_safety} of the event-registration
+handle associated with \mpiarg{event\_registration}.  The current set
+of all hints related to this callback safety level of the
+event-registration handle is returned in \mpiarg{info\_used}.
+An \MPI/ implementation is required to return all hints that are supported
+by the implementation and have default values specified, any user-supplied
+hints that were not ignored by the implementation, and any additional hints
+that were set by the implementation.  If no such hints exist, a handle to a
+newly created info object is returned that contains no key/value pairs.
+The user is responsible for freeing \mpiarg{info\_used} via
+\mpifunc{MPI\_INFO\_FREE}.
+
+
+To stop the \MPI/ implementation from raising events for a specific
+registration, a user needs to free the corresponding event-registration
+handle.
+
+\begin{funcdef}{MPI\_T\_EVENT\_HANDLE\_FREE}{(\mbox{event\_registration}, \mbox{user\_data}, \mbox{free\_cb\_function})}
+\funcarg{\INOUT}{event\_registration}{event registration (handle)}
+\funcarg{\IN}{user\_data}{pointer to a user-controlled buffer}
+\funcarg{\IN}{free\_cb\_function}{pointer to user-defined callback function (function)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_handle\_free}{(\gb{}MPI\_T\_event\_registration~event\_registration, void~*user\_data, MPI\_T\_event\_free\_cb\_function~free\_cb\_function)}
+
+\mpifunc{MPI\_T\_EVENT\_HANDLE\_FREE} returns \error{MPI\_SUCCESS} when
+deallocation of the handle was initiated successfully and returns
+\error{MPI\_T\_ERR\_INVALID\_HANDLE} if \mpiarg{event\_registration} does
+not match a valid allocated event-registration handle at the time of the call.
+The callback function \mpiarg{free\_cb\_function} is called by the \MPI/
+implementation, when it is able to guarantee that no further event
+instances for the corresponding event-registration handle will be raised.  If
+the pointer to \mpiarg{free\_cb\_function} is the \code{NULL} pointer, no
+user function is invoked after successful deallocation of the event
+registration handle. The pointer to user-controlled memory provided in the
+\mpiarg{user\_data} argument will be passed to the function provided in the
+\mpiarg{free\_cb\_function} on invocation.
+
+\begin{users}
+    A free-callback function associated with a registration handle should
+    always be prepared to postpone any pending actions, should the provided
+    callback safety requirements exceed those required by the pending
+    actions.
+\end{users}
+
+
+The callback function passed to \mpifunc{MPI\_T\_EVENT\_HANDLE\_FREE} in
+the argument \mpiarg{free\_cb\_function} needs to have the following
+type:
+
+\mpitypedefbindvoidmain{MPI\_T\_event\_free\_cb\_function}{(\gb{}MPI\_T\_event\_registration~event\_registration, MPI\_T\_cb\_safety~cb\_safety, void~*user\_data)}
+
+\subsubsection{Handling Dropped Events}
+\label{sec:tools:mpit:droppedevents}
+
+Events may occur at times when the \MPI/ implementation cannot invoke
+the user function corresponding to a matching event handle.
+An implementation is allowed to buffer such events and delay
+the callback invocation. If an event occurs at times when
+the corresponding callback function cannot be called and the
+corresponding data cannot be buffered,
+or no callback function meeting the required callback safety level is registered,
+the event data may be
+dropped. 
+To discover such data loss, the user can set a handler
+function for a specific event-registration handle.
+
+\begin{funcdef}{MPI\_T\_EVENT\_SET\_DROPPED\_HANDLER}{(\mbox{event\_registration}, \mbox{dropped\_cb\_function})}
+\funcarg{\INOUT}{event\_registration}{valid event registration (handle)}
+\funcarg{\IN}{dropped\_cb\_function}{pointer to user-defined callback function (function)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_set\_dropped\_handler}{(\gb{}MPI\_T\_event\_registration~event\_registration, MPI\_T\_event\_dropped\_cb\_function~dropped\_cb\_function)}
+\cdeclindex{MPI\_T\_event\_registration}
+\mpicallbackindex{MPI\_T\_event\_dropped\_cb\_function}
+
+\mpifunc{MPI\_T\_EVENT\_SET\_DROPPED\_HANDLER} registers the function 
+\mpiarg{dropped\_cb\_function} to be called by the \MPI/
+implementation when event information is dropped for the registration handle
+specified in \mpiarg{event\_registration}. 
+Subsequent calls to \mpifunc{MPI\_T\_EVENT\_SET\_DROPPED\_HANDLER} 
+with the same registration handle will replace previously-registered callback functions 
+for that registration handle.
+If the pointer to
+\mpiarg{dropped\_cb\_function} is the \code{NULL} pointer,
+no data loss is recorded or reported until a new valid callback function is registered.
+
+
+\begin{users}
+    The invocation of the dropped handler callback function may not necessarily occur 
+    close to the time the event was actually lost.
+\end{users}
+
+
+The callback function passed to \mpifunc{MPI\_T\_EVENT\_SET\_DROPPED\_HANDLER} in
+the argument \mpiarg{dropped\_cb\_function} needs to have the following
+type:
+
+\mpitypedefbindvoidmain{MPI\_T\_event\_dropped\_cb\_function}{(\gb{}MPI\_Count~count, MPI\_T\_event\_registration~event\_registration, int~source\_index, MPI\_T\_cb\_safety~cb\_safety, void~*user\_data)}
+
+The argument \mpiarg{event\_registration} corresponds to the event
+registration handle to which the dropped data corresponds. The argument
+\mpiarg{count} provides a best effort estimation of the number of
+invocations to a registered event callback corresponding to
+\mpiarg{event\_registration} that were not executed since the registration
+of the dropped-callback handler or the last invocation of a registered 
+dropped-callback handler.  If the number of dropped events observed by the
+implementation exceeds the limit of \mpiargshort{count}, an
+implementation shall set \mpiargshort{count} to the maximum possible value for the type of \mpiargshort{count}.  The
+\mpiarg{source\_index} provides the index of the source that dropped the
+corresponding event information. The argument \mpiargshort{cb\_safety} describes
+the safety requirements the callback function must fulfill in the current
+invocation.  The possible values for \mpiargshort{cb\_safety} are described in
+Table~\ref{table:tools:mpit:cbsafety}. The argument \mpiarg{user\_data} is
+the pointer to user-allocated memory that was passed to the \MPI/
+implementation during callback registration.  If no event callback is
+registered for safety requirement levels that an implementation uses to invoke
+the dropped handler callback function for a specific event, the corresponding
+dropped handler callback function will not be invoked.
+
+\begin{users}
+    A callback function for dropped events associated with a registration
+    handle should always be prepared to postpone any pending actions,
+    should the provided callback safety requirements exceed those required
+    by the pending actions.
+\end{users}
+
+\begin{implementors}
+    A high-quality implementation should strive to find a good balance between
+    timely notification, completeness of information, and the freedom of action
+    for a tool when invoking the callback function for dropped events associated
+    with a registration handle.
+\end{implementors}
+
+If dropped event notifications have been observed for a specific source since the last
+event notification of that source, the corresponding dropped handler
+callback function must be called before other events are raised for
+that source. This means in a sequence of five events E1 to E5 from the same
+source, where E3 and E4 were dropped, any handler function set through
+\mpifunc{MPI\_T\_EVENT\_SET\_DROPPED\_HANDLER} for event-registration
+handles associated with E3 or E4 must be called before E5 is raised.
+
+
+\subsubsection{Reading Event Data}
+
+In event callbacks, the parameter \mpiarg{event\_instance} provides
+access to the per-instance event data, i.e., the data encoded by the
+specific event type for this instance.  The user can obtain event data as
+well as event meta data, such as a time stamp and the source, by providing
+this handle to the respective query functions. The event-instance handle is
+invalid beyond the scope of the current invocation of the callback function
+to which it is provided.
+
+The callback function argument \mpiarg{event\_registration} 
+identifies the registration handle that was used to register the callback function.
+
+The callback function  argument \mpiarg{cb\_safety} indicates the requirements for the
+specific callback invocation. The value is one of the safety requirements levels
+described in Table~\ref{table:tools:mpit:cbsafety}.
+The argument \mpiarg{user\_data} passes the pointer provided by the
+user during callback registration back to the function call.
+
+\begin{users}
+Depending on the registered event and usage of \MPI/ by the application, a
+callback function may be invoked with high frequency. Users should
+therefore strive to minimize the amount of work done inside callback
+functions. Furthermore, the time spent in a callback function may influence
+the capability of an implementation to buffer events; long execution
+times may lead to an increased number of dropped events.
+\end{users}
+
+\MPI/ provides the following function calls to access data of a specific event
+instance and its corresponding meta data (such as its time and source).
+
+\cdeclindex{MPI\_T\_event\_instance}
+\begin{funcdef}{MPI\_T\_EVENT\_READ}{(\mbox{event\_instance}, \mbox{element\_index}, \mbox{buffer})}
+\funcarg{\IN}{event\_instance}{event-instance handle provided to the callback function (handle)}
+\funcarg{\IN}{element\_index}{index into the array of datatypes of the item to be queried (integer)}
+\funcarg{\OUT}{buffer}{pointer to a memory location to store the item data (choice)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_read}{(\gb{}MPI\_T\_event\_instance~event\_instance, int~element\_index, void~*buffer)}
+
+\mpifunc{MPI\_T\_EVENT\_READ} allows users to copy one element of the event
+data to a user-specified buffer at a time.
+
+The \mpiarg{event\_instance} argument identifies the event instance to
+query. It is erroneous to provide any other event-instance handle to the
+call than the one passed by the \MPI/ implementation to the callback
+function in which the data is read.  The \mpishortarg{buffer} argument must point
+to a memory location the \MPI/ implementation can copy the element
+of the event data to identified by \mpiarg{element\_index}.
+
+\cdeclindex{MPI\_T\_event\_instance}
+\begin{funcdef}{MPI\_T\_EVENT\_COPY}{(\mbox{event\_instance}, \mbox{buffer})}
+\funcarg{\IN}{event\_instance}{event instance provided to the callback function (handle)}
+\funcarg{\OUT}{buffer}{user-allocated buffer for event data (choice)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_copy}{(\gb{}MPI\_T\_event\_instance~event\_instance, void~*buffer)}
+
+\mpifunc{MPI\_T\_EVENT\_COPY} copies the event data as a whole into the
+user-provided \mpiarg{buffer}. The user must ensure that the buffer is of
+at least the size of the extent of the event type, which can be computed from the type and displacement information returned by the
+corresponding call to \mpifunc{MPI\_T\_EVENT\_GET\_INFO}. The data may
+include padding bytes between individual elements of the event data in the
+buffer. A user can reconstruct the location and size of the data contained
+in the buffer through the information returned by
+\mpifunc{MPI\_T\_EVENT\_GET\_INFO}.
+
+\begin{implementors}
+    An implementation should strive to use an appropriately compact
+    representation when copying event instance data to a user buffer via
+    \mpifunc{MPI\_T\_EVENT\_COPY} to reduce the amount of memory required for
+    the user buffer.
+\end{implementors}
+
+\subsubsection{Reading Event Meta Data}
+\label{sec:tools:mpit:events:metadata}
+
+Additional to the specific event data encoded by each event type,
+supplemental information available across all event types can be queried.
+
+\cdeclindex{MPI\_T\_event\_instance}
+\begin{funcdef}{MPI\_T\_EVENT\_GET\_TIMESTAMP}{(\mbox{event\_instance}, \mbox{event\_timestamp})}
+\funcarg{\IN}{event\_instance}{event instance provided to the callback function (handle)}
+\funcarg{\OUT}{event\_timestamp}{timestamp the event was observed (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_get\_timestamp}{(\gb{}MPI\_T\_event\_instance~event\_instance, MPI\_Count~*event\_timestamp)}
+
+\mpifunc{MPI\_T\_EVENT\_GET\_TIMESTAMP} returns the timestamp of when the
+event was initially observed by the implementation.  The
+\mpiarg{event\_instance} argument identifies the event instance to
+query. It is erroneous to provide any other handle to the call than the one
+passed by the \MPI/ implementation to the callback function in which the
+timestamp is read.
+
+\begin{users}
+    An \MPI/ implementation may postpone the call to the user's callback
+    function.  In this case, the call to
+    \mpifunc{MPI\_T\_EVENT\_GET\_TIMESTAMP} may yield a timestamp in the
+    past that is closer to the time the event was initially observed, as
+    opposed to a timestamp captured during callback function invocation.
+\end{users}
+
+\begin{implementors}
+    A high-quality implementation will return a timestamp as close as possible
+    to the earliest time the event was observed by the \MPI/ implementation.
+\end{implementors}
+
+An event may be raised from different components acting as event sources in
+the \MPI/ implementation.  A source in this context is an abstract concept
+that helps to define partial ordering of raised events, as each source
+provides its own ordering guarantees. A source describes the entity that
+raises the event, rather than the origin of the data.
+
+To identify the source of an event instance, the user can query the index
+of the source within the corresponding event callback
+function invocation.
+
+\begin{implementors}
+    An excessive number of event sources may negatively impact performance
+    of a tool due to per-source overhead in event handling.
+\end{implementors}
+
+\cdeclindex{MPI\_T\_event\_instance}
+\begin{funcdef}{MPI\_T\_EVENT\_GET\_SOURCE}{(\mbox{event\_instance}, \mbox{source\_index})}
+\funcarg{\IN}{event\_instance}{event instance provided to the callback function (handle)}
+\funcarg{\OUT}{source\_index}{index identifying the source (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_event\_get\_source}{(\gb{}MPI\_T\_event\_instance~event\_instance, int~*source\_index)}
+
+The \mpiarg{event\_instance} argument identifies the event instance to query. It
+is erroneous to provide any other event-instance handle to the call than
+the one passed by the \MPI/ implementation to the callback function in
+which the source is queried.
+
+The \mpiarg{source\_index} argument returns the index of the source of the event instance.
+It can be used to query more information on the source using
+\mpifunc{MPI\_T\_SOURCE\_GET\_INFO}.
+
+\begin{rationale}
+    Event callback function invocations are associated with a source to enable
+    chronological processing of events on the tool side, when required,
+    while retaining low overhead on the side of the \MPI/ implementation.
+\end{rationale}
+
+\subsection{Variable Categorization}
+\label{sec:mpit:cat}
+
+\MPI/ implementations can optionally group performance and control
+variables into categories to express logical relationships between various
+variables.  For example, an \MPI/ implementation could group all control
+and performance variables that refer to message transfers in the \MPI/
+implementation and thereby distinguish them from variables that refer to
+local resources such as memory allocations or other interactions with the
+operating system.
+
+Categories can also contain other categories to form a hierarchical
+grouping.  Categories can never include themselves, either directly or
+transitively within other included categories.  Expanding on the example
+above, this allows \MPI/ to refine the grouping of variables referring to
+message transfers into variables to control and to monitor message queues,
+message matching activities and communication protocols.  Each of these
+groups of variables would be represented by a separate category and these
+categories would then be listed in a single category representing variables
+for message transfers.
+
+The category information may be queried in a fashion similar to the
+mechanism for querying variable information.  The \MPI/ implementation
+exports a set of $N$ categories via the \MPI/ tool information interface.
+If $N=0$, then the \MPI/ implementation does not export any categories,
+otherwise the provided categories are indexed from $0$ to $N-1$.  This
+index number is used in subsequent calls to functions of the \MPI/ tool
+information interface to identify the individual categories.
+
+An \MPI/ implementation is permitted to increase the number of categories
+during the execution of an \MPI/ program when new categories become
+available through dynamic loading.  However, \MPI/ implementations are not
+allowed to change the index of a category or delete it once it has been
+added to the set.
+
+Similarly, \MPI/ implementations are allowed to add variables to
+categories, but they are not allowed to remove variables from categories or
+change the order in which they are returned.
+
+\subsubsection{Category Query Functions}
+
+The following function can be used to query the number of categories, $\mpiarg{num\_cat}$.
+
+\begin{funcdef}{MPI\_T\_CATEGORY\_GET\_NUM}{(\mbox{num\_cat})}
+\funcarg{\OUT}{num\_cat}{current number of categories (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_category\_get\_num}{(\gb{}int~*num\_cat)}
+
+Individual category information can then be queried by calling the
+following function:
+
+\begin{funcdef}{MPI\_T\_CATEGORY\_GET\_INFO}{(\mbox{cat\_index}, \mbox{name}, \mbox{name\_len}, \mbox{desc}, \mbox{desc\_len}, \mbox{num\_cvars}, \mbox{num\_pvars}, \mbox{num\_categories})}
+\funcarg{\IN}{cat\_index}{index of the category to be queried (integer)}
+\funcarg{\OUT}{name}{buffer to return the string containing the name of the category (string)}
+\funcarg{\INOUT}{name\_len}{length of the string and/or buffer for \mpiarg{name} (integer)}
+\funcarg{\OUT}{desc}{buffer to return the string containing the description of the category (string)}
+\funcarg{\INOUT}{desc\_len}{length of the string and/or buffer for \mpiarg{desc} (integer)}
+\funcarg{\OUT}{num\_cvars}{number of control variables in the category (integer)}
+\funcarg{\OUT}{num\_pvars}{number of performance variables in the category (integer)}
+\funcarg{\OUT}{num\_categories}{number of  categories contained in the category (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_category\_get\_info}{(\gb{}int~cat\_index, char~*name, int~*name\_len, char~*desc, int~*desc\_len, int~*num\_cvars, int~*num\_pvars, int~*num\_categories)}
+
+\textoutdesc{name}{the name of the category}
+
+The routine is required to return a name of at least length one.  This name
+must be unique with respect to all other names for categories used by the
+\MPI/ implementation.
+
+If any \OUT\ parameter to \mpifunc{MPI\_T\_CATEGORY\_GET\_INFO} is the
+\code{NULL} pointer, the implementation will ignore the parameter and not
+return a value for the parameter.
+
+
+\textoutdesc{desc}{the description of the category}
+
+Returning a description is optional.  If an \mpi/ implementation decides
+not to return a description, the first character for \mpiarg{desc} must be
+set to the null character and \mpiarg{desc\_len} must be set to one at the
+return of this call.
+
+The function returns the number of control variables, performance variables
+and other categories contained in the queried category in the arguments
+\mpiarg{num\_cvars}, \mpiarg{num\_pvars}, and \mpiarg{num\_categories},
+respectively.
+
+If the name of a category is equivalent across connected \MPI/ processes, then
+the returned description must be equivalent.
+
+\begin{funcdef}{MPI\_T\_CATEGORY\_GET\_NUM\_EVENTS}{(\mbox{cat\_index}, \mbox{num\_events})}
+\funcarg{\IN}{cat\_index}{index of the category to be queried (integer)}
+\funcarg{\OUT}{num\_events}{number of event types in the category (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_category\_get\_num\_events}{(\gb{}int~cat\_index, int~*num\_events)}
+
+\mpifunc{MPI\_T\_CATEGORY\_GET\_NUM\_EVENTS} returns the number of event types
+contained in the queried category.
+
+\begin{funcdef}{MPI\_T\_CATEGORY\_GET\_INDEX}{(\mbox{name}, \mbox{cat\_index})}
+\funcarg{\IN}{name}{the name of the category (string)}
+\funcarg{\OUT}{cat\_index}{the index of the category (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_category\_get\_index}{(\gb{}const~char~*name, int~*cat\_index)}
+
+\mpifunc{MPI\_T\_CATEGORY\_GET\_INDEX} is a function for retrieving the index of a category given a known category name.
+The \mpiarg{name} parameter is provided by the caller, and \mpiarg{cat\_index} is returned by the \MPI/ implementation.
+The \mpiarg{name} parameter is a string terminated with a null character.
+
+This routine returns \error{MPI\_SUCCESS} on success and returns
+\error{MPI\_T\_ERR\_INVALID\_NAME} if \mpiarg{name} does not match the name
+of any category provided by the implementation at the time of the call.
+
+\begin{rationale}
+This routine is provided to enable fast retrieval of a category index by a
+tool, assuming it knows the name of the category for which it is looking.
+The number of categories exposed by the implementation can change over
+time, so it is not possible for the tool to simply iterate over the list of
+categories once at initialization.  Although using \MPI/ implementation
+specific category names is not portable across \MPI/ implementations, tool
+developers may choose to take this route for lower overhead at runtime
+because the tool will not have to iterate over the entire set of categories
+to find a specific one.
+\end{rationale}
+
+\subsubsection{Category Member Query Functions}
+\label{sec:mpit:category_query_functions}
+
+\begin{funcdef}{MPI\_T\_CATEGORY\_GET\_CVARS}{(\mbox{cat\_index}, \mbox{len}, \mbox{indices})}
+\funcarg{\IN}{cat\_index}{index of the category to be queried, in the range from $0$ to $\mpiarg{num\_cat}-1$ (integer)}
+\funcarg{\IN}{len}{the length of the indices array (integer)}
+\funcarg{\OUT}{indices}{an integer array of size \mpiarg{len}, indicating control variable indices (array of integers)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_category\_get\_cvars}{(\gb{}int~cat\_index, int~len, int~indices[])}
+
+\mpifunc{MPI\_T\_CATEGORY\_GET\_CVARS} can be used to query which control variables are contained in a particular category.
+A category contains zero or more control variables.
+
+
+\begin{funcdef}{MPI\_T\_CATEGORY\_GET\_PVARS}{(\mbox{cat\_index}, \mbox{len}, \mbox{indices})}
+\funcarg{\IN}{cat\_index}{index of the category to be queried, in the range from $0$ to $\mpiarg{num\_cat}-1$ (integer)}
+\funcarg{\IN}{len}{the length of the indices array (integer)}
+\funcarg{\OUT}{indices}{an integer array of size \mpiarg{len}, indicating performance variable indices (array of integers)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_category\_get\_pvars}{(\gb{}int~cat\_index, int~len, int~indices[])}
+
+\mpifunc{MPI\_T\_CATEGORY\_GET\_PVARS} can be used to query which
+performance variables are contained in a particular category.  A category
+contains zero or more performance variables.
+
+\begin{funcdef}{MPI\_T\_CATEGORY\_GET\_EVENTS}{(\mbox{cat\_index}, \mbox{len}, \mbox{indices})}
+\funcarg{\IN}{cat\_index}{index of the category to be queried, in the range from $0$ to $\mpiarg{num\_cat}-1$ (integer)}
+\funcarg{\IN}{len}{the length of the indices array (integer)}
+\funcarg{\OUT}{indices}{an integer array of size \mpiarg{len}, indicating event type indices (array of integers)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_category\_get\_events}{(\gb{}int~cat\_index, int~len, int~indices[])}
+
+\mpifunc{MPI\_T\_CATEGORY\_GET\_EVENTS} can be used to query which
+event types are contained in a particular category.  A category
+contains zero or more event types.
+
+\begin{funcdef}{MPI\_T\_CATEGORY\_GET\_CATEGORIES}{(\mbox{cat\_index}, \mbox{len}, \mbox{indices})}
+\funcarg{\IN}{cat\_index}{index of the category to be queried, in the range from $0$ to $\mpiarg{num\_cat}-1$ (integer)}
+\funcarg{\IN}{len}{the length of the indices array (integer)}
+\funcarg{\OUT}{indices}{an integer array of size \mpiarg{len}, indicating category indices (array of integers)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_category\_get\_categories}{(\gb{}int~cat\_index, int~len, int~indices[])}
+
+\mpifunc{MPI\_T\_CATEGORY\_GET\_CATEGORIES} can be used to query which
+other categories are contained in a particular category.  A category
+contains zero or more other categories.
+
+As mentioned above, \MPI/ implementations can grow the number of categories
+as well as the number of variables or other categories within a category.
+In order to allow users of the \MPI/ tool information interface to check
+quickly whether new categories have been added or new variables or
+categories have been added to a category, \MPI/ maintains an update number
+that is monotonically increasing during the execution
+and is returned by the following function:
+
+\label{sec:mpit:category_changed}
+\begin{funcdef}{MPI\_T\_CATEGORY\_CHANGED}{(\mbox{update\_number})}
+\funcarg{\OUT}{update\_number}{update number (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_T\_category\_changed}{(\gb{}int~*update\_number)}
+
+If two calls to this routine return the same update number, it is
+guaranteed that the category information has not changed between the two
+calls.  If the update number retrieved from the second call is higher, then
+some categories have been added or expanded. If the number of changes to
+categories exceeds the limit of \mpiarg{update\_number}, an implementation
+shall set \mpiarg{update\_number} to the maximum possible value for the type of \mpiarg{update\_number}.
+
+The index values returned in \mpiarg{indices} by
+\mpifunc{MPI\_T\_CATEGORY\_GET\_CVARS},
+\mpifunc{MPI\_T\_CATEGORY\_GET\_PVARS},
+\mpifunc{MPI\_T\_CATEGORY\_GET\_EVENTS}, and
+\mpifunc{MPI\_T\_CATEGORY\_GET\_CATEGORIES} can be used as input to
+\mpifunc{MPI\_T\_CVAR\_GET\_INFO}, \mpifunc{MPI\_T\_PVAR\_GET\_INFO},
+\mpifunc{MPI\_T\_EVENT\_GET\_INFO}, and
+\mpifunc{MPI\_T\_CATEGORY\_GET\_INFO}, respectively.
+
+The user is responsible for allocating the arrays passed into the functions
+\mpifunc{MPI\_T\_CATEGORY\_GET\_CVARS},
+\mpifunc{MPI\_T\_CATEGORY\_GET\_PVARS},
+\mpifunc{MPI\_T\_CATEGORY\_GET\_EVENTS}, and
+\mpifunc{MPI\_T\_CATEGORY\_GET\_CATEGORIES}.  Starting from array index
+$0$, each function writes up to \mpiarg{len} elements into the array.  If
+the category contains more than \mpiarg{len} elements, the function returns
+an arbitrary subset of size \mpiarg{len}.  Otherwise, the entire set of elements is
+returned in the beginning entries of the array, and any remaining array
+entries are not modified.
+
+\subsection{Return Codes for the \texorpdfstring{\MPI/}{MPI} Tool Information Interface}
+\label{sec:mpit:retcodes}
+
+All procedures defined as part of the \MPI/ tool information interface
+return an integer \mpitermni{return code}%
+\mpitermindex{return code!tool information interface}%
+\mpitermindex{tool information interface!return code} (see Table~\ref{table:tools:mpit:err}) to
+indicate whether the function was completed successfully or was aborted.
+For the former case, the value \mpiconst{MPI\_SUCCESS} is returned.
+In the latter case, the return code indicates the reason for not completing
+the routine.  Regardless of whether the return code is \mpiconst{MPI\_SUCCESS} or indicates that the procedure abnormally terminated, the \MPI/ process continues normal execution and does not invoke any \MPI/ error handler.   The \MPI/ implementation is
+not required to check all user-provided parameters; if a user passes
+invalid parameter values to any routine, the behavior of the implementation
+is undefined.
+
+All return codes with the prefix \constskip{MPI\_T\_ERR\_} must be unique values and
+cannot overlap with any error codes or error classes returned by the
+\MPI/ implementation.  They must also satisfy
+
+$$
+0 = \error{MPI\_SUCCESS} < \errorskip{MPI\_T\_ERR\_\XXX/} \leq \error{MPI\_ERR\_LASTCODE}.
+$$
+
+\begin{table}[t]
+\caption{Return codes used in procedures of the \MPI/ tool information interface}
+\label{table:tools:mpit:err} 
+\begin{tabularx}{\linewidth}{|l|X|} %ALLOWLATEX%
+\hline
+\textbf{Return Code} & \textbf{Description} \\
+\hline
+\hline
+\multicolumn{2}{|l|}{{\small Return Codes for All Procedures in the \MPI/ Tool Information Interface}}\\
+\hline
+\error{MPI\_SUCCESS} & Call completed successfully\\
+\errormain{MPI\_T\_ERR\_INVALID} & Invalid or bad parameter value(s)\\
+\errormain{MPI\_T\_ERR\_MEMORY} & Out of memory\\
+\errormain{MPI\_T\_ERR\_NOT\_INITIALIZED} & Interface not initialized\\
+\errormain{MPI\_T\_ERR\_CANNOT\_INIT} & Interface not in the state to be initialized\\ 
+\error{MPI\_T\_ERR\_NOT\_ACCESSIBLE} & Requested functionality not accessible\\
+\hline
+\hline
+\multicolumn{2}{|l|}{{\small Return Codes for Datatype Procedures: {\mpiskipfunc{MPI\_T\_ENUM\_\XXX/}}}
+\mpifuncindex{MPI\_T\_ENUM\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_ENUM\_GET\_ITEM}%
+}\\
+\hline
+\errormain{MPI\_T\_ERR\_INVALID\_INDEX} & The enumeration index is invalid  \\
+\hline
+\hline
+\multicolumn{2}{|l|}{{\small Return Codes for Variable, Category, and Event Query Procedures: {\mpiskipfunc{MPI\_T\_\XXX/\_GET\_\XXX/}}}
+\mpifuncindex{MPI\_T\_PVAR\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_CVAR\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_EVENT\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_CATEGORY\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_CVAR\_GET\_INDEX}%
+\mpifuncindex{MPI\_T\_PVAR\_GET\_INDEX}%
+\mpifuncindex{MPI\_T\_CATEGORY\_GET\_INDEX}%
+\mpifuncindex{MPI\_T\_EVENT\_GET\_INDEX}%
+}\\
+\hline
+\error{MPI\_T\_ERR\_INVALID\_INDEX} & The variable or category index is invalid\\ 
+\errormain{MPI\_T\_ERR\_INVALID\_NAME} & The variable or category name is invalid\\ 
+\hline
+\hline
+
+\multicolumn{2}{|l|}{{\small Return Codes for Handle Procedures: {\mpiskipfunc{MPI\_T\_\XXX/\_\{ALLOC$|$FREE\}}}}
+\mpifuncindex{MPI\_T\_PVAR\_HANDLE\_ALLOC}%
+\mpifuncindex{MPI\_T\_CVAR\_HANDLE\_ALLOC}%
+\mpifuncindex{MPI\_T\_EVENT\_HANDLE\_ALLOC}%
+\mpifuncindex{MPI\_T\_PVAR\_HANDLE\_FREE}%
+\mpifuncindex{MPI\_T\_CVAR\_HANDLE\_FREE}%
+\mpifuncindex{MPI\_T\_EVENT\_HANDLE\_FREE}%
+}\\
+\hline
+\error{MPI\_T\_ERR\_INVALID\_INDEX} & The variable index is invalid \\ 
+\error{MPI\_T\_ERR\_INVALID\_HANDLE} & The handle is invalid\\ 
+\errormain{MPI\_T\_ERR\_OUT\_OF\_HANDLES} & No more handles available\\ 
+\hline
+\hline
+%% Reduce the font size so this will fit on one line
+\multicolumn{2}{|l|}{{\small Return Codes for Performance Experiment Session Procedures: {\mpiskipfunc{MPI\_T\_PVAR\_SESSION\_\XXX/}}}%
+\mpifuncindex{MPI\_T\_PVAR\_SESSION\_CREATE}%
+\mpifuncindex{MPI\_T\_PVAR\_SESSION\_FREE}%
+}\\
+\hline
+\errormain{MPI\_T\_ERR\_OUT\_OF\_SESSIONS} & No more sessions available\\ 
+\errormain{MPI\_T\_ERR\_INVALID\_SESSION} & Session argument is not a valid session\\
+\hline
+\hline
+\multicolumn{2}{|l|}{{\small Return Codes for Control Variable Access Procedures: {\mpiskipfunc{MPI\_T\_CVAR\_\{READ$|$WRITE\}}}}
+\mpifuncindex{MPI\_T\_CVAR\_WRITE}%
+\mpifuncindex{MPI\_T\_CVAR\_READ}%
+}\\
+\hline
+\error{MPI\_T\_ERR\_CVAR\_SET\_NOT\_NOW} & Variable cannot be set at this moment\\
+\error{MPI\_T\_ERR\_CVAR\_SET\_NEVER} & Variable cannot be set until end of execution\\
+\error{MPI\_T\_ERR\_INVALID\_HANDLE} & The handle is invalid\\ 
+\hline
+\hline
+\multicolumn{2}{|l|}{{\small Return Codes for Performance Variable Access and Control Procedures:}}\\
+
+\multicolumn{2}{|l|}{{\small \mpiskipfunc{MPI\_T\_PVAR\_\{START$|$STOP$|$READ$|$WRITE$|$RESET$|$READREST\}}}
+\mpifuncindex{MPI\_T\_PVAR\_START}%
+\mpifuncindex{MPI\_T\_PVAR\_STOP}%
+\mpifuncindex{MPI\_T\_PVAR\_READ}%
+\mpifuncindex{MPI\_T\_PVAR\_WRITE}%
+\mpifuncindex{MPI\_T\_PVAR\_RESET}%
+\mpifuncindex{MPI\_T\_PVAR\_READRESET}%
+}\\
+\hline
+\error{MPI\_T\_ERR\_INVALID\_HANDLE} & The handle is invalid\\ 
+\error{MPI\_T\_ERR\_INVALID\_SESSION} & Performance experiment session argument is\flushline invalid\\
+\error{MPI\_T\_ERR\_PVAR\_NO\_STARTSTOP} & Variable cannot be started or stopped
+                                  (for \mpifunc{MPI\_T\_PVAR\_START} and
+                                   \mpifunc{MPI\_T\_PVAR\_STOP})\\
+\error{MPI\_T\_ERR\_PVAR\_NO\_WRITE} & Variable cannot be written or reset
+                               (for \mpifunc{MPI\_T\_PVAR\_WRITE} and
+                               \mpifunc{MPI\_T\_PVAR\_RESET}) \\  
+\error{MPI\_T\_ERR\_PVAR\_NO\_ATOMIC} & Variable cannot be read and written\flushline atomically
+                              (for \mpifunc{MPI\_T\_PVAR\_READRESET})\\
+                                       
+\hline
+\hline
+\multicolumn{2}{|l|}{{\small Return Codes for Source Procedures: {\mpiskipfunc{MPI\_T\_SOURCE\_\XXX/}}}
+\mpifuncindex{MPI\_T\_SOURCE\_GET\_INFO}%
+\mpifuncindex{MPI\_T\_SOURCE\_GET\_NUM}%
+\mpifuncindex{MPI\_T\_SOURCE\_GET\_TIMESTAMP}%
+}\\
+\hline
+\error{MPI\_T\_ERR\_INVALID\_INDEX} & The source index is invalid \\ 
+\error{MPI\_T\_ERR\_NOT\_SUPPORTED} & Requested functionality not supported\\
+\hline
+\hline
+\multicolumn{2}{|l|}{{\small Return Codes for Category Procedures: {\mpiskipfunc{MPI\_T\_CATEGORY\_\XXX/}}}
+\mpifuncindex{MPI\_T\_CATEGORY\_GET\_CATEGORIES}%
+\mpifuncindex{MPI\_T\_CATEGORY\_GET\_CVARS}%
+\mpifuncindex{MPI\_T\_CATEGORY\_GET\_PVARS}%
+\mpifuncindex{MPI\_T\_CATEGORY\_GET\_INFO}%
+}\\
+\hline
+\error{MPI\_T\_ERR\_INVALID\_INDEX} & The category index is invalid\\
+\hline
+\end{tabularx}
+\end{table} 
+
+
+\subsection{Profiling Interface}
+
+All requirements for the profiling interface, as described in
+Section~\ref{sec:prof}, also apply to the \MPI/ tool information interface.
+All rules, guidelines, and recommendations from Section~\ref{sec:prof}
+apply equally to procedures defined as part of the \MPI/ tool information
+interface.
+

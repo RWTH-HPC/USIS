@@ -1,0 +1,7 @@
+The OpenSHMEM specification belongs to Open Source Software Solutions, Inc.
+(OSSS), a nonprofit organization, under an agreement with HPE.
+Permission to copy without fee all or part of this material is granted,
+provided the OSSS notice and the title of this document appear, and notice is
+given that copying is by permission of OSSS.
+
+Title: OpenSHMEM Application Programming Interface

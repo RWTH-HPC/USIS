@@ -1,0 +1,73 @@
+\apisummary{
+    Performs an atomic fetch-and-add operation on a remote data object.
+}
+
+\begin{apidefinition}
+
+\begin{C11synopsis}
+TYPE @\FuncDecl{shmem\_atomic\_fetch\_add}@(TYPE *dest, TYPE value, int pe);
+TYPE @\FuncDecl{shmem\_atomic\_fetch\_add}@(shmem_ctx_t ctx, TYPE *dest, TYPE value, int pe);
+\end{C11synopsis}
+where \TYPE{} is one of the standard \ac{AMO} types specified by
+Table~\ref{stdamotypes}.
+
+\begin{Csynopsis}
+TYPE @\FuncDecl{shmem\_\FuncParam{TYPENAME}\_atomic\_fetch\_add}@(TYPE *dest, TYPE value, int pe);
+TYPE @\FuncDecl{shmem\_ctx\_\FuncParam{TYPENAME}\_atomic\_fetch\_add}@(shmem_ctx_t ctx, TYPE *dest, TYPE value, int pe);
+\end{Csynopsis}
+where \TYPE{} is one of the standard \ac{AMO} types and has a corresponding
+\TYPENAME{} specified by Table~\ref{stdamotypes}.
+
+\begin{DeprecateBlock}
+\begin{C11synopsis}
+TYPE @\FuncDecl{shmem\_fadd}@(TYPE *dest, TYPE value, int pe);
+\end{C11synopsis}
+where \TYPE{} is one of \{\CTYPE{int}, \CTYPE{long}, \CTYPE{long long}\}.
+
+\begin{Csynopsis}
+TYPE @\FuncDecl{shmem\_\FuncParam{TYPENAME}\_fadd}@(TYPE *dest, TYPE value, int pe);
+\end{Csynopsis}
+where \TYPE{} is one of \{\CTYPE{int}, \CTYPE{long}, \CTYPE{long long}\}
+and has a corresponding \TYPENAME{} specified by Table~\ref{stdamotypes}.
+\end{DeprecateBlock}
+
+\begin{apiarguments}
+
+\apiargument{IN}{ctx}{A context handle specifying the context on which to perform the operation.
+    When this argument is not provided, the operation is performed on
+    the default context.}
+\apiargument{OUT}{dest}{Symmetric address of the destination data object.
+    The type of \VAR{dest} should match that implied in the
+    SYNOPSIS section.}
+\apiargument{IN}{value}{The operand to the atomic fetch-and-add operation.  The
+    type of \VAR{value} should match that implied in the SYNOPSIS section.}
+\apiargument{IN}{pe}{\ac{PE} number of the remote \ac{PE} relative to the team associated
+     with the given \VAR{ctx} when provided, or the default context otherwise.}
+\end{apiarguments}
+
+\apidescription{
+    \FUNC{shmem\_atomic\_fetch\_add} routines perform an atomic fetch-and-add operation.  An
+    atomic fetch-and-add operation fetches the old \VAR{dest} and adds \VAR{value}
+    to \VAR{dest} without the possibility of another atomic operation on the
+    \VAR{dest} between the time of the fetch and the update.  These routines add
+    \VAR{value} to \VAR{dest} on \VAR{pe} and return the previous contents of
+    \VAR{dest} as an atomic operation.
+}
+
+\apireturnvalues{
+    The contents that had been at the \VAR{dest} address on the remote \ac{PE}
+    prior to the atomic addition operation.  The data type of the return value is
+    the same as the \VAR{dest}.
+}
+
+\begin{apiexamples}
+
+\apicexample
+        {The following \FUNC{shmem\_atomic\_fetch\_add} example is for
+        \Cstd[11] programs:}
+        {./example_code/shmem_atomic_fetch_add_example.c}
+        {}
+
+\end{apiexamples}
+
+\end{apidefinition}

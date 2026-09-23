@@ -1,0 +1,740 @@
+#! /usr/bin/env perl
+
+use warnings;
+
+$printDeprecated = 1;
+$quotechk = 1;
+$dquotechk = 1;
+$retcode = 0;
+$elinespacechk = 1;
+
+%knownTeX = (
+    'section' => 1,
+    'subsection' => 1,
+    'subsubsection' => 1,
+    'phantomsection' => 1,
+    'paragraph' => 1,
+    'paraheading' => 1,
+    'chapter' => 1,
+    'part' => 1,
+    'noindent' => 1,
+    'par' => 1,
+    'parbox' => 1,
+    'raggedright' => 1,   # Often needed with parbox
+    'caption' => 1,
+    'label' => 1,
+    'pagelabel' => 1,
+    'nonumber' => 1,
+    'ref' => 1,
+    #'pageref' => 1,
+    'nameref' => 1,
+    'cite' => 1,
+    'nocite' => 1,        # why is this used?
+    'emph' => 1,
+    # 'texttt' => 1,      # Use code or other appropriate macro
+    'textbf' => 1,
+    # 'textrm' => 1,      # Should normally not be needed
+    #'textit' => 1,       # Should normally not be needed. \emph for text.
+    'indent' => 1,
+    'footnote' => 1,
+    'frac' => 1,
+    'item' => 1,
+    'index' => 1,
+    'small' => 1,
+    'input' => 1,
+    'footnotesize' => 1,
+    'scriptsize' => 1,        # Consider requiring ALLOWLATEX instead
+    'constfootnotesize' => 1, # deprecate, use mpiconst[2]
+    'hspace' => 1,
+    'mbox' => 1,     # ok when used in equations
+    'protect' => 1,  # sometimes needed within other macros
+    '_' => 1,
+    '#' => 1,
+    '%' => 1,
+    '&' => 1,
+    ' ' => 1,
+    '$' => 1,
+    '^' => 1,
+    '|' => 1,
+    '\\' => 1,
+    '>' => 1,
+    ','=> 1,
+    '=' => 1,
+    '~' => 1,    # accent
+    'kill' => 1,
+    'linebreak' => 1,
+    'newline' => 1,
+    'clearpage' => 1,
+    '{' => 1,
+    '}' => 1,
+    'ddagger' => 1,        # for tables in Annex A.2
+    'hyphenation' => 1,
+    'begin{array}' => 1,
+    'begin{center}' => 1,
+    'begin{centering}' => 1, # better than center in a figure (less space)
+    'begin{description}' => 1,
+    'begin{displaymath}' => 1,
+    'begin{document}' => 1,
+    'begin{enumerate}' => 1,
+    'begin{eqnarray}' => 1,
+    'begin{eqnarray*}' => 1,
+    'begin{example}' => 1,
+    'begin{figure}' => 1,
+    'begin{itemize}' => 1,
+    'begin{obeylines}' => 1,
+    'begin{quote}' => 1,   # Only for quotes (used for a Fortran extract)
+    'begin{sloppy}' => 1,  # Do we want to allow this?
+    'begin{raggedright}' => 1, # discouraged but sometimes needed
+    'begin{small}' => 1,
+    'begin{tabbing}' => 1,
+    'begin{tabular}' => 1,
+    'begin{tabularx}' => 1,
+    'begin{table}' => 1,
+    'begin{verbatim}' => 1,
+    'begin{Verbatim}' => 1,
+    'begin{lstlisting}' => 1,
+    'begin{tohtml}' => 1,
+    'begin{nottohtml}' => 1,
+    'end{array}' => 1,
+    'end{center}' => 1,
+    'end{centering}' => 1,
+    'end{description}' => 1,
+    'end{displaymath}' => 1,
+    'end{document}' => 1,
+    'end{enumerate}' => 1,
+    'end{eqnarray}' => 1,
+    'end{eqnarray*}' => 1,
+    'end{example}' => 1,
+    'end{figure}' => 1,
+    'end{itemize}' => 1,
+    'end{obeylines}' => 1,
+    'end{quote}' => 1,
+    'end{sloppy}' => 1,
+    'end{raggedright}' => 1,
+    'end{small}' => 1,
+    'end{tabbing}' => 1,
+    'end{tabular}' => 1,
+    'end{tabularx}' => 1,
+    'end{table}' => 1,
+    'end{verbatim}' => 1,
+    'end{Verbatim}' => 1,
+    'end{lstlisting}' => 1,
+    'end{tohtml}' => 1,
+    'end{nottohtml}' => 1,
+    '[' => 1, ']' => 1,
+    '(' => 1, ')' => 1,
+    'lefteqn' => 1,
+    '/' => 1,
+    '"' => 1,
+    '\'' => 1,
+    'bar' => 1,
+    'epsilon' => 1,
+    'times' => 1,
+    'circ' => 1,
+    'ast' => 1,
+    'mid' => 1,
+    'ldots' => 1,
+    'vdots' => 1,
+    'cdot' => 1,
+    'dots' => 1,
+    'dotfill' => 1,
+    'centerline' => 1,
+    'includegraphics' => 1,
+    'texorpdfstring' => 1,
+    'left' => 1,
+    'right' => 1,
+    'min' => 1,
+    'max' => 1,
+    'leq' => 1,
+    'le' => 1,
+    'ge' => 1,
+    'geq' => 1,
+    'ne' => 1,
+    'neq' => 1,
+    'sum' => 1,
+    'prod' => 1,
+    'in' => 1,
+    'not' => 1,
+    'emptyset' => 1,
+    'sim' => 1,
+    'lfloor' => 1,
+    'rfloor' => 1,
+    'cap' => 1,
+    'cup' => 1,
+    'cal' => 1,
+    'quad' => 1,
+    'langle' => 1,
+    'rangle' => 1,
+    'textbackslash' => 1,
+    'hline' => 1,
+    'cline' => 1,   # Used in some tables in I/O chapter
+    'rule' => 1,
+    'multicolumn' => 1,
+    'multirow' => 1,
+    'copyright' => 1,
+    'addcontentsline' => 1,
+    'LaTeX' => 1,
+    'url' => 1,
+    'href' => 1,
+    'infloattrue' => 1,
+    'infloatfalse' => 1,
+    'fi' => 1,
+    'else' => 1,
+    'hyphen' => 1,
+    'lstset' => 1, # Important for some special handling of code examples
+);
+%knownMPITeX = (
+    'mpifunc' => 1,
+    'mpifuncshort' => 1,
+    'mpifuncmain' => 1,
+    'mpifuncindex' => 1,
+    'mpifuncskip' => 1,
+    'mpifuncmainindex' => 1,
+    'mpiskipfunc' => 1,      # deprecate - use mpifuncskip
+    'mpishortfunc' => 1,     # deprecate - use mpifuncshort
+    'mpitypedefbind' => 1,
+    'mpitypedefbindvoid' => 1,
+    'mpitypedefemptybind' => 1,
+    'mpicpptypedefemptybind' => 1,
+    'mpicppskiptypedefbind' => 1,
+    'OnlyForAutomaticAnnexGeneration' => 1,   # UGLY HACK!!
+    'mpifoverloadOnlyInAnnex' => 1,           # Another UGLY HACK!!
+    'exindex' => 1,
+    'Exindex' => 1,          # Replacement for exindex
+    'textTitleFont' => 1,
+    'IN' => 1,
+    'OUT' => 1,
+    'INOUT' => 1,
+    'XXX' => 1,
+    'funcarg' => 1,
+    'MPI' => 1, 'MPII' => 1, 'MPIII' => 1, 'MPIIDOTI' => 1,
+    'MPIIDOTII' => 1, 'MPIIDOTO' => 1, 'MPIIIDOTO' => 1,
+    'MPIIDOTIII' => 1, 'MPIIIDOTI' => 1, 'MPIIII' => 1,
+    'MPIIIDOTII' => 1,
+    'MPIIIIDOTO' => 1, 'mpiiiidoto' => 1,
+    'MPIIIIDOTI' => 1, 'mpiiiidoti' => 1,
+    'MPIIV' => 1, 'MPIIVDOTO' => 1, 'mpiiv' => 1, 'mpiivdoto' => 1,
+    'MPIIVDOTI' => 1, 'mpiivdoti' => 1,
+    'MPIV' => 1, 'MPIVDOTO' => 1, 'mpiv' => 1, 'mpivdoto' => 1,
+    'MPIVDOTI' => 1, 'mpivdoti' => 1,
+    'MPIVI' => 1, 'MPIVIDOTO' => 1, 'mpividoto' => 1,
+    'mpi' => 1, 'mpii' => 1, 'mpiii' => 1, 'mpiidoti' => 1,
+    'mpiidotii' => 1, 'mpiidoto' => 1, 'mpiiidoto' => 1,
+    'mpiidotiii' => 1, 'mpiiidoti' => 1, 'mpiiii' => 1,
+    'mpiiidotii' => 1,
+    'RMA' => 1,
+    'begin{rationale}' => 1,
+    'begin{users}' => 1,
+    'begin{implementors}' => 1,
+    'begin{funcdef}' => 1,
+    'begin{funcdef2}' => 1,
+    'begin{funcdefna}' => 1,
+    'begin{constlist}' => 1,
+    'begin{mpi-binding}' => 1,
+    'begin{mpicodeblock}' => 1,
+    'end{rationale}' => 1,
+    'end{users}' => 1,
+    'end{implementors}' => 1,
+    'end{funcdef}' => 1,
+    'end{funcdef2}' => 1,
+    'end{funcdefna}' => 1,
+    'end{constlist}' => 1,
+    'end{mpi-binding}' => 1,
+    'end{mpicodeblock}' => 1,
+    'cdeclindex' => 1, # deprecate, use mpictypeindex
+    'cdeclmainindex' => 1, # deprecate, use mpictypemainindex
+    'type' => 1,     # deprecate, use mpidtype
+    'typemain' => 1, # deprecate, use mpidtypemain
+    'typeindex' => 1,# deprecate, use mpidtypeindex
+    'deprecatedsep' => 1, # Temp, should be replaced/removed in MPI 4.1
+    'mpidtype' => 1,
+    'mpidtypemain' => 1,
+    'mpidtypemainshort' => 1,
+    'mpidtypeindex' => 1,
+    'mpidtypeshort' => 1,
+    'mpidtypeskip' => 1,
+    'mpidtypeitem' => 1,
+    'mpidtypeitemonly' => 1,
+    'mpidtypemainitem' => 1,
+    'ftype' => 1,
+    'ftypeshort' => 1,
+    'ctype' => 1,
+    'ctypeshort' => 1,
+    'carg' => 1,
+    'farg' => 1,
+    'fnarg' => 1,
+    'fnfinalarg' => 1,
+    'mpiarg' => 1,
+    'mpishortarg' => 1, # deprecate, use mpiargshort
+    'mpiargshort' => 1,
+    'mpibind' => 1,
+    'mpibindmain' => 1,
+    'mpibindnotint' => 1,
+    'MPIbindindex' => 1,
+    'MPIbindindexuse' => 1,
+    'MPIBCfunc' => 1,
+    'mpiskipemptybind' => 1,
+    'mpiemptybindidx' => 1,
+    'bindingislisttrue' => 1,    # These adjust spacing *after* a
+    'bindingislistfalse' => 1,   # mpiemptybindidx
+    'mpicppbind' => 1,
+    'mpicppemptybind' => 1,
+    'mpicppskipemptybind' => 1,
+    'bindindent' => 1,
+    'mpifbind' => 1,
+    'mpifbindmain' => 1,
+    'mpifnewbind' => 1,
+    'mpifnewbindmain' => 1,
+    'mpifsubbind' => 1,
+    'mpifnewsubbind' => 1,
+    'mpifnewnonebind' => 1,
+    'mpifbindspecial' => 1,
+    'fargs' => 1,
+    'const' => 1,         # deprecate, use mpiconst
+    'constmain' => 1,     # deprecate, use mpiconstmain
+    'constskip' => 1,     # deprecate, use mpiconstskip
+    'noconstitem' => 1,
+    'constitem' => 1,
+    'constitemtwo' => 1,
+    'constitemthree' => 1,
+    'constskipitem' => 1,
+    'constmainitem' => 1,
+    'constitemonly' => 1,
+    'typeitem' => 1,
+    'constshort' => 1,     # deprecate, use mpiconstshort
+    'constshortmain' => 1, # deprecate, use mpiconstshortmain
+    'constsmall' => 1,     # deprecate, use mpiconst[1]
+    'mpiconst' => 1,
+    'mpiconstmain' => 1,
+    'mpiconstshort' => 1,
+    'mpiconstmainshort' => 1,
+    'mpiconstmainindex' => 1,
+    'mpiconstskip' => 1,
+    'mpiconstfunc' => 1,
+    'mpiconstfuncmain' => 1,
+    'mpiconstfuncskip' => 1,
+    'mpiconstfuncindex' => 1,
+    'mpictype' => 1,
+    'mpictypemain' => 1,
+    'mpictypeindex' => 1,
+    'mpictypemainindex' => 1,
+    'mpictypeskip' => 1,
+    'mpictypeshort' => 1,
+    'mpiftype' => 1,
+    'mpiftypemain' => 1,
+    'mpiftypekind' => 1,
+    'mpiftypekindmain' => 1,
+    'mpicallback' => 1,
+    'mpicallbackmain' => 1,
+    'mpicallbackskip' => 1,
+    'mpicallbackindex' => 1,
+    'mpicallbackmainindex' => 1,
+    'mpiccallbackdef' => 1,
+    'mpiccallbackdefindex' => 1,
+    'mpiccallback' => 1,
+    'mpifcallback' => 1,
+    'mpifcallbackskip' => 1,
+    'code' => 1,
+    'mpiublb' => 1,
+    'mpicode' => 1,
+    'mpilegend' => 1,
+    'mpiterm' => 1,
+    'mpitermindex' => 1,
+    'mpitermni' => 1,
+    'mpitermtitleindex' => 1,
+    'mpitermdefni' => 1,
+    'mpitermdef' => 1,
+    'mpitermdefindex' => 1,
+    'mpitermtitleindexsubmain' => 1,
+    'mpitermtitleindexmainsub' => 1,
+    'mpitermsub' => 1,
+    'MPIreplace' => 1,
+    'MPIupdate' => 1,
+    'MPIdelete' => 1,
+    'MPIupdateBegin' => 1,
+    'MPIupdateEnd' => 1,
+    'MPIdeleteBegin' => 1,
+    'MPIdeleteEnd' => 1,
+    'gb' => 1,
+    'vlgb' => 1,
+    'flushline' => 1,
+    'ffunc' => 1,
+    'cfunc' => 1,
+    'error' => 1,
+    'errormain' => 1,
+    'errorskip' => 1,
+    'errorweak' => 1,
+    'infoskip' => 1,
+    'infokey' => 1,
+    'infokeymain' => 1,
+    'infokeyskip' => 1,
+    'infoval' => 1,
+    'infovalshort' => 1,
+    'infovalmain' => 1,
+    'infovalskip' => 1,
+    'mpistring' => 1,
+    'mpistringskip' => 1,
+    'mpistringshort' => 1,
+    'mpistringmain' => 1,
+    'bindinglangreset' => 1,
+    'bindinglabeltrue' => 1,
+    'bindinglabelfalse' => 1,
+    'mpilaunch' => 1,
+    'mpilaunchskip' => 1,
+    'mpilaunchmain' => 1,
+
+    #    'class' => 1,
+
+    'n' => 1, # Not really a commend, but occurs as \n in examples
+    'ifbookprinting' => 1,
+    'variable' => 1,
+
+    'ifdraft' => 1,
+    'ifdraftspec' => 1,
+
+    'editremovebegin' => 1,
+    'editremoveend' => 1,
+    'sectionref' => 1,
+    'sectionrange' => 1,
+    'annexref' => 1,
+    'namedref' => 1,
+
+    'textoutdesc' => 1,  # used to simplify MPI_T section
+    'textoutargs' => 1,
+    'textoutoptinfo' => 1,
+
+    'wpm' => 1,
+    'spm' => 1,
+
+    'EE' => 1, 'EEi' => 1, 'FlushEntries' => 1,
+
+    'MPIisinitialized' => 1, 'MPIisfinalized' => 1,
+
+    'wideunderline' => 1,
+
+    'thickhline' => 1,     # for tables in Annex A.2
+);
+%deprecatedMPI = (
+    'consti' => 1,    # Removed because use was inconsistent
+    'status' => 1,    # vote status, should be removed
+    'commentOut' => 1, # How many uses
+    'OnlyForAutomaticAnnexGeneration' => 1, #Eeek!
+    'mpibindA' => 1,
+    'MPIRT' => 1,    # part of the MPI-2 process that didn't make it
+    'func' => 1,
+);
+# These are Tex and LaTeX commands that should not appear in the source file
+# Make sure that these are not listed in knownTeX
+%deprecatedTeX = (
+    'hyphenation' => 1,
+    'rm' => 1,
+    'em' => 1,
+    'tt' => 1,
+    'bf' => 1,
+    'sf' => 1,
+    'it' => 1,
+    'textrm' => 1,   # Need to understand use
+    'texttt' => 1,   # Need to use correct macro!!
+    'textit' => 1,   # Need to use correct macro!!
+#    'textbf' => 1,   # Need to provide alternative more emphasis
+    #    'small' => 1,
+    'tiny' => 1,
+    'Huge' => 1,
+    #    'hspace' => 1,
+    'smallskip' => 1,
+    'medskip' => 1,
+    'vskip' => 1,
+    'vfill' => 1,
+    'vspace' => 1,
+    'hskip' => 1,
+    'parindent' => 1,
+    #    'par' => 1,    # Allow for use in ensuring paragraphs start correctly
+    'verb' => 1,
+    #    'mbox' => 1,   # Allow in math mode
+    'center' => 1,
+    'color' => 1,
+    #    'quad' => 1,
+    'hangindent' => 1,
+    'hangafter' => 1,
+    'char' => 1,
+    'relax' => 1,
+    'let' => 1,
+    'obeylines' => 1,
+    'def' => 1,
+    'let' => 1,
+    'displaystyle' => 1,
+    ';' => 1,
+    #    'rule' => 1,
+    ',' => 1,
+    'pageref' => 1,
+);
+
+foreach $file (@ARGV) {
+    # Check for special options
+    if ($file =~ /^-/) {
+        if ($file =~ /^--?addcmd=(.*)/) {
+            my $newname = $1;
+            $knownTeX{$newname} = 1;
+        }
+        elsif ($file =~ /^--?noquotechk/) {
+            $quotechk = 0;
+        }
+        elsif ($file =~ /^--?nodoublequotechk/) {
+            $dquotechk = 0;
+        }
+	elsif ($file =~ /^--?noeolspacechk/) {
+	    $elinespacechk = 0;
+	}
+        elsif ($file =~ /^--?help/ || $file =~ /^--?usage/) {
+            print "getlatex [--addcmd=name] [--noquotechk] [--usage] filenames\n";
+        }
+        elsif ($file =~ /^--?allowpageref/) {
+            delete $deprecatedTeX{'pageref'};
+            $knownTeX{'pageref'} = 1;
+        }
+        else {
+            print STDERR "Unrecognized argument $file\n";
+            $retcode = 1;
+        }
+        next;
+    }
+    # If the argument doesn't start with -, it is a file name.
+    open (FD, "<$file" ) || die "Could not open file $file\n";
+    $linecount = 0;
+    while (<FD>) {
+        $linecount++;
+        $inline = $_;
+        # Handle Exceptional lines
+        if ($inline =~ /%ALLOWLATEX%/) {
+            # This permits us to use LaTeX commands for rare cases
+            next;
+        }
+	# Handle commands for controlling processing
+	if ($inline =~ /%ALLOWLATEX:([A-Za-z]*)%/) {
+	    $knownTeX{$1} = 1;
+	    if (defined($deprecatedTeX{$1})) {
+		$deprecatedTeX{$1} = ();
+	    }
+	    next;
+	}
+        # Handle comments
+        if ($inline =~ /^(.*)(.)%/) {
+            $before = $1;
+            $char   = $2;
+            if ($2 ne '\\') {
+                $inline = $before . $char;
+            }
+        }
+        if ($inline =~ /^%/) { next; }
+        # Skip verbatim text
+        if ($inline =~ /\\begin\{[Vv]erbatim}/) {
+            do {
+                $inline = <FD>;
+                $linecount++;
+            } while (! ($inline =~ /\\end\{[Vv]erbatim}/) );
+            next;
+        }
+        # Skip mpicodeblock text
+        if ($inline =~ /\\begin\{mpicodeblock}/) {
+            do {
+                $inline = <FD>;
+                $linecount ++;
+            } while (! ($inline =~ /\\end\{mpicodeblock}/) );
+            next;
+        }
+        # Skip mpi-binding text
+        if ($inline =~ /\\begin\{mpi-binding}/) {
+            do {
+                $inline = <FD>;
+                $linecount ++;
+            } while (! ($inline =~ /\\end\{mpi-binding}/) );
+            next;
+        }
+        # Skip listing text
+        if ($inline =~ /\\begin\{lstlisting}/) {
+            do {
+                $inline = <FD>;
+                $linecount++;
+            } while (! ($inline =~ /\\end\{lstlisting}/) );
+            next;
+        }
+	# Special case for lstset - allow some commands within the argument
+	# to lstset.
+	if ($inline =~ /(.*)\\lstset\{.*\}(.)/) {
+	    # Remove the lstset. Note that this assumes lstset is the
+	    # only use of braces (since it might include a balanced set
+	    # of braces).
+	    $inline = $1 . $2;
+	}
+        # Look for raw ... in text (but not in verbatim)
+        if ($inline =~ /\.\.\./) {
+            # Don't bother removing the ... because it doesn't affect the other
+            # tests.  But do eliminate some command usage where ... is ok
+            $testline = $inline;
+            while ($testline =~ /(.*)\\[fc]type\{[^\}]+\}(.*)/) {
+                $testline = $1 . $2;
+            }
+            while ($testline =~ /(.*)\\[fc]func\{[^\}]+\}(.*)/) {
+                $testline = $1 . $2;
+            }
+            # FIXME: We may want to look for ldots in mpifunc, code, and
+	    # mpicode
+            while ($testline =~ /(.*)\\mpifunc\{[^\}]+\}(.*)/) {
+                $testline = $1 . $2;
+            }
+            while ($testline =~ /(.*)\\code\{[^\}]+\}(.*)/) {
+                $testline = $1 . $2;
+            }
+            while ($testline =~ /(.*)\\mpicode\{[^\}]+\}(.*)/) {
+                $testline = $1 . $2;
+            }
+            if ($testline =~ /\.\.\./) {
+                print "$file:$linecount: raw ... in text: $_";
+                $retcode = 1;
+            }
+        }
+        # Look for " MPI..."
+        $inline2 = $inline;
+        while ($inline2 =~ /^(.*) MPI(.)(.*)/) {
+            $before = $1;
+            $after1  = $2;
+            $after2  = $3;
+            # Check for formatted index entry: ...MPI...@...\MPI/...
+	    # This isn't perfect, but eliminates some false positives
+	    if ($inline2 =~ /MPI[^\{\}]*@[^\{\}]*\\MPI\//) {
+		; # this line is ok (probably)
+	    }
+	    elsif ($after1 ne "_" && $after1 ne "\\" && $after1 ne ":") {
+                print "$file:$linecount:Naked MPI: $_";
+                $retcode = 1;
+            }
+            $inline2 = $before . $after1 . $after2;
+        }
+	# Also check for a bare MPI at the end of a line
+        $inline2 = $inline;
+        if ($inline2 =~ /^.* MPI$/) {
+	    print "$file:$linecount:Naked MPI: $_";
+	    $retcode = 1;
+        }
+
+        # Its good to occassionally check for [ {\(]RMA as well, but
+        # that also generates false positives for indexing entries and
+        # correct uses of texorpdfstring
+        # For index entries, RMA should be followed with @, as in
+        # ... {foo RMA@foo \RMA/}. Though it is not perfect, look for
+	# before contains Exindex and after2 contains @
+        while ($inline2 =~ /^(.*) RMA(.)(.*)/) {
+            $before = $1;
+            $after1  = $2;
+            $after2  = $3;
+            if ($after1 ne "_" && $after1 ne "\\" && $after1 ne ":" && $after1 ne "@") {
+		if ((not ($before =~ /.*Exindex.*/)) || (not ($after2 =~ /.*\@.*/))) {
+		    print "$file:$linecount:Naked RMA: $_";
+		    $retcode = 1;
+		}
+            }
+            $inline2 = $before . $after1 . $after2;
+        }
+        # Look for " \ref{...}" but not ", \ref{...}"
+        $inline2 = $inline;
+        while ($inline2 =~ /^([^,]*) \\ref\{([^}]+)}(.*)/) {
+            $before = $1;
+            $after1  = $2;
+            $after2  = $3;
+            print "$file:$linecount: \\ref{$after1} (no tie): $_";
+            $retcode = 1;
+            $inline2 = $before . $after2;
+        }
+        # Look for " ~\ref{...}"
+        $inline2 = $inline;
+        while ($inline2 =~ /\s~\\ref\{([^}]+)}(.*)/) {
+            $after1  = $1;
+            $after2  = $2;
+            print "$file:$linecount: <space>~\\ref{$after1} (extra space before tie): $_";
+            $retcode = 1;
+            $inline2 = $after2;
+        }
+        # Look for " character (often an error)
+        # Permitted within mpi-binding (which should normally be skipped)
+        if ($dquotechk && /[^\\]\"/) {
+            # Allow " within \code{...}, avoid TeX comments
+            my $tmpline = $_;
+            $tmpline =~ s/\\code\{[^}]*}//g;
+            $tmpline =~ s/[^\\]%.*//g;
+            if ($tmpline =~ /[^\\]\"/) {
+                print "$file:$linecount:double quote character: $_";
+                $retcode = 1;
+            }
+        }
+        # Look for punctuation on the wrong side of a quote
+        if ($quotechk && /\'[\.,]/) {
+            # Note that quotes are sometimes used in the document
+            # incorrectly to mark an MPI term.  Those should be fixed instead.
+            print "$file:$linecount: check punctunation in quote: $_";
+            $retcode = 1;
+        }
+	# Look for vertical spacing added with \\[amount] (note that we flag
+	# use of vspace)
+	if ($elinespacechk && $inline =~ /\\\\\[([^\]]*)\]/) {
+	    print "$file:$linecount: improper vspace on \\\\: $1\n";
+	    $retcode = 1;
+	}
+	# Check for indexing macros used incorrectly
+	if (/^\\mpitermdefindex\{.*\} *$/) {
+	    print "$file:$linecount: indexing command without % at eol: $_";
+	    $retcode = 1;
+	}
+	if (/ \\mpitermdefindex\{.*\} *$/) {
+	    print "$file:$linecount: indexing command without % at eol: $_";
+	    $retcode = 1;
+	}
+        # Look for commands
+        while ($inline =~ /([^\\]*)\\([A-Za-z]*)(.*)/) {
+            $before = $1;
+            $cmd    = $2;
+            $after  = $3;
+            if ($cmd eq "begin" || $cmd eq "end") {
+                if ($after =~ /^(\{[-a-zA-Z0-9\*]+})(.*)/) {
+                    $envname = $1;
+                    $after   = $2;
+                    if ($envname eq "") {
+                        print "ERROR envname $_\n";
+                        $retcode = 1;
+                    }
+                    $cmd     .= $envname;
+                }
+            }
+            elsif ($cmd eq "") {
+                if ($after =~ /^(.)(.*)/) {
+                    $cmd .= $1;
+                    $after = $2;
+                }
+            }
+            #print "$cmd\n";
+            $inline = $before . $after;
+
+	    # Bug checking - terms must not be in both lists
+	    if (defined($knownTeX{$cmd}) && defined($deprecatedTeX{$cmd})) {
+		print "$file:$linecount: $cmd both known and deprecated in $_";
+	    }
+
+            if (!defined($knownTeX{$cmd}) && !defined($knownMPITeX{$cmd})) {
+                if (!defined($deprecatedTeX{$cmd}) &&
+                    !defined($deprecatedMPI{$cmd})) {
+                    print "$file:$linecount: Unlisted TeX Command used $cmd in $_";
+                    $retcode = 1;
+                }
+                elsif ($printDeprecated) {
+                    my $macroType = "unknown";
+                    if (defined($deprecatedMPI{$cmd})) { $macroType = "mpi-mac"; }
+                    elsif (defined($deprecatedTeX{$cmd})) { $macroType = "LaTeX"; }
+                    print "$file:$linecount: deprecated command ($macroType) $cmd used in $_";
+                    $retcode = 1;
+                }
+            }
+        }
+    }
+    close( FD );
+}
+
+exit $retcode;

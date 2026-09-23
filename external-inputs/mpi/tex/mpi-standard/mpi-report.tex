@@ -1,0 +1,361 @@
+
+% Version as of 25 March 1997 by Steve Huss-Lederman
+% Version as of 06 January 2008 by Rainer Keller (using pdflatex)
+% Version as of 19 February 2008 by Rolf Rabenseifner (combining 1.3+2.0)
+% Version as of October, 2010, by William Gropp (version 3.0)
+%
+% The top-level LaTeX file for MPI-2.1 and further versions.
+% latex this file to get complete document
+%
+% To print only one chapter, use either the MAKE-MPI-CHAPTER
+% utilities provided in this directory, or put an \includeonly{}
+% command in (see Lamport, page 76)
+%                       -- Steve Otto
+%
+%
+
+\documentclass[twoside,11pt,fleqn,letterpaper,pagesize]{scrbook}
+\usepackage{scrlayer-scrpage}
+\pagestyle{plain}
+\setcounter{tocdepth}{3}
+\marginparwidth 0pt
+\oddsidemargin=.25in
+\evensidemargin  .25in
+\marginparsep 0pt
+\topmargin=-.5in
+\textwidth=6.0in
+\textheight=9.0in
+% Keep the document parindent in a separate length so it is constant
+\newlength{\docparindent}
+\setlength{\docparindent}{2em}
+\parindent=\docparindent
+
+%\usepackage{xr}              % recommended for enabling references across
+                              % volumes, should we want an option for
+                              % a printable version. Also xr-hyper should
+                              % be considered
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{makeidx}         % Index generation, please see "man makeindex"
+                             % and README
+\usepackage{tabularx}        % Enhanced tabular environment
+
+\usepackage{multirow}
+
+% control of toc spacing
+% FOR KOMA, do not use tocloft
+%\usepackage{tocloft}
+% control of description environment
+\usepackage{enumitem}
+\usepackage{ifpdf}
+\usepackage{color}
+
+\input{mpi-macs.tex} % \include not valid before begin{document}
+
+% Use drafttrue while constructing the draft
+\drafttrue
+%\draftfalse
+% Use draftspectrue to include a text block about the draft specification
+\draftspectrue
+%\draftspecfalse
+
+% Use \bindinglabeltrue to issue a language label before every binding
+% definition
+\bindinglabeltrue
+
+%% scrbook customization
+\KOMAoptions{chapterprefix=true}
+\KOMAoptions{numbers=noendperiod}
+\KOMAoptions{headings=openright}
+\KOMAoptions{open=right}
+\setkomafont{disposition}{\normalcolor\rmfamily}
+\setkomafont{chapter}{\normalcolor\rmfamily\bfseries\huge}
+% \bfseries might be a better choice for the title
+\setkomafont{title}{\normalcolor\rmfamily\mdseries\Huge}
+\setkomafont{descriptionlabel}{\normalfont\bfseries}
+
+% 4.0 used \sffamily for paragraph and sections. 4.1 is using rmfamily
+% throughout
+%\setkomafont{paragraph}{\normalfont\sffamily}
+% 4.1 changed subsubsections to be in italics so that they stand out in the
+% text.
+\setkomafont{subsubsection}{\normalfont\itshape}
+
+% Control for the table of contents
+\setkomafont{chapterentry}{\normalcolor\rmfamily\bfseries}
+% Make section number wider (for section 11.10)
+% For pages over 1000, more space is needed.
+\DeclareTOCStyleEntry[numwidth=2.5em,pagenumberwidth=3em]{tocline}{section}
+\DeclareTOCStyleEntry[indent=4em,numwidth=3.75em,dynnumwidth=false,pagenumberwidth=3em]{tocline}{subsection}
+\DeclareTOCStyleEntry[indent=7.750em,dynnumwidth=false,pagenumberwidth=3em]{tocline}{subsubsection}
+\DeclareTOCStyleEntry[pagenumberwidth=3em,raggedpagenumber=false]{tocline}{chapter}
+
+\DeclareTOCStyleEntry[numwidth=3.00em,pagenumberwidth=3em,raggedpagenumber=false]{tocline}{table}
+\DeclareTOCStyleEntry[numwidth=3.00em,pagenumberwidth=3em,raggedpagenumber=false]{tocline}{figure}
+\DeclareTOCStyleEntry[numwidth=3.00em,pagenumberwidth=3em,raggedpagenumber=false]{tocline}{mpiexample}
+
+%% Require pdflatex, and use color for hyperlinks (replace those colors with
+%% black if needed)
+\typeout{  }
+\typeout{Loading PDF-Graphicx packages ... }
+\typeout{-------------------------------------------------------------------}
+
+\usepackage{graphicx}                   % graphics extension
+\DeclareGraphicsExtensions{.pdf}                % In case of using pdflatex set ext.
+\definecolor{mpidarkblue}{HTML}{003670}         % Dark blue in the MPI logo
+\usepackage[pdftex,                             % For PDF output
+              backref=page,
+              baseurl={http://www.mpi-forum.org},
+              colorlinks=true,
+              filecolor=black,
+              linkcolor=mpidarkblue,
+              citecolor=red,
+              urlcolor=blue,
+              hypertexnames=true,
+              bookmarksnumbered=true,
+              pdfauthor={MPI-Forum},
+              pdftitle={MPI: A Message-Passing Interface Standard},
+              pdfsubject={MPI: A Message-Passing Interface Standard},
+              pdfkeywords={Message Passing, MPI, Standard},
+              pdfpagelabels,
+              plainpages=false
+              ]{hyperref}      % For hyperlinks
+
+\ifdraft
+%% Include the draftwatermark package to add "DRAFT" across every page
+\usepackage{draftwatermark}
+\DraftwatermarkOptions{fontsize=11pt,scale=10,text={\textrm{DRAFT}}}
+% Using scale does not always work - sometimes it results in a far too
+% large ``Draft'' text.
+%\SetWatermarkScale{6}
+%% Make overfull boxes obvious.  Only in the draft mode, so that any
+%% lingering overfull boxes don't generate these rules in the margin for
+%% a released version of the standard.
+\overfullrule=5pt
+%% Uncomment the following line to have text appear in the output for each
+%% index entry.
+%\markindextrue
+\fi
+
+\makeindex
+
+\begin{document}
+
+% \setcounter{page}{1}  % obsolete due use of documenttype 'book'
+\pagenumbering{roman}
+
+\title{\MPI/:  A Message-Passing Interface Standard
+        \\ {\Large Version 5.1}
+\ifdraft
+        \\ {\large (Draft)}
+        \\ {\large Unofficial, for comment only}
+\fi
+}
+
+\author{Message Passing Interface Forum}
+
+\date{%
+%           \today is used for future drafts and standards, fixed dates are
+%           used for print versions done later
+\today \\
+%Month X, 20XX\\  % Use this format for Official voting date
+\vspace{0.2in}
+}
+
+\frontmatter  % included for use of documenttype 'book'
+\maketitle
+\pagestyle{plainwithlinenumbers}
+\setcounter{page}{2}
+\hfuzz=5pt
+
+\pdfbookmark[0]{Abstract}{Abstract}
+\include{chap-frontm/abstract-cpy}
+
+% a \newpage is done by \include
+\pdfbookmark[0]{History}{History}
+\include{chap-frontm/history}
+
+\newpage
+\pagestyle{empty} % \without linenumbers (This page can be used for filling-up in book printing)
+
+% Turning off \withlinenumbers here causes the contents pages to be
+% printed without the rulers
+\contentstrue
+\pagestyle{plain} % \withlinenumbers
+% Temporarily update the page style for the contents and list of tables/figures
+\cfoot*{\upshape\textrm{\normalsize\thepage}}
+\ofoot*{}
+\ifoot*{}
+
+%\phantomsection
+\pdfbookmark[0]{Contents}{Contents}
+%
+\tableofcontents
+
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Examples}
+\listofmpiexamples
+
+\contentsfalse
+\clearpage
+
+%\pagestyle{plainwithlinenumbers}
+% Update the page style for the front matter
+% Line numbers ruler
+\lefoot*{\hbox to 0pt{\hss\LineNumberRuler\hskip1.5pc}}
+\rofoot*{\hbox to 0pt{\hskip1.5pc\LineNumberRuler\hss}}
+% Mark the page as draft if in draftmode
+\ifdraft
+\refoot*{\drafttext}
+\lofoot*{\drafttext}
+\fi
+
+\include{chap-frontm/credits}
+
+% If there have been an odd number of pages, we need to eject another
+% page before we change the page counter
+\ifodd\value{page}\else\hbox{}\thispagestyle{empty}\newpage\fi
+
+\mainmatter  % included for use of documenttype 'book'
+%\setcounter{page}{1}     % obsolete due use of documenttype 'book'
+%\pagenumbering{arabic}   % obsolete due use of documenttype 'book'
+
+\clearpage
+\pagestyle{scrheadings}  %\withlinenumbers
+% headings and scrheadings with scrbook does not include pagenumbers
+% on the head. The following fixes that.
+\rehead{\upshape\textrm{\normalsize\thepage}}
+\lohead{\upshape\textrm{\normalsize\thepage}}
+% Line numbers ruler
+\lefoot{\hbox to 0pt{\hss\LineNumberRuler\hskip1.5pc}}
+\rofoot{\hbox to 0pt{\hskip1.5pc\LineNumberRuler\hss}}
+% Mark the page as draft if in draftmode
+\ifdraft
+\cfoot{\drafttext}
+% Clear left/right foot set above
+\refoot{}
+\lofoot{}
+\else
+\cfoot{}
+\fi
+
+% scrbook should start chapters on an odd page, but is not doing so.
+% KOMAoptions set above for this had no effect.
+\startchap
+\include{chap-intro/intro}
+
+\startchap
+\include{chap-terms/terms-2}
+
+\startchap
+\include{chap-pt2pt/pt2pt-rendered}
+
+\startchap
+\include{chap-part/part-rendered}
+
+\startchap
+\include{chap-datatypes/datatypes-rendered}
+
+\startchap
+\include{chap-coll/coll-rendered}
+
+\startchap
+\include{chap-context/context-rendered}
+
+\startchap
+\include{chap-topol/topol-rendered}
+
+\startchap
+\include{chap-inquiry/inquiry-rendered}
+
+\startchap
+\include{chap-misc/misc-2-rendered}
+
+\startchap
+\include{chap-dynamic/dynamic-2-rendered}
+
+\startchap
+\include{chap-one-side/one-side-2-rendered}
+
+\startchap
+\include{chap-ei/ei-2-rendered}
+
+\startchap
+\include{chap-io/io-2-rendered}
+
+\startchap
+\include{chap-tools/tools-3-rendered}
+
+\startchap
+\include{chap-ft/ft-rendered}
+
+\startchap
+\include{chap-deprecated/deprecated-rendered}
+
+\startchap
+\include{chap-removed/removed}
+
+\startchap
+\include{chap-semantic-changes/semantic-changes}
+
+% In the discussion, it was proposed to keep Language Bindings at the end
+\startchap
+\include{chap-binding/binding-2-rendered}
+
+\startchap
+\include{chap-abi/abi-rendered}
+
+\appendix
+\mpifoverloadStartInAnnex
+
+\cleardoublepage
+% Clear the binding names, since they aren't needed when each language
+% is gathered together. The special case still needs a text label,
+% which is given below.
+\def\IIbindingcname{}
+\def\IIbindingfname{}
+\def\IIbindingfnamespecial{The following procedure is not available with mpif.h:}
+\def\IIbindingfnewname{}
+
+\include{chap-appLang/appLang-Const-rendered}
+\include{appLang-C}
+\include{appLang-Fortran2008}
+\include{appLang-Fortran}
+
+\cleardoublepage
+\include{chap-changes/changes}
+
+\backmatter  % included for use of documenttype 'book'
+
+\newpage
+\phantomsection
+\sloppy
+\addcontentsline{toc}{chapter}{Bibliography}
+% Since we are not using the scrbook bibliography, we need to set the
+% running headers on the page
+\markboth{BIBLIOGRAPHY}{BIBLIOGRAPHY}
+\fixupbackrefformatting
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\ifdraft
+%% Turn off overfull rules for the indices, because these are mostly benign
+%% and very hard to fix.  These are often very long MPI terms.
+\overfullrule=0pt
+\fi
+\raggedright
+\sloppy \small
+\include{func-index}
+
+\end{document}

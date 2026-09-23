@@ -1,0 +1,494 @@
+.TH SHMEM_ALLTOALLS 3 "Open Source Software Solutions, Inc." "OpenSHMEM Library Documentation"
+./ sectionStart
+.SH NAME
+shmem_alltoalls \- 
+Exchanges a fixed amount of strided data blocks between all pairs
+of PEs participating in the collective routine.
+
+./ sectionEnd
+
+
+./ sectionStart
+.SH   SYNOPSIS
+./ sectionEnd
+
+
+./ sectionStart
+.SS C11:
+
+.B int
+.B shmem\_alltoalls(shmem_team_t
+.IB "team" ,
+.B TYPE
+.IB "*dest" ,
+.B const
+.B TYPE
+.IB "*source" ,
+.B ptrdiff_t
+.IB "dst" ,
+.B ptrdiff_t
+.IB "sst" ,
+.B size_t
+.I nelems
+.B );
+
+
+
+./ sectionEnd
+
+
+where TYPE is one of the standard RMA types specified by Table 1.
+./ sectionStart
+.SS C/C++:
+
+./ sectionEnd
+
+
+./ sectionStart
+
+.B int
+.B shmem\_TYPENAME\_alltoalls(shmem_team_t
+.IB "team" ,
+.B TYPE
+.IB "*dest" ,
+.B const
+.B TYPE
+.IB "*source" ,
+.B ptrdiff_t
+.IB "dst" ,
+.B ptrdiff_t
+.IB "sst" ,
+.B size_t
+.I nelems
+.B );
+
+
+
+./ sectionEnd
+
+
+where TYPE is one of the standard RMA types and has a corresponding TYPENAME specified by Table 1.
+./ sectionStart
+
+.B int
+.B shmem\_alltoallsmem(shmem_team_t
+.IB "team" ,
+.B void
+.IB "*dest" ,
+.B const
+.B void
+.IB "*source" ,
+.B ptrdiff_t
+.IB "dst" ,
+.B ptrdiff_t
+.IB "sst" ,
+.B size_t
+.I nelems
+.B );
+
+
+
+./ sectionEnd
+
+
+
+./ sectionStart
+.B ***************DEPRECATED***************
+./ sectionEnd
+
+./ sectionStart
+
+.B void
+.B shmem\_alltoalls32(void
+.IB "*dest" ,
+.B const
+.B void
+.IB "*source" ,
+.B ptrdiff_t
+.IB "dst" ,
+.B ptrdiff_t
+.IB "sst" ,
+.B size_t
+.IB "nelems" ,
+.B int
+.IB "PE_start" ,
+.B int
+.IB "logPE_stride" ,
+.B int
+.IB "PE_size" ,
+.B long
+.I *pSync
+.B );
+
+
+
+.B void
+.B shmem\_alltoalls64(void
+.IB "*dest" ,
+.B const
+.B void
+.IB "*source" ,
+.B ptrdiff_t
+.IB "dst" ,
+.B ptrdiff_t
+.IB "sst" ,
+.B size_t
+.IB "nelems" ,
+.B int
+.IB "PE_start" ,
+.B int
+.IB "logPE_stride" ,
+.B int
+.IB "PE_size" ,
+.B long
+.I *pSync
+.B );
+
+
+
+./ sectionEnd
+
+
+
+./ sectionStart
+.B ****************************************
+./ sectionEnd
+
+./ sectionStart
+
+.SH DESCRIPTION
+.SS Arguments
+.BR "IN " -
+.I team
+- A valid OpenSHMEM team handle.%
+
+
+
+.BR "OUT " -
+.I dest
+- Symmetric address of a data object large enough to receive 
+the combined total of 
+.I nelems
+elements from each PE in the
+active set.
+The type of 
+.I "dest"
+should match that implied in the SYNOPSIS section.
+
+
+.BR "IN " -
+.I source
+- Symmetric address of a data object that contains 
+.I nelems
+elements of data for each PE in the active set, ordered according to
+destination PE.
+The type of 
+.I "source"
+should match that implied in the SYNOPSIS section.
+
+
+.BR "IN " -
+.I dst
+- The stride between consecutive elements of the 
+.I "dest"
+data object. The stride is scaled by the element size. A
+value of 1 indicates contiguous data.
+
+
+.BR "IN " -
+.I sst
+- The stride between consecutive elements of the
+.I "source"
+data object. The stride is scaled by the element size.
+A value of 1 indicates contiguous data.
+
+
+.BR "IN " -
+.I nelems
+- 
+The number of elements to exchange for each PE.
+For 
+.BR "shmem\_alltoallsmem" ,
+elements are bytes;
+for 
+.B shmem\_alltoalls{32,64}
+, elements are 4 or 8 bytes,
+respectively.
+
+
+
+./ sectionStart
+.B ***************DEPRECATED***************
+./ sectionEnd
+
+
+
+.BR "IN " -
+.I PE\_start
+- The lowest PE number of the active set of
+PEs.
+
+
+.BR "IN " -
+.I logPE\_stride
+- The log (base 2) of the stride between
+consecutive PE numbers in the active set.
+
+
+.BR "IN " -
+.I PE\_size
+- The number of PEs in the active set.
+
+
+.BR "IN " -
+.I pSync
+- 
+Symmetric address of a work array of size at least SHMEM\_ALLTOALLS\_SYNC\_SIZE.
+
+./ sectionStart
+.B ****************************************
+./ sectionEnd
+
+./ sectionEnd
+
+
+./ sectionStart
+
+.SS API Description
+
+The 
+.B shmem\_alltoalls
+routines are collective routines.
+These routines are equivalent in functionality to the corresponding
+.B shmem\_alltoall
+routines except that they add explicit stride values
+for accessing the source and destination data arrays, whereas the array
+access in 
+.B shmem\_alltoall
+is always with a stride of 1.
+
+Each PE participating in the operation
+exchanges 
+.I nelems
+strided data elements
+with all other PEs participating in the operation.
+Both strides, 
+.I dst
+and 
+.I sst
+, must be greater
+than or equal to 1.
+
+The same 
+.I "dest"
+and 
+.I "source"
+arrays and same values for values of
+arguments 
+.I dst
+, 
+.I sst
+, 
+.I nelems
+must be passed by all PEs
+that participate in the collective.
+
+Given a PE 
+.I i
+that is the kth PE
+participating in the operation and a PE
+.I j
+that is the lth PE
+participating in the operation
+PE 
+.I i
+sends the 
+.I sst
+* lth block of the
+.I source
+data object to
+the 
+.I dst
+* kth block of the
+.I dest
+data object on
+PE 
+.IR "j" .
+
+
+See the description of 
+.B shmem\_alltoall
+for:
+
+.IP
+
+
+\(bu Data element sizes for the different sized and typed 
+.B shmem\_alltoalls
+variants.
+
+\(bu Rules for PE participation in the collective routine.
+
+\(bu The pre- and post-conditions for symmetric objects.
+
+\(bu Typing constraints for 
+.I "dest"
+and 
+.I "source"
+data objects.
+
+.RE
+
+
+./ sectionEnd
+
+
+
+./ sectionStart
+
+.SS Return Values
+
+Zero on successful local completion. Nonzero otherwise.
+
+./ sectionEnd
+
+
+
+./ sectionStart
+.SS Examples
+
+
+
+This  C/C++ example shows a 
+.B shmem\_int64\_alltoalls
+on two 64-bit integers among
+all PEs.
+
+.nf
+#include <inttypes.h>
+#include <shmem.h>
+#include <stdio.h>
+
+int main(void) {
+ shmem_init();
+ int mype = shmem_my_pe();
+ int npes = shmem_n_pes();
+
+ const int count = 2;
+ const ptrdiff_t dst = 2;
+ const ptrdiff_t sst = 3;
+ int64_t *dest = (int64_t *)shmem_malloc(count * dst * npes * sizeof(int64_t));
+ int64_t *source = (int64_t *)shmem_malloc(count * sst * npes * sizeof(int64_t));
+
+ /* assign source values */
+ for (int pe = 0; pe < npes; pe++) {
+   for (int i = 0; i < count; i++) {
+     source[sst * ((pe * count) + i)] = mype + pe;
+     dest[dst * ((pe * count) + i)] = 9999;
+   }
+ }
+ /* wait for all PEs to initialize source/dest */
+ shmem_team_sync(SHMEM_TEAM_WORLD);
+
+ /* alltoalls on all PES */
+ shmem_int64_alltoalls(SHMEM_TEAM_WORLD, dest, source, dst, sst, count);
+
+ /* verify results */
+ for (int pe = 0; pe < npes; pe++) {
+   for (int i = 0; i < count; i++) {
+     int j = dst * ((pe * count) + i);
+     if (dest[j] != pe + mype) {
+       printf("[%d] ERROR: dest[%d]=%" PRId64 ", should be %d\\n", mype, j, dest[j],
+              pe + mype);
+     }
+   }
+ }
+
+ shmem_free(dest);
+ shmem_free(source);
+ shmem_finalize();
+ return 0;
+}
+.fi
+
+
+
+
+
+.SS Table 1:
+Standard RMA Types and Names
+.TP 25
+.B \TYPE
+.B \TYPENAME
+.TP
+float
+float
+.TP
+double
+double
+.TP
+long double
+longdouble
+.TP
+char
+char
+.TP
+signed char
+schar
+.TP
+short
+short
+.TP
+int
+int
+.TP
+long
+long
+.TP
+long long
+longlong
+.TP
+unsigned char
+uchar
+.TP
+unsigned short
+ushort
+.TP
+unsigned int
+uint
+.TP
+unsigned long
+ulong
+.TP
+unsigned long long
+ulonglong
+.TP
+int8\_t
+int8
+.TP
+int16\_t
+int16
+.TP
+int32\_t
+int32
+.TP
+int64\_t
+int64
+.TP
+uint8\_t
+uint8
+.TP
+uint16\_t
+uint16
+.TP
+uint32\_t
+uint32
+.TP
+uint64\_t
+uint64
+.TP
+size\_t
+size
+.TP
+ptrdiff\_t
+ptrdiff

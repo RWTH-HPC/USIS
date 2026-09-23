@@ -1,0 +1,2316 @@
+{
+  "shmem_barrier_all": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Pure synchronization across every PE.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Pure synchronization across every PE.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Pure synchronization across every PE.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Pure synchronization across every PE.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine returns void: it reports no status at all, so both arrays are empty by construction.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'synchronization', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same barrier+quiet-combined reasoning as nvshmem_barrier_all -- OpenSHMEM's shmem_barrier_all carries the identical documented guarantee (completes all outstanding local and remote memory operations, not just a rendezvous).",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same barrier+quiet-combined reasoning as nvshmem_barrier_all -- OpenSHMEM's shmem_barrier_all carries the identical documented guarantee (completes all outstanding local and remote memory operations, not just a rendezvous).",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same barrier+quiet-combined reasoning as nvshmem_barrier_all -- OpenSHMEM's shmem_barrier_all carries the identical documented guarantee (completes all outstanding local and remote memory operations, not just a rendezvous).",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same barrier+quiet-combined reasoning as nvshmem_barrier_all -- OpenSHMEM's shmem_barrier_all carries the identical documented guarantee (completes all outstanding local and remote memory operations, not just a rendezvous).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same barrier+quiet-combined reasoning as nvshmem_barrier_all -- OpenSHMEM's shmem_barrier_all carries the identical documented guarantee (completes all outstanding local and remote memory operations, not just a rendezvous).",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same barrier+quiet-combined reasoning as nvshmem_barrier_all -- OpenSHMEM's shmem_barrier_all carries the identical documented guarantee (completes all outstanding local and remote memory operations, not just a rendezvous).",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'synchronization', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'synchronization', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No user-supplied buffer parameters, so the aliasing contract does not apply (the null case).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    }
+  },
+  "shmem_broadcast32": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Standard blocking SHMEM active-set collective.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Standard blocking SHMEM active-set collective.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Standard blocking SHMEM active-set collective.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Standard blocking SHMEM active-set collective.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.deprecated_in": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM 1.5 deprecated the fixed-size active-set collectives, shmem_broadcast32/64 among them, in favour of the team-based routines -- see the 'Active-set-based library constants and collectives' subsection of backmatter.tex's deprecation chapter, which lists this routine by name.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/backmatter.tex",
+      "value": "OpenSHMEM-1.5"
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] shmem_broadcast32 is part of the original OpenSHMEM active-set collective API and predates the changelog's own coverage (which starts at Version 1.1). Extract now correctly declines to answer here rather than guessing: shmem_broadcast.tex documents both this routine and the team-based shmem_broadcast that 1.5 ADDED, so the file-level changelog mapping previously reported 1.5 -- the release that deprecated this routine -- as the release that introduced it.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "OpenSHMEM-1.0"
+    },
+    "parameters[PE_root].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[PE_root].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=RANK.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[PE_root].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=RANK); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[PE_size].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[PE_size].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[PE_size].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[PE_start].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[PE_start].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=RANK.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[PE_start].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=RANK); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must be a symmetric-heap allocation: only symmetric allocations can participate in this operation, so the memory space is structurally guaranteed rather than a property of the argument -- see docs/schema/gpu-memory-semantics.md's own nvshmem_int_put row.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "symmetric_heap"
+    },
+    "parameters[logPE_stride].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[logPE_stride].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=SCALAR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[logPE_stride].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=SCALAR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[nelems].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[nelems].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[nelems].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[pSync].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[pSync].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[pSync].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must be a symmetric-heap allocation: only symmetric allocations can participate in this operation, so the memory space is structurally guaranteed rather than a property of the argument -- see docs/schema/gpu-memory-semantics.md's own nvshmem_int_put row.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "symmetric_heap"
+    },
+    "parameters[source].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must be a symmetric-heap allocation: only symmetric allocations can participate in this operation, so the memory space is structurally guaranteed rather than a property of the argument -- see docs/schema/gpu-memory-semantics.md's own nvshmem_int_put row.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "symmetric_heap"
+    },
+    "relationships.superseded_by": {
+      "method": "condensed",
+      "note": "OpenSHMEM's own deprecation appendix (\"Active-set-based library constants and collectives\"): the active-set collectives \"[have] been superseded by a more readable, flexible method for organizing and communicating between groups of PEs ... in favor of using collective operations with a team parameter\". shmem:shmem_{T}_broadcast is that team-based form. Collapsed {T}-family key, matching how the corpus stores this entry pre-Concretize.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/backmatter.tex",
+      "value": "shmem:shmem_{T}_broadcast"
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine returns void: it reports no status at all, so both arrays are empty by construction.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective.algorithm_class": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- classic SHMEM's active-set (PE_start/logPE_stride/PE_size) is the closest analog to a communicator/team scope, no inter-group concept. Note this active-set mechanism itself has no corresponding formal-layer slot either -- see workflow/formal/assign.py's binder_notes for this same function.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "one_to_all"
+    },
+    "semantics.collective.comm_scope": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- classic SHMEM's active-set (PE_start/logPE_stride/PE_size) is the closest analog to a communicator/team scope, no inter-group concept. Note this active-set mechanism itself has no corresponding formal-layer slot either -- see workflow/formal/assign.py's binder_notes for this same function.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "intracommunicator"
+    },
+    "semantics.collective.in_place": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- classic SHMEM's active-set (PE_start/logPE_stride/PE_size) is the closest analog to a communicator/team scope, no inter-group concept. Note this active-set mechanism itself has no corresponding formal-layer slot either -- see workflow/formal/assign.py's binder_notes for this same function.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.reduction_op": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- classic SHMEM's active-set (PE_start/logPE_stride/PE_size) is the closest analog to a communicator/team scope, no inter-group concept. Note this active-set mechanism itself has no corresponding formal-layer slot either -- see workflow/formal/assign.py's binder_notes for this same function.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.root_involved": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- classic SHMEM's active-set (PE_start/logPE_stride/PE_size) is the closest analog to a communicator/team scope, no inter-group concept. Note this active-set mechanism itself has no corresponding formal-layer slot either -- see workflow/formal/assign.py's binder_notes for this same function.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.collective.topology_aware": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- classic SHMEM's active-set (PE_start/logPE_stride/PE_size) is the closest analog to a communicator/team scope, no inter-group concept. Note this active-set mechanism itself has no corresponding formal-layer slot either -- see workflow/formal/assign.py's binder_notes for this same function.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.type": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- classic SHMEM's active-set (PE_start/logPE_stride/PE_size) is the closest analog to a communicator/team scope, no inter-group concept. Note this active-set mechanism itself has no corresponding formal-layer slot either -- see workflow/formal/assign.py's binder_notes for this same function.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "broadcast"
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same blocking-collective completion reasoning as nvshmem_int_broadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same blocking-collective completion reasoning as nvshmem_int_broadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same blocking-collective completion reasoning as nvshmem_int_broadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same blocking-collective completion reasoning as nvshmem_int_broadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same blocking-collective completion reasoning as nvshmem_int_broadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same blocking-collective completion reasoning as nvshmem_int_broadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This call defines no in-place mode, so its buffer arguments must not overlap. Mirrors semantics.collective.in_place = false / the absence of an in-place variant.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "forbidden"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "nelems >= 0",
+        "PE_root >= 0",
+        "PE_size >= 1",
+        "logPE_stride >= 0"
+      ]
+    }
+  },
+  "shmem_broadcastmem": {
+    "execution.completion": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] Completing rather than incomplete: the routine leaves no request or handle behind, and the team-based half of OpenSHMEM's own broadcast section states the dest object is updated upon return. There is no nonblocking team-based broadcast in OpenSHMEM 1.6.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "c"
+    },
+    "execution.locality": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] The call reads source on the root and updates dest on every PE in the team, so it touches both local and remote state.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] OpenSHMEM 1.6 defines a host API only -- it has no device-callable counterpart to NVSHMEM's __device__ routines, so the work is performed by the CPU. Matches execution.launch, which Classify already sets to cpu for every OpenSHMEM entry.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] Null is an answer, not a gap. This field's enumeration is MPI's THREAD_SINGLE/FUNNELED/SERIALIZED/MULTIPLE taxonomy; OpenSHMEM has its own SHMEM_THREAD_* levels and states no per-routine requirement for this call, so there is no value in the enumeration to give.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[PE_root].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] PE_root's validity depends on the team's size rather than on another argument's value; that dependency is stated in tool_integration.invariants as PE_root < comm_size(team).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[PE_root].constraints.value_range": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] 'PE numbering is relative to the team. The specified root PE must be a valid PE number for the team, between 0 and N-1, where N is the size of the team.' Phrased in the same words the other three broadcast entries use for this field.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[PE_root].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] Non-buffer parameter: a PE number, not memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] nelems gives the extent of both dest and source, and this field names a single partner argument. Left null rather than picking one of the two arbitrarily; the same choice as nvshmem_{T}_broadcast and shmem_broadcast32. The buffer/count relation is what parameters[].length is for, and Extract leaves it null for OpenSHMEM because the standard's tex carries no length annotation to read.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] An address argument has no ordered value range.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].memory_space": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] 'Symmetric address of destination data object.' Kept distinct from ordinary device or host memory because a symmetric address resolves to the same offset on every PE.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "symmetric_heap"
+    },
+    "parameters[nelems].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] nelems governs both buffer arguments; see parameters[dest].constraints.paired_with.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[nelems].constraints.value_range": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] 'The number of elements in source and dest arrays. For shmem_broadcastmem, elements are bytes.' A count of elements is non-negative; the standard states no upper bound.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "value >= 0"
+    },
+    "parameters[nelems].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] Non-buffer parameter: a count, not memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] Same reasoning as parameters[dest].constraints.paired_with.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] An address argument has no ordered value range.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].memory_space": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] 'Symmetric address of the source data object.'",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "symmetric_heap"
+    },
+    "parameters[team].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] The team's validity does not depend on another argument.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[team].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] An opaque handle has no ordered range to state; its one documented precondition, that it not be SHMEM_TEAM_INVALID, is carried in tool_integration.invariants where a non-range precondition belongs.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[team].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] Non-buffer parameter: a team handle, not memory the call reads or writes.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] OpenSHMEM 1.6 defines no nonblocking, persistent, neighborhood or device-side counterpart of the team-based broadcast, so every variant edge is an explicit null. The type-generic shmem_{T}_broadcast family is a sibling spelling of the same operation rather than a variant in any of these senses.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] 'For team-based broadcasts, zero on successful local completion; otherwise, nonzero.' The standard names no individual error constants, and its own notes say integer return codes are currently undefined, so 'nonzero' is the whole of what is specified.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": [
+        "nonzero"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] 'For team-based broadcasts, zero on successful local completion; otherwise, nonzero.'",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": [
+        "0"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] Exactly one of collective/point_to_point/one_sided/atomic is non-null, and for this call it is collective.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective.algorithm_class": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] The data-movement shape: source on the single PE named by PE_root is copied to dest on every PE participating in the collective.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "one_to_all"
+    },
+    "semantics.collective.comm_scope": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] The routine is defined over an OpenSHMEM team, which is a group of PEs within one program -- the intracommunicator case. OpenSHMEM defines no intercommunicator analogue.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "intracommunicator"
+    },
+    "semantics.collective.in_place": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] OpenSHMEM defines no distinguished in-place mode for broadcast: dest and source are separate arguments with no documented sentinel or aliasing form, unlike the reductions, where source and dest must be either the same symmetric address or fully disjoint.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": false
+    },
+    "semantics.collective.reduction_op": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] A broadcast takes no reduction operator; the signature has no operator argument and the description states a copy, not a combination.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": false
+    },
+    "semantics.collective.root_involved": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] A distinguished root plays an asymmetric role -- PE_root supplies the data all other PEs receive. Note the team-based form updates dest on *all* PEs including the root, where the deprecated active-set form updates it on all PEs other than the root; root_involved is true in both, since it asks about the asymmetric role, not about who is written.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": true
+    },
+    "semantics.collective.topology_aware": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] topology_aware asks whether this is one of MPI's neighborhood collectives, which move data along a graph attached to the communicator. That family is MPI-only; OpenSHMEM has no equivalent, so false here as for every non-MPI collective. It does not ask whether an implementation uses a topology-aware algorithm.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.type": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] 'Broadcasts a block of data from one PE to one or more destination PEs.'",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "broadcast"
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] 'Upon return from a team-based broadcast routine, the following are true for the local PE: ... The source data object may be safely reused.'",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "after_return"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] An ordinary data-movement call, not an ordering or completion primitive. fence_semantics is non-none only for shmem_fence (remote) and shmem_quiet (both).",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] 'Upon return from a team-based broadcast routine, the following are true for the local PE: the dest data object is updated.'",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "after_return"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] OpenSHMEM states no consistency model for this routine; the memory model applies to the RMA and AMO routines rather than to a blocking collective whose effects are complete on return.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] A blocking collective's contract is that every participant's result is in place by the time the call returns -- distinct from a put, whose remote side is only guaranteed after a quiet. Matches the value on mpi_bcast and nvshmem_{T}_broadcast; the deprecated shmem_broadcast32 carries it too.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "after_return"
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] Both buffer arguments are documented as 'Symmetric address of destination data object' and 'Symmetric address of the source data object', so the operation is confined to the symmetric heap.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": true
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] Exactly one of collective/point_to_point/one_sided/atomic is non-null, and for this call it is collective. A broadcast is not an RMA operation even though OpenSHMEM's data model is one-sided elsewhere.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] Exactly one of collective/point_to_point/one_sided/atomic is non-null, and for this call it is collective.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] Mirrors semantics.collective.in_place=false: the standard documents no form in which dest and source may coincide, so an overlap between them is a defect rather than the calling convention.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": "forbidden"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-08-09] Every field of this entry is fixed by the symbol alone. Unlike CUDA-aware MPI's buffer, an OpenSHMEM symmetric address is a symmetric address at every call site.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "condensed",
+      "note": "[added 2026-08-09] The symbol-level preconditions the section states: 'If team compares equal to SHMEM_TEAM_INVALID or is otherwise invalid, the behavior is undefined', and 'The specified root PE must be a valid PE number for the team, between 0 and N-1, where N is the size of the team'. Written in the reference grammar, which permits bare parameter names, bare PPM constants and comm_size() in this field.",
+      "retrieved": null,
+      "source_url": "external-inputs/shmem/tex/shmem-standard/content/shmem_broadcast.tex",
+      "value": [
+        "team != SHMEM_TEAM_INVALID",
+        "nelems >= 0",
+        "PE_root >= 0",
+        "PE_root < comm_size(team)"
+      ]
+    }
+  },
+  "shmem_finalize": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_init.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "f"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_init.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_init.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_init.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine returns void: it reports no status at all, so both arrays are empty by construction.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_init (null).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No user-supplied buffer parameters, so the aliasing contract does not apply (the null case).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    }
+  },
+  "shmem_free": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "f"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[ptr].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[ptr].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[ptr].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must be a symmetric-heap allocation: only symmetric allocations can participate in this operation, so the memory space is structurally guaranteed rather than a property of the argument -- see docs/schema/gpu-memory-semantics.md's own nvshmem_int_put row.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "symmetric_heap"
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine returns void: it reports no status at all, so both arrays are empty by construction.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This call defines no in-place mode, so its buffer arguments must not overlap. Mirrors semantics.collective.in_place = false / the absence of an in-place variant.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "forbidden"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    }
+  },
+  "shmem_init": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Process-lifetime singleton, same reasoning as mpi_init.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Process-lifetime singleton, same reasoning as mpi_init.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Process-lifetime singleton, same reasoning as mpi_init.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Process-lifetime singleton, same reasoning as mpi_init.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine returns void: it reports no status at all, so both arrays are empty by construction.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Process-lifetime singleton, no buffer -- same reasoning as mpi_init (null).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No user-supplied buffer parameters, so the aliasing contract does not apply (the null case).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    }
+  },
+  "shmem_malloc": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation is documented as collective across all PEs, same as NVSHMEM's malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation is documented as collective across all PEs, same as NVSHMEM's malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation is documented as collective across all PEs, same as NVSHMEM's malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation is documented as collective across all PEs, same as NVSHMEM's malloc.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[size].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[size].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[size].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine's return is a RESULT, not a status code, so it has no error tokens; failure is reported out of band (or not at all).",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation, collective across all PEs -- same profile as nvshmem_free's deallocation counterpart, symmetric_heap=True is the defining property.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation, collective across all PEs -- same profile as nvshmem_free's deallocation counterpart, symmetric_heap=True is the defining property.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation, collective across all PEs -- same profile as nvshmem_free's deallocation counterpart, symmetric_heap=True is the defining property.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation, collective across all PEs -- same profile as nvshmem_free's deallocation counterpart, symmetric_heap=True is the defining property.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation, collective across all PEs -- same profile as nvshmem_free's deallocation counterpart, symmetric_heap=True is the defining property.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric-heap allocation, collective across all PEs -- same profile as nvshmem_free's deallocation counterpart, symmetric_heap=True is the defining property.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No user-supplied buffer parameters, so the aliasing contract does not apply (the null case).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "size >= 0"
+      ]
+    }
+  },
+  "shmem_quiet": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Waits for completion of all of the caller's own outstanding operations -- distinct from shmem_fence, which only orders subsequent operations without waiting for prior ones to complete. Not required to be called by every PE together.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Waits for completion of all of the caller's own outstanding operations -- distinct from shmem_fence, which only orders subsequent operations without waiting for prior ones to complete. Not required to be called by every PE together.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Waits for completion of all of the caller's own outstanding operations -- distinct from shmem_fence, which only orders subsequent operations without waiting for prior ones to complete. Not required to be called by every PE together.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Waits for completion of all of the caller's own outstanding operations -- distinct from shmem_fence, which only orders subsequent operations without waiting for prior ones to complete. Not required to be called by every PE together.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine returns void: it reports no status at all, so both arrays are empty by construction.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'synchronization', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No data buffer of its own -- vacuous buffer_reuse default. fence_semantics='remote' reflects shmem_quiet's defining property: unlike fence (which only orders), quiet actually waits for completion of all the caller's outstanding operations' REMOTE effects specifically (local effects are already guaranteed complete by the operations themselves in this model).",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[corrected 2026-07-21 field audit] shmem_quiet waits for completion of all outstanding operations issued by the calling PE -- both the local side (source buffers reusable) and the remote side (updates visible at their targets). Under the field's meaning ('which side(s) this operation actually completes') that is `both`, not `remote`.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No data buffer of its own -- vacuous buffer_reuse default. fence_semantics='remote' reflects shmem_quiet's defining property: unlike fence (which only orders), quiet actually waits for completion of all the caller's outstanding operations' REMOTE effects specifically (local effects are already guaranteed complete by the operations themselves in this model).",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No data buffer of its own -- vacuous buffer_reuse default. fence_semantics='remote' reflects shmem_quiet's defining property: unlike fence (which only orders), quiet actually waits for completion of all the caller's outstanding operations' REMOTE effects specifically (local effects are already guaranteed complete by the operations themselves in this model).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No data buffer of its own -- vacuous buffer_reuse default. fence_semantics='remote' reflects shmem_quiet's defining property: unlike fence (which only orders), quiet actually waits for completion of all the caller's outstanding operations' REMOTE effects specifically (local effects are already guaranteed complete by the operations themselves in this model).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No data buffer of its own -- vacuous buffer_reuse default. fence_semantics='remote' reflects shmem_quiet's defining property: unlike fence (which only orders), quiet actually waits for completion of all the caller's outstanding operations' REMOTE effects specifically (local effects are already guaranteed complete by the operations themselves in this model).",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'synchronization', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'synchronization', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No user-supplied buffer parameters, so the aliasing contract does not apply (the null case).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    }
+  },
+  "shmem_{T}_get": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_int_put.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_int_put.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_int_put.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with shmem_int_put.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must be a symmetric-heap allocation: only symmetric allocations can participate in this operation, so the memory space is structurally guaranteed rather than a property of the argument -- see docs/schema/gpu-memory-semantics.md's own nvshmem_int_put row.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "symmetric_heap"
+    },
+    "parameters[nelems].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[nelems].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[nelems].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[pe].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[pe].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=RANK.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[pe].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=RANK); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must be a symmetric-heap allocation: only symmetric allocations can participate in this operation, so the memory space is structurally guaranteed rather than a property of the argument -- see docs/schema/gpu-memory-semantics.md's own nvshmem_int_put row.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "symmetric_heap"
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine returns void: it reports no status at all, so both arrays are empty by construction.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'one_sided', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_get.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_get.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_get.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_get.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_get.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_get.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.one_sided.epoch_type": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as shmem_int_put.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "implicit"
+    },
+    "semantics.one_sided.operation": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as shmem_int_put.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "get"
+    },
+    "semantics.one_sided.ordering": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as shmem_int_put.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'one_sided', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This call defines no in-place mode, so its buffer arguments must not overlap. Mirrors semantics.collective.in_place = false / the absence of an in-place variant.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "forbidden"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "nelems >= 0",
+        "pe >= 0",
+        "pe < comm_size(all_pes)"
+      ]
+    }
+  },
+  "shmem_{T}_put": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] runs_on='cpu' here, deliberately distinct from NVSHMEM's 'gpu' -- classic OpenSHMEM targets CPU-resident symmetric memory, not GPU memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] runs_on='cpu' here, deliberately distinct from NVSHMEM's 'gpu' -- classic OpenSHMEM targets CPU-resident symmetric memory, not GPU memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] runs_on='cpu' here, deliberately distinct from NVSHMEM's 'gpu' -- classic OpenSHMEM targets CPU-resident symmetric memory, not GPU memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] runs_on='cpu' here, deliberately distinct from NVSHMEM's 'gpu' -- classic OpenSHMEM targets CPU-resident symmetric memory, not GPU memory.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[dest].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must be a symmetric-heap allocation: only symmetric allocations can participate in this operation, so the memory space is structurally guaranteed rather than a property of the argument -- see docs/schema/gpu-memory-semantics.md's own nvshmem_int_put row.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "symmetric_heap"
+    },
+    "parameters[nelems].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[nelems].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[nelems].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[pe].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[pe].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=RANK.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[pe].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=RANK); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[source].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must be a symmetric-heap allocation: only symmetric allocations can participate in this operation, so the memory space is structurally guaranteed rather than a property of the argument -- see docs/schema/gpu-memory-semantics.md's own nvshmem_int_put row.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "symmetric_heap"
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine returns void: it reports no status at all, so both arrays are empty by construction.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'one_sided', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same local-completion/remote-visibility reasoning as nvshmem_int_put -- classic OpenSHMEM's put has the identical local-complete-on-return, remote-needs-fence/quiet contract.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same local-completion/remote-visibility reasoning as nvshmem_int_put -- classic OpenSHMEM's put has the identical local-complete-on-return, remote-needs-fence/quiet contract.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same local-completion/remote-visibility reasoning as nvshmem_int_put -- classic OpenSHMEM's put has the identical local-complete-on-return, remote-needs-fence/quiet contract.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same local-completion/remote-visibility reasoning as nvshmem_int_put -- classic OpenSHMEM's put has the identical local-complete-on-return, remote-needs-fence/quiet contract.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[corrected 2026-07-21 field audit] A blocking put's remote side is NOT complete when the call returns -- return only guarantees the local source buffer is reusable. Remote completion is guaranteed by a subsequent quiet (or a barrier, which implies one), which is exactly what the enum's `after_quiet` value means. The previous `null` said this operation has no remote side at all, which inverts the meaning of a put and would let a verifier conclude the target's memory is never written.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_quiet"
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same local-completion/remote-visibility reasoning as nvshmem_int_put -- classic OpenSHMEM's put has the identical local-complete-on-return, remote-needs-fence/quiet contract.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.one_sided.epoch_type": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same epoch/ordering reasoning as nvshmem_int_put -- ordering managed via shmem_quiet/fence, not an explicit epoch.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "implicit"
+    },
+    "semantics.one_sided.operation": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same epoch/ordering reasoning as nvshmem_int_put -- ordering managed via shmem_quiet/fence, not an explicit epoch.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "put"
+    },
+    "semantics.one_sided.ordering": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same epoch/ordering reasoning as nvshmem_int_put -- ordering managed via shmem_quiet/fence, not an explicit epoch.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'one_sided', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This call defines no in-place mode, so its buffer arguments must not overlap. Mirrors semantics.collective.in_place = false / the absence of an in-place variant.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "forbidden"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "nelems >= 0",
+        "pe >= 0",
+        "pe < comm_size(all_pes)"
+      ]
+    }
+  },
+  "shmem_{T}_wait_until": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] OpenSHMEM is a host-side API: every routine in it is callable only from host code, and neither the standard nor the headers carry a __host__/__device__-style qualifier for a classifier to read (which is why this was left null mechanically). Recorded here so `null` stays reserved for genuinely unknown, rather than standing in for a fact that is not in doubt.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[cmp].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[cmp].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=SCALAR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[cmp].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=SCALAR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[cmp_value].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[cmp_value].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=SCALAR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[cmp_value].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=SCALAR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[ivar].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[ivar].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[ivar].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must be a symmetric-heap allocation: only symmetric allocations can participate in this operation, so the memory space is structurally guaranteed rather than a property of the argument -- see docs/schema/gpu-memory-semantics.md's own nvshmem_int_put row.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "symmetric_heap"
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. This routine returns void: it reports no status at all, so both arrays are empty by construction.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape. See possible_errors.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'synchronization', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_return"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same reasoning as nvshmem_int_wait_until.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'synchronization', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'synchronization', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This call defines no in-place mode, so its buffer arguments must not overlap. Mirrors semantics.collective.in_place = false / the absence of an in-place variant.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "forbidden"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    }
+  }
+}

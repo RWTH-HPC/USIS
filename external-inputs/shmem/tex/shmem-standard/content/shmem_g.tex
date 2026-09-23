@@ -1,0 +1,47 @@
+\apisummary{
+    Copies one data item from a remote \ac{PE}
+}
+
+\begin{apidefinition}
+
+\begin{C11synopsis}
+TYPE @\FuncDecl{shmem\_g}@(const TYPE *source, int pe);
+TYPE @\FuncDecl{shmem\_g}@(shmem_ctx_t ctx, const TYPE *source, int pe);
+\end{C11synopsis}
+where \TYPE{} is one of the standard \ac{RMA} types specified by Table \ref{stdrmatypes}.
+
+\begin{Csynopsis}
+TYPE @\FuncDecl{shmem\_\FuncParam{TYPENAME}\_g}@(const TYPE *source, int pe);
+TYPE @\FuncDecl{shmem\_ctx\_\FuncParam{TYPENAME}\_g}@(shmem_ctx_t ctx, const TYPE *source, int pe);
+\end{Csynopsis}
+where \TYPE{} is one of the standard \ac{RMA} types and has a corresponding \TYPENAME{} specified by Table \ref{stdrmatypes}.
+
+\begin{apiarguments}
+  \apiargument{IN}{ctx}{A context handle specifying the context on which to perform the operation.
+    When this argument is not provided, the operation is performed on
+    the default context.}
+  \apiargument{IN}{source}{Symmetric address of the source data object.
+    The type of \source{} should match that implied in the SYNOPSIS section.}
+  \apiargument{IN}{pe}{\ac{PE} number of the remote \ac{PE} on which \VAR{source} resides 
+    relative to the team associated with the given \VAR{ctx} when provided, or the 
+    default context otherwise.}
+\end{apiarguments}
+
+\apidescription{
+  These routines provide a very low latency get capability for single elements
+  of most basic types.
+}
+
+\apireturnvalues{
+    Returns a single element of type specified in the synopsis.
+}
+
+\begin{apiexamples}
+
+\apicexample
+    {The following \FUNC{shmem\_g} example is for \Cstd[11] programs:}
+    {./example_code/shmem_g_example.c}
+    {}
+\end{apiexamples}
+
+\end{apidefinition}

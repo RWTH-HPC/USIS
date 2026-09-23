@@ -1,0 +1,475 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/RWTH-HPC/USIS/v0.1.0/curated/schemas/api-schema.json",
+  "title": "Unified Semantic Interface Specification (v0.1.0)",
+  "description": "A single JSON schema shared by every parallel programming model (PPM): MPI, NCCL, NVSHMEM, OpenSHMEM, OpenMP, CUDA. Each top-level key is a model-qualified function identifier of the form 'model:function_key' (e.g. 'mpi:mpi_bcast'). Every entry has the same eight top-level sections regardless of which PPM it describes; a field that does not apply to a given model/operation is explicitly null, never omitted. In a final entry a null means 'not applicable' or 'implementation-defined (see tool_integration.context_dependencies)', never 'not yet computed'. semantics.formal (participants/data_flow/sync/handle_lifecycle) carries operational data-flow and synchronization detail, and parameters[].memory_space says where each buffer lives. The closed enums (identity.api_group, parameters[].kind, ...) are deliberately incomplete: null there means no fitting value, and a value is added when a real entry needs it. $defs/shape_template is an authoring-time-only construct (see $comment) and is never referenced by a shipped entry.",
+  "$comment": "Two-schema workflow: authored source documents may express semantics.formal as {shape_ref, bindings, extra?} against a companion shapes.json (not validated by this file; a relaxed entries-authored schema for them is planned but not yet written, so an assignment is checked by validating its expansion). A build step (the expander) resolves shape_ref+bindings against shapes.json and writes out the fully inlined semantics.formal shown in $defs/formal below. THIS schema validates only the post-expansion, shipped form: semantics.formal is always either null or a fully inlined object, and shape_ref/bindings/extra never appear in a validated instance. $defs/shape_template is included here purely as a shared reference definition for tooling that needs to validate shapes.json itself; it is not reachable from $defs/entry.",
+  "type": "object",
+  "patternProperties": {
+    "^[a-z0-9]+:[A-Za-z0-9_{}]+$": { "$ref": "#/$defs/entry" }
+  },
+  "additionalProperties": false,
+  "minProperties": 1,
+  "$defs": {
+
+    "entry": {
+      "type": "object",
+      "title": "PPM Function Entry",
+      "description": "Exactly eight top-level sections, always present.",
+      "required": ["identity", "bindings", "execution", "semantics", "parameters", "return", "tool_integration", "relationships"],
+      "additionalProperties": false,
+      "properties": {
+        "identity":         { "$ref": "#/$defs/identity" },
+        "bindings":         { "$ref": "#/$defs/bindings" },
+        "execution":        { "$ref": "#/$defs/execution" },
+        "semantics":        { "$ref": "#/$defs/semantics" },
+        "parameters":       { "type": "array", "items": { "$ref": "#/$defs/parameter" } },
+        "return":           { "$ref": "#/$defs/return" },
+        "tool_integration": { "$ref": "#/$defs/tool_integration" },
+        "relationships":    { "$ref": "#/$defs/relationships" }
+      }
+    },
+
+    "identity": {
+      "type": "object",
+      "description": "Provenance and classification.",
+      "required": ["model", "name", "api_group", "since", "deprecated_in", "standard_refs", "desc", "type_family"],
+      "additionalProperties": false,
+      "properties": {
+        "model":          { "type": "string", "enum": ["mpi", "nccl", "nvshmem", "shmem", "openmp", "cuda"], "description": "Which PPM this entry belongs to." },
+        "name":           { "type": "string", "description": "Canonical function name; may contain {T} placeholder when type_family is non-null." },
+        "api_group":      { "type": ["string", "null"], "enum": ["collective", "point_to_point", "one_sided", "query", "management", "synchronization", "io", null], "description": "'synchronization' covers local completion/ordering primitives (mpi_wait, nvshmem_fence, shmem_quiet, *_wait_until) that are neither inquiries nor lifecycle calls; 'io' covers the mpi_file_* family. Nullable — null = no fitting category in the enum (e.g. mpi_pack-style local data manipulation); the enum is deliberately incomplete and grows the grounded way. In a final entry null never means 'not yet classified'." },
+        "since":          { "type": ["string", "null"], "pattern": "^[A-Za-z][A-Za-z0-9]*-[0-9]+(\\.[0-9]+)*$", "description": "Version this function was introduced, in the form '<PPM>-<version>' enforced by the pattern, e.g. 'MPI-1.0', 'NVSHMEM-2.0'. Null if unknown." },
+        "deprecated_in":  { "type": ["string", "null"], "pattern": "^[A-Za-z][A-Za-z0-9]*-[0-9]+(\\.[0-9]+)*$", "description": "Version this function was deprecated, as a version string — never a boolean. Null if not deprecated. Same '<PPM>-<version>' pattern as identity.since." },
+        "standard_refs":  { "type": "array", "items": { "type": "string" }, "description": "Citations into the governing standard/spec, e.g. ['MPI-4.1 §5.4.2']." },
+        "desc":           { "type": ["string", "null"], "description": "One-sentence plain-English description of what the function does." },
+        "type_family":    { "type": ["array", "null"], "items": { "type": "string" }, "description": "Concrete type suffixes this entry is generic over, e.g. [\"int\",\"long\",\"float\"]. The operation axis (add vs. fetch vs. cswap) does NOT collapse into this." }
+      }
+    },
+
+    "binding_c": {
+      "type": "object",
+      "description": "C binding metadata for this function.",
+      "required": ["expressible", "header", "signature"],
+      "additionalProperties": false,
+      "properties": {
+        "expressible": { "type": "boolean", "description": "Whether this call can be expressed in C at all." },
+        "header":      { "type": "string", "description": "Header this symbol is declared in, e.g. 'mpi.h', 'nccl.h'." },
+        "signature":   { "type": ["string", "null"], "description": "Full C prototype. Null exactly when expressible is false -- a call the standard does not express in C has no C prototype to state (MPI_Sizeof and MPI_F_sync_reg, the two Fortran-only routines in the corpus; apis.json c_expressible=false)." }
+      }
+    },
+    "binding_fortran90": {
+      "type": "object",
+      "description": "Fortran 90 binding metadata for this function.",
+      "required": ["name", "expressible", "use_colons", "index_overload", "not_with_mpif"],
+      "additionalProperties": false,
+      "properties": {
+        "name":           { "type": "string", "description": "Fortran 90 symbol name, e.g. 'MPI_COMM_RANK'." },
+        "expressible":    { "type": "boolean", "description": "Whether this call can be expressed in Fortran 90 at all." },
+        "use_colons":     { "type": "boolean", "description": "Whether array arguments use ':' assumed-shape declarators in this binding." },
+        "index_overload": { "type": ["boolean", "null"], "description": "Whether an index/rank-overloaded form exists. Null if not applicable." },
+        "not_with_mpif":  { "type": "boolean", "description": "Whether this symbol is unavailable when using the mpif.h include form (as opposed to the mpi module)." }
+      }
+    },
+    "binding_fortran08": {
+      "type": "object",
+      "description": "Fortran 2008 (mpi_f08-style) binding metadata for this function.",
+      "required": ["name", "expressible", "abstract_interface", "module"],
+      "additionalProperties": false,
+      "properties": {
+        "name":               { "type": "string", "description": "Fortran 2008 symbol name, e.g. 'MPI_Comm_rank'." },
+        "expressible":        { "type": "boolean", "description": "Whether this call can be expressed in Fortran 2008 at all." },
+        "abstract_interface": { "type": "boolean", "description": "Whether this symbol has an abstract interface declaration (used for procedure arguments)." },
+        "module":             { "type": "string", "description": "Fortran module this symbol is declared in, e.g. 'mpi_f08'." }
+      }
+    },
+    "binding_lis": {
+      "type": "object",
+      "description": "Large-count interface (LIS) binding metadata — the MPI-4 large-count variant of this function (MPI_Count-sized arguments in place of int).",
+      "required": ["expressible"],
+      "additionalProperties": false,
+      "properties": { "expressible": { "type": "boolean", "description": "Whether a large-count variant of this call exists." } }
+    },
+    "binding_cpp": {
+      "type": "object",
+      "description": "C++ binding metadata for this function, if a dedicated C++ binding exists.",
+      "required": ["expressible", "class_method"],
+      "additionalProperties": false,
+      "properties": {
+        "expressible":  { "type": "boolean", "description": "Whether this call can be expressed in C++ at all." },
+        "class_method": { "type": ["string", "null"], "description": "Qualified C++ method name, e.g. 'Comm::Send'. Null if no dedicated C++ binding exists." }
+      }
+    },
+
+    "bindings": {
+      "type": "object",
+      "description": "One named sub-object per language; null = unsupported by this PPM (never omitted).",
+      "required": ["c", "fortran90", "fortran08", "lis", "cpp"],
+      "additionalProperties": false,
+      "properties": {
+        "c":         { "anyOf": [{ "$ref": "#/$defs/binding_c" },         { "type": "null" }] },
+        "fortran90": { "anyOf": [{ "$ref": "#/$defs/binding_fortran90" }, { "type": "null" }] },
+        "fortran08": { "anyOf": [{ "$ref": "#/$defs/binding_fortran08" }, { "type": "null" }] },
+        "lis":       { "anyOf": [{ "$ref": "#/$defs/binding_lis" },       { "type": "null" }] },
+        "cpp":       { "anyOf": [{ "$ref": "#/$defs/binding_cpp" },       { "type": "null" }] }
+      }
+    },
+
+    "execution": {
+      "type": "object",
+      "description": "When/where the call executes. All 11 fields present in every entry.",
+      "required": ["blocking", "execute_once", "collective", "thread_safety", "launch", "runs_on", "gpu_scope", "stages", "locality", "completion", "procedure_class"],
+      "additionalProperties": false,
+      "properties": {
+        "blocking":         { "type": "boolean", "description": "Blocks until locally complete? Refers to the immediate caller's own context. When not fixed by the symbol alone, value here is the default case; see tool_integration.context_dependencies." },
+        "execute_once":     { "type": "boolean", "description": "True ONLY for process-lifetime singleton calls the standard forbids repeating -- across the six models covered, exactly MPI_Init, MPI_Init_thread and MPI_Finalize. NOT for ordinary collectives, and NOT merely for being an init/finalize routine: OpenSHMEM and NVSHMEM explicitly permit repeated initialization, so theirs are false. See docs/schema/field-semantics.md." },
+        "collective":       { "type": "boolean", "description": "True if every process/PE/thread in the team must call this, independent of operation_class." },
+        "thread_safety":    { "type": ["string", "null"], "enum": ["single", "funneled", "serialized", "multiple", null], "description": "Minimum MPI_THREAD_* level this call requires, using MPI's own taxonomy (single/funneled/serialized/multiple)." },
+        "launch":           { "type": ["string", "null"], "enum": ["cpu", "gpu", "cpu+gpu", null], "description": "Where in program text this may be issued from, independent of runs_on (what hardware performs the work). Null means genuinely undetermined, NOT 'the source carried no qualifier to read' -- MPI and OpenSHMEM are host-side APIs and say cpu even though neither standard has a __host__/__device__-style marker. See docs/schema/field-semantics.md." },
+        "runs_on":          { "type": ["string", "null"], "enum": ["cpu", "gpu", "cpu+gpu", null], "description": "What hardware actually performs the work, independent of launch." },
+        "gpu_scope":        { "type": ["string", "null"], "enum": ["thread", "warp", "block", "device", null], "description": "For GPU-callable calls: which CUDA execution scope must call this together (thread = per-thread, block = every thread in the block, etc.). Null if not GPU-callable." },
+        "stages":           { "type": ["array", "null"], "items": { "type": "string", "enum": ["i", "s", "c", "f"] }, "description": "MPI-4 procedure taxonomy: initialization/starting/completion/freeing. A call performs at least part of each indicated stage." },
+        "locality":         { "type": ["string", "null"], "enum": ["local", "remote", "both", null], "description": "Whether the call touches only local state, a remote PE's/rank's state, or both." },
+        "completion":       { "type": ["string", "null"], "enum": ["ic", "c", "f", "stream_ordered", null], "description": "incomplete (leaves request) | completing | freeing | stream_ordered (completion implied by CUDA-stream order, no request-like handle — NCCL/NVSHMEM host calls; observable only via the caller's own stream/event synchronization)." },
+        "procedure_class":  { "type": ["string", "null"], "enum": ["b-op", "nb-op", "p-op", "pp-op", null], "description": "Blocking/persistence category — 'b-op' (blocking) | 'nb-op' (nonblocking) | 'p-op' (persistent) | 'pp-op' (persistent partitioned). Distinct from semantics.atomic.operation / semantics.collective.type, which describe the data operation rather than this call-shape axis." }
+      }
+    },
+
+    "semantics_collective": {
+      "type": "object",
+      "description": "Non-null only when semantics.operation_class = 'collective'.",
+      "required": ["type", "root_involved", "in_place", "comm_scope", "algorithm_class", "reduction_op", "topology_aware"],
+      "additionalProperties": false,
+      "properties": {
+        "type":            { "type": "string", "enum": ["broadcast", "reduce", "allreduce", "scatter", "gather", "allgather", "alltoall", "scan", "reduce_scatter"], "description": "The specific collective pattern (extensible)." },
+        "root_involved":   { "type": "boolean", "description": "Does a root process/PE play a special role?" },
+        "in_place":        { "type": "boolean", "description": "Does the PPM define a DISTINGUISHED in-place mode for this call -- a documented way to make the send and receive buffers coincide? Not 'would aliasing the two buffers happen to work in practice'. MPI spells it with the MPI_IN_PLACE sentinel; NCCL documents a per-call aliasing condition; OpenSHMEM/NVSHMEM reductions require source and dest to be either the same symmetric address or fully disjoint. FALSE for a single-buffer call like MPI_Bcast: one inout buffer is not an in-place VARIANT, it is the only form the call has. Mirrored by tool_integration.buffer_aliasing. See docs/schema/field-semantics.md." },
+        "comm_scope":      { "type": "string", "enum": ["intracommunicator", "intercommunicator", "both"], "description": "Which kinds of communicator this collective may be called on." },
+        "algorithm_class": { "type": "string", "enum": ["one_to_all", "all_to_one", "all_to_all"], "description": "Data-movement shape, independent of the specific 'type' (extensible)." },
+        "reduction_op":    { "type": "boolean", "description": "Does this call consume a reduction operator parameter?" },
+        "topology_aware":  { "type": "boolean", "description": "True ONLY for MPI's neighborhood collectives -- the family (MPI_Neighbor_allgather/alltoall and their v/w, nonblocking and persistent variants) requiring a topology communicator built by MPI_Cart_create or MPI_Dist_graph_create, which moves data along that attached graph rather than across the whole group. It does NOT mean 'the implementation uses a topology-aware ring/tree algorithm' -- that is true of essentially every production collective in every PPM and carries no information. False for everything else, in every PPM. See docs/schema/field-semantics.md." }
+      }
+    },
+    "semantics_p2p": {
+      "type": "object",
+      "description": "Non-null only when semantics.operation_class = 'point_to_point'.",
+      "required": ["direction", "synchronous", "buffered", "ready"],
+      "additionalProperties": false,
+      "properties": {
+        "direction":   { "type": "string", "enum": ["send", "receive", "send_receive"], "description": "Which side of the point-to-point exchange this call performs." },
+        "synchronous": { "type": ["boolean", "null"], "description": "Null = not applicable (e.g. direction 'receive' — these three describe SEND-mode variants) or genuinely implementation-defined; when implementation-defined, pair with a tool_integration.context_dependencies entry (e.g. MPI_Send's standard-mode buffering)." },
+        "buffered":    { "type": ["boolean", "null"], "description": "See 'synchronous' — same nullability rationale." },
+        "ready":       { "type": ["boolean", "null"], "description": "See 'synchronous' — same nullability rationale." }
+      }
+    },
+    "semantics_one_sided": {
+      "type": "object",
+      "description": "Non-null only when semantics.operation_class = 'one_sided'.",
+      "required": ["operation", "epoch_type", "ordering"],
+      "additionalProperties": false,
+      "properties": {
+        "operation":  { "type": "string", "enum": ["put", "get", "accumulate", "fetch_op", "compare_swap"], "description": "The RMA operation this call performs." },
+        "epoch_type": { "type": "string", "enum": ["fence", "pscw", "lock", "lockall", "implicit"], "description": "Which RMA access-epoch mechanism this call's completion/exposure is governed by." },
+        "ordering":   { "type": "string", "enum": ["none", "relaxed", "release_acquire"], "description": "Memory-ordering guarantee this operation provides relative to other RMA operations." }
+      }
+    },
+    "semantics_atomic": {
+      "type": "object",
+      "description": "Non-null only when semantics.operation_class = 'atomic'.",
+      "required": ["operation", "fetch", "compare"],
+      "additionalProperties": false,
+      "properties": {
+        "operation": { "type": ["string", "null"], "enum": ["add", "fetch", "fetch_add", "set", "swap", "cswap", "inc", "fetch_inc", "and", "or", "xor", "fetch_and", "fetch_or", "fetch_xor", null], "description": "Null = the reduction operator is runtime-parameterized via an OPERATION-kind parameter (e.g. MPI_Fetch_and_op's MPI_Op argument) — statically undeterminable, while fetch/compare remain statically known." },
+        "fetch":     { "type": "boolean", "description": "Does this atomic return the prior value?" },
+        "compare":   { "type": "boolean", "description": "Does this atomic compare against an expected value before applying (e.g. compare-and-swap)?" }
+      }
+    },
+    "semantics_memory": {
+      "type": "object",
+      "description": "Buffer completion/reuse and memory-model semantics. Present for most operation_class values (see semantics.memory's own description for when the whole object is null instead).",
+      "required": ["local_completion", "remote_completion", "buffer_reuse", "fence_semantics", "symmetric_heap", "memory_model"],
+      "additionalProperties": false,
+      "properties": {
+        "local_completion":  { "type": "string",          "enum": ["after_return", "after_wait", "after_test", "after_flush"], "description": "When the call's LOCAL side (this participant's own view) is guaranteed complete." },
+        "remote_completion": { "type": ["string", "null"], "enum": ["after_return", "after_fence", "after_quiet", null], "description": "When this operation's effect becomes visible at the remote target. Null means the operation has NO remote side at all -- a purely local call, or a get, whose only effect lands locally -- and never 'unknown'. A put returning means its local source buffer is reusable, not that the target's memory has been updated, so a put is after_quiet. See docs/schema/field-semantics.md." },
+        "buffer_reuse":      { "type": "string",          "enum": ["after_return", "after_wait", "after_test", "after_flush", "never"], "description": "When the caller may safely reuse/overwrite the buffer(s) involved." },
+        "fence_semantics":   { "type": "string",          "enum": ["none", "local", "remote", "both"], "description": "WHICH SIDE this call actually completes or guards -- not which side issues it (every one of these is issued locally). none = not an ordering/completion primitive at all. local = completes only the caller's own side (source buffers become reusable). remote = guards delivery/ordering at the target PEs without waiting for local completion (shmem_fence, nvshmem_fence). both = completes both sides (shmem_quiet, nvshmem_quiet, and any barrier that implies a quiet). Fence orders; quiet completes. See docs/schema/field-semantics.md." },
+        "symmetric_heap":    { "type": "boolean", "description": "Does this call operate on the SHMEM/NVSHMEM PGAS symmetric heap?" },
+        "memory_model":      { "type": ["string", "null"], "enum": ["relaxed", "release_acquire", "seq_consistent", null], "description": "Consistency model this operation's memory effects follow. Null if not applicable." }
+      }
+    },
+
+    "semantics": {
+      "type": "object",
+      "description": "operation_class determines which ONE conditional sub-object is non-null. memory and formal are always present (formal may itself be null).",
+      "required": ["collective", "point_to_point", "one_sided", "atomic", "memory", "formal"],
+      "additionalProperties": false,
+      "properties": {
+        "collective":       { "anyOf": [{ "$ref": "#/$defs/semantics_collective" }, { "type": "null" }], "description": "Non-null only when operation_class = 'collective'." },
+        "point_to_point":   { "anyOf": [{ "$ref": "#/$defs/semantics_p2p" },        { "type": "null" }], "description": "Non-null only when operation_class = 'point_to_point'." },
+        "one_sided":        { "anyOf": [{ "$ref": "#/$defs/semantics_one_sided" },  { "type": "null" }], "description": "Non-null only when operation_class = 'one_sided'." },
+        "atomic":           { "anyOf": [{ "$ref": "#/$defs/semantics_atomic" },     { "type": "null" }], "description": "Non-null only when operation_class = 'atomic'." },
+        "memory":           { "anyOf": [ { "$ref": "#/$defs/semantics_memory" }, { "type": "null" } ], "description": "Nullable, mirroring formal's null convention. Null = no memory-semantics contract applies (query/management calls with no user-visible buffer semantics, e.g. mpi_comm_rank), rather than vacuous after_return/none/false values. In a final entry, null never means 'not yet classified'." },
+        "formal":           { "$ref": "#/$defs/formal", "description": "Operational data-flow/synchronization layer. Null for entries where it doesn't earn its keep (most query/management calls). Populated from the shape catalog by the assign and assemble stages." }
+      }
+    },
+
+    "binding_type": {
+      "type": "object",
+      "description": "One concrete type string per language binding, e.g. c: 'MPI_Comm', fortran90: 'INTEGER'. Null per language = not expressible in that binding.",
+      "required": ["c", "fortran90", "fortran08", "lis", "cpp"],
+      "additionalProperties": false,
+      "properties": {
+        "c":         { "type": ["string", "null"], "description": "C type string, e.g. 'void*', 'MPI_Comm', or '{T}*' for a type-generic entry." },
+        "fortran90": { "type": ["string", "null"], "description": "Fortran 90 type string, e.g. 'INTEGER'." },
+        "fortran08": { "type": ["string", "null"], "description": "Fortran 2008 type string, e.g. 'TYPE(MPI_Comm)'." },
+        "lis":       { "type": ["string", "null"], "description": "Large-count interface type string." },
+        "cpp":       { "type": ["string", "null"], "description": "C++ type string, if a dedicated C++ binding exists." }
+      }
+    },
+
+    "parameter_constraints": {
+      "type": "object",
+      "description": "Validity constraints on this parameter.",
+      "required": ["not_null", "value_range", "paired_with"],
+      "additionalProperties": false,
+      "properties": {
+        "not_null":    { "type": ["boolean", "null"], "description": "Nullable, like its two sibling constraints. Null = no nullability constraint asserted -- either not applicable (a by-value parameter cannot be null at all) or genuinely undetermined (a blanket true would be wrong for e.g. MPI_STATUS_IGNORE / MPI_Init(NULL,NULL)). A consumer derives no proof obligation from null." },
+        "value_range": { "type": ["string", "null"], "description": "Free-text validity constraint on the value, e.g. '0 <= rank < comm_size'. Null if none." },
+        "paired_with": { "type": ["string", "null"], "description": "Name of the corresponding parameter in a matching call (e.g. a send's datatype paired with the matching recv's datatype). Null if none." }
+      }
+    },
+
+    "parameter_kind": {
+      "type": ["string", "null"],
+      "enum": ["BUFFER", "COUNT", "RANK", "DATATYPE", "COMMUNICATOR", "OPERATION", "TAG", "STATUS", "REQUEST", "TEAM", "WINDOW", "KEY", "ERROR_CODE", "STREAM", "SCALAR", "ID", "INFO", "FILE", "GROUP", "ERRHANDLER", "SESSION", "MESSAGE", "TOOL_HANDLE", "INDEX_ARRAY", "OPAQUE_STATE", "BOOL", "STRING", "TEAM_SIZE", "THREAD_LEVEL", "DEVICE", "SIG_OP", null],
+      "description": "The kind vocabulary: what a value IS to the API, independent of its C type. Used by parameters[].kind and by return.value_kind -- one definition, so the two cannot drift. parameters[].kind describes most values; the role values are described here. RANK: a rank value. It never says whose rank (by-value dest/source/root/pe/target_rank are all RANK), so a caller's own rank -- mpi_comm_rank's 'rank' out-parameter, shmem_my_pe's return -- needs no value of its own. TEAM_SIZE: the number of members of a team, group or communicator: the 'size' out-parameter of mpi_comm_size/mpi_comm_remote_size/mpi_group_size, ncclCommCount's 'count', and the value shmem_n_pes/nvshmem_team_n_pes/omp_get_num_threads return. It is deliberately NOT a bare SIZE: a pointer 'size' is a byte size in mpi_type_size and mpi_pack_size and a file offset in mpi_file_get_size, all of which are SCALAR, so TEAM_SIZE is assigned per function and never by parameter name. Nor is it COUNT, which counts the elements of a buffer. THREAD_LEVEL: a thread-support level (MPI_THREAD_SINGLE..MULTIPLE and OpenSHMEM's/NVSHMEM's equivalents) -- 'required'/'provided' of mpi_init_thread, mpi_query_thread and mpi_t_init_thread, 'requested'/'provided' of shmem/nvshmem _init_thread and _query_thread; verbosity and cb_safety are levels of something else and are null. DEVICE: a device number (ordinal), by value or through an int* -- CUDA's device/peerDevice/srcDevice/dstDevice, OpenMP's device_num/dev/src_device_num/dst_device_num, ncclCommCuDevice's device; arrays of devices (devs, devlist, device_arr) are null, as BOOL excludes arrays of booleans. SIG_OP: the signal operator of the OpenSHMEM/NVSHMEM *_put_signal family ('the type of update to be performed' on the signal); its values are signal-update constants, a domain disjoint from OPERATION's MPI_Op/ncclRedOp_t/reduction constants, and a consumer dispatching on OPERATION would mistake it for one of those."
+    },
+
+    "parameter": {
+      "type": "object",
+      "description": "Per-argument semantics.",
+      "required": ["name", "kind", "direction", "desc", "binding_type", "asynchronous", "constant", "pointer", "array_type", "func_type", "length", "parameter_bindings", "root_only", "constraints", "memory_space"],
+      "additionalProperties": false,
+      "properties": {
+        "name":               { "type": "string", "description": "Parameter name as it appears in the signature." },
+        "kind":               { "$ref": "#/$defs/parameter_kind", "description": "See $defs/parameter_kind for the role values RANK, TEAM_SIZE, THREAD_LEVEL, DEVICE and SIG_OP. STREAM: a CUDA stream handle (ncclAllReduce's 'stream' and every NCCL/NVSHMEM on-stream call). SCALAR: a plain scalar that is neither buffer, handle, nor operator -- by-value operands like SHMEM/NVSHMEM atomics' 'value'/'cond', and pointer-to-scalar outputs like mpi_type_size's 'size' (rank and team-size outputs are RANK and TEAM_SIZE instead). ID: an opaque identifier established out-of-band -- ncclCommInitRank's ncclUniqueId 'commId'. BOOL: a true/false predicate answer -- MPI's 'flag' out-parameter, whose own desc reads 'Flag is true if MPI_INIT or MPI_INIT_THREAD has been called and false otherwise', and 'reorder', 'ranks may be reordered (true) or not (false)'; deliberately NOT 'provided' or 'result', which carry a thread-support level and an MPI_IDENT/CONGRUENT/SIMILAR comparison respectively, nor 'periods', which is an ARRAY of booleans. STRING: a text buffer -- port_name, service_name, datarep, filename, comm_name/type_name/win_name, desc, string, stringtag, name. INFO, FILE, GROUP, ERRHANDLER, SESSION, MESSAGE: the first-class MPI handle types MPI_Info, MPI_File, MPI_Group, MPI_Errhandler, MPI_Session, MPI_Message, assigned by C type rather than parameter name, which is what makes them unambiguous; FILE and SESSION mirror the formal layer's handle_kind values of the same name. TOOL_HANDLE: one generic kind for the whole MPI_T tool-information-interface handle family (MPI_T_pvar_handle, MPI_T_cvar_handle, MPI_T_pvar_session, MPI_T_event_registration, MPI_T_event_instance, MPI_T_enum). Deliberately one value rather than one per handle type: to a consumer of this schema they are all \"an opaque handle into the tool interface\", and binding_type.c still says which one it is. MPI_T_cb_safety and MPI_T_source_order are NOT TOOL_HANDLE -- they are enumeration types, not handles. INDEX_ARRAY: an array of positions/offsets into another parameter, not a data buffer (no payload is transferred through it) and not a COUNT (it is a vector, not a magnitude): MPI's displs/sdispls/rdispls, dims/coords/periods, and the MPI_T indices arrays. A consumer needs the distinction because an index array is read to compute addresses, so it is alias-relevant in a way a COUNT is not. OPAQUE_STATE: a void* the implementation stores and hands back untouched, never dereferenced by the PPM: extra_state and the attribute_val family. Calling these BUFFER would tell a race detector to track bytes that are never read; OPAQUE_STATE tells it the opposite, which is the whole value of the distinction. Nullable -- null = no fitting kind in the enum, e.g. the MPI_T scalar-index family (cat_index, cvar_index, pvar_index, source_index -- a position in a tool-interface table, neither a handle nor an array) and the non-thread levels verbosity and cb_safety. A near-miss is worse than a logged gap: open categories are listed in docs/cross-ppm-analysis/known-gaps-and-open-questions.md and added when a complete worked entry needs them. In a final entry null never means 'not yet classified'." },
+        "direction":          { "type": "string", "enum": ["in", "out", "inout"], "description": "Data-flow direction of this argument relative to the caller." },
+        "desc":               { "type": ["string", "null"], "description": "Plain-English role description of this parameter." },
+        "binding_type":       { "$ref": "#/$defs/binding_type" },
+        "asynchronous":       { "type": "boolean", "description": "May this buffer be accessed by the runtime after the call returns (until completion)?" },
+        "constant":           { "type": "boolean", "description": "Is this parameter const-qualified in C?" },
+        "pointer":            { "type": ["boolean", "null"], "description": "Is this parameter passed by pointer? Null if not applicable (e.g. by-value scalars)." },
+        "array_type":         { "type": ["string", "null"], "enum": ["fixed", "variable", "2d", null], "description": "Shape of the array this parameter passes: 'fixed' when length is an integer or a PPM constant, '2d' for a declared T x[][n] (length holds the outer dimension, the C type the inner one), 'variable' otherwise. null exactly when length is: not an array." },
+        "func_type":          { "type": ["string", "null"], "description": "Full signature of the pointed-to function, if this parameter is a function pointer. Null otherwise." },
+        "length":             { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "string", "pattern": "^([A-Za-z_][A-Za-z0-9_]*|\\*)$" }, { "type": "null" }], "description": "How many elements the array this parameter passes holds. An integer: that many. The name of a sibling parameter: as many as that parameter's value, in units of the buffer's datatype where it has one ('count', 'nelems'). A PPM constant: as many as that constant ('MPI_MAX_OBJECT_NAME'). '*': an array whose length is not recorded as a number, parameter or constant -- it depends on an object passed in (a communicator's group size, a topology's degree), on several parameters or a terminator, or the source does not say; desc says more where the source does. null: not an array (a scalar, a handle, or a pointer to one value). null exactly when array_type is." },
+        "parameter_bindings": { "type": "array", "items": { "type": "string", "enum": ["c", "c_large", "fortran90", "fortran90_optional", "fortran08", "fortran08_optional", "lis", "lis_large", "cpp"] }, "description": "Which binding variants include this parameter — the positive inverse of a 'suppress this binding' flag. An '_optional' suffix marks the parameter optional in that binding; a '*_large' token with no plain counterpart marks a large-count-interface-only parameter." },
+        "root_only":          { "type": "boolean", "description": "Is this parameter only meaningful on the root process/PE?" },
+        "constraints":        { "$ref": "#/$defs/parameter_constraints" },
+        "memory_space":       { "type": ["string", "null"], "enum": ["host", "device", "symmetric_heap", "unified", "either", null], "description": "Fixed value for most PPM/parameter combinations; 'either' pairs with a tool_integration.context_dependencies entry (e.g. CUDA-aware MPI). Non-buffer parameters are null." }
+      }
+    },
+
+    "return": {
+      "type": "object",
+      "description": "Return-value semantics, independent of how the model signals errors.",
+      "required": ["kind", "value_kind", "binding_type", "possible_errors", "possible_successes"],
+      "additionalProperties": false,
+      "properties": {
+        "kind":               { "type": "string", "enum": ["ERROR_CODE", "RESULT", "void", "bool", "value"], "description": "What the returned value REPRESENTS, which the C type alone does not settle: ERROR_CODE (a status and nothing else) | RESULT (the object the call produced -- an allocation or address) | value (a datum the call computed or fetched) | bool (a predicate answer) | void. `int` is overloaded in the OpenSHMEM-lineage APIs -- a status for shmem_team_split_strided, a PE number for shmem_my_pe, a predicate for shmem_test_lock -- so mapping 'non-void => ERROR_CODE' is wrong. See docs/schema/field-semantics.md." },
+        "value_kind":         { "$ref": "#/$defs/parameter_kind", "description": "What a returned datum IS, in the kind vocabulary parameters[].kind uses -- so a fact reads the same whether the call writes it through a pointer or returns it: MPI_Comm_rank(comm, &rank)'s 'rank' is RANK, and so is shmem_my_pe()'s return. Non-null only when kind is 'value' (workflow/validate/consistency.py checks this, since the schema has no conditional to express it); null for every other kind, and null for a value with no fitting kind (a fetched atomic, a time, a handle conversion). Populated today: RANK for shmem/nvshmem _my_pe, _team_my_pe and _team_translate_pe and for omp_get_thread_num/omp_get_ancestor_thread_num; TEAM_SIZE for shmem/nvshmem _n_pes and _team_n_pes and for omp_get_num_threads/omp_get_team_size; DEVICE for omp_get_device_num, omp_get_default_device, omp_get_initial_device and omp_get_device_from_uid, each of which returns a device number (omp_get_num_devices returns a count and stays null). omp_get_max_threads is deliberately null (an upper bound on a future team, not the size of one), and so are omp_get_team_num/omp_get_num_teams (a position in, and the count of, a teams region's teams -- teams, not members of one)." },
+        "binding_type":       { "$ref": "#/$defs/binding_type" },
+        "possible_errors":    { "type": "array", "items": { "type": "string" }, "description": "All distinct error codes/classes this call may return." },
+        "possible_successes": { "type": "array", "items": { "type": "string" }, "description": "Every distinct successful outcome the return value can signal — the positive counterpart of possible_errors, so a multi-outcome success isn't squeezed into one sentence." }
+      }
+    },
+
+    "context_dependency": {
+      "type": "object",
+      "description": "One entry per field whose effective value is NOT fixed by the function symbol alone.",
+      "required": ["field", "default_value", "depends_on", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "field":         { "type": "string", "description": "Dotted path, e.g. 'execution.blocking' or 'param:buf.memory_space'." },
+        "default_value": { "type": ["string", "boolean", "null"], "description": "The value documented elsewhere in this entry — valid under the common/default runtime configuration, so a consumer that doesn't track the relevant context still has a sane fallback." },
+        "depends_on":    { "type": "array", "items": { "type": "string" }, "description": "Plain-English runtime factors that actually determine the value, e.g. ['communicator config.blocking', 'ncclGroupStart/ncclGroupEnd nesting']." },
+        "note":          { "type": "string", "description": "Free-text explanation of how the factors in depends_on combine to determine the actual value." }
+      }
+    },
+
+    "tool_integration": {
+      "type": "object",
+      "description": "Correctness / perf-tool hooks: profiling symbol, machine-readable invariants, the buffer-aliasing contract, and any fields elsewhere in the entry whose true value depends on runtime state rather than the symbol alone.",
+      "required": ["profiling_name", "invariants", "buffer_aliasing", "context_dependencies"],
+      "additionalProperties": false,
+      "properties": {
+        "profiling_name":       { "type": ["string", "null"], "description": "Profiling-interposer symbol, e.g. PMPI_xxx / PNCCL_xxx. Null if none." },
+        "invariants":           { "type": "array", "items": { "type": "string" }, "description": "Machine-readable preconditions, expressed in the shared reference/selector grammar." },
+        "buffer_aliasing":      { "type": ["string", "null"], "enum": ["forbidden", "allowed", "in_place_only", null], "description": "Null = not applicable (the function has no user-supplied buffer parameters at all, e.g. mpi_comm_rank, mpi_wait). In a final entry, null never means 'not yet classified'." },
+        "context_dependencies": { "type": "array", "items": { "$ref": "#/$defs/context_dependency" }, "description": "Fields elsewhere in THIS entry whose true value at a given call site isn't fixed by the function symbol alone (see context_dependency). Empty array = every field in this entry is a fixed, static contract." }
+      }
+    },
+
+    "relationship_variants": {
+      "type": "object",
+      "description": "Links to related entries, each a 'model:function_key' string (e.g. 'mpi:mpi_ibcast') or null.",
+      "required": ["nonblocking", "blocking", "persistent", "neighborhood", "host", "gpu"],
+      "additionalProperties": false,
+      "properties": {
+        "nonblocking":  { "type": ["string", "null"], "description": "Nonblocking counterpart, if this entry is blocking." },
+        "blocking":     { "type": ["string", "null"], "description": "Inverse of nonblocking: points a nonblocking/persistent entry back at its blocking counterpart." },
+        "persistent":   { "type": ["string", "null"], "description": "Persistent counterpart of this entry, if one exists." },
+        "neighborhood": { "type": ["string", "null"], "description": "Neighborhood-collective counterpart, if one exists." },
+        "host":         { "type": ["string", "null"], "description": "Host-callable counterpart, for device-only entries. Pairs with gpu." },
+        "gpu":          { "type": ["string", "null"], "description": "GPU-callable counterpart. Null when this same entry already covers GPU launch via execution.launch = 'cpu+gpu'." }
+      }
+    },
+
+    "relationships": {
+      "type": "object",
+      "description": "Variant family + related-operation graph, via model-qualified keys.",
+      "required": ["variants", "superseded_by", "supersedes"],
+      "additionalProperties": false,
+      "properties": {
+        "variants":        { "$ref": "#/$defs/relationship_variants" },
+        "superseded_by":   { "type": ["string", "null"], "description": "model:function_key of the recommended replacement, if any. The schema's only supersession edge: a cross-entry reference belongs with the rest of the entry graph in relationships, not among identity's self-describing fields." },
+        "supersedes":      { "type": "array", "items": { "type": "string" }, "description": "The inverse edge of superseded_by: model:function_key of every entry this one replaces. An array because supersession is many-to-one (one modern call can replace several deprecated ones), where superseded_by is single-valued. Empty array = supersedes nothing. Derived mechanically by inverting the corpus's superseded_by edges (workflow/assemble/assemble.py), never hand-authored -- authoring both directions independently is how a graph desyncs." }
+      }
+    },
+
+    "formal": {
+      "type": ["object", "null"],
+      "description": "Operational data-flow and synchronization layer. Null wherever it doesn't earn its keep.",
+      "required": ["participants", "data_flow", "sync", "handle_lifecycle"],
+      "additionalProperties": false,
+      "properties": {
+        "participants":     { "type": "array", "items": { "$ref": "#/$defs/participant" }, "description": "Who is involved in a call instance, and whether each one actually invokes the function." },
+        "data_flow":        { "type": "array", "items": { "$ref": "#/$defs/data_flow_entry" }, "description": "Who reads, writes, or reduces which memory, and where a written value provably came from. Empty array for pure-sync ops like barrier." },
+        "sync":             { "$ref": "#/$defs/sync" },
+        "handle_lifecycle": { "type": "array", "items": { "$ref": "#/$defs/handle_lifecycle_entry" }, "description": "Whether this call creates, uses, or destroys a long-lived handle (request, window, communicator, symmetric-heap allocation, file, session). Empty array otherwise." }
+      }
+    },
+
+    "participant": {
+      "type": "object",
+      "description": "Who is involved in a call instance, and whether they actually invoke the function.",
+      "required": ["id", "role_kind", "calls_function", "cardinality", "selector"],
+      "additionalProperties": false,
+      "properties": {
+        "id":             { "type": "string", "description": "Local id for this role, referenced by data_flow[].participant and sync.events[].participant." },
+        "role_kind":      { "type": "string", "enum": ["initiator", "member", "passive_target"], "description": "initiator = the one process/PE that starts an asymmetric op (e.g. an RMA origin). member = a symmetric participant in a collective. passive_target = the remote side of a one-sided op that never calls a matching function itself." },
+        "calls_function": { "type": "boolean", "description": "False for the passive side of a one-sided operation." },
+        "cardinality":    { "type": "string", "enum": ["one", "many"], "description": "Whether this role is played by exactly one participant instance ('one') or by every participant matching the selector ('many')." },
+        "selector":       { "type": "string", "description": "Predicate in the reference grammar, e.g. 'rank == param:root' or 'is_neighbor(rank, param:comm)'." }
+      }
+    },
+
+    "data_flow_entry": {
+      "type": "object",
+      "description": "One memory access. source states where a written value provably came from.",
+      "required": ["id", "op", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "id":            { "type": "string", "description": "Local id for this access, referenced by other data_flow entries' source/inputs." },
+        "participant":   { "type": ["string", "null"], "description": "Null for reduce nodes, which are not scoped to a single participant." },
+        "op":            { "type": "string", "enum": ["read", "write", "reduce", "read_modify_write"], "description": "read/write = ordinary buffer access. reduce = an aggregation node with no single owning participant, combining a scoped set of sibling reads via 'inputs' and 'operation_ref'. read_modify_write = an atomic combined read+write." },
+        "buffer":        { "type": ["string", "null"], "description": "Reference-grammar pointer to the buffer touched, e.g. 'param:buf'. Null for reduce nodes." },
+        "extent":        { "type": ["object", "null"], "description": "Element count and datatype this access spans. Null if not a bulk buffer access.", "properties": {
+                              "count_ref": { "type": "string", "description": "Reference to the count parameter, e.g. 'param:count'." }, "datatype_ref": { "type": "string", "description": "Reference to the datatype parameter, or a 'type:{T}' literal for a type_family entry." } },
+                              "additionalProperties": false },
+        "offset":        { "type": ["string", "null"], "description": "Reference-grammar expression for this access's slice offset. Null for uniform-copy shapes (e.g. bcast); populated for indexed shapes where each participant's slice depends on its rank (e.g. scatter)." },
+        "inputs":        { "type": "array", "items": { "type": "object", "properties": {
+                              "ref": { "type": "string", "description": "id of the sibling data_flow entry supplying one contribution." }, "scope": { "type": "string", "description": "Registry-controlled aggregation scope — see the scope registry in docs/schema/semantics-formal.md." } },
+                              "additionalProperties": false },
+                            "description": "For op:'reduce'. scope is an open string, e.g. 'all_participant_instances', 'instances_before_self_in_order', 'rma_target_prior', 'single_instance'." },
+        "operation_ref": { "type": ["string", "null"], "description": "Reference to the reduction-operator parameter, e.g. 'param:op'. Null unless op == 'reduce'." },
+        "valid_during":  { "type": ["array", "null"], "items": { "type": "object", "properties": {
+                              "epoch_scope": { "type": "string", "enum": ["access", "exposure"], "description": "Which side of an RMA epoch this precondition refers to." },
+                              "bound_to":    { "type": "string", "description": "Handle parameter the epoch is bound to." },
+                              "role":        { "type": "string", "description": "Role this access plays relative to the epoch (mirrors sync.events[].event_type conventions)." } },
+                              "additionalProperties": false },
+                            "description": "Epoch preconditions this access must fall inside — how an RMA transfer between an open access epoch and an open exposure epoch on the same window gets checked. Null if not epoch-bound." },
+        "source": {
+          "description": "structural = copy from a sibling entry in the same call instance. reduced = aggregation over a scoped set of sibling reads (optionally sliced per recipient via 'offset', for reduce_scatter). gathered = per-participant assembly of a named sibling read across a scope with NO operator, each contribution placed at 'placement_offset' evaluated in the contributing participant's context (allgather/fcollect). matched = resolved at runtime by sync.matching against a separate call instance, 'via' = the id of the gating sync.events entry. null = not modeled (implementation/runtime state).",
+          "oneOf": [
+            { "type": "null" },
+            { "type": "object", "required": ["kind", "ref"], "properties": { "kind": { "const": "structural" }, "ref": { "type": "string" }, "offset": { "type": ["string", "null"] } } },
+            { "type": "object", "required": ["kind", "ref"], "properties": { "kind": { "const": "reduced" },    "ref": { "type": "string" }, "offset": { "type": ["string", "null"] } } },
+            { "type": "object", "required": ["kind", "ref", "scope"], "properties": { "kind": { "const": "gathered" }, "ref": { "type": "string" }, "scope": { "type": "string" }, "placement_offset": { "type": ["string", "null"] } } },
+            { "type": "object", "required": ["kind", "via"], "properties": { "kind": { "const": "matched" },    "via": { "type": "string" } } }
+          ]
+        }
+      }
+    },
+
+    "sync": {
+      "type": "object",
+      "description": "Ordering, events, and cross-call-instance matching.",
+      "required": ["events", "ordering", "matching"],
+      "additionalProperties": false,
+      "properties": {
+        "events": { "type": "array", "description": "Named points, or open/close interval endpoints for RMA epochs.", "items": { "type": "object",
+          "required": ["id", "participant", "event_type"],
+          "additionalProperties": false,
+          "properties": {
+            "id":           { "type": "string", "description": "Local id for this event, referenced by data_flow[].source.via and handle_lifecycle bindings." },
+            "participant":  { "type": "string", "description": "id of the participant this event belongs to." },
+            "event_type":   { "type": "string", "enum": ["point", "open_epoch", "close_epoch"], "description": "point = a single moment (e.g. request completion). open_epoch/close_epoch = interval endpoints for RMA epochs (fence/lock/PSCW)." },
+            "epoch_scope":  { "type": ["string", "null"], "enum": ["access", "exposure", null], "description": "For open_epoch/close_epoch events: which side of the epoch this is. Null for point events." },
+            "bound_to":     { "type": ["string", "null"], "description": "Handle parameter this event is bound to, e.g. 'param:request' or 'param:win'." },
+            "group_ref":    { "type": ["string", "null"], "description": "For PSCW-style epochs, the explicit process group this epoch pairs against. Null otherwise." }
+          } } },
+        "ordering": { "type": "array", "description": "Happens-before relationships between events/data_flow entries.", "items": { "type": "object",
+          "required": ["before", "after", "scope"],
+          "additionalProperties": false,
+          "properties": {
+            "before": { "description": "A data_flow id, a sync.events id, or a call-boundary reference that must happen first." },
+            "after":  { "description": "A data_flow id, a sync.events id, or a call-boundary reference that must happen after 'before'." },
+            "scope":  { "type": "string", "enum": ["same_participant_instance", "all_participant_instances", "cross_call"], "description": "How widely this ordering constraint is enforced." },
+            "note":   { "type": "string", "description": "Free-text explanation of the ordering constraint." }
+          } } },
+        "matching": { "type": ["object", "null"],
+          "description": "States how separate call instances pair up with each other. Null when there is nothing to match against (e.g. mpi_wait, which only closes a handle interval).",
+          "additionalProperties": false,
+          "properties": {
+            "kind":                     { "type": "string", "enum": ["collective_rendezvous", "tag_match", "peer_match", "group_match", "epoch_scoped"], "description": "collective_rendezvous = every instance in the participant group, no key (bcast/barrier/allreduce). tag_match = comm+tag+source/dest, non-overtaking (MPI isend/irecv). peer_match = comm+peer rank, program order, no tag (NCCL send/recv). group_match = explicit process-group equality (MPI PSCW). epoch_scoped = deferred to an enclosing epoch, no matching at this call site (RMA put/get inside lock/fence)." },
+            "match_keys":               { "type": "array", "items": { "type": "string" }, "description": "Reference-grammar keys that must agree across the paired instances." },
+            "matched_across":           { "type": "string", "description": "What the match is scoped across, e.g. 'paired_call', 'all_participant_instances'." },
+            "program_order_required":   { "type": ["boolean", "null"], "description": "Whether matching additionally requires program order between the paired instances. Null if not applicable." }
+          } }
+      }
+    },
+
+    "handle_lifecycle_entry": {
+      "type": "object",
+      "description": "Tracks a handle across its create/use/destroy interval. Also the mechanism behind RMA epochs and request completion — those are 'use' with epoch_scope, and 'create'/'destroy' with no epoch fields, respectively.",
+      "required": ["handle", "handle_kind", "role"],
+      "additionalProperties": false,
+      "properties": {
+        "handle":      { "type": "string", "description": "A 'param:' reference, or 'return_value' for handles created by return (e.g. nvshmem_malloc)." },
+        "handle_kind": { "type": "string", "enum": ["REQUEST", "WINDOW", "COMMUNICATOR", "DATATYPE", "SYMMETRIC_ALLOCATION", "FILE", "SESSION"], "description": "What kind of long-lived resource this handle identifies." },
+        "role":        { "type": "string", "enum": ["create", "use", "destroy"], "description": "Where in the handle's lifecycle this entry falls. RMA epochs are 'use' with epoch fields set on the enclosing data_flow/sync entries; request completion is 'create' at post, 'destroy' at wait." },
+        "derived_from": { "type": ["string", "null"], "description": "For 'create' entries that also consume an existing handle, e.g. Comm_split's newcomm derived_from comm." }
+      }
+    },
+
+    "shape_template": {
+      "type": "object",
+      "description": "AUTHORING-TIME ONLY. Never referenced by $defs/entry and never appears in a shipped instance validated against this schema — see the top-level $comment.",
+      "required": ["id", "slots", "template"],
+      "additionalProperties": false,
+      "properties": {
+        "id":    { "type": "string", "description": "Shape identifier, e.g. 'collective.one_to_all_uniform', 'rma.put'." },
+        "slots": { "type": "array", "description": "Named holes in the template that an authored entry fills in via 'bindings'.", "items": { "type": "object",
+          "required": ["name", "kind", "optional"],
+          "additionalProperties": false,
+          "properties": {
+            "name":     { "type": "string", "description": "Slot name referenced in the template body, e.g. 'source_buffer', 'root_selector'." },
+            "kind":     { "type": "string", "enum": ["buffer_slot", "extent_slot", "selector_slot", "operation_slot", "handle_slot", "index_slot", "literal_slot"], "description": "What kind of value this slot expects." },
+            "optional": { "type": "boolean", "description": "Whether an authored entry may omit a binding for this slot." }
+          } } },
+        "template": { "$ref": "#/$defs/formal", "description": "The formal-layer skeleton, written with '{{slot_name}}' placeholders that the expander substitutes with each slot's bound value." }
+      }
+    }
+  }
+}

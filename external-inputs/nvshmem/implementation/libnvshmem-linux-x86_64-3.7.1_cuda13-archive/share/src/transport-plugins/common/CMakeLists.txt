@@ -1,0 +1,38 @@
+macro(add_helper_library LIBRARY_NAME NEED_CUDA SOURCE_LIST)
+  add_library(${LIBRARY_NAME} STATIC ${LINK_REQUIREMENTS} ${SOURCE_LIST})
+  target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_17)
+
+  set_target_properties(${LIBRARY_NAME} PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    CUDA_SEPARABLE_COMPILATION ON
+  )
+
+  target_include_directories(${LIBRARY_NAME} PUBLIC
+                             ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+
+  target_include_directories(${LIBRARY_NAME} PRIVATE
+                             ${CMAKE_SOURCE_DIR}/include
+                             ${CUDAToolkit_INCLUDE_DIRS}
+  )
+
+  if(NEED_CUDA)
+    target_link_libraries(${LIBRARY_NAME} PRIVATE CUDA::cudart_static)
+  endif()
+endmacro()
+
+add_helper_library(nvshmem_transport_common OFF transport_common.cpp)
+
+if(NVSHMEM_USE_GDRCOPY)
+  add_helper_library(nvshmem_transport_gdr_common OFF transport_gdr_common.cpp)
+  target_include_directories(nvshmem_transport_gdr_common PUBLIC ${GDRCOPY_INCLUDE})
+endif()
+
+if(NVSHMEM_BUILD_IBDEVX_TRANSPORT OR NVSHMEM_BUILD_IBGDA_TRANSPORT OR NVSHMEM_BUILD_IBRC_TRANSPORT OR NVSHMEM_BUILD_GPUNETIO_TRANSPORT)
+  add_helper_library(nvshmem_transport_ib_common ON transport_ib_common.cpp)
+
+  if(NVSHMEM_BUILD_IBDEVX_TRANSPORT OR NVSHMEM_BUILD_IBGDA_TRANSPORT OR NVSHMEM_BUILD_GPUNETIO_TRANSPORT)
+    add_helper_library(nvshmem_transport_mlx5_common OFF transport_mlx5_common.cpp)
+    target_link_libraries(nvshmem_transport_mlx5_common PRIVATE MLX5_lib)
+  endif()
+endif()

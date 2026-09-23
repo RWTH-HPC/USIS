@@ -1,0 +1,462 @@
+\makeindex
+
+\newcommand{\minitab}[2][l]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+
+\definecolor{ListingBG}{rgb}{0.91,0.91,0.91}
+\definecolor{shadecolor}{rgb}{0.92,0.92,0.92}
+
+\hyphenation{Open-SHMEM}
+
+\renewcommand{\chaptername}{Chapter}
+\renewcommand{\appendixname}{Annex}
+\Crefname{appendix}{Annex}{Annexes}
+
+% Place some penalty for doing the break
+% The penalty for a ``\gb'' should be greater than a \hyphenpenalty.
+% \hyphenpenalty is 50 in plain.tex.
+\def\gb{\penalty10000\hskip 0pt plus 8em\penalty4800\hskip 0pt plus-8em%
+\penalty10000}
+
+% This macro enables that all "_" (underscore) characters in the pfd
+% file are searchable, and that cut&paste will copy the "_" as underscore.
+% Without the following macro, the \_ is treated in searches and cut&paste
+% as a " " (space character).
+% This macro does not modify the behavior of _ in math or in verbatim
+% environments. In verbatim environments, the "_" is always treated
+% as a searchable character.
+%
+\DeclareRobustCommand{\_}{\texttt{\char`\_}}
+%
+
+\def\colorswapnt{\colorlet{saved}{.}\color{ForestGreen}}
+\def\colorswapot{\colorlet{saved}{.}\color{red}}
+\def\prevcolor{\color{saved}}
+
+\newcommand{\newtext}[1]{\textcolor{ForestGreen}{#1}}
+\newcommand{\oldtext}[1]{\textcolor{magenta}{\sout{#1}}}
+\newcommand{\insertDocVersion}{1.6}
+\newcommand{\openshmem}[1][]{%
+  {Open\-SHMEM\ifthenelse{\equal{#1}{}}{}{~#1}}\xspace}
+\newcommand{\HEADER}[1]{\textit{#1}}
+\newcommand{\FUNC}[1]{\textit{#1}}
+\newcommand{\CTYPE}[1]{\textit{#1}}
+\newcommand{\VAR}[1]{\textit{#1}}
+\newcommand{\ENVVAR}[1]{\textit{#1}}
+\newcommand{\CONST}[1]{\textit{#1}}
+\newcommand{\KEYWORD}[1]{\textit{#1}}
+%%
+\newcommand{\CorCpp}{\textit{C/C++}\xspace}
+\newcommand{\Fortran}[1][]{%
+  \textit{Fortran\ifthenelse{\equal{#1}{}}{}{~#1}}\xspace}
+\newcommand{\Cstd}[1][]{%
+  \textit{C\ifthenelse{\equal{#1}{}}{}{#1}}\xspace}
+\newcommand{\Cpp}[1][]{%
+  \textit{C++\ifthenelse{\equal{#1}{}}{}{#1}}\xspace}
+%%
+\newcommand{\TYPE}{\emph{TYPE}}
+\newcommand{\TYPENAME}{\emph{TYPENAME}}
+\newcommand{\SIZE}{\emph{SIZE}}
+
+\newcommand{\source}{\textit{source}}
+\newcommand{\dest}{\textit{dest}}
+\newcommand{\PUT}{\textit{Put}}
+\newcommand{\GET}{\textit{Get}}
+\newcommand{\OPR}[1]{\textit{#1}}
+\newcommand{\shmemprefix}{\textit{SHMEM\_}}
+\newcommand{\shmemprefixLC}{\textit{shmem\_}}
+\newcommand{\shmemprefixC}{\textit{\_SHMEM\_}}
+\newcommand{\ith}{${\textit{i}^{\text{\tiny th}}}$}
+\newcommand{\jth}{${\textit{j}^{\text{\tiny th}}}$}
+\newcommand{\kth}{${\textit{k}^{\text{\tiny th}}}$}
+\newcommand{\lth}{${\textit{l}^{\text{\tiny th}}}$}
+
+%% Generate indexed reference.
+\newcommand{\EnvVarIndex}[1]{\index{#1}}
+\newcommand{\FuncIndex}[1]{\index{#1}}
+\newcommand{\LibConstIndex}[1]{\index{#1}}
+\newcommand{\LibHandleIndex}[1]{\index{#1}}
+\newcommand{\TableIndex}[1]{\index{#1}\index{Tables!#1}}
+%% Write text and generate reference.
+\newcommand{\EnvVarRef}[1]{\ENVVAR{#1}\EnvVarIndex{#1}}
+\newcommand{\FuncRef}[1]{\FUNC{#1}\FuncIndex{#1}}
+\newcommand{\LibConstRef}[1]{\CONST{#1}\LibConstIndex{#1}}
+\newcommand{\LibHandleRef}[1]{\CONST{#1}\LibHandleIndex{#1}}
+\newcommand{\TableCaptionRef}[1]{\caption{#1}\TableIndex{#1}}
+%% Specialized declaration/creation and generate reference.
+\newcommand{\EnvVarDecl}[1]{\EnvVarRef{#1}}
+\newcommand{\FuncDecl}[1]{{\ListingsCurrentStyle{#1}}\FuncIndex{#1}}
+\newcommand{\FuncParam}[1]{{\ListingsParamStyle{#1}}}
+\newcommand{\LibConstDecl}[2][\CorCpp]{%
+  \parbox[t]{5cm}{~\\[-4pt] #1: \\\hspace*{8mm} \LibConstRef{#2} \\~}}
+\newcommand{\LibHandleDecl}[2][\CorCpp]{%
+  \parbox[t]{0pt}{~\\[-4pt] #1: \\\hspace*{8mm} \LibHandleRef{#2} \\~}}
+
+\newcommand{\subsubsubsection}[1]{\paragraph{#1}\mbox{}\par\nobreak}
+\Crefname{paragraph}{Section}{Sections}
+\setlength{\parindent}{0pt}
+
+\begin{acronym}
+\acro{RMA}{Remote Memory Access}
+\acro{RMO}{\emph{Remote Memory Operation}}
+\acro{AMO}{Atomic Memory Operation}
+\acro{PE}{\emph{Processing Element}}
+\acrodefplural{PE}[PEs]{\emph{Processing Elements}}
+\acro{PGAS}{\emph{Partitioned Global Address Space}}
+\acro{API}{\emph{Application Programming Interface}}
+\acro{MPI}{\emph{Message Passing Interface}}
+\acro{SPMD}{\emph{Single Program Multiple Data}}
+\acro{ANL}{Argonne National Laboratory}
+\acro{ARL}{Army Research Laboratory}
+\acro{AMD}{Advanced Micro Devices}
+\acro{MPMD}{\emph{Multiple Program Multiple Data}}
+\acro{TCP}{\emph{Transmission Control Protocol}}
+\acro{UH}{University of Houston}
+\acro{UO}{University of Oregon}
+\acro{ORNL}{Oak Ridge National Laboratory}
+\acro{LANL}{Los Alamos National Laboratory}
+\acro{ESSC}{Extreme Scale Systems Center}
+\acro{OS}{operating system}
+\acro{OSSS}{Open Source Software Solutions}
+\acro{SGI}{Silicon Graphics International}
+\acro{DoD}{U.S. Department of Defense}
+\acro{SBU}{Stonybrook University}
+\acro{UTK}{University of Tennessee at Knoxville}
+\acro{HPE}{Hewlett Packard Enterprise}
+\end{acronym}
+
+% Remove whitespace and retain commas when using cleveref's `\cref`.
+% https://tex.stackexchange.com/a/340502 by users/16967/heiko-oberdiek
+\makeatletter
+\let\org@@cref\@cref
+% Modify cleveref's internal \@cref to zap spaces between list elements.
+\renewcommand*{\@cref}[2]{%
+  \edef\process@me{%
+    \noexpand\org@@cref{#1}{\zap@space#2 \@empty}%
+  }\process@me
+}
+\makeatother
+\newcommand{\ChangelogRef}[1]{\\See \cref{#1}.\space}
+
+% Grab current listings style for use in environment escape to LaTeX.
+% https://tex.stackexchange.com/a/209644 by users/21891/jub0bs
+\makeatletter
+\newcommand\ListingsCurrentStyle{}
+\lst@AddToHook{Output}{\global\let\ListingsCurrentStyle\lst@thestyle}
+\lst@AddToHook{OutputOther}{\global\let\ListingsCurrentStyle\lst@thestyle}
+\makeatother
+
+%
+% Use Sans Serif font for sections, etc.
+%
+%
+\makeatletter
+\def\section{\@startsection {section}{1}{\z@}{-3.5ex plus -1ex minus
+-.2ex}{2.3ex plus .2ex}{\Large\sf}}
+\def\subsection{\@startsection{subsection}{2}{\z@}{-3.25ex plus -1ex minus
+-.2ex}{1.5ex plus .2ex}{\large\sf}}
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}{-3.25ex plus
+-1ex minus -.2ex}{1.5ex plus .2ex}{\normalsize\sf\bf}}
+\def\paragraph{\@startsection {paragraph}{4}{\z@}{3.25ex plus 1ex minus .2ex}
+{-1em}{\normalsize\sf\bf}} % Indent after \paragraph
+\makeatother
+%
+% End use Sans Serif font for sections, etc.  S. Otto
+%
+
+
+%
+% This section is for example code listings
+%
+
+\newcommand{\ListingsParamStyle}{\bfseries\itshape\color{CadetBlue}}
+
+\definecolor{DarkGreen}{rgb}{0, 0.25, 0}
+
+\lstdefinestyle{SourceListingsDefault}{
+  language={C},
+  breaklines=true,
+  breakatwhitespace=true,
+  escapechar=@,
+  tabsize=2,
+  basicstyle=\ttfamily\footnotesize,
+  showstringspaces=false,
+  frame=single,
+  % Preprocessor directives
+  classoffset=0,
+  keywords={\#include, \#pragma, \#if, \#ifdef, \#else, \#endif},
+  keywordstyle=\bfseries\color{CadetBlue},
+  % Language keywords
+  classoffset=1,
+  keywords={
+    if, else, for, while, do, return, break, continue,
+    static, const, volatile,
+    sizeof, typedef, struct, union,
+    switch, case, default, goto,
+  },
+  keywordstyle=\bfseries\color{Orchid},
+  % Types
+  classoffset=2,
+  keywords={
+    _Thread_local, _Noreturn,
+    void, bool, _Bool, unsigned, char, short, int, long,
+    float, double, _Complex, complex, size_t, ptrdiff_t,
+    int8_t, int16_t, int32_t, int64_t,
+    uint8_t, uint16_t, uint32_t, uint64_t,
+    shmem_ctx_t, shmem_team_t, shmem_team_config_t,
+    FILE,
+  },
+  keywordstyle=\color{DarkGreen},
+  % Other elements
+  classoffset=3,
+  keywords={NULL},
+  keywordstyle=\color{MidnightBlue},
+  % Type-generic parameters (see FuncParam)
+  classoffset=4,
+  keywords={TYPE, TYPENAME, SIZE},
+  keywordstyle=\ListingsParamStyle,
+  % Other syntax elements
+  commentstyle=\itshape\color{BrickRed},
+  stringstyle=\color{DarkOrchid},
+  backgroundcolor=\color{white},
+}
+
+\definecolor{gray}{rgb}{0.97,0.97,0.97}
+
+\lstdefinestyle{PrototypeListingsDefault}{
+  style=SourceListingsDefault,
+  frame=none,
+  backgroundcolor=\color{gray},
+}
+
+\lstset{style=SourceListingsDefault}
+
+%
+% End this section is for example code listings
+%
+
+%
+% Deprecation Helpers
+%
+
+\newcommand{\strikeline}[1][red]{{\color{#1}\raisebox{.5ex}{\rule{1em}{.4pt}}}}
+\newcommand{\stretchline}[1][red]{\xrfill[.5ex]{.4pt}[#1]}
+\newcommand{\DeprecationStart}[1][red]{{\color{#1} deprecation start} \mbox{}}
+\newcommand{\DeprecationEnd}[1][red]{{\color{#1} deprecation end} \mbox{}}
+
+\newcommand{\StartDeprecateBlock}{
+  {\strikeline\mbox{} \DeprecationStart \stretchline\mbox{}}}
+\newcommand{\EndDeprecateBlock}{%
+  \mbox{}\stretchline\mbox{} \DeprecationEnd \strikeline}
+\newenvironment{DeprecateBlock}{%
+  \par \StartDeprecateBlock \par}{\par \EndDeprecateBlock \par}
+
+\newcommand{\StartInlineDeprecate}{%
+  \strikeline\mbox{} \DeprecationStart \strikeline \mbox{}}
+\newcommand{\EndInlineDeprecate}{%
+  \strikeline\mbox{} \DeprecationEnd \strikeline}
+\newenvironment{DeprecateInline}{\StartInlineDeprecate}{\EndInlineDeprecate}
+
+\newcommand{\deprecationstart}{%
+  \color{red} \strikeline\mbox{} deprecation start \stretchline \mbox{}}
+\newcommand{\deprecationend}{%
+  \mbox{}\stretchline\mbox{} \color{red} deprecation end \strikeline}
+\newenvironment{deprecate}{\deprecationstart \\}{\\ \deprecationend}
+
+%
+% Design feedback request helpers
+%
+
+\newcommand{\feedbackstart}{\color{RoyalBlue} \strikeline[RoyalBlue]
+  design feedback requested \stretchline[RoyalBlue] \mbox{}}
+\newcommand{\feedbackend}{\mbox{}\stretchline[RoyalBlue]\mbox{}}
+
+\newenvironment{FeedbackRequest}{\feedbackstart \\}{\\ \feedbackend}
+
+%
+% Library API description template commands
+%
+
+\newcommand{\apisummary}[1]{
+    #1
+\hfill
+}
+
+\newenvironment{apidefinition}{
+\begin{description}
+\item[SYNOPSIS] \hfill \\ \\
+\vspace{-2em}
+}
+{
+\end{description} % ends \begin{description} from \apidescription
+\end{description}
+}
+
+\lstnewenvironment{Cpp11synopsis}
+{
+  \textbf{C++11:}
+  \lstset{style=PrototypeListingsDefault}
+}{}
+
+\lstnewenvironment{C11synopsis}
+{
+  \textbf{C11:}
+  \lstset{style=PrototypeListingsDefault}
+}{}
+
+\lstnewenvironment{CsynopsisCol}
+{
+  \lstset{style=PrototypeListingsDefault}
+}{}
+
+
+\lstnewenvironment{Csynopsis}
+{
+  \textbf{C/C++:}
+  \lstset{style=PrototypeListingsDefault}
+}{}
+
+\lstnewenvironment{CsynopsisST}
+{
+  \textbf{C/C++:}
+  \color{red}{
+    \lstset{style=PrototypeListingsDefault}
+  }
+}{}
+
+\newenvironment{apiarguments}{
+\newcommand{\apiargument}[3]{
+\begin{tabular}{p{2cm} p{2cm} p{10cm}}
+\textbf{##1} & \textit{##2} & {##3} \\
+\end{tabular}
+}
+\hfill
+\item[DESCRIPTION] \hfill
+
+\begin{description}
+\item[Arguments] \hfill \\
+}
+{
+\hfill
+\end{description}
+}
+
+\newcommand{\apidescription}[1]{
+\begin{description}
+\vspace{-1em}
+\item[API Description] \hfill \\
+    \sloppy
+    #1
+\hfill
+}
+
+\newcommand{\apidesctable}[4] {\hfill \\ #1 \\ \\
+    \begin{tabular}{p{5cm} p{9cm}}
+       \hline
+       #2 & #3 \\
+       \hline \tabularnewline
+       \end{tabular}\\
+        #4
+}
+
+\newcommand{\apireturnvalues}[1]{
+\hfill
+\item[Return Values] \hfill \\
+    #1
+\hfill \\
+}
+
+\newcommand{\apitablerow}[2]{
+ \begin{tabular}{p{5cm} p{9cm}}
+ #1 & #2 \tabularnewline
+  \end{tabular}\\
+}
+
+\newcommand{\widetablerow}[2]{
+ \begin{tabular}{p{6cm} p{8cm}}
+ #1 & #2 \tabularnewline
+  \end{tabular}\\
+}
+
+\newcommand{\sessiontablebegin} {
+\begin{table}[h!]
+\hspace{-1.0cm}
+\begin{tabular}{|p{5.6cm}|p{12cm}|}
+    \hline
+    \textbf{Option} & \textbf{Usage hint}
+    \tabularnewline \hline
+}
+
+\newcommand{\sessiontableend} {
+\end{tabular}
+\TableCaptionRef{Session options}
+\label{session_opts}
+\end{table}
+}
+
+\newcommand{\sessiontablerow}[2]{
+ #1 & #2 \tabularnewline
+}
+
+\newcommand{\apinotes}[1]{
+\item[Notes] \hfill \\
+    #1
+\hfill \\
+}
+
+\newcommand{\apiimpnotes}[1]{
+\item[Note to Implementers] \hfill \\
+    #1
+\hfill \\
+}
+
+\newcommand{\parimpnotes}[1]{
+\begin{description}
+\item[Note to Implementers] \leavevmode \\
+    #1
+\end{description}
+}
+
+\theoremstyle{definition}
+\newtheorem{source_example}{Example}
+\newtheorem{program_output}{Output}
+
+\newenvironment{apiexamples}{
+  \newcommand{\apicexample}[4][]{
+    \begin{source_example}
+      \ifthenelse{\equal{##1}{}}{}{\label{##1}}
+      ##2
+    \end{source_example}
+    \lstinputlisting[style=SourceListingsDefault]{##3}
+    ##4}
+  \vspace{-2pt}
+\item[EXAMPLES] \hfill \\
+  \vspace{-2pt}
+}{}
+
+\newcommand{\SourceExample}[2]{
+  \noindent
+  \begin{minipage}{\linewidth}
+    \vspace{0.1in}
+    \begin{source_example}
+      #2 \hfill
+      \lstinputlisting[style=SourceListingsDefault]{#1}
+    \end{source_example}
+    \vspace{0.1in}
+  \end{minipage}
+}
+
+\newcommand{\ProgramOutput}[2]{
+  \noindent
+  \begin{minipage}{\linewidth}
+    \vspace{0.1in}
+    \begin{program_output}
+      #2 \hfill
+      \lstinputlisting[style=SourceListingsDefault]{#1}
+    \end{program_output}
+    \vspace{0.1in}
+  \end{minipage}
+}
+
+%
+% End library API description template commands
+%

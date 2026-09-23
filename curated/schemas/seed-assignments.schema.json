@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/RWTH-HPC/USIS/v0.1.0/curated/schemas/seed-assignments.schema.json",
+  "title": "Hand-authored shape assignments (matcher seed)",
+  "description": "Validates curated/shapes/seed-assignments.json -- for 58 real functions, which shape fits and how its slots are filled. Curated because workflow/formal/assign.py consumes it in production as its first matching rule; measured 2026-07-22, removing it changes 26 of those 58 (23 lose their shape entirely, one gets the wrong shape, two get different slot fills). It is also the only place a per-function correction survives --regenerate formal, which rebuilds curated/formal-assignments.json wholesale. Split from the former shapes.golden.json the same day: the expansion each assignment must produce is a test fixture and lives in workflow/formal/testdata/expansions.json, joined on 'ppm:function' and cross-checked by workflow/formal/test_shapes.py. Per-shape provenance moved into shapes.json, so 'why does this shape exist' has exactly one home.",
+  "type": "object",
+  "required": [
+    "assignments"
+  ],
+  "properties": {
+    "$comment": {
+      "type": "string"
+    },
+    "assignments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "ppm",
+          "function",
+          "shape_ref",
+          "bindings"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "ppm": {
+            "type": "string",
+            "description": "mpi | shmem | nccl | nvshmem"
+          },
+          "function": {
+            "type": "string",
+            "description": "The function key, as used in the corpus."
+          },
+          "shape_ref": {
+            "type": "string",
+            "description": "Id of the shape in shapes.json this function was bound to."
+          },
+          "bindings": {
+            "type": "object",
+            "description": "Slot name -> bound value. Every non-optional slot of the referenced shape must appear; expand() substitutes each for its '{{slot}}' token."
+          },
+          "extra": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "A deep-merge patch for genuinely one-off, non-reusable quirks on an otherwise-good shape match -- never a holding pattern for a near-miss awaiting a second user (see docs/schema/shape-catalog.md)."
+          }
+        }
+      },
+      "description": "One record per hand-assigned function."
+    }
+  }
+}

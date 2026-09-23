@@ -1,0 +1,10 @@
+#! /bin/sh
+
+# Try to extract an mpi.h from the document.  The resulting file will need to 
+# be edited, but should provide a start
+#
+grep -h mpibind chap-*/*.tex | sed -e 's%\\_%_%g' \
+    -e 's%\\MPIupdate{3\.0}{[^}]*}{\([^}]*\)}%\1%g' \
+    -e 's%\\mpibind{\(.*\)}%int \1;%g' \
+    -e 's%\\MPIreplace{3\.0}{[^}]*}{[^}]*}{\([^}]*\)}%\1%g' \
+    -e 's/%.*//g' -e 's/~/ /g'

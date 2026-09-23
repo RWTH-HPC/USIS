@@ -1,0 +1,20 @@
+#! /bin/sh
+#
+# Get a list of the files that does not include the generated -rendered
+# versions of files
+files=`ls chap-*/*.tex | grep -v rendered`
+#
+echo ""
+echo "constskip should not be used for any MPI constant or for mpicode"
+# There is some danger that this will remove a line with a bad constskip
+# because that line has an allowed version.
+grep 'constskip' $files | grep -v 'constskip{false}' | grep -v 'constskip{true}' | grep -v 'constskip{NULL}'
+
+
+echo ""
+echo "const should only be used for MPI constants - not code, not functions"
+grep '\\const' chap-*/*.tex | grep -v '\\const{MPI\\_' | grep -v 'constskip'  | egrep -v 'MPI\\?_UNDEFINED' | egrep -v 'MPI\\?_COMBINER' | egrep -v 'MPI\\?_ANY' | egrep -v 'MPI\\?_WIN\\?_FLAVOR'
+
+echo ""
+echo "Check for misused dashes; --- should be used in text, not - or --"
+grep -- ' - ' chap-*/*.tex | grep -v '%' | egrep -v '[+=&]'

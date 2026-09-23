@@ -1,0 +1,3118 @@
+{
+  "ncclAllGather": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "stream_ordered"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": "Concatenates every rank's send buffer into each rank's receive buffer, placing rank i's contribution at offset i."
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Part of NCCL's original public API: the core collectives and the rank-wise communicator lifecycle both date to the 1.x releases, predating the 2.0 reorganization that introduced group calls and the 2.2/2.7 additions already recorded for ncclBroadcast/ncclSend/ncclRecv. Stated from general knowledge of NCCL's release history -- the vendored 2.30 docs mirror carries no '(Since ...)' marker for these, unlike the sections that do.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "NCCL-1.0"
+    },
+    "parameters[comm].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=COMMUNICATOR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COMMUNICATOR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=DATATYPE); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=DATATYPE); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[sendbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[sendcount].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendcount].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[sendcount].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=STREAM); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=STREAM); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective.algorithm_class": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No reduction, every rank ends up with every rank's contribution.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "all_to_all"
+    },
+    "semantics.collective.comm_scope": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No reduction, every rank ends up with every rank's contribution.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "intracommunicator"
+    },
+    "semantics.collective.in_place": {
+      "method": "condensed",
+      "note": "[corrected 2026-07-21 field audit] NCCL documents in-place operation for this collective explicitly -- see external-inputs/nccl/docs/2.30/api/colls.md, which states the exact aliasing condition per call. The previous `false` contradicted the vendored documentation. Documented condition for this call: `sendbuff == recvbuff + rank * sendcount`.",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": true
+    },
+    "semantics.collective.reduction_op": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No reduction, every rank ends up with every rank's contribution.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.root_involved": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No reduction, every rank ends up with every rank's contribution.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.topology_aware": {
+      "method": "general_knowledge",
+      "note": "[corrected 2026-07-21 field audit] topology_aware is true only for MPI's neighborhood collectives (those requiring a topology communicator from MPI_Cart_create/MPI_Dist_graph_create). This is not one of them. The previous `true` encoded 'implementations use topology-aware ring/tree algorithms', which is a different claim and equally true of MPI's collectives -- see docs/schema/field-semantics.md.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.type": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No reduction, every rank ends up with every rank's contribution.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "allgather"
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] The send and receive buffers may coincide, but only in the exact in-place form this call documents -- any other overlap is undefined. Mirrors semantics.collective.in_place = true; see that field's own note for the documented aliasing condition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "in_place_only"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "comm != NULL",
+        "sendcount >= 0"
+      ]
+    }
+  },
+  "ncclAllReduce": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "stream_ordered"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": "Reduces the input arrays from all ranks with the given operator and leaves an identical copy of the result in every rank's receive buffer."
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Part of NCCL's original public API: the core collectives and the rank-wise communicator lifecycle both date to the 1.x releases, predating the 2.0 reorganization that introduced group calls and the 2.2/2.7 additions already recorded for ncclBroadcast/ncclSend/ncclRecv. Stated from general knowledge of NCCL's release history -- the vendored 2.30 docs mirror carries no '(Since ...)' marker for these, unlike the sections that do.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "NCCL-1.0"
+    },
+    "parameters[comm].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=COMMUNICATOR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COMMUNICATOR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[count].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[count].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[count].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=DATATYPE); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=DATATYPE); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[op].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[op].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=OPERATION); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[op].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=OPERATION); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[sendbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[stream].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=STREAM); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=STREAM); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective.algorithm_class": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same topology_aware reasoning as ncclBroadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "all_to_all"
+    },
+    "semantics.collective.comm_scope": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same topology_aware reasoning as ncclBroadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "intracommunicator"
+    },
+    "semantics.collective.in_place": {
+      "method": "condensed",
+      "note": "[corrected 2026-07-21 field audit] NCCL documents in-place operation for this collective explicitly -- see external-inputs/nccl/docs/2.30/api/colls.md, which states the exact aliasing condition per call. The previous `false` contradicted the vendored documentation. Documented condition for this call: `sendbuff == recvbuff`.",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": true
+    },
+    "semantics.collective.reduction_op": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same topology_aware reasoning as ncclBroadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.collective.root_involved": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same topology_aware reasoning as ncclBroadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.topology_aware": {
+      "method": "general_knowledge",
+      "note": "[corrected 2026-07-21 field audit] topology_aware is true only for MPI's neighborhood collectives (those requiring a topology communicator from MPI_Cart_create/MPI_Dist_graph_create). This is not one of them. The previous `true` encoded 'implementations use topology-aware ring/tree algorithms', which is a different claim and equally true of MPI's collectives -- see docs/schema/field-semantics.md.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.type": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same topology_aware reasoning as ncclBroadcast.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "allreduce"
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] The send and receive buffers may coincide, but only in the exact in-place form this call documents -- any other overlap is undefined. Mirrors semantics.collective.in_place = true; see that field's own note for the documented aliasing condition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "in_place_only"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "comm != NULL",
+        "count >= 0"
+      ]
+    }
+  },
+  "ncclBroadcast": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "stream_ordered"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": "Copies the root rank's send buffer into every rank's receive buffer."
+    },
+    "identity.since": {
+      "method": "web",
+      "note": "Moderate confidence, not a directly-quoted primary source -- two independent web search result summaries agreed 'ncclBroadcast function was added in NCCL 2.2.12' / 'noted in the NCCL 2.2 release documentation', but attempts to fetch the actual archived NCCL 2.2-era release-notes PDF directly failed (binary/garbled extraction). Worth an independent check against the primary release notes before treating as final. NCCL's older ncclBcast (in-place only, no separate output buffer) is a distinct, earlier function not covered by this entry.",
+      "retrieved": "2026-07-20",
+      "source_url": "https://docs.nvidia.com/deeplearning/nccl/release-notes/index.html",
+      "value": "NCCL-2.2"
+    },
+    "parameters[comm].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=COMMUNICATOR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COMMUNICATOR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[count].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[count].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[count].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=DATATYPE); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=DATATYPE); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[root].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[root].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=RANK.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[root].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=RANK); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[stream].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=STREAM); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=STREAM); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective.algorithm_class": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- NCCL communicators have no intercommunicator concept. topology_aware=true is a well-documented NCCL property (ring/tree algorithms tuned to NVLink/PCIe/network topology), unlike the other three PPMs here.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "one_to_all"
+    },
+    "semantics.collective.comm_scope": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- NCCL communicators have no intercommunicator concept. topology_aware=true is a well-documented NCCL property (ring/tree algorithms tuned to NVLink/PCIe/network topology), unlike the other three PPMs here.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "intracommunicator"
+    },
+    "semantics.collective.in_place": {
+      "method": "condensed",
+      "note": "[corrected 2026-07-21 field audit] NCCL documents in-place operation for this collective explicitly -- see external-inputs/nccl/docs/2.30/api/colls.md, which states the exact aliasing condition per call. The previous `false` contradicted the vendored documentation. Documented condition for this call: `sendbuff == recvbuff`.",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": true
+    },
+    "semantics.collective.reduction_op": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- NCCL communicators have no intercommunicator concept. topology_aware=true is a well-documented NCCL property (ring/tree algorithms tuned to NVLink/PCIe/network topology), unlike the other three PPMs here.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.root_involved": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- NCCL communicators have no intercommunicator concept. topology_aware=true is a well-documented NCCL property (ring/tree algorithms tuned to NVLink/PCIe/network topology), unlike the other three PPMs here.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.collective.topology_aware": {
+      "method": "general_knowledge",
+      "note": "[corrected 2026-07-21 field audit] topology_aware is true only for MPI's neighborhood collectives (those requiring a topology communicator from MPI_Cart_create/MPI_Dist_graph_create). This is not one of them. The previous `true` encoded 'implementations use topology-aware ring/tree algorithms', which is a different claim and equally true of MPI's collectives -- see docs/schema/field-semantics.md.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.type": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] comm_scope='intracommunicator' -- NCCL communicators have no intercommunicator concept. topology_aware=true is a well-documented NCCL property (ring/tree algorithms tuned to NVLink/PCIe/network topology), unlike the other three PPMs here.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "broadcast"
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend, applied to a collective buffer.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend, applied to a collective buffer.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend, applied to a collective buffer.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend, applied to a collective buffer.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend, applied to a collective buffer.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend, applied to a collective buffer.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] The send and receive buffers may coincide, but only in the exact in-place form this call documents -- any other overlap is undefined. Mirrors semantics.collective.in_place = true; see that field's own note for the documented aliasing condition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "in_place_only"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "comm != NULL",
+        "count >= 0",
+        "root < comm_size(comm)"
+      ]
+    }
+  },
+  "ncclCommDestroy": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Corrected 2026-07-17 auditing the pilot corpus against the real docs (external-inputs/nccl/docs/2.30/api/comms.md:161): 'This function is an intra-node collective call, which all ranks on the same node should call to avoid a hang.' The original proposal had collective=false/locality='local', based on an unverified assumption rather than the actual doc text -- confirmed wrong on direct comparison. (The docs also note ncclCommDestroy becomes 'a purely local operation' if ncclCommFinalize was already called first, but the default/documented case this entry describes is the collective one.)",
+      "retrieved": null,
+      "source_url": null,
+      "value": "f"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Corrected 2026-07-17 auditing the pilot corpus against the real docs (external-inputs/nccl/docs/2.30/api/comms.md:161): 'This function is an intra-node collective call, which all ranks on the same node should call to avoid a hang.' The original proposal had collective=false/locality='local', based on an unverified assumption rather than the actual doc text -- confirmed wrong on direct comparison. (The docs also note ncclCommDestroy becomes 'a purely local operation' if ncclCommFinalize was already called first, but the default/documented case this entry describes is the collective one.)",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Corrected 2026-07-17 auditing the pilot corpus against the real docs (external-inputs/nccl/docs/2.30/api/comms.md:161): 'This function is an intra-node collective call, which all ranks on the same node should call to avoid a hang.' The original proposal had collective=false/locality='local', based on an unverified assumption rather than the actual doc text -- confirmed wrong on direct comparison. (The docs also note ncclCommDestroy becomes 'a purely local operation' if ncclCommFinalize was already called first, but the default/documented case this entry describes is the collective one.)",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Corrected 2026-07-17 auditing the pilot corpus against the real docs (external-inputs/nccl/docs/2.30/api/comms.md:161): 'This function is an intra-node collective call, which all ranks on the same node should call to avoid a hang.' The original proposal had collective=false/locality='local', based on an unverified assumption rather than the actual doc text -- confirmed wrong on direct comparison. (The docs also note ncclCommDestroy becomes 'a purely local operation' if ncclCommFinalize was already called first, but the default/documented case this entry describes is the collective one.)",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/comms.md",
+      "value": "Destroys a communicator and releases its resources; the communicator must not be accessed afterwards."
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Part of NCCL's original public API: the core collectives and the rank-wise communicator lifecycle both date to the 1.x releases, predating the 2.0 reorganization that introduced group calls and the 2.2/2.7 additions already recorded for ncclBroadcast/ncclSend/ncclRecv. Stated from general knowledge of NCCL's release history -- the vendored 2.30 docs mirror carries no '(Since ...)' marker for these, unlike the sections that do.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "NCCL-1.0"
+    },
+    "parameters[comm].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=COMMUNICATOR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COMMUNICATOR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Handle teardown, no data buffer -- no memory-semantics contract (null), symmetric with ncclCommInitRank's profile.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No user-supplied buffer parameters, so the aliasing contract does not apply (the null case).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "comm != NULL"
+      ]
+    }
+  },
+  "ncclCommInitRank": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Blocks until the rank rendezvous with the rest of the communicator's ranks completes; collective=true since every rank must call it to form the communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Blocks until the rank rendezvous with the rest of the communicator's ranks completes; collective=true since every rank must call it to form the communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Blocks until the rank rendezvous with the rest of the communicator's ranks completes; collective=true since every rank must call it to form the communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Left null -- not clearly documented as a fixed single value.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/comms.md",
+      "value": "Creates a communicator for one rank of a multi-process or multi-threaded clique, using a shared unique ID to rendezvous with the other ranks."
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Part of NCCL's original public API: the core collectives and the rank-wise communicator lifecycle both date to the 1.x releases, predating the 2.0 reorganization that introduced group calls and the 2.2/2.7 additions already recorded for ncclBroadcast/ncclSend/ncclRecv. Stated from general knowledge of NCCL's release history -- the vendored 2.30 docs mirror carries no '(Since ...)' marker for these, unlike the sections that do.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "NCCL-1.0"
+    },
+    "parameters[commId].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[commId].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=ID); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[commId].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=ID); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=COMMUNICATOR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COMMUNICATOR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[nranks].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[nranks].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[nranks].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[rank].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[rank].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=RANK.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[rank].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=RANK); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No data buffer argument -- no memory-semantics contract (null). Blocks until the rank rendezvous completes (already captured in execution.blocking), which is a comm-formation property, not a memory-completion one.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No user-supplied buffer parameters, so the aliasing contract does not apply (the null case).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "nranks >= 1",
+        "rank >= 0",
+        "rank < nranks"
+      ]
+    }
+  },
+  "ncclGroupEnd": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with ncclGroupStart.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with ncclGroupStart.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with ncclGroupStart.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with ncclGroupStart.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/group.md",
+      "value": "Closes a group call, enqueueing every operation issued since the matching ncclGroupStart onto its stream."
+    },
+    "identity.since": {
+      "method": "web",
+      "note": "Same source and reasoning as ncclGroupStart above -- the two are always introduced/used together.",
+      "retrieved": "2026-07-20",
+      "source_url": "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/groups.html",
+      "value": "NCCL-2.0"
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with ncclGroupStart (null).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No user-supplied buffer parameters, so the aliasing contract does not apply (the null case).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    }
+  },
+  "ncclGroupStart": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Brackets a group of otherwise-collective calls to fuse them into one network operation; no parameters, no per-rank matching requirement of its own.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Brackets a group of otherwise-collective calls to fuse them into one network operation; no parameters, no per-rank matching requirement of its own.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Brackets a group of otherwise-collective calls to fuse them into one network operation; no parameters, no per-rank matching requirement of its own.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Brackets a group of otherwise-collective calls to fuse them into one network operation; no parameters, no per-rank matching requirement of its own.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/group.md",
+      "value": "Opens a group call, so that subsequent NCCL operations are aggregated and do not block on inter-CPU synchronization until the matching ncclGroupEnd."
+    },
+    "identity.since": {
+      "method": "web",
+      "note": "Lower confidence than most entries here -- inferred, not directly quoted. NCCL's own docs describe group calls as solving the problem of managing multiple GPUs from one thread without deadlocking, contrasting NCCL 2.x's behavior with NCCL 1.x's ('contrary to NCCL 1.x, there is no need to set the CUDA device before every call within a group') -- multi-GPU-per-thread support was NCCL 2.0's own headline rewrite, and group semantics are described as integral to that capability, not a later addition. No single release-note line was found stating 'group calls added in 2.0' directly; worth an independent check.",
+      "retrieved": "2026-07-20",
+      "source_url": "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/groups.html",
+      "value": "NCCL-2.0"
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] No data buffer -- a context bracket, not a memory operation, no memory-semantics contract (null); see the already-logged ncclGroupStart/End 'no handle to bind to' formal-layer gap for the deeper modeling question.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'management', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No user-supplied buffer parameters, so the aliasing contract does not apply (the null case).",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    }
+  },
+  "ncclRecv": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same 'stream_ordered' encoding as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "stream_ordered"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Symmetric with ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/p2p.md",
+      "value": "Receives a buffer from a peer rank, matching that peer's corresponding ncclSend."
+    },
+    "identity.since": {
+      "method": "condensed",
+      "note": "Same source and reasoning as ncclSend above -- both are introduced by the same 'Two-Sided Point-to-Point Operations' section.",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/p2p.md:9",
+      "value": "NCCL-2.7"
+    },
+    "parameters[comm].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must agree with the matching call's 'comm' argument -- the message-envelope agreement this call's sync.matching.match_keys encodes structurally.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "comm"
+    },
+    "parameters[comm].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=COMMUNICATOR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COMMUNICATOR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[count].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must agree with the matching call's 'count' argument -- the message-envelope agreement this call's sync.matching.match_keys encodes structurally.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "count"
+    },
+    "parameters[count].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[count].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must agree with the matching call's 'datatype' argument -- the message-envelope agreement this call's sync.matching.match_keys encodes structurally.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "datatype"
+    },
+    "parameters[datatype].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=DATATYPE); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=DATATYPE); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[peer].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[peer].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=RANK.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[peer].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=RANK); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[stream].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=STREAM); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=STREAM); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'point_to_point', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'point_to_point', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point.buffered": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same null encoding as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point.direction": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same null encoding as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "receive"
+    },
+    "semantics.point_to_point.ready": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same null encoding as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point.synchronous": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same null encoding as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This call defines no in-place mode, so its buffer arguments must not overlap. Mirrors semantics.collective.in_place = false / the absence of an in-place variant.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "forbidden"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "comm != NULL",
+        "count >= 0",
+        "peer < comm_size(comm)"
+      ]
+    }
+  },
+  "ncclReduce": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "stream_ordered"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; completion='stream_ordered'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": "Reduces the input arrays from all ranks with the given operator, leaving the result in the root rank's receive buffer only."
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Part of NCCL's original public API: the core collectives and the rank-wise communicator lifecycle both date to the 1.x releases, predating the 2.0 reorganization that introduced group calls and the 2.2/2.7 additions already recorded for ncclBroadcast/ncclSend/ncclRecv. Stated from general knowledge of NCCL's release history -- the vendored 2.30 docs mirror carries no '(Since ...)' marker for these, unlike the sections that do.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "NCCL-1.0"
+    },
+    "parameters[comm].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=COMMUNICATOR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COMMUNICATOR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[count].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[count].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[count].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=DATATYPE); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=DATATYPE); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[op].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[op].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=OPERATION); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[op].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=OPERATION); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[root].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[root].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=RANK.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[root].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=RANK); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[stream].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=STREAM); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=STREAM); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective.algorithm_class": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Root-only result, unlike ncclAllReduce.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "all_to_one"
+    },
+    "semantics.collective.comm_scope": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Root-only result, unlike ncclAllReduce.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "intracommunicator"
+    },
+    "semantics.collective.in_place": {
+      "method": "condensed",
+      "note": "[corrected 2026-07-21 field audit] NCCL documents in-place operation for this collective explicitly -- see external-inputs/nccl/docs/2.30/api/colls.md, which states the exact aliasing condition per call. The previous `false` contradicted the vendored documentation. Documented condition for this call: `sendbuff == recvbuff`.",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": true
+    },
+    "semantics.collective.reduction_op": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Root-only result, unlike ncclAllReduce.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.collective.root_involved": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Root-only result, unlike ncclAllReduce.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.collective.topology_aware": {
+      "method": "general_knowledge",
+      "note": "[corrected 2026-07-21 field audit] topology_aware is true only for MPI's neighborhood collectives (those requiring a topology communicator from MPI_Cart_create/MPI_Dist_graph_create). This is not one of them. The previous `true` encoded 'implementations use topology-aware ring/tree algorithms', which is a different claim and equally true of MPI's collectives -- see docs/schema/field-semantics.md.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.type": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Root-only result, unlike ncclAllReduce.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "reduce"
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] The send and receive buffers may coincide, but only in the exact in-place form this call documents -- any other overlap is undefined. Mirrors semantics.collective.in_place = true; see that field's own note for the documented aliasing condition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "in_place_only"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "comm != NULL",
+        "count >= 0",
+        "root < comm_size(comm)"
+      ]
+    }
+  },
+  "ncclReduceScatter": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[corrected 2026-07-21 field audit] ncclReduceScatter is enqueued on a CUDA stream exactly like every other NCCL collective, so its completion is stream-ordered with no request-like handle. `ic` (incomplete/leaves a request) would be inconsistent with all six sibling NCCL collectives and with the stream_ordered value, which exists for precisely this case.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "stream_ordered"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; collective=true, every rank must call it together to produce each rank's slice of the reduced result.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; collective=true, every rank must call it together to produce each rank's slice of the reduced result.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same async/stream-ordered reasoning as ncclSend; collective=true, every rank must call it together to produce each rank's slice of the reduced result.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": "Reduces the input arrays from all ranks with the given operator and scatters the result so that rank i receives the i-th block."
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Part of NCCL's original public API: the core collectives and the rank-wise communicator lifecycle both date to the 1.x releases, predating the 2.0 reorganization that introduced group calls and the 2.2/2.7 additions already recorded for ncclBroadcast/ncclSend/ncclRecv. Stated from general knowledge of NCCL's release history -- the vendored 2.30 docs mirror carries no '(Since ...)' marker for these, unlike the sections that do.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "NCCL-1.0"
+    },
+    "parameters[comm].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=COMMUNICATOR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COMMUNICATOR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=DATATYPE); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=DATATYPE); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[op].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[op].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=OPERATION); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[op].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=OPERATION); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[recvcount].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[recvcount].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[recvcount].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[stream].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=STREAM); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=STREAM); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective.algorithm_class": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] type='reduce_scatter' (see comment above). root_involved=false: no single root, every rank both contributes and receives a slice. algorithm_class='all_to_all' is the closest of the 3 available values (one_to_all/all_to_one/all_to_all) -- every participant both sends its full contribution and receives back a (different-sized) slice, unlike a true one_to_all or all_to_one shape. topology_aware=true, same reasoning as NCCL's other collectives.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "all_to_all"
+    },
+    "semantics.collective.comm_scope": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] type='reduce_scatter' (see comment above). root_involved=false: no single root, every rank both contributes and receives a slice. algorithm_class='all_to_all' is the closest of the 3 available values (one_to_all/all_to_one/all_to_all) -- every participant both sends its full contribution and receives back a (different-sized) slice, unlike a true one_to_all or all_to_one shape. topology_aware=true, same reasoning as NCCL's other collectives.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "intracommunicator"
+    },
+    "semantics.collective.in_place": {
+      "method": "condensed",
+      "note": "[corrected 2026-07-21 field audit] NCCL documents in-place operation for this collective explicitly -- see external-inputs/nccl/docs/2.30/api/colls.md, which states the exact aliasing condition per call. The previous `false` contradicted the vendored documentation. Documented condition for this call: `recvbuff == sendbuff + rank * recvcount`.",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/colls.md",
+      "value": true
+    },
+    "semantics.collective.reduction_op": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] type='reduce_scatter' (see comment above). root_involved=false: no single root, every rank both contributes and receives a slice. algorithm_class='all_to_all' is the closest of the 3 available values (one_to_all/all_to_one/all_to_all) -- every participant both sends its full contribution and receives back a (different-sized) slice, unlike a true one_to_all or all_to_one shape. topology_aware=true, same reasoning as NCCL's other collectives.",
+      "retrieved": null,
+      "source_url": null,
+      "value": true
+    },
+    "semantics.collective.root_involved": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] type='reduce_scatter' (see comment above). root_involved=false: no single root, every rank both contributes and receives a slice. algorithm_class='all_to_all' is the closest of the 3 available values (one_to_all/all_to_one/all_to_all) -- every participant both sends its full contribution and receives back a (different-sized) slice, unlike a true one_to_all or all_to_one shape. topology_aware=true, same reasoning as NCCL's other collectives.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.topology_aware": {
+      "method": "general_knowledge",
+      "note": "[corrected 2026-07-21 field audit] topology_aware is true only for MPI's neighborhood collectives (those requiring a topology communicator from MPI_Cart_create/MPI_Dist_graph_create). This is not one of them. The previous `true` encoded 'implementations use topology-aware ring/tree algorithms', which is a different claim and equally true of MPI's collectives -- see docs/schema/field-semantics.md.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.collective.type": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] type='reduce_scatter' (see comment above). root_involved=false: no single root, every rank both contributes and receives a slice. algorithm_class='all_to_all' is the closest of the 3 available values (one_to_all/all_to_one/all_to_all) -- every participant both sends its full contribution and receives back a (different-sized) slice, unlike a true one_to_all or all_to_one shape. topology_aware=true, same reasoning as NCCL's other collectives.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "reduce_scatter"
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] Same stream-ordered completion reasoning as ncclSend.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'collective', not 'point_to_point', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] The send and receive buffers may coincide, but only in the exact in-place form this call documents -- any other overlap is undefined. Mirrors semantics.collective.in_place = true; see that field's own note for the documented aliasing condition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "in_place_only"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "comm != NULL",
+        "recvcount >= 0"
+      ]
+    }
+  },
+  "ncclSend": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] completion='stream_ordered', the value for exactly this case -- completion is implied by CUDA stream order, observable only via the caller's own stream/event synchronization, not a request-like handle.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "stream_ordered"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL host calls enqueue stream-ordered work and return without waiting for the GPU-side transfer to complete -- blocking=false at the 'waits for the operation's effect' sense the schema asks about. runs_on='gpu' since the actual data movement happens on the GPU/network, independent of launch='cpu'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "both"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL host calls enqueue stream-ordered work and return without waiting for the GPU-side transfer to complete -- blocking=false at the 'waits for the operation's effect' sense the schema asks about. runs_on='gpu' since the actual data movement happens on the GPU/network, independent of launch='cpu'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL host calls enqueue stream-ordered work and return without waiting for the GPU-side transfer to complete -- blocking=false at the 'waits for the operation's effect' sense the schema asks about. runs_on='gpu' since the actual data movement happens on the GPU/network, independent of launch='cpu'.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "identity.desc": {
+      "method": "condensed",
+      "note": "[added 2026-07-21 field audit] one-sentence condensation of this function's section in the vendored docs mirror; NCCL's identity.desc is no longer extracted mechanically (retired 2026-07-21, matching MPI/NVSHMEM -- the mirror's paragraphs are arbitrary-length prose, not one-sentence summaries).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/p2p.md",
+      "value": "Sends a buffer to a peer rank, to be matched by that peer's corresponding ncclRecv."
+    },
+    "identity.since": {
+      "method": "condensed",
+      "note": "The docs mirror's 'Two-Sided Point-to-Point Operations' section (covering ncclSend/ncclRecv) opens with '(Since NCCL 2.7)'. This is the only per-family version marker found anywhere in the classic host API docs (colls.md/comms.md/group.md/p2p.md) -- everything else that matched a 'since NCCL X' search is in device_gin.md/device_setup.md, the newer GPU-initiated-networking API this project's adapter doesn't even parse (see workflow/extract/nccl/adapter.py's module docstring).",
+      "retrieved": null,
+      "source_url": "external-inputs/nccl/docs/2.30/api/p2p.md:9",
+      "value": "NCCL-2.7"
+    },
+    "parameters[comm].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must agree with the matching call's 'comm' argument -- the message-envelope agreement this call's sync.matching.match_keys encodes structurally.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "comm"
+    },
+    "parameters[comm].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=COMMUNICATOR); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[comm].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COMMUNICATOR); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[count].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must agree with the matching call's 'count' argument -- the message-envelope agreement this call's sync.matching.match_keys encodes structurally.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "count"
+    },
+    "parameters[count].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=COUNT.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "value >= 0"
+    },
+    "parameters[count].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=COUNT); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Must agree with the matching call's 'datatype' argument -- the message-envelope agreement this call's sync.matching.match_keys encodes structurally.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "datatype"
+    },
+    "parameters[datatype].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=DATATYPE); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[datatype].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=DATATYPE); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[peer].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[peer].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Range constraint implied by kind=RANK.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "0 <= value < comm_size of the communicator/team this call is issued on"
+    },
+    "parameters[peer].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=RANK); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=BUFFER); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[sendbuff].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] NCCL operates on GPU-resident buffers: sendbuff/recvbuff are device pointers in the memory of the CUDA device associated with this rank's communicator.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "device"
+    },
+    "parameters[stream].constraints.paired_with": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This parameter has no counterpart in a matching call; explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].constraints.value_range": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No value-range constraint applies to this parameter (kind=STREAM); explicitly null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "parameters[stream].memory_space": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Non-buffer parameter (kind=STREAM); memory_space is null by definition.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "relationships.variants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] No variant family: this call has no blocking/nonblocking/persistent/neighborhood/host/gpu counterpart in its own PPM. All six keys explicitly null rather than the object being omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": {
+        "blocking": null,
+        "gpu": null,
+        "host": null,
+        "neighborhood": null,
+        "nonblocking": null,
+        "persistent": null
+      }
+    },
+    "return.possible_errors": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclInvalidArgument",
+        "ncclInvalidUsage",
+        "ncclUnhandledCudaError",
+        "ncclSystemError",
+        "ncclInternalError"
+      ]
+    },
+    "return.possible_successes": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Error/success tokens this call may return, as short codes rather than sentences -- the field's own documented shape.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "ncclSuccess"
+      ]
+    },
+    "semantics.atomic": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Not an atomic operation, so the whole semantics.atomic sub-object is null -- the 'always present, explicitly null' convention applied to the three conditional sub-objects that operation_class did not select.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.collective": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'point_to_point', not 'collective', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.buffer_reuse": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL host calls enqueue stream-ordered work and return immediately -- the send buffer isn't safe to reuse until the enqueued operation actually completes on the stream (e.g. via cudaStreamSynchronize/cudaEventSynchronize), which has no exact match among this enum's 4 values (after_return/after_wait/after_test/after_flush all implicitly assume a CPU-side request/handle model NCCL doesn't have). 'after_flush' is used as the closest available analog to 'wait for the stream to drain', not a confirmed exact fit -- same spirit as the completion-field caveat already flagged on this function above, this is a real enum-coverage question, not a confident answer. remote_completion left null: NCCL has no separate fence/quiet primitive.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.fence_semantics": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL host calls enqueue stream-ordered work and return immediately -- the send buffer isn't safe to reuse until the enqueued operation actually completes on the stream (e.g. via cudaStreamSynchronize/cudaEventSynchronize), which has no exact match among this enum's 4 values (after_return/after_wait/after_test/after_flush all implicitly assume a CPU-side request/handle model NCCL doesn't have). 'after_flush' is used as the closest available analog to 'wait for the stream to drain', not a confirmed exact fit -- same spirit as the completion-field caveat already flagged on this function above, this is a real enum-coverage question, not a confident answer. remote_completion left null: NCCL has no separate fence/quiet primitive.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "none"
+    },
+    "semantics.memory.local_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL host calls enqueue stream-ordered work and return immediately -- the send buffer isn't safe to reuse until the enqueued operation actually completes on the stream (e.g. via cudaStreamSynchronize/cudaEventSynchronize), which has no exact match among this enum's 4 values (after_return/after_wait/after_test/after_flush all implicitly assume a CPU-side request/handle model NCCL doesn't have). 'after_flush' is used as the closest available analog to 'wait for the stream to drain', not a confirmed exact fit -- same spirit as the completion-field caveat already flagged on this function above, this is a real enum-coverage question, not a confident answer. remote_completion left null: NCCL has no separate fence/quiet primitive.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "after_flush"
+    },
+    "semantics.memory.memory_model": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL host calls enqueue stream-ordered work and return immediately -- the send buffer isn't safe to reuse until the enqueued operation actually completes on the stream (e.g. via cudaStreamSynchronize/cudaEventSynchronize), which has no exact match among this enum's 4 values (after_return/after_wait/after_test/after_flush all implicitly assume a CPU-side request/handle model NCCL doesn't have). 'after_flush' is used as the closest available analog to 'wait for the stream to drain', not a confirmed exact fit -- same spirit as the completion-field caveat already flagged on this function above, this is a real enum-coverage question, not a confident answer. remote_completion left null: NCCL has no separate fence/quiet primitive.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.remote_completion": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL host calls enqueue stream-ordered work and return immediately -- the send buffer isn't safe to reuse until the enqueued operation actually completes on the stream (e.g. via cudaStreamSynchronize/cudaEventSynchronize), which has no exact match among this enum's 4 values (after_return/after_wait/after_test/after_flush all implicitly assume a CPU-side request/handle model NCCL doesn't have). 'after_flush' is used as the closest available analog to 'wait for the stream to drain', not a confirmed exact fit -- same spirit as the completion-field caveat already flagged on this function above, this is a real enum-coverage question, not a confident answer. remote_completion left null: NCCL has no separate fence/quiet primitive.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.memory.symmetric_heap": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL host calls enqueue stream-ordered work and return immediately -- the send buffer isn't safe to reuse until the enqueued operation actually completes on the stream (e.g. via cudaStreamSynchronize/cudaEventSynchronize), which has no exact match among this enum's 4 values (after_return/after_wait/after_test/after_flush all implicitly assume a CPU-side request/handle model NCCL doesn't have). 'after_flush' is used as the closest available analog to 'wait for the stream to drain', not a confirmed exact fit -- same spirit as the completion-field caveat already flagged on this function above, this is a real enum-coverage question, not a confident answer. remote_completion left null: NCCL has no separate fence/quiet primitive.",
+      "retrieved": null,
+      "source_url": null,
+      "value": false
+    },
+    "semantics.one_sided": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] operation_class is 'point_to_point', not 'one_sided', so this conditional sub-object is null. Exactly one of collective/point_to_point/one_sided/atomic is ever non-null; the other three are explicitly null rather than omitted.",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point.buffered": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL has no buffered/synchronous/ready send-mode distinction at all -- null ('not applicable').",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point.direction": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL has no buffered/synchronous/ready send-mode distinction at all -- null ('not applicable').",
+      "retrieved": null,
+      "source_url": null,
+      "value": "send"
+    },
+    "semantics.point_to_point.ready": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL has no buffered/synchronous/ready send-mode distinction at all -- null ('not applicable').",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "semantics.point_to_point.synchronous": {
+      "method": "general_knowledge",
+      "note": "[model-proposed; reviewed 2026-07-17 in an earlier review pass whose record is not kept in curated/review/] NCCL has no buffered/synchronous/ready send-mode distinction at all -- null ('not applicable').",
+      "retrieved": null,
+      "source_url": null,
+      "value": null
+    },
+    "tool_integration.buffer_aliasing": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] This call defines no in-place mode, so its buffer arguments must not overlap. Mirrors semantics.collective.in_place = false / the absence of an in-place variant.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "forbidden"
+    },
+    "tool_integration.context_dependencies": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Every field in this entry is a fixed, static contract -- no field's effective value depends on runtime state rather than the symbol. Empty array is the documented way to say that.",
+      "retrieved": null,
+      "source_url": null,
+      "value": []
+    },
+    "tool_integration.invariants": {
+      "method": "general_knowledge",
+      "note": "[added 2026-07-21 field audit] Preconditions in the shared reference grammar (docs/schema/reference-grammar.md), which permits bare parameter names, bare PPM constants and comm_size() in this field specifically. Each string here is validated by workflow/formal/grammar.py's validate_invariant. An empty array means the call has no symbol-level precondition to state, not that none was looked for.",
+      "retrieved": null,
+      "source_url": null,
+      "value": [
+        "comm != NULL",
+        "count >= 0",
+        "peer < comm_size(comm)"
+      ]
+    }
+  }
+}

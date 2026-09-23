@@ -1,0 +1,41 @@
+\apisummary{
+    Returns the number of \acp{PE} running in a program.
+}
+
+\begin{apidefinition}
+
+\begin{Csynopsis}
+int @\FuncDecl{shmem\_n\_pes}@(void);
+\end{Csynopsis}
+
+\begin{apiarguments}
+    \apiargument{None.}{}{}
+\end{apiarguments}
+
+\apidescription{
+    The routine returns the number of \acp{PE} running in the program.
+}
+
+\apireturnvalues{
+    Integer -  Number of \acp{PE} running in the \openshmem program.
+}
+
+\apinotes{
+    As of \openshmem[1.2] the use of \FUNC{\_num\_pes} has been
+    deprecated. Although \openshmem libraries are required to support the call,
+    users are encouraged to use \FUNC{shmem\_n\_pes} instead.  The behavior and
+    signature  of the routine \FUNC{shmem\_n\_pes} remains unchanged from the
+    deprecated \FUNC{\_num\_pes} version.
+}
+
+\begin{apiexamples}
+
+\apicexample
+    {The following \FUNC{shmem\_my\_pe} and \FUNC{shmem\_n\_pes} example is for
+    \CorCpp{} programs:}
+    {./example_code/shmem_npes_example.c}
+    {}
+
+\end{apiexamples}
+
+\end{apidefinition}

@@ -1,0 +1,1046 @@
+#! @PERL5@
+# -*- Mode: perl; -*-
+#
+# FIXME: F77includes, F09includeToModules, F90modules only used once, and
+# are probably abandoned features that need to be removed
+#
+# Extract the examples in a form that allows them to be tested.
+#
+# Basic form is
+# \begin{example}
+# ...
+# \begin{verbatim}
+#    capture this code
+# \end{verbatim}
+# ...
+# \end{example}
+#
+# Several alternatives to verbatim are supported. These include
+#  \begin{lstlisting}[language=xxx]
+#     where xxx is C or Fortran, usually modified with [MPI], [MPI08], or
+#     [MPI08dirs] (if a dialect is included, the form is
+#     language={[dialect]language}, as in language={[MPI]C}
+#  \begin{Verbatim}[options]
+#
+# There are special commands that help in processing.  These must appear before
+# the \begin{verbatim} (or the alternative commands).
+#
+# We also need to process things like \fileinclude{filename} as if they
+# are a verbatim environment.
+#
+# Globals
+# LineCount is used to report on the location of the examples.
+$LineCount = 0;
+$FileName  = "stdin";
+# Set missing prototypes to yes on older Solaris systems
+$missing_prototype = "no";
+$noisy = 0;
+$Debug     = 0;
+$DebugSubst = 0;
+$INFILE    = STDIN;
+$gVerbose  = 0;
+# Default output directory is the current directory
+$outdir = ".";
+# Location of this package
+$prefix       = "@prefix@";
+$exec_prefix  = "@exec_prefix@";
+$bindir       = "@bindir@";
+$mpiheaderdir = "@abs_srcdir@";
+#
+# name of the test package.  If none given, use MPI definitions
+$testpkg = "@testpkg@";
+#
+#
+# Globals about the current example.
+# Language extension (and hence compiler).  The default is C
+$LangExt = "c";
+# LangVer allows us to distinguish between different versions of the
+# same language - this is important for Fortran - versions there are
+# f, f90, and f08 (corresponding to the 3 Fortran bindings for MPI)
+$LangVer = "c";
+# Line where example starts
+$ExampleLine = 0;
+# Output file descriptor
+$FOUT = 0;
+#
+# Convert Fortran77 to Fortran90 (free format)
+$UpdateFortran = 0;
+$autoFortranContinue = 0;
+# Use this to control whether Fortran examples are tested; e.g., set to
+# true if no full MPI Fortran implementation is available.
+$ignoreFortran = 0;
+# Test against some implementations mpi.h file
+$useOriginalMPIH = 0;
+# Test against an mpi.h created from the document
+$useDerivedMPIH = 1;
+# Set this to one cause any use of a deprecated function to cause an error.
+$noDeprecated = 0;
+# This might hold some text; before finishing, call FlushTextLine.
+$LineBuffer = "";
+# Not all Fortran compilers accept "f90" as the extension for Fortran programs
+$fortExt = "f90";
+# Available Compilers.  May be empty
+$availCompilers{'c'} = "@CC@";
+$availCompilers{'f90'} = "@FC@";
+$availCompilers{'mpic'} = "@MPICC@";
+$availCompilers{'mpif'} = "@MPIF77@";
+$availCompilers{'mpif90'} = "@MPIF90@";
+$availCompilers{'mpif08'} = "@MPIF90@";
+# An option is to use existing MPI compiler wrappers.
+$useMPIcompilers = 0;
+
+# C++ compilation withdrawn since MPI removed the C++ binding
+
+# If no Fortran compiler is available, set ignoreFortran
+if ("@FC@" eq "false") {
+    $ignoreFortran = 1;
+}
+
+# Read commandline options
+# FIXME: Unify with the other check
+foreach (@ARGV) {
+    if (/^--?mpicompilers/) {
+	$useMPIcompilers = 1;
+    }
+    elsif (/^--?debugsubst/) { $DebugSubst = 1; }
+    elsif (/^--?debug/)      { $Debug = 1; }
+    elsif (/^--?verbose/)    { $gVerbose = 1; }
+    elsif (/^--?cc=(.*)/)    { $compileCmd{'c'} = $1; }
+    elsif (/^--?fc=(.*)/)    { $compileCmd{'f90'} = $1; }
+    elsif (/^--?nofortran/)  { $ignoreFortran = 1; }
+    elsif (/^--?nodeprecated/) { $noDeprecated = 1; }
+    elsif (/^--?outdir=(.*)/) {
+	$outdir = $1;
+	if (! -s $outdir) {
+	    print STDERR "Specified output directory $outdir does not exist\n";
+        }
+    }
+    elsif (/^--?config=(.*)/) {
+	$cfgfile = $1;
+	if (! -s $cfgfile) {
+	    print STDERR "Could not open config file $cfgfile\n";
+        }
+ 	else {
+	    # Using require allows this file to contain routine and
+	    # variable definitions
+	    require $cfgfile;
+	}
+    }
+    elsif (/^--?help/ || /^--?usage/) {
+	print "mpichk [ --config=filename ] [--verbose] \n";
+	print "       [ --cc=cmd ] [ --fc=cmd ] [ --outdir=dire ]\n";
+	print "       [ [ file ... ]\n";
+	print "Check a LaTeX file with structured comments describing \n";
+        print "code fragments for correctness.  Read from stdin if\n";
+	print "no file is specified.\n";
+	print "If --cc, or --fc, are given, the provided cmd is used\n";
+	print "to compile the extracted example.  For example, use\n";
+	print "\t mpichk --cc=\"mpicc -Wall -Wpendantic\" ... \n";
+	print "to use an version of mpicc for C programs that supports the \n";
+	print "GNU options for detailed warnings.\n";
+
+	return;
+    }
+    elsif (-e $_) {
+	$inFiles[$#inFiles+1] = $_;
+    }
+    else {
+	print STDERR "Unrecognized argument $_\n";
+	exit(1);
+    }
+}
+
+print "Files to process are @inFiles\n" if $Debug;
+
+# Determine the compile command to use, complete with path to include file
+# or modules
+%compileCmd = ();
+%compileFlags = ();
+
+if ($useMPIcompilers) {
+    if ($availCompilers{'mpic'} ne "") {
+	$compileCmd{'c'} = $availCompilers{'mpic'};
+    }
+    if ($availCompilers{'mpif'} ne "") {
+	$compileCmd{'f'} = $availCompilers{'mpif'};
+    }
+    if ($availCompilers{'mpif90'} ne "") {
+	$compileCmd{'f90'} = availCompilers{'mpif90'};
+	$compileCmd{'f08'} = availCompilers{'mpif08'};
+    }
+}
+else {
+    $compileCmd{'c'}     = $availCompilers{'c'};
+    $compileFlags{'c'}   = "-I$mpiheaderdir";
+    $compileCmd{'f'}     = $availCompilers{'f90'};
+    $compileFlags{'f'}   = "-I$mpiheaderdir";
+    $compileCmd{'f90'}   = $availCompilers{'f90'};
+    $compileFlags{'f90'} = "@FC_MODINC@$mpiheaderdir/fortran";
+    $compileCmd{'f08'}   = $availCompilers{'f90'};
+    $compileFlags{'f08'} = "@FC_MODINC@$mpiheaderdir/fortran08";
+}
+
+# Add the common compiler flags
+$compileFlags{'c'}   .= " @CFLAGS@";
+$compileFlags{'f'}   .= " @FCFLAGS@";
+$compileFlags{'f90'} .= " @FCFLAGS@";
+$compileFlags{'f08'} .= " @FCFLAGS@";
+
+# Sometimes, we may want to add a compile option for a particular test,
+# e.g., tell Fortran to ignore mismatched argments to a routine (note
+# that a full MPI module should take care of this, but it is difficult in
+# all cases)
+# Note that gfortran provides no practical way to turn off *warnings*
+# on argument mismatches - only by turning off *all* warnings can you do that
+$specialCompileFlags{'mismatch'} = "-fallow-argument-mismatch";
+$specialCompileFlags{'pointer'} = "-fcray-pointer";
+
+# Allow override with environment variables
+if (defined($ENV{"MPICHK_CFLAGS"})) {
+    $compileFlags{'c'} = $ENV{"MPICHK_CFLAGS"};
+}
+if (defined($ENV{"MPICHK_FFLAGS"})) {
+    $compileFlags{'f'} = $ENV{"MPICHK_FFLAGS"};
+}
+if (defined($ENV{"MPICHK_F90FLAGS"})) {
+    $compileFlags{'f90'} = $ENV{"MPICHK_F90FLAGS"};
+}
+if (defined($ENV{"MPICHK_F08FLAGS"})) {
+    $compileFlags{'f08'} = $ENV{"MPICHK_F08FLAGS"};
+}
+
+# UNSUPPORTED
+# Get some options that affect the default behavior
+if (defined($ENV{'MPICHK_NEWMPIONLY'})) { $useOriginalMPIH = 0; }
+
+#
+# Routines to add specific include files.
+#
+# These allow two kinds of customizations.  The simplest is to change the
+# list of files that each routine adds to the test programs.
+# More complex effects can be accomplished by replacing the routines
+# themselves
+
+# Cincludes are added to all C *AND* C++ files
+@CIncludeList = ();
+sub ExtraCIncludes {
+    # Temporary for checking using MPICH2 (to include new bindings)
+    print $FOUT "#define MPICH2_CONST const\n";
+    foreach $incfile (@CIncludeList) {
+        print $FOUT "#include \"$incfile\"\n";
+    }
+}
+#
+# F77 includes are added only the F77 files (not to F90)
+@F77IncludeList = ( );
+sub ExtraF77Includes {
+    foreach $incfile (@F77IncludeList) {
+        print $FOUT "        include \"$incfile\"\n";
+    }
+}
+#
+# F90 modules are added only to the F90 files
+@F90ModuleList = ( );
+sub ExtraF90Modules {
+    foreach $modfile (@F90ModuleList) {
+        print $FOUT "        use $modfile\n";
+    }
+}
+#
+# For better error checking, we may want to replace "include 'foof.h'" with
+# "use FOO" as a Fortran 90 module.
+@F90IncludeToModule = { };
+sub F90ItoM {
+    foreach $key (keys(%F90IncludeToModule)) {
+        $modfile = $F90IncludeToModule{$key};
+        s/include\s\s*['"]$key['"]/use $modfile/g;
+    }
+}
+
+$Cincludes = \&ExtraCIncludes;
+$F77includes = \&ExtraF77Includes;
+$F90modules = \&ExtraF90Modules;
+$F90includeToModules = \&F90ItoM;
+
+if ($testpkg ne "" && -s "$bindir/config.$testpkg.cfg") {
+    require "$bindir/config.$testpkg.cfg";
+}
+
+if ("@enable_mpi@" eq "yes") {
+    if ($useOriginalMPIH) {
+	@CIncludeList = ( 'mpi.h' );
+    }
+    if ($useDerivedMPIH) {
+	@CIncludeList = ( '../mpicompilechk/mpi-5.0.h' );
+    }
+    @F77IncludeList = ( 'mpif.h' );
+    @F90ModuleList = ( 'MPI' );
+    @F90IncludeToModule = { "mpif.h" => "MPI" };
+    %deprecatedFunctions = ( 'MPI_Type_hvector' => 'MPI_Type_create_hvector', 
+			     'MPI_Type_hindexed' => 'MPI_Type_create_hindexed', 
+			     'MPI_Type_struct' => 'MPI_Type_create_struct', 
+			     'MPI_Address' => 'MPI_Get_address', 
+			     'MPI_Type_extent' => 'MPI_Type_get_extent', 
+			     'MPI_Keyval_create' => 'MPI_Comm_create_keyval',
+			     'MPI_Keyval_free' => 'MPI_Comm_free_keyval', 
+			     'MPI_Attr_put' => 'MPI_Comm_set_attr',
+			     'MPI_Attr_get' => 'MPI_Comm_get_attr', 
+			     'MPI_Attr_delete' => 'MPI_Comm_delete_attr', 
+			     'MPI_Errhandler_create' => 'MPI_Comm_create_errhandler', 
+			     'MPI_Errhandler_set' => 'MPI_Comm_set_errhandler', 
+			     'MPI_Errhandler_get' => 'MPI_Comm_get_errhandler', 
+			     'MPI_Type_lb' => 'MPI_Type_get_extent',
+			     'MPI_Type_ub' => 'MPI_Type_get_extent',
+			     'MPI_Delete_function' => 'MPI_Comm_delete_attr_function',
+			     'MPI_Copy_function' => 'MPI_Comm_copy_attr_function',
+			     'MPI_Handler_function' => 'MPI_Comm_errhandler_fn',
+	);
+}
+
+#
+# Update the variables
+sub SetDefaults
+{
+    $LangExt = "c";
+    $LangVer = "c";
+    $extraFlags = "";
+    $ExampleLine = $LineCount;
+    $ExampleFileName = "";
+    $ExampleFileObj  = "";
+    $IncludeRoutineHeader = 0;
+    $includeMPIMod = "yes";
+    $includeImplicitNone = "yes";
+    $DeclString = "";
+    $DeclAMString = "";
+    $DeclSawUse = 0;
+    $TailString = "";
+    $IncDir = "";
+    $TopString  = "";
+    $ArgsString = "";
+    $SubstSearch = "";
+    $SubstString = "";
+    @SubstSearchArr = ();
+    @SubstStringArr = ();
+    @SubstFoundArr = ();
+    $SkipElipsis = 0;
+    $IgnoreVerbatim = 0;
+    $FOUT = 0;
+    $UpdateFortran = 0;
+    $ReplaceMPIF = 1;
+    $LineBuffer = "";
+    $ReturnType = "void";
+    $autoFortranContinue = 0;
+}
+
+# Create the test file header (common top part)
+sub CreateTestfileHeader
+{
+    # Ready for example:
+    $ExampleFileName = "$outdir/ex$ExampleLine.$LangExt";
+    $ExampleFileObj  = "$outdir/ex$ExampleLine.o";
+    unlink $ExampleFileName;
+    open( $FOUT, ">$ExampleFileName" ) || die "Open failed: $!\n";
+    # Moved the top string to after the initial definitions.
+    if ($LangExt eq "c") {
+        print $FOUT "/* Example from line $ExampleLine in file $FileName */\n";
+	print $FOUT "#include <stdio.h>\n#include <stdlib.h>\n";
+	# Use iostream instead of the older iostream.h
+        print $FOUT "#include \"protofix.h\"\n" 
+	      if ("$missing_prototype" eq "yes" );
+	# Add any system-specific cincludes (C AND C++)
+        &$Cincludes;
+        if ($TopString ne "") { print $FOUT "$TopString\n"; }
+	if ($noDeprecated) { &OutNoDeprecated; }
+	if ($IncludeRoutineHeader) {
+	    if ($ArgsString eq "") { $ArgsString = "void"; }
+	    print $FOUT "$ReturnType testroutine($ArgsString) {\n";
+	}
+	print $FOUT "$DeclString\n";
+	}
+    elsif ($LangExt eq "f" || $LangExt eq "f90") {
+        if ($TopString ne "") { print $FOUT "$TopString\n"; }
+	print $FOUT "!\n ";
+	if ($IncludeRoutineHeader) {
+	    print $FOUT "SUBROUTINE TESTROUTINE($ArgsString)\n";
+	    #print $FOUT "INCLUDE \'mpif.h\'\n";
+	    if ($includeMPIMod eq "yes") {
+		if ($LangVer eq "f90") {
+		    print $FOUT "USE MPI\n";
+		}
+		elsif ($LangVer eq "f08") {
+		    print $FOUT "USE MPI_F08\n";
+		}
+		else {
+		    print STDERR "Unrecognized Fortran version $LangVer\n";
+		}
+	    }
+	    if ($includeImplicitNone eq "yes") {
+		# Any example fragment that contains a "use" statement
+		# needs to have the use statements before any implicit none
+		# As a simple work around, the implicit none can be disabled
+		print $FOUT "IMPLICIT NONE\n";
+	    }
+	    print $FOUT "$DeclString\n";
+	}
+    }
+}
+
+sub CompleteTestfile
+{
+    if ($IncludeRoutineHeader) {
+	if ($LangExt eq "f" || $LangExt eq "f90") {
+	    if ($TailString ne "") { print $FOUT "$TailString\n"; }
+	    print $FOUT "END\n";
+	}
+	else {
+	    if ($TailString ne "") { print $FOUT "$TailString\n"; }
+	    print $FOUT "}\n";
+	}
+    }
+    else {
+	if ($TailString ne "") { print $FOUT "$TailString\n"; }
+    }
+    # Finish up (run compiler on example?)
+    close( $FOUT );
+    print "Example on line $ExampleLine in $FileName\n" if $noisy;
+}
+
+# Process a single line
+sub ProcessTextLine
+{
+    if ($noDeprecated) {
+	foreach $name (keys(%deprecatedFunctions)) {
+	    if (/$name/i) {
+		print "in $FileName, at line $LineCount: $name should be $deprecatedFunctions{$name}\n";
+	    }
+	}
+    }
+    if (!$useOriginalMPIH) {
+	if (/^\s*#\s*include\s*.mpi\.h./) {
+	    $_ = "\n";
+	}
+    }
+    # Look for the "use mpi" or "use mpi_f08" string, and if found, add the
+    # DECLAFTERMOD string
+    if ($DeclAMString ne "") {
+	if (/^\s*use[,\s]/i) {
+	    $DeclSawUse = 1;
+	}
+	elsif ($DeclSawUse) {
+	    $_ = $DeclAMString . "\n" . $_;
+	    $DeclSawUse = 0;
+	}
+    }
+
+    if ($SubstSearch ne "") {
+	for ($i=0; $i<=$#SubstSearchArr; $i++) {
+	    print "Substituting $SubstStringArr[$i] for $SubstSearchArr[$i]\n" if $DebugSubst;
+	    $rc =  s%$SubstSearchArr[$i]%$SubstStringArr[$i]%g;
+	    if ($rc != 0) {
+		$SubstFoundArr[$i] = 1;
+		if ($DebugSubst) { print "Found match!\n"; }
+	    }
+	}
+    }
+    if (/\.\.\./) {
+	if ($SkipElipsis) { $_ = "\n"; }
+	else { print "Example contains ... at line $LineCount\n"; }
+    }
+    # Handle some Fortran changes
+    if ($UpdateFortran) {
+	# include mpif.h to use mpi
+	if ($ReplaceMPIF) {
+            s/include[ ]*['"]mpif.h['"]/use mpi/g;
+        }
+	# Look for continuation lines
+        # Convert c or C (followed by a space) to !
+	# This allows us to handle examples that begin in the first 
+	# column.  There is a special case for single character lines
+	s/^[cC]\s/! /g;
+	s/^[cC]$/!/g;
+        if (/^.....\$/) { 
+	    print "Found continuation line\n" if $Debug;
+	    # Remove the continuation mark
+	    s/^(.....)\$/$1 /g ;
+	    # Add a & to the previous line
+	    chop $LineBuffer;
+	    $LineBuffer = "$LineBuffer &\n";
+	}
+        if (/^.....\+/) {
+	    print "Found continuation line\n" if $Debug;
+	    # Remove the continuation mark
+	    s/^(.....)\+/$1 /g ;
+	    # Add a & to the previous line
+	    chop $LineBuffer;
+	    $LineBuffer = "$LineBuffer &\n";
+	}
+	if ($autoFortranContinue) {
+	    if (/[\+\-,]\s*$/) {
+		# Add a Fortran90-style continuation
+		s/\r?\n//;
+		$_ .= " &\n";
+	    }
+	}
+	$Save="$_";
+	$_ = $LineBuffer;
+	$LineBuffer = $Save;
+    }
+}
+
+sub FlushTextLine
+{
+    if ($UpdateFortran) {
+	print $FOUT $LineBuffer;
+	$LineBuffer = "";
+    }
+}
+
+sub CompileTestfile
+{
+    my $cmdline;
+
+    unlink "ex.out";
+    # Try to use the simple approach first (just use mpicc/mpif77 etc)
+    if (defined($compileCmd{$LangVer})) {
+	$cmdline = "$compileCmd{$LangVer} -c $compileFlags{$LangVer} -o $ExampleFileObj $extraFlags $ExampleFileName >ex.out 2>&1"
+    }
+    else {
+	print STDOUT "Could not find $LangVer!\n" if $Debug;
+        $cmdline = "make -f @DATADIR@/Makefile INCDIR=\"$IncDir\" EX=$ExampleFileObj > ex.out 2>&1";
+    }
+    print STDOUT $cmdline . "\n" if $gVerbose;
+    # Wait until here to test for ignoreFortran so that verbose output
+    # will issue the compile command that would have been used.
+    if ($ignoreFortran && ($LangExt eq "f" || $LangExt eq "f90")) {
+	# Leave the extracted code, but don't attempt to compile
+	return;
+    }
+    $rc = system( $cmdline );
+    if ($rc != 0) {
+	print "Error or warning detected in example on line $ExampleLine ($FileName):\n";
+	system( "cat ex.out" );
+    }
+    else {
+	system( "cat ex.out" );
+    }
+}
+
+# \begin{verbatim} (or similar command) has been seen.  Process the rest.
+# Pass the environment name as option (e.g., "verbatim" or "lstlisting")
+sub ProcessVerbatim
+{
+    my $envname = $_[0];
+    my $echars  = $_[1];   # May be empty
+    CreateTestfileHeader ;
+    # Now, read the rest of the verbatim
+    while (<$INFILE>) {
+	$LineCount++;
+	if ($echars ne "") {
+	    # process a few LaTeX commands within the escape chars.
+	    $es = quotemeta(substr($echars,0,1));
+	    $ee = quotemeta(substr($echars,1,1));
+	    while (/([^$es]*)$es([^$ee]*)$ee(.*)/) {
+		print "Found Latex Sequence $2\n" if $Debug;
+		$pre = $1;
+		$exp = $2;
+		$post = $3;
+		if ($exp =~ /\\underline{(.*)}/) {
+		    print "Found underline\n" if $Debug;
+		    $exp = $1;
+		    # Within escapechar, we must escape underscore -
+		    # so need to remove that escape when removing the
+		    # escapechars command.
+		    $exp =~ s/\\_/_/;
+		}
+		else {
+		    print STDERR "Unhandled command in escape: $exp\n";
+		}
+		$_ = $pre . $exp . $post;
+	    }
+	}
+        if (/\\end\{$envname}/) { last; }
+	ProcessTextLine ;
+	print $FOUT $_;
+    }
+
+    FlushTextLine ;
+    CompleteTestfile ;
+    &CheckAllSubstsUsed() ;
+
+    CompileTestfile ;
+}
+
+# \begin{Verbatim} has been seen.  Process the rest.
+sub ProcessCapVerbatim
+{
+    # Try to extract command chars from options
+    my $ccmd = "\\";
+    my $lbrc = "{";
+    my $rbrc = "}";
+    if ($VerbatimOptions =~ /\[commandchars=(.*)\]/) {
+	my $chars = $1;
+	print "Found commandchars = $1\n" if $Debug;
+	# chars replace \ { } in that order
+	$ccmd = substr $chars,0,1;
+	$chars = substr $chars,1;
+	if ($ccmd eq "\\") {
+	    $ccmd .= substr $chars,0,1;
+	    $chars = substr $chars,1;
+	}
+	print "ccmd = $ccmd\n" if $Debug;
+	$lbrc = substr $chars,0,1;
+	$chars = substr $chars,1;
+	if ($lbrc eq "\\") {
+	    $lbrc .= substr $chars,0,1;
+	    $chars = substr $chars,1;
+	}
+	print "lbrc = $lbrc\n" if $Debug;
+	$rbrc = substr $chars,0,1;
+	$chars = substr $chars,1;
+	if ($rbrc eq "\\") {
+	    $rbrc .= substr $chars,0,1;
+	    $chars = substr $chars,1;
+	}
+	print "rbrc = $rbrc\n" if $Debug;
+    }
+
+    CreateTestfileHeader ;
+    # Now, read the rest of the verbatim
+    while (<$INFILE>) {
+	$LineCount++;
+	# In CapVerbatim, we may see some LaTeX commands, primarily updates
+ 	if (/\\end\{Verbatim}/) { last; }
+	while (/^(.*)${ccmd}MPIupdate${lbrc}[^}]+${rbrc}${lbrc}[^}]+${rbrc}${lbrc}([^}]*)${rbrc}(.*)$/) {
+	    $_ = $1 . $2 . $3 . "\n";
+	}
+	while (/^(.*)${ccmd}MPIdelete${lbrc}[^}]+${rbrc}${lbrc}[^}]+${rbrc}${lbrc}([^}]*)${rbrc}(.*)$/) {
+	    $_ = $1 . $3 . "\n";
+	}
+	while (/^(.*)${ccmd}MPIreplace${lbrc}[^}]+${rbrc}${lbrc}[^}]+${rbrc}${lbrc}([^}]*)${rbrc}${lbrc}[^}]+${rbrc}(.*)$/) {
+	    $_ = $1 . $3 . $4 . "\n";
+	}
+	if (/MPIupdate/) {
+	    # Substitute MPIupdate{3.0}{xxx}{yyy} to yyy
+	    print STDERR "Warning: MPIupdate command at $LineCount: $_\n";
+	}
+	ProcessTextLine ;
+	print $FOUT $_;
+    }
+
+    FlushTextLine ;
+    CompleteTestfile ;
+    &CheckAllSubstsUsed() ;
+
+    CompileTestfile ;
+}
+
+# Process a fileinclude.  Argument is the file name
+sub ProcessFileinclude 
+{
+    my $isDOS = 0;
+    my $filename = $_[0];
+
+    print "Processing $filename\n" if $Debug;
+
+    # Copy the file into the test header
+    CreateTestfileHeader ;
+    # Now, read the rest of the verbatim
+    # Some uses of include assume that the extension is .tex and do not
+    # include the extension.
+    if (! -s $filename) {
+	if (-s "$filename.tex") {
+	    $filename .= ".tex";
+	}
+	else {
+	    print STDERR "Could not find $filename or $filename.tex\n";
+	}
+    }
+    open( INCFILE, "<$filename]" );
+    while (<INCFILE>) {
+	# Check for DOS-style files
+	if (/\r\n/) {
+	    s/\r\n/\n/;
+	    if ($isDOS == 0) {
+		print STDERR "$filename has DOS-style End of lines (<return><newline>)\n";
+		$isDOS = 1;
+	    }
+	}
+	ProcessTextLine ;
+	print $FOUT $_;
+    }
+
+    FlushTextLine ;
+
+    CompleteTestfile ;
+
+    CompileTestfile ;
+}
+
+# %%HEADER has been seen process until %%ENDHEADER
+sub ProcessHeader
+{
+    while (<$INFILE>) {
+	if (/\r\n/) {
+	    s/\r\n/\n/;
+	}
+	$LineCount++;
+        # print $_;
+	if (/%%ENDHEADER/) { last; }
+	if (! /%%/) {
+          print "Error: Header without %% or missing %%ENDHEADER at $LineCount\n"; return ; }
+	# Various header commands, like
+	# %%LANG: FORTRAN, FORTRAN90, FORTRAN08, C, C++ (sets $LangExt and
+        # $LangVer)
+	# %%DECL: variable declarations to add
+        # %%TAIL: stuff to add before the end of the code
+        # %%FRAGMENT - indicates that code is fragment, not full routine
+	if (/%%FRAGMENT/) { $IncludeRoutineHeader = 1; }
+	if (/%%LANG:\s*C/) { $LangExt = "c"; $LangVer = "c";}
+	# Use f90 for the extension for Fortran 90 - some compilers
+	# use this to select free-form vs fixed form.
+	elsif (/%%LANG:\s*FORTRAN08/) { $LangExt = $fortExt; $LangVer = "f08";}
+	elsif (/%%LANG:\s*FORTRAN90/) { $LangExt = $fortExt; $LangVer = "f90";}
+	elsif (/%%LANG:\s*Fortran90/) { $LangExt = $fortExt; $LangVer = "f90";}
+        elsif (/%%LANG:\s*FORTRAN/) { $LangExt = $fortExt; $UpdateFortran = 1;
+				      $LangVer = "f90";}
+        elsif (/%%LANG:\s*Fortran/) { $LangExt = $fortExt; $UpdateFortran = 1;
+				      $LangVer = "f90";}
+	elsif (/%%LANG:\s*(.*)/) {
+	    print STDERR "Unrecognized language $1\n";
+	    $IgnoreVerbatim = 1;
+	}
+	elsif (/%%NOUSEMPI/) { $ReplaceMPIF = 0; }
+	elsif (/%%NOADDMPIMOD/) { $includeMPIMod = "no"; }
+	elsif (/%%NOIMPLICITNONE/) { $includeImplicitNone = "no"; }
+	elsif (/%%AUTOCONTINUE/) { $autoFortranContinue = 1; }
+	elsif (/%%SKIPELIPSIS/) { $SkipElipsis = 1; }
+	elsif (/%%DECL:\s*(.*)$/) { $DeclString = "$DeclString$1\n";
+	}
+	elsif (/%%DECLAFTERMOD:\s*(.*)$/) { $DeclAMString = "$DeclAMString$1\n";
+	}
+	elsif (/%%TAIL:\s*(.*)$/) { $TailString = "$TailString$1\n"; }
+	elsif (/%%INCDIR:\s*(.*)$/) { $IncDir = "$IncDir -I$1"; }
+	elsif (/%%TOP:\s*(.*)$/)  { $TopString = "$TopString$1\n"; }
+        elsif (/%%RETURN:\s*(.*)$/) { $ReturnType = "$1"; }
+	elsif (/%%ARGS:\s*(.*)$/)  {
+	    $ArgsString = "$ArgsString$1";
+	    if ($LangExt ne "f") { $ArgsString = "$ArgsString\n"; }
+	}
+	elsif (/%%SUBST:(.*):(.*)$/) {
+	    $SubstSearch = "$1"; $SubstString = "$2";
+	    $cnt = $#SubstSearchArr;
+	    $cnt++;
+	    $SubstSearchArr[$cnt] = "$1";
+	    $SubstStringArr[$cnt] = "$2";
+	}
+	elsif (/%%SKIP$/) { $IgnoreVerbatim = 1; }
+	elsif (/%%EXTRAFLAGS:(.*)$/) {
+	    $val = $1;
+	    if (defined($specialCompileFlags{$val})) {
+		$extraFlags = $specialCompileFlags{$val};
+	    }
+	    else {
+		print STDERR "Unrecognized value for EXTRAFLAGS:$val\n";
+	    }
+	}
+	elsif (/%%ALLOWMISMATCH/) {
+	    # This should add, only for this example compilation, flags
+	    # to allow mismatch arg types
+	    #print STDERR "Unimplemented feature ALLOWMISMATCH\n";
+	    $extraFlags = $specialCompileFlags{'mismatch'};
+	}
+	elsif (/%%ALLOWIMPLICIT/) {
+	    # This should *remove*, for this example complilation, flags
+	    # to warn on implicit function declarations
+	    print STDERR "Unimplemented feature ALLOWIMPLICIT\n";
+	}
+	elsif (/%%MSG:(.*)$/) {
+	    # Use this, for example, to note that an example expects to
+	    # issue a warning.
+	    print $1 . "\n";
+	}
+    }
+}
+
+# \begin{example} has been seen.  Process the rest.
+sub ProcessExample
+{
+    while (<$INFILE>) {
+	$LineCount++;
+	if (/\\end\{example}/) { return; }
+        if (/^%.*\\begin\{verbatim}/) { next; }
+        if (/^%.*\\begin\{Verbatim}/) { next; }
+	if ($IgnoreVerbatim == 0) {
+	    if (/\\begin\{verbatim}/) {
+		&ProcessVerbatim("verbatim");
+	    }
+	    elsif (/\\begin\{lstlisting}(.*)/) {
+		( $coreLanguage, $dialect, $basicstyle, $escapechars ) =
+		    &processListingOptions($1);
+		&ProcessVerbatim("lstlisting",$escapechars);
+	    }
+	    elsif (/\\begin\{Verbatim}(.*)/) {
+		$VerbatimOptions = $1;
+		&ProcessCapVerbatim;
+	    }
+	}
+	if (/^%%HEADER/) { &SetDefaults; &ProcessHeader; }
+    }
+}
+
+sub ProcessFile
+{
+    local $oldLineCount;
+    local $oldFileName; 
+    local $oldPosition;
+    my $isDOS = 0;
+    my $filename = $_[0];
+
+    if (! -s "$filename") {
+	if (-s "$filename.tex") {
+	    $filename .= ".tex";
+	}
+	else {
+	    print STDERR "Could not find $filename or $filename.tex\n";
+	}
+    }
+    print "Opening file $filename\n";
+    $oldPosition = tell($INFILE);
+    close($INFILE);
+    # This doesn't really work, because perl appears to buffer the input 
+    # the <$INFILE> in the while pick up the text FOLLOWING this use 
+    # of the open (!).
+    # Check for the case where the filename does not have the .tex
+    # extension
+    if (! -s $filename && -s "$filename.tex") { $filename .= ".tex"; }
+    if (!open( $INFILE, "<$filename" )) {
+	print "could not open $filename\n";
+	open($INFILE, "<FileName");
+	return;
+    }
+    $oldLineCount = $LineCount;
+    $oldFileName = $FileName;
+    $FileName = $_[0];
+    $LineCount = 0;
+    while (<$INFILE>) {
+	if (/\r\n/) {
+	    s/\r\n/\n/;
+	    if ($isDOS == 0) {
+		$isDOS = 1;
+		print STDERR "$FileName has DOS-style end-of-line\n";
+	    }
+	}
+	$LineCount++;
+	if (/%.*\\input/) { next; }
+	if (/\\input\s*[\{]?([^\s\}]*)[\}]?/) {
+	    print "Found a file to input: $1\n";
+	    &ProcessFile($1);
+	}
+	if (/%\s*\\begin\{example}/) { next; }
+	if (/\\begin\{example}/) {
+	    print "Found example on line $LineCount\n" if $Debug ;
+	    &SetDefaults;
+	    &ProcessExample;
+	}
+	if (/%.*\\fileinclude/) {next; }
+	if (/\\fileinclude\{(.*)}/)  {
+	    print "Found a fileinclude for file $1 at line $LineCount ($FileName) without a header\n";
+	}
+	if (/%.*\\begin\{verbatim}/) { next; }
+	if (/\\begin\{verbatim}/) {
+	    print "Found a verbatim at line $LineCount ($FileName) without a header\n";
+	}
+	if (/%.*\\begin\{lstlisting}/) { next; }
+	if (/\\begin\{lstlisting}/) {
+	    print "Found a lstlisting at line $LineCount ($FileName) without a header\n";
+	}
+	if (/%.*\\begin\{Verbatim}/) { next; }
+	if (/\\begin\{Verbatim}/) {
+	    print "Found a Verbatim at line $LineCount ($FileName) without a header\n";
+	}
+	if (/^%%NOCHECK/) {
+	    # skip following verbatim or similar block
+            $_ = <$INFILE>;
+	    if (/\r\n/) {
+		s/\r\n/\n/;
+		if ($isDOS == 0) {
+		    $isDOS = 1;
+		    print STDERR "$FileName has DOS-style end-of-line\n";
+		}
+	    }
+	    $LineCount++ ;
+	    # Note that since we've read the next line, we'll ignore
+	    # everything until the next \input, \begin, \fileinclude, or
+            # %%HEADER/%%NOCHECK
+	    next;
+	}
+	if (/^%%HEADER/) {
+	    # code not in an example
+	    print "Found example on line $LineCount\n" if $Debug;
+	    $foundCode = 0;
+	    &SetDefaults;
+	    &ProcessHeader;
+	    $_ = <$INFILE>;
+	    if (/\r\n/) {
+		s/\r\n/\n/;
+		if ($isDOS == 0) {
+		    $isDOS = 1;
+		    print STDERR "$FileName has DOS-style end-of-line\n";
+		}
+	    }
+	    $LineCount++;
+	    if ($IgnoreVerbatim == 0) {
+		if (/\\begin\{verbatim}/) {
+		    $foundCode = 1;
+		    &ProcessVerbatim("verbatim");
+		}
+		if (/\\begin\{lstlisting}(.*)/) {
+		    ( $coreLanguage, $dialect, $basicstyle, $escapechars ) =
+			&processListingOptions($1);
+		    # Need to check for [langauge=...]
+		    $foundCode = 1;
+		    &ProcessVerbatim("lstlisting",$escapechars);
+		}
+		if (/\\begin\{Verbatim}(.*)/) {
+		    $VerbatimOptions = $1;
+		    # Need to check for [comandchars=...],
+		    # and to process commands within the Verbatim (typically
+		    # used to mark changes in an example)
+		    $foundCode = 1;
+		    &ProcessCapVerbatim;
+		}
+	    }
+	    if (/\\fileinclude\{(.*)}/) { 
+		$foundCode = 1;    # A guess
+		&ProcessFileinclude($1) ; 
+	    }
+	    # Handle missing code block (probably unexpected LaTeX environment)
+	    if (!$IgnoreVerbatim && $foundCode == 0) {
+		print STDERR "%%HEADER at $LineCount has no code block!\n";
+	    }
+	}
+    }
+    close ($INFILE);
+    $LineCount = $oldLineCount;
+    $FileName  = $oldFileName;
+    open($INFILE,"<$FileName") || die "Could not reopen file $FileName\n";
+    # SEEK_SET is 0
+    seek $INFILE,$oldPosition,0;
+}
+
+# Extract known options from a lstlisting command.  Argument is [....]
+sub processListingOptions
+{
+    $listingOptions = $_[0];
+
+    print "Listing options are $listingOptions\n" if $Debug;
+    # Extract language from /[language=(.*)]/
+    # Full set (permitted in the standard document) is
+    #   language=[{[dialect][C,Fortran]} or
+    #   language=[C,Fortran]
+    #    dialect is MPI08 or MPI08dirs for the "mpi_f08" module
+    #    version of MPI
+    #   basicstyle=\lstsmall
+    #   escapeinside=<char><char>
+    #   caption={...}
+    #   label=name
+    # If escapeinside is seen, we need to process the
+    # latex - that might mean understanding a few commands,
+    # such as \underline.
+    if ($listingOptions =~ /\[(.*)\]/) {
+	print "Looking for options in $1\n" if $Debug;
+	$listingOptions = $1 . ",";
+	# look for language=value, escapeinside=cc, and basicstyle
+	# all comma separated
+	$basicstyle = "";
+	$escapechars = "";
+	$listingLanguage = "";
+	if ($listingOptions =~ /(.*)caption=\{[^\}]*\}(.*)/) {
+	    # Ignore the caption argument
+	    $listingOptions = $1 . $3;
+	}
+	if ($listingOptions =~ /(.*)label=[^,]*(.*)/) {
+	    # Ignore the label argument
+	    $listingOptions = $1 . $3;
+	}
+	if ($listingOptions =~ /(.*)basicstyle=([^,]*),(.*)/) {
+	    $listingOptions = $1 . $3;
+	    $basicstyle = $2;
+	}
+	if ($listingOptions =~ /(.*)escapeinside=([^,]*),(.*)/) {
+	    $listingOptions = $1 . $3;
+	    $escapechars    = $2;
+	}
+	if ($listingOptions =~ /(.*)language=([^,]*),(.*)/) {
+	    $listingOptions  = $1 . $3;
+	    $listingLanguage = $2;
+	    # Unpack the language and dialect
+	    $coreLanguage = "";
+	    $dialect      = "";
+	    if ($listingLanguage =~ /\{\[(.*)\](.*)\}/) {
+		$dialect = $1;
+		$coreLanguage = $2;
+	    }
+	    else {
+		$coreLanguage = $listingLanguage;
+	    }
+	}
+	if ($listingOptions ne "") {
+	    print STDERR "Warning: Unrecognized option(s) $listingOptions at $LineCount\n";
+	}
+	if ($gVerbose) {
+	    print "Listing options: language=$listingLanguage; $coreLanguage and $dialect\n";
+	    if ($basicstyle ne "") {
+		print "  basicstyle=$basicstyle\n";
+	    }
+	    if ($escapechars ne "") {
+		print "  escapechars=$escapechars\n";
+	    }
+	}
+    }
+    return ( $coreLanguage, $dialect, $basicstyle, $escapechars );
+}
+
+#
+# Process stdin or command line args
+$nofile = 1;
+# 
+# This is needed to control autoflush
+use FileHandle;
+
+# Get some values from the environment
+if (defined($ENV{'MPICHK_NODEPRECATED'})) { $noDeprecated = 1; }
+if (defined($ENV{'MPICHK_VERBOSE'})) { $gVerbose = 1; }
+if (defined($ENV{'MPICHK_DEBUG'})) { $Debug = 1; }
+if (defined($ENV{'MPICHK_DEBUGSUBST'})) { $DebugSubst = 1; }
+if (defined($ENV{'MPICHK_NEWMPI'})) { 
+    $CIncludeList[$#CIncludeList+1] = '../mpicompilechk/mpinew.h'; 
+}
+
+$| = 1;
+autoflush STDERR 1;
+autoflush STDOUT 1;
+
+#Split this into arg processing and then filenames.
+
+foreach $FileName (@inFiles) {
+    $nofile    = 0;
+    $LineCount = 0;
+    &ProcessFile($FileName);
+}
+
+exit(0);
+
+sub OutNoDeprecated {
+    foreach $name (keys(%deprecatedFunctions)) {
+	print $FOUT "#define $name \"$name is deprecated\"\n";
+    }
+}
+
+sub CheckAllSubstsUsed {
+    for (my $i=0; $i<=$#SubstSearchArr; $i++) {
+	if ($SubstFoundArr[$i] == 0) {
+	    print STDERR "Did not use substitution $SubstSearchArr[$i] to $SubstStringArr[$i]\n";
+	}
+    }
+}

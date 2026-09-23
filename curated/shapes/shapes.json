@@ -1,0 +1,2205 @@
+[
+  {
+    "$comment": "Generalizes the 'root reads once, everyone (including root) writes' pattern rather than the narrower 'root reads, only non-root writes' version implied by the illustrative sentence in docs/schema/semantics-formal.md. Needed because MPI_Bcast uses a single inout buffer (source_buffer==dest_buffer, root's write is a same-buffer no-op) while NCCL/NVSHMEM/SHMEM use two separate buffers and root itself also receives into a distinct recvbuff/dest. One pure-substitution template covers both by making root a member of the 'member' write participant too, rather than needing a conditional. NVSHMEM/SHMEM's byte-oriented 'mem' variant (used for these golden examples) has no runtime datatype parameter -- datatype is fixed by which typed entry this is (nvshmem_int_broadcast vs. nvshmem_broadcastmem) -- so extent.datatype_ref is bound to a literal type token ('type:byte') rather than a param: ref. See the corresponding entry in docs/cross-ppm-analysis/known-gaps-and-open-questions.md.",
+    "cross_ppm_reusable": true,
+    "id": "collective.one_to_all_uniform",
+    "motivated_by": [
+      "mpi:mpi_bcast",
+      "nccl:ncclBroadcast",
+      "nvshmem:nvshmem_broadcastmem",
+      "shmem:shmem_broadcastmem"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "source_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "dest_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "root_selector",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{source_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "root",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{dest_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "{{root_selector}}"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Same typed-API finding as one_to_all_uniform, plus a second instance of the same pattern: NVSHMEM/SHMEM's reduction operator (sum/min/max/...) is baked into the function name via a macro OP argument (confirmed directly in external-inputs/nvshmem/implementation/.../nvshmem_coll_api.h's NVSHMEMI_DECL_TEAM_REDUCE(NAME,TYPE,OP) and external-inputs/shmem/tex/shmem-standard/content/shmem_reductions.tex's per-operator FuncDecl list), not a runtime OPERATION-kind parameter the way MPI's op / NCCL's op are. operation_ref is bound to a literal token ('literal:sum') for NVSHMEM/SHMEM, vs. a real param: ref for MPI/NCCL.",
+    "cross_ppm_reusable": true,
+    "id": "collective.all_to_all_reduce",
+    "motivated_by": [
+      "mpi:mpi_allreduce",
+      "nccl:ncclAllReduce",
+      "nvshmem:nvshmem_int_sum_reduce",
+      "shmem:shmem_int_sum_reduce"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "source_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "dest_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "operation_slot",
+        "name": "operation",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{source_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": "{{extent}}",
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "{{operation}}",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{dest_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Strongest cross-PPM evidence in this seed set -- all four PPMs, both directions (create and destroy) of the interval. nvshmem_malloc/shmem_malloc bind handle to the literal 'return_value' token per handle_lifecycle's documented convention (docs/schema/semantics-formal.md), since the handle is the function's return value, not a parameter.",
+    "cross_ppm_reusable": true,
+    "id": "resource.lifecycle",
+    "motivated_by": [
+      "mpi:mpi_win_create",
+      "mpi:mpi_win_free",
+      "nccl:ncclCommInitRank",
+      "nccl:ncclCommDestroy",
+      "nvshmem:nvshmem_malloc",
+      "nvshmem:nvshmem_free",
+      "shmem:shmem_malloc",
+      "shmem:shmem_free"
+    ],
+    "slots": [
+      {
+        "kind": "handle_slot",
+        "name": "handle",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "handle_kind",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "role",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "{{handle}}",
+          "handle_kind": "{{handle_kind}}",
+          "role": "{{role}}"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "{{handle}}",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "MPI_Put's real signature (confirmed against external-inputs/mpi/tex/mpi-standard/apis.json) has no target-buffer parameter at all -- the remote address is resolved via (win, target_disp) against a region already registered by a separate mpi_win_create call, not a literal pointer. This binds target_buffer to the window handle itself ('param:win') rather than inventing a param: ref that doesn't exist. That is a genuine, newly-found gap: data_flow[].buffer implicitly assumes a nameable BUFFER-kind parameter, which MPI's window+displacement addressing model doesn't provide -- flagged in known-gaps-and-open-questions.md. SHMEM/NVSHMEM's symmetric-heap put has a real dest pointer and doesn't hit this. Also simplified: MPI_Put's origin and target sides can have independent count/datatype; this shape binds one shared extent from the origin side only and does not model the two diverging -- acceptable for a seed shape, called out here rather than silently assumed.",
+    "cross_ppm_reusable": "partial by design -- NCCL has no one-sided API at all, matching shape-catalog.md's own catalog table (rma.put: MPI/SHMEM/NVSHMEM only). Not a gap.",
+    "id": "rma.put",
+    "motivated_by": [
+      "mpi:mpi_put",
+      "nvshmem:nvshmem_{T}_put",
+      "shmem:shmem_{T}_put"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "origin_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "target_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "target_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{origin_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{target_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "{{target_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "shape-catalog.md's own catalog table lists NCCL as also using this shape (ncclSend, via a peer_match extra), and viz/html/examples/formal-semantics-V3.html has a worked example for it -- but that example binds handle to a sentinel string 'implicit_stream_handle', not a real param: ref, because NCCL's send/recv have no REQUEST-like (or any) handle parameter; completion is tracked by CUDA stream order, not a handle value flowing through a parameter. handle_lifecycle_entry.handle_kind's enum (REQUEST/WINDOW/COMMUNICATOR/DATATYPE/SYMMETRIC_ALLOCATION/FILE/SESSION) has no value that honestly describes 'implicit, stream-ordered completion'. Rather than force NCCL into this shape with an invented handle_kind, this seed grounds handle_bound.post_send/post_recv in MPI only and logs the NCCL mismatch as a new entry in known-gaps-and-open-questions.md. Separately: source.matched.via (required by $defs/data_flow_entry when source.kind is 'matched') has no documented convention anywhere in the existing docs for what string it should hold; post_recv's golden example below binds it to the sync.events entry id ('local_complete') that gates when the written value becomes valid -- a reasonable but previously-unspecified choice, flagged for the project owner to confirm rather than presented as settled.",
+    "cross_ppm_reusable": "grounded in MPI only for this seed -- see notes",
+    "id": "handle_bound.post_send",
+    "motivated_by": [
+      "mpi:mpi_isend"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "handle_slot",
+        "name": "handle",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "matching",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_send_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "sender",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [
+        {
+          "handle": "{{handle}}",
+          "handle_kind": "REQUEST",
+          "role": "create"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "sender",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "{{handle}}",
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "sender"
+          }
+        ],
+        "matching": "{{matching}}",
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Mirror of post_send: op is 'write' instead of 'read', and source.kind is 'matched' (the written value is only known once the matching send is paired at runtime) instead of null.",
+    "cross_ppm_reusable": "grounded in MPI only for this seed -- see handle_bound.post_send's notes (same NCCL gap applies to ncclRecv)",
+    "id": "handle_bound.post_recv",
+    "motivated_by": [
+      "mpi:mpi_irecv"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "handle_slot",
+        "name": "handle",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "matching",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_recv_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "receiver",
+          "source": {
+            "kind": "matched",
+            "via": "local_complete"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [
+        {
+          "handle": "{{handle}}",
+          "handle_kind": "REQUEST",
+          "role": "create"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "receiver",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "{{handle}}",
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "receiver"
+          }
+        ],
+        "matching": "{{matching}}",
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Deliberately has no data_flow or sync.events -- matches docs/consumers/tool-consumption-model.md's own trace table, which describes Wait as contributing only 'handle_lifecycle: [request destroy]'. The actual ordering guarantee (Wait cannot return before the posting call's local completion) is NOT encoded as an explicit ordering edge inside this shape, because the event it would order against (post_send's local_complete) belongs to a *different* entry's expansion. Per tool-consumption-model.md, correlating create/destroy across two entries via the shared handle value is the consuming tool's job (dataflow-track the handle through the IR), not something one entry's semantics.formal can declare about another entry.",
+    "cross_ppm_reusable": "MPI only, per shape-catalog.md's own catalog table",
+    "id": "handle_bound.wait_on_handle",
+    "motivated_by": [
+      "mpi:mpi_wait"
+    ],
+    "slots": [
+      {
+        "kind": "handle_slot",
+        "name": "handle",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "{{handle}}",
+          "handle_kind": "REQUEST",
+          "role": "destroy"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "waiter",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": null,
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Grounded in the team/communicator-scoped variants (shmem_team_sync, nvshmem_barrier), not the zero-argument *_all() variants (shmem_barrier_all(), nvshmem_barrier_all()) confirmed in the same headers -- those take no parameters at all, so scope_selector would have no param: ref to bind to (the world-scope is implicit, not named). Not modeled here; would need a literal 'true'/'everyone' selector value, analogous to the type/operation literal-token pattern already used elsewhere.",
+    "cross_ppm_reusable": true,
+    "id": "sync_only.rendezvous",
+    "motivated_by": [
+      "mpi:mpi_barrier",
+      "shmem:shmem_team_sync",
+      "nvshmem:nvshmem_barrier"
+    ],
+    "slots": [
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Both real signatures (confirmed: external-inputs/shmem/tex/shmem-standard/content/shmem_fence.tex, external-inputs/nvshmem/implementation/.../nvshmem_api.h) take zero parameters -- hence zero slots. Deliberately does NOT encode the actual ordering guarantee (this fence orders all of the caller's previously-issued RMA operations before subsequent ones), because that needs the not-yet-built implicit_all_prior matching.kind already logged for the _nbi family in known-gaps-and-open-questions.md -- fence closing every open _nbi-style window is exactly that same gap, encountered again from a different angle.",
+    "cross_ppm_reusable": true,
+    "id": "sync_only.local_fence",
+    "motivated_by": [
+      "shmem:shmem_fence",
+      "nvshmem:nvshmem_fence"
+    ],
+    "slots": [],
+    "template": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "fence_point",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "offset is bound identically on both the top-level data_flow entry field and inside source.offset -- confirmed against the original design-discussion HTML's own (never-shipped) live-demo shape definition for this exact shape, which does the same double-binding. Unlike that HTML version (which uses a 'non_root' participant and notes root's own slice is 'simplified for exposition' / not modeled), this version reuses collective.one_to_all_uniform's generalization: 'member' includes root, so root's own slice is captured for free rather than left out.",
+    "cross_ppm_reusable": "MPI only, per shape-catalog.md's own table",
+    "id": "collective.one_to_all_indexed",
+    "motivated_by": [
+      "mpi:mpi_scatter"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "source_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "dest_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "root_selector",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      },
+      {
+        "kind": "index_slot",
+        "name": "index_expr",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{source_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "root",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{dest_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": "{{index_expr}}",
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "structural",
+            "offset": "{{index_expr}}",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "{{root_selector}}"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "A real modeling ambiguity, resolved and documented rather than silently picked: df_write is attributed to participant 'member' (many), not 'root' (one), even though the buffer being written (dest_buffer) is only semantically meaningful on root's own call instance. This is necessary because offset must vary per contributing rank -- if the write were attributed to 'root' (cardinality one), rank-dependent expressions inside offset would resolve against root's own rank only, not each contributor's. The cost: this technically implies every member's own dest_buffer argument gets written, when MPI only writes root's. Same class of deliberate approximation as collective.one_to_all_uniform's root-inclusive 'member' write.",
+    "cross_ppm_reusable": "MPI only, per shape-catalog.md's own table",
+    "id": "collective.all_to_one_indexed",
+    "motivated_by": [
+      "mpi:mpi_gather"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "source_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "dest_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "root_selector",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      },
+      {
+        "kind": "index_slot",
+        "name": "index_expr",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{source_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{dest_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": "{{index_expr}}",
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "{{root_selector}}"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "docs/schema/shape-catalog.md's catalog table marks this shape SHMEM-reusable, but no reduce-to-a-single-root primitive was found anywhere in external-inputs/shmem/tex/shmem-standard/content/shmem_reductions.tex -- every shmem_TYPENAME_op_reduce delivers its result to every PE in the team (that's collective.all_to_all_reduce's shape, already built and grounded in shmem_int_sum_reduce). Flagging this as a probable documentation inaccuracy rather than silently reproducing it or silently omitting SHMEM without explanation. Slot names normalized to source_buffer/dest_buffer/operation for consistency with collective.all_to_all_reduce, differing from the illustrative HTML's sendbuf/recvbuf/op naming for this specific shape.",
+    "cross_ppm_reusable": "MPI + NCCL confirmed; SHMEM checkmark in shape-catalog.md's table appears to be an error -- see notes",
+    "id": "collective.all_to_one_reduce",
+    "motivated_by": [
+      "mpi:mpi_reduce",
+      "nccl:ncclReduce"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "source_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "dest_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "operation_slot",
+        "name": "operation",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "root_selector",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{source_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": "{{extent}}",
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "{{operation}}",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{dest_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "root",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "root",
+          "role_kind": "initiator",
+          "selector": "{{root_selector}}"
+        },
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Identical mechanism to collective.all_to_all_reduce's reduce node, with inputs[].scope changed from 'all_participant_instances' to 'instances_before_self_in_order' -- no new op, no new shape mechanism, exactly as docs/schema/semantics-formal.md describes this scope value's purpose.",
+    "cross_ppm_reusable": "MPI only, per shape-catalog.md's own table",
+    "id": "collective.scan_prefix",
+    "motivated_by": [
+      "mpi:mpi_scan"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "source_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "dest_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "operation_slot",
+        "name": "operation",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{source_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": "{{extent}}",
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "instances_before_self_in_order"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "{{operation}}",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{dest_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Exact mirror of rma.put (op/participant roles swapped). Inherits the same MPI window+displacement gap already logged for rma.put -- mpi_get's real signature (confirmed against apis.json) has no target-buffer parameter either, so target_buffer binds to the window handle ('param:win') for the same documented reason.",
+    "cross_ppm_reusable": true,
+    "id": "rma.get",
+    "motivated_by": [
+      "mpi:mpi_get",
+      "nvshmem:nvshmem_{T}_get",
+      "shmem:shmem_{T}_get"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "origin_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "target_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "target_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{target_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "target",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{origin_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "{{target_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Corrected 2026-07-21 (full-corpus audit). Two defects, both in the single data_flow entry: (1) inputs[].ref was bound straight to {{operand}}, i.e. a 'param:value' reference, but inputs[].ref is defined as the id of a SIBLING data_flow entry -- the cross-entry consistency checker flagged it as naming no such sibling, and a consumer following the reference found nothing. (2) its scope was 'single_instance', which appears nowhere in the scope registry in docs/schema/semantics-formal.md -- schema-open, registry-closed means an unregistered scope is exactly as damaging as an undocumented enum value. Both are fixed by modelling what actually happens: the ORIGIN reads its operand (a real data_flow read), and the target's read-modify-write combines that incoming value with the target's own resident value -- which is precisely the already-registered 'rma_target_prior' scope, minted for MPI_Accumulate's identical two-party case. No new vocabulary needed. MPI is deliberately NOT grounded here, consistent with the already-established finding in docs/schema/design-conventions.md ('Honest gaps over forced fits'): MPI_Compare_and_swap passes its operands as three separate local buffers, not by value, and does not fit this SHMEM-shaped binding pattern. shmem_int_atomic_add/nvshmem_int_atomic_add were chosen over the fetch_add variants specifically to sidestep an unresolved sub-problem: fetch_add returns the PRE-operation value to the caller, and data_flow has no mechanism for exposing a location's value immediately before a write it also describes -- non-fetching add has no such return, avoiding the issue rather than solving it (flagged, not fixed). Two further, real gaps surfaced authoring this shape: (1) 'operand' (the by-value TYPE value parameter) doesn't fit any of the 7 slot kinds -- none represent a bare scalar (non-buffer, non-handle, non-operation) parameter reference; bound via literal_slot as the least-wrong available option. (2) data_flow[].inputs is documented (docs/schema/semantics-formal.md) as being 'for op:reduce' specifically; this shape uses it on an op:'read_modify_write' entry instead -- schema-valid (inputs isn't conditionally restricted by op in api-schema.json), but extends the field beyond its documented scope, worth confirming is intentional. Reduction operator is again a literal token ('literal:add'), same typed-API pattern as the collective shapes -- op is baked into the function name (nvshmem_api.h's NVSHMEMI_DECL_TYPE_ADD_SET macro), not a runtime parameter.",
+    "cross_ppm_reusable": "SHMEM + NVSHMEM only -- MPI deliberately excluded, see notes",
+    "id": "rma.atomic",
+    "motivated_by": [
+      "shmem:shmem_{T}_atomic_add",
+      "nvshmem:nvshmem_int_atomic_add"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "target_buffer",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "operand",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "operation",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "target_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{operand}}",
+          "extent": null,
+          "id": "df_operand_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{target_buffer}}",
+          "extent": null,
+          "id": "df_rmw",
+          "inputs": [
+            {
+              "ref": "df_operand_read",
+              "scope": "rma_target_prior"
+            }
+          ],
+          "offset": null,
+          "op": "read_modify_write",
+          "operation_ref": "{{operation}}",
+          "participant": "target",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "{{target_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "The two-party reduce case docs/schema/semantics-formal.md describes ('rma_target_prior' scope: combines the origin's incoming value with the target's own resident value, not a sibling call-instance read'). Same MPI window+displacement gap as rma.put/rma.get for target_buffer.",
+    "cross_ppm_reusable": "MPI only, per shape-catalog.md's own table",
+    "id": "rma.accumulate",
+    "motivated_by": [
+      "mpi:mpi_accumulate"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "origin_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "target_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "operation_slot",
+        "name": "operation",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "target_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{origin_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": "{{extent}}",
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "rma_target_prior"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "{{operation}}",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{target_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "reduced",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "{{target_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "MPI_Win_fence both closes the previous access epoch and opens the next one in a single call (or just opens, on the first call in a window's lifetime) -- modeled as always emitting both a close_epoch and an open_epoch event bound to the same handle, which is harmless on the first call (closing an epoch that was never meaningfully open is not separately flagged as an error by this shape; that check is the consuming tool's job, consistent with the project's tool-agnostic boundary).",
+    "cross_ppm_reusable": "MPI only, per shape-catalog.md's own table",
+    "id": "epoch.fence",
+    "motivated_by": [
+      "mpi:mpi_win_fence"
+    ],
+    "slots": [
+      {
+        "kind": "handle_slot",
+        "name": "handle",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "{{handle}}",
+            "epoch_scope": null,
+            "event_type": "close_epoch",
+            "group_ref": null,
+            "id": "close_prior",
+            "participant": "self"
+          },
+          {
+            "bound_to": "{{handle}}",
+            "epoch_scope": null,
+            "event_type": "open_epoch",
+            "group_ref": null,
+            "id": "open_next",
+            "participant": "self"
+          }
+        ],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "One shape, two bindings (role='open_epoch' for lock, 'close_epoch' for unlock) -- same create/destroy-style parameterization already used by resource.lifecycle, applied to epoch events instead of handle_lifecycle roles. Trivial pairwise target (single origin, single target rank), matching.kind left null rather than 'epoch_scoped', since (unlike put/get/accumulate, which defer their matching to an *enclosing* lock/unlock epoch) the lock/unlock calls themselves are the epoch boundary, not something deferring to one.",
+    "cross_ppm_reusable": "MPI only, per shape-catalog.md's own table",
+    "id": "epoch.lock_unlock",
+    "motivated_by": [
+      "mpi:mpi_win_lock",
+      "mpi:mpi_win_unlock"
+    ],
+    "slots": [
+      {
+        "kind": "handle_slot",
+        "name": "handle",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "role",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "target_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "{{target_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "{{handle}}",
+            "epoch_scope": "access",
+            "event_type": "{{role}}",
+            "group_ref": null,
+            "id": "epoch_event",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "One shape, four bindings covering the real 4-call PSCW protocol exactly (confirmed against apis.json: mpi_win_start/post take a group parameter, mpi_win_complete/wait don't -- the group slot is bound to null for the latter two, which the schema's group_ref field already allows). 'group' uses handle_slot rather than a new slot kind, on the reasoning that a process-group reference is closer to a resource handle than to a literal constant -- a pragmatic choice, not a clean fit (GROUP isn't in handle_kind's enum either, but handle_slot's binding target here is sync.events[].group_ref, not handle_lifecycle, so handle_kind validation doesn't apply).",
+    "cross_ppm_reusable": "MPI only, per shape-catalog.md's own table",
+    "id": "epoch.pscw",
+    "motivated_by": [
+      "mpi:mpi_win_start",
+      "mpi:mpi_win_complete",
+      "mpi:mpi_win_post",
+      "mpi:mpi_win_wait"
+    ],
+    "slots": [
+      {
+        "kind": "handle_slot",
+        "name": "handle",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "role",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "epoch_scope",
+        "optional": false
+      },
+      {
+        "kind": "handle_slot",
+        "name": "group",
+        "optional": true
+      }
+    ],
+    "template": {
+      "data_flow": [],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "{{handle}}",
+            "epoch_scope": "{{epoch_scope}}",
+            "event_type": "{{role}}",
+            "group_ref": "{{group}}",
+            "id": "epoch_event",
+            "participant": "self"
+          }
+        ],
+        "matching": {
+          "kind": "group_match",
+          "match_keys": [],
+          "matched_across": "paired_call",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "extent is marked optional in this shape's slots (unlike every other extent_slot use) because mpi_file_write_at_all_end's real signature (confirmed against apis.json) has no count/datatype parameters at all -- only fh/buf/status. Bound to null for the _end golden example.",
+    "cross_ppm_reusable": "MPI only, per shape-catalog.md's own table",
+    "id": "epoch.file_split_collective",
+    "motivated_by": [
+      "mpi:mpi_file_write_at_all_begin",
+      "mpi:mpi_file_write_at_all_end"
+    ],
+    "slots": [
+      {
+        "kind": "handle_slot",
+        "name": "handle",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "role",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": true
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_io",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "self",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "self",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "{{handle}}",
+            "epoch_scope": null,
+            "event_type": "{{role}}",
+            "group_ref": null,
+            "id": "io_event",
+            "participant": "self"
+          }
+        ],
+        "matching": null,
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Added 2026-07-17 after reviewing the pilot corpus (workflow/formal/assign.py's mpi_send/ncclSend proposals both hit 'escalate_new_shape' against the existing catalog for exactly this reason). This is the exact NCCL gap handle_bound.post_send's own notes above already anticipated ('completion is tracked by CUDA stream order, not a handle value flowing through a parameter') plus the symmetric, previously-unlogged MPI blocking case: mpi_send/ncclSend have no REQUEST-style (or any) handle at all, so handle_bound.post_send is a near-miss -- forcing either into it (with an invented handle_kind, or a sentinel non-param handle value) would be exactly the wrong-fit CLAUDE.md warns against. p2p.direct_send is structurally identical to handle_bound.post_send minus the handle: same single-participant read, but sync.events[].bound_to is null (the call's own return IS the completion point) and handle_lifecycle is empty. sync.matching is left null in the template and supplied via extra per assignment -- match_keys genuinely differ per function (MPI's tag_match needs comm+tag+dest, NCCL's peer_match needs only comm+peer), mirroring how handle_bound.post_send/post_recv already handle mpi_isend/mpi_irecv's matching, not a new pattern.",
+    "cross_ppm_reusable": true,
+    "id": "p2p.direct_send",
+    "motivated_by": [
+      "mpi:mpi_send",
+      "nccl:ncclSend"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "matching",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_send_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "sender",
+          "source": null,
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "sender",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "sender"
+          }
+        ],
+        "matching": "{{matching}}",
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Mirror of p2p.direct_send: op is 'write' instead of 'read', and source.kind is 'matched' (via 'local_complete', same previously-unspecified-but-reused convention as handle_bound.post_recv) instead of null. See p2p.direct_send's notes for the full rationale.",
+    "cross_ppm_reusable": true,
+    "id": "p2p.direct_recv",
+    "motivated_by": [
+      "mpi:mpi_recv",
+      "nccl:ncclRecv"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "matching",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_recv_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "receiver",
+          "source": {
+            "kind": "matched",
+            "via": "local_complete"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "receiver",
+          "role_kind": "initiator",
+          "selector": "self"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "local_complete",
+            "participant": "receiver"
+          }
+        ],
+        "matching": "{{matching}}",
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Built on the 'gathered' source.kind: the written buffer is the per-participant assembly of df_read across all_participant_instances with NO operator, each contribution landing at placement_offset evaluated in the CONTRIBUTING participant's context. The proposal's open sub-question (per-contribution vs. total extent on the write) is decided here as per-contribution (block_extent), matching placement_offset's own per-contribution semantics -- the total is implied by the scope's cardinality. contribution_extent and block_extent are separate slots because MPI declares independent send/recv count+type parameter pairs (sendcount/sendtype vs recvcount/recvtype) while NCCL binds both to the same sendcount/datatype pair. shmem_{T}_fcollect matches this shape's structure exactly but has NO golden yet: its datatype is baked into the symbol (typed-API), so placement_offset's extent_size() has no datatype param: ref to point at -- blocked on the already-logged 'type:<x>' literal-token grammar decision (known-gaps-and-open-questions.md's typed-API row), deliberately not resolved as a side effect here. SHMEM's variable-length collect (vs. fcollect) stays out entirely -- the separate, still-open variable-length-collectives gap.",
+    "cross_ppm_reusable": true,
+    "id": "collective.gather_to_all",
+    "motivated_by": [
+      "mpi:mpi_allgather",
+      "nccl:ncclAllGather"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "source_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "dest_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "contribution_extent",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "block_extent",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      },
+      {
+        "kind": "index_slot",
+        "name": "placement_offset",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{source_buffer}}",
+          "extent": "{{contribution_extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{dest_buffer}}",
+          "extent": "{{block_extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "gathered",
+            "placement_offset": "{{placement_offset}}",
+            "ref": "df_read",
+            "scope": "all_participant_instances"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Built on the optional 'offset' on reduced-kind sources: the standard reduce node (identical to collective.all_to_all_reduce's) whose result each participant receives only a slice of, via source.offset -- the 'good third stress test of combining two mechanisms' shape-catalog.md flagged when this shape was first sketched, now actually passing. HONEST LIMITATION, deliberate: df_read/df_reduce's extent is null -- each participant's full contribution spans recvcount x group-size elements, and neither MPI_Reduce_scatter_block nor ncclReduceScatter has a parameter naming that total, so no {count_ref,datatype_ref} pair can state it without arithmetic the extent object deliberately doesn't support. Null (not modeled) beats mis-stating the slice extent as the contribution extent. MPI's v-variant MPI_Reduce_scatter (per-recipient recvcounts array) stays out -- the variable-length gap.",
+    "cross_ppm_reusable": true,
+    "id": "collective.reduce_scatter",
+    "motivated_by": [
+      "nccl:ncclReduceScatter",
+      "mpi:mpi_reduce_scatter_block"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "source_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "dest_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "slice_extent",
+        "optional": false
+      },
+      {
+        "kind": "operation_slot",
+        "name": "operation",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      },
+      {
+        "kind": "index_slot",
+        "name": "slice_offset",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{source_buffer}}",
+          "extent": null,
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "member",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": null,
+          "extent": null,
+          "id": "df_reduce",
+          "inputs": [
+            {
+              "ref": "df_read",
+              "scope": "all_participant_instances"
+            }
+          ],
+          "offset": null,
+          "op": "reduce",
+          "operation_ref": "{{operation}}",
+          "participant": null,
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{dest_buffer}}",
+          "extent": "{{slice_extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "member",
+          "source": {
+            "kind": "reduced",
+            "offset": "{{slice_offset}}",
+            "ref": "df_reduce"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Added 2026-07-21 (field audit). resource.lifecycle hard-codes a single participant (cardinality 'one', selector 'self') and matching: null, which is right for a purely local create/destroy (MPI_Win_create on an already-built communicator, an MPI handle free) and wrong for the large class of lifecycle calls that are themselves collective: ncclCommInitRank/ncclCommDestroy, shmem_malloc/shmem_free, nvshmem_malloc/nvshmem_free. Those five carried execution.collective = true while their own formal block said one participant and no matching at all -- a direct self-contradiction inside one entry, and one that makes a collective-matching checker silently skip them. Minted as its own shape rather than widened in place, per the project's 'a wrong fit is worse than an honest gap' rule: local and collective lifecycle really are different participant structures, not one structure with an optional field. Split out of resource.lifecycle 2026-07-21 during the field audit. All six motivating functions carry execution.collective = true, but resource.lifecycle's template hard-codes a single 'self' participant (cardinality 'one') and matching: null -- so each of these entries asserted, inside itself, both that every PE/rank must call it and that it has no collective matching rule at all. A collective-matching checker reading the formal layer would silently skip exactly the calls most likely to deadlock on a missing participant. resource.lifecycle is unchanged and still correct for genuinely local lifecycle calls (mpi_win_create/mpi_win_free on an existing communicator). scope_selector binding note: ncclCommDestroy scopes to 'rank in param:comm', but ncclCommInitRank cannot -- its comm parameter is the OUT handle being created, so the clique is defined by the shared ncclUniqueId instead; it uses the whole-run 'all_pes' scope, as do the four SHMEM/NVSHMEM symmetric-heap calls, which are collective over all PEs by definition.",
+    "cross_ppm_reusable": true,
+    "id": "resource.collective_lifecycle",
+    "motivated_by": [
+      "nccl:ncclCommInitRank",
+      "nccl:ncclCommDestroy",
+      "shmem:shmem_malloc",
+      "shmem:shmem_free",
+      "nvshmem:nvshmem_malloc",
+      "nvshmem:nvshmem_free"
+    ],
+    "slots": [
+      {
+        "kind": "handle_slot",
+        "name": "handle",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "handle_kind",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "role",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "scope_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [],
+      "handle_lifecycle": [
+        {
+          "handle": "{{handle}}",
+          "handle_kind": "{{handle_kind}}",
+          "role": "{{role}}"
+        }
+      ],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "many",
+          "id": "member",
+          "role_kind": "member",
+          "selector": "{{scope_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": "{{handle}}",
+            "event_type": "point",
+            "id": "lifecycle_event",
+            "participant": "member"
+          }
+        ],
+        "matching": {
+          "kind": "collective_rendezvous",
+          "match_keys": [],
+          "matched_across": "all_participant_instances",
+          "program_order_required": null
+        },
+        "ordering": []
+      }
+    }
+  },
+  {
+    "$comment": "Added 2026-07-21 (full-corpus audit). The put-with-signal family (shmem_put_signal, nvshmem_putmem_signal, and their typed/sized/_nbi variants -- 32 corpus functions) was being assigned the plain rma.put shape, which silently dropped sig_addr/signal/sig_op entirely: the signal write is the whole reason the call exists over an ordinary put, and without it the entry describes a different operation. This shape is rma.put plus a second, separately-addressed access on the TARGET -- a read_modify_write, because sig_op selects between set and add semantics rather than being a plain store. No new vocabulary was needed: read_modify_write is an existing data_flow[].op and the operand comes through the existing structural/source machinery. Minted 2026-07-21 during the full-corpus audit. The 32-function put-with-signal family was being bound to plain rma.put, which references only dest/source/nelems/pe and therefore dropped sig_addr, signal and sig_op on the floor -- the entry then described an ordinary put, losing the one thing that distinguishes this call. The signal update is modelled as a read_modify_write rather than a write because sig_op selects between SET and ADD semantics, and as a separate data_flow entry rather than a second extent because it targets a different address with its own (single-element) size. sync.ordering records that the payload write lands before the signal becomes observable, which is the ordering guarantee the whole put-with-signal idiom exists to provide.",
+    "cross_ppm_reusable": true,
+    "id": "rma.put_signal",
+    "motivated_by": [
+      "nvshmem:nvshmem_{T}_put_signal",
+      "nvshmem:nvshmem_putmem_signal",
+      "shmem:shmem_{T}_put_signal",
+      "shmem:shmem_ctx_put64_signal"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "origin_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "target_buffer",
+        "optional": false
+      },
+      {
+        "kind": "extent_slot",
+        "name": "extent",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "target_selector",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "signal_buffer",
+        "optional": false
+      },
+      {
+        "kind": "buffer_slot",
+        "name": "signal_operand",
+        "optional": false
+      },
+      {
+        "kind": "operation_slot",
+        "name": "signal_op",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{origin_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{target_buffer}}",
+          "extent": "{{extent}}",
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_read"
+          },
+          "valid_during": null
+        },
+        {
+          "buffer": "{{signal_operand}}",
+          "extent": null,
+          "id": "df_signal_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{signal_buffer}}",
+          "extent": null,
+          "id": "df_signal_update",
+          "inputs": [],
+          "offset": null,
+          "op": "read_modify_write",
+          "operation_ref": "{{signal_op}}",
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_signal_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "{{target_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [
+          {
+            "bound_to": null,
+            "event_type": "point",
+            "id": "signal_delivered",
+            "participant": "target"
+          }
+        ],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": [
+          {
+            "after": "signal_delivered",
+            "before": "df_write",
+            "scope": "same_participant_instance"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$comment": "The single-element put. shmem_{T}_p(dest, value, pe) writes ONE element whose value arrives as a by-value operand rather than through a local buffer, so rma.put does not fit: rma.put's df_read reads an origin_buffer that these functions do not have, and its extent slot has nothing to bind to. Modelled on rma.atomic instead, which already had exactly this problem and solved it with a literal_slot operand read at the origin -- the only difference here is that the target's op is a plain write sourced structurally from that read, not a read_modify_write. Authored 2026-07-21 (second full-corpus audit): 26 function families across SHMEM and NVSHMEM were escalating for want of it, the largest single escalation family that was not already a logged schema gap. The mirrored read direction (shmem_{T}_g) is deliberately NOT authored alongside it -- see docs/cross-ppm-analysis/known-gaps-and-open-questions.md: a _g returns the fetched value as the function's RETURN VALUE, and the formal layer has no way to name a return value as a data_flow destination. Inventing a phantom destination buffer for it would be exactly the wrong fit this project rejects.",
+    "cross_ppm_reusable": true,
+    "id": "rma.put_scalar",
+    "motivated_by": [
+      "shmem:shmem_{T}_p",
+      "nvshmem:nvshmem_{T}_p",
+      "shmem:shmem_ctx_{T}_p"
+    ],
+    "slots": [
+      {
+        "kind": "buffer_slot",
+        "name": "target_buffer",
+        "optional": false
+      },
+      {
+        "kind": "literal_slot",
+        "name": "value",
+        "optional": false
+      },
+      {
+        "kind": "selector_slot",
+        "name": "target_selector",
+        "optional": false
+      }
+    ],
+    "template": {
+      "data_flow": [
+        {
+          "buffer": "{{value}}",
+          "extent": null,
+          "id": "df_value_read",
+          "inputs": [],
+          "offset": null,
+          "op": "read",
+          "operation_ref": null,
+          "participant": "origin",
+          "source": null,
+          "valid_during": null
+        },
+        {
+          "buffer": "{{target_buffer}}",
+          "extent": null,
+          "id": "df_write",
+          "inputs": [],
+          "offset": null,
+          "op": "write",
+          "operation_ref": null,
+          "participant": "target",
+          "source": {
+            "kind": "structural",
+            "ref": "df_value_read"
+          },
+          "valid_during": null
+        }
+      ],
+      "handle_lifecycle": [],
+      "participants": [
+        {
+          "calls_function": true,
+          "cardinality": "one",
+          "id": "origin",
+          "role_kind": "initiator",
+          "selector": "self"
+        },
+        {
+          "calls_function": false,
+          "cardinality": "one",
+          "id": "target",
+          "role_kind": "passive_target",
+          "selector": "{{target_selector}}"
+        }
+      ],
+      "sync": {
+        "events": [],
+        "matching": {
+          "kind": "epoch_scoped",
+          "match_keys": []
+        },
+        "ordering": []
+      }
+    }
+  }
+]

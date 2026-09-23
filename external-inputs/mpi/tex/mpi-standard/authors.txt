@@ -1,0 +1,80 @@
+Responsible Chapter Authors (the initial list is taken from the 
+MPI 2.1 document, as updated).
+
+Bill Gropp, Frontmatter, Introduction, and Bibliography 
+Richard Graham, Point-to-Point Communications
+Adam Moody and Torsten Hoefler, Collective Communication
+Richard Treumann, Groups, Contexts, and Communicators
+Jesper Larsson Tr\"aff and Torsten Hoefler, Process Topologies, Info-Object, and One-Sided Communications
+George Bosilca, Environmental Management, Datatypes
+David Solt, Process Creation and Management
+Bronis de Supinski, External Interfaces, and Profiling
+Rajeev Thakur, I/O
+Jeff Squyres, Language Bindings 
+Rolf Rabenseifner, Deprecated Functions, and Annex Change-Log 
+Alexander Supalov, Annex Language bindings
+
+This is the full list of reviewers.
+
+This is a list from MPI 2.1.  For each of these, for MPI 2.2, we need
+a single lead reviewer. 
+
+Frontmatter:
+        - Bill Gropp, Rusty Lusk
+Acknowledgements:
+        - Richard Graham, Bill Gropp, Rusty Lusk
+Chap. 1: Introduction to MPI
+        - Bill Gropp, Rusty Lusk, Karl Feind, Adam Moody, Jesper Traeff
+Chap. 2: MPI-2 Terms and Conventions
+        - Tony Skjellum, Bill Gropp, Richard Barrett, Jesper Traeff
+Chap. 3: Point-to-Point Communication
+        - Rich Graham, Jespar Larsson Traeff, George Bosilca,
+          Steve Poole, Kannan Narasimhan, David Solt, B. Gropp, Matt Koop,
+          Adam Moody
+Chap. 3: Datatypes
+        - George Bosilca, Rich Graham, Jespar Larsson Traeff,
+          Steve Poole, Kannan Narasimhan, David Solt, B. Gropp, Matt Koop,
+          Adam Moody
+Chap. 5: Collective Communication
+        - Adam Moody, Steven Ericsson-Zenith, Edgar Gabriel, Rajeev Thakur,
+          Bill Gropp, Georg Bosilca, Torsten Hoefler, Jesper Traeff
+Chap. 6: Groups, Context, and Communicators
+        - Richard Treumann, Steven Ericsson-Zenith, Edgar Gabriel, Tony
+          Skjellum, Bill Gropp, Georg Bosilca, Robert Blackmore
+Chap. 7: Process Topologies
+        - Jesper Traeff, Rusty Lusk, Bill Gropp, Richard Barrett
+Chap. 8: MPI Environmental Management (incl. sections from MPI-2 Misc.)
+        - George Bosilca, Rich Graham, Jespar Larsson Traeff,
+          Steve Poole, Kannan Narasimhan, David Solt, B. Gropp
+Chap. 9: Miscellany
+        - Jespar Larsson Traeff, Rich Graham, George Bosilca,
+          Steve Poole, Kannan Narasimhan, B. Gropp
+Chap.10: Process Creation and Management
+        - David Solt, Dries Kimpe, Rusty Lusk, George Bosilca, Bill Gropp,
+          Kalem Karian
+Chap.11: One-Sided Communication
+        - Jespar Larsson Traeff, Ericsson-Zenith, Martin Schulz,
+          Bill Gropp, Darius Buntinas
+Chap.12: External Interfaces
+        - Bronis de Supinski, Bill Gropp
+Chap.13: I/O
+        - Rajeev Thakur, Joachim Worringen, Bill Gropp, Rainer Keller
+Chap.14: Profiling Interface
+        - Bronis de Supinski, Bill Gropp, Jeff Brown
+Chap.15: Deprecated Functions
+        - Rolf Rabenseifner, Bill Gropp
+Chap.16: Language Bindings
+        - Jeff Squyres, Steve Poole, Purushotham Bangalore,
+          Bill Gropp, Erez Haba, Alexander Supalov
+Bibliography:
+        - Rusty Lusk, Bill Gropp
+Annex A: Language Bindings Summary
+        - Alexander Supalov, Jeff Squyres, Steve Poole, Purushotham Bangalore,
+          Bill Gropp,
+Annex B: Change Log
+        - Rolf Rabenseifner, Bill Gropp
+Index:
+        - Rusty Lusk, Bill Gropp
+
+MPI-1.3: Bill Gropp, Rolf Rabenseifner, Adam Moody, Puri Bangalore,
+        Terry Dontje

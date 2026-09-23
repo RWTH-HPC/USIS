@@ -1,0 +1,422 @@
+{
+  "$comment": "Per-field provenance classification for api-schema.json. Cross-references the workflow stages described in workflow/README.md. 'path' uses dotted notation with [] for array items; a path ending in '.*' covers every leaf field of that sub-object identically unless overridden by a more specific entry listed separately.",
+  "schema_ref": "api-schema.json",
+  "workflow_ref": "workflow/README.md",
+  "tiers": {
+    "syntactic": "Derivable mechanically from the primary source (declared signature, type qualifier, or a flag already literally present in the source's own macro/annotation layer). Stage B. No model judgment involved.",
+    "semantic": "Requires reading and interpreting descriptive prose about what the call does, or a cross-entry/cross-reference judgment. Stage C. Model-proposed, needs a confidence score.",
+    "semantic_heuristic": "Semantic in principle, but a naming-convention or co-located-flag heuristic gives Stage C a strong prior to confirm rather than classify from scratch.",
+    "formal": "Synthesized via shape_ref+bindings assignment or a full inline draft, then machine-validated by running it through the expander and diffing against a golden entry. Stage D, checked by Stage E.",
+    "derived": "Computed mechanically from other already-classified fields in the same entry; not read from source directly.",
+    "authoring_only": "Exists only in the pre-expansion authored document (shapes.json and the shape assignments). Erased by the expander. Never appears in an api-schema.json-validated instance.",
+    "supplement": "Not derivable from the primary source at all (mechanically or by interpreting its prose) for this entry -- filled from curated/supplement/supplement-<ppm>.json, a hand-authored/web-researched/general-knowledge side file, gated needs_approval like every other model-touched value. For most fields, this is never a field's *primary* tier: it applies per-entry, only when the field's normally-governing stage has run and confirmed a real null, and it never overrides a stage's actual output, including a low-confidence one. See curated/README.md. **Exception, 2026-07-21:** every `tier: \"semantic\"` field below also carries `\"stage_c_mechanism\": \"supplement\"` -- these are the ~24 pure-prose Stage C fields formerly targeted by a separate model-assisted classification stage, since retired in favor of authoring these directly as supplement.json entries, the same mechanism as every other supplement-sourced field. For exactly these fields there is no other stage left to ever populate them, so an *omitted* value (not just a confirmed null) is supplement-eligible -- see workflow/supplement/propose.py's `_STAGE_C_VIA_SUPPLEMENT` handling."
+  },
+  "fields": [
+    {
+      "path": "identity.model",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Fixed by which source file is being ingested, not inferred from its content."
+    },
+    {
+      "path": "identity.name",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Literal symbol name from the source signature."
+    },
+    {
+      "path": "identity.api_group",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "Name prefixes are a strong prior (e.g. most one-sided calls name put/get) but final classification requires reading what the call does. The 'io' value makes the whole mpi_file_* family mechanically classifiable from its name prefix -- see workflow/classify/heuristics.py."
+    },
+    {
+      "path": "identity.since",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "From version-introduced macros/changelog markers in the source, where present. This genuinely varies by PPM -- confirmed 2026-07-20 by checking, not assuming: MPI has no such marker at all (chap-changes/ contains only prose, no per-function tag); OpenSHMEM does, a real structured 'Changes to this Document' chapter (workflow/extract/shmem/changelog.py parses it, joined against every content/*.tex file Extract already processes -- a file never mentioned in an introduction-marker item is inferred to predate the changelog's own coverage, OpenSHMEM 1.0); NCCL has exactly one incidental mention in its docs mirror (the Send/Recv family, 'Since NCCL 2.7' -- not a repeatable pattern, handled via supplement.json's condensed method instead of Extract machinery); NVSHMEM has none found so far.",
+      "supplement_reliance": "MPI: null for all 571 functions, Extract-side -- chap-changes/chap-semantic-changes has no per-function machine-readable marker at all; 524/571 filled via curated/supplement/supplement-mpi.json (general_knowledge, version-history pattern buckets), 47 left honestly null (genuine uncertainty, not oversight). NCCL: null for 61/63 -- only ncclSend/ncclRecv have a real source citation (condensed); the rest await either research or being left as an honest gap, project owner's call, not yet resolved as of this note. NVSHMEM: null for all 67 -- no source signal found; general recall not confident enough to fill without independent verification, not yet attempted. SHMEM: RESOLVED 2026-07-20 -- no longer relies on supplement.json at all, see the rationale above; every one of the 279 functions gets a real, mechanically-derived value directly from Extract. OpenMP (2026-09-11): null for all 96 from Extract -- omp.h's grouping comments ('/* OpenMP 5.1 */') are the implementer's notes, unevenly applied and not delimited, not per-routine markers; the three thread-team inquiries spmd maps are filled via supplement (general_knowledge). CUDA (2026-09-11): null for all 331 from Extract -- cuda_runtime_api.h has no version marker; five routines are filled via supplement (general_knowledge). See curated/README.md."
+    },
+    {
+      "path": "identity.deprecated_in",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "From deprecation macros/annotations in the source, where present."
+    },
+    {
+      "path": "identity.standard_refs",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Section-reference macros/citations already present in the source."
+    },
+    {
+      "path": "identity.desc",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Copied and lightly cleaned from the source's own one-line description where the source supplies one -- true for NCCL (a docs-mirror paragraph) and SHMEM (the purpose-built \\apisummary{} macro), both short and single-source. NOT true for MPI or NVSHMEM (see supplement_reliance): neither's source ships a genuine one-sentence description, so 'syntactic' does not hold uniformly across PPMs for this field, the same gap already found and left unresolved for parameters[].asynchronous/root_only/length. CUDA (added 2026-09-11) is a PPM where it does hold: cuda_runtime_api.h's doxygen \\brief line is a purpose-built one-line summary, read alone at static confidence. OpenMP (2026-09-11) holds too, but from a second vendored tier rather than the header: omp.h carries no prose at all, so Extract reads each routine's Summary sentence out of the vendored specification (external-inputs/openmp/docs/5.2/md, sliced by workflow/ingestion/openmp_spec_text.py) -- 94 of 96 routines, the other two being OpenMP 6.0 additions the vendored 5.2 does not define.",
+      "supplement_reliance": "Resolved 2026-07-20 (supersedes the original per-entry framing below): MPI's prose.py first-sentence heuristic and NVSHMEM's Description-block lookup were both retired from Extract entirely, not patched -- MPI's real semantics routinely span multiple sentences (a structural mismatch, not an occasional miss) and NVSHMEM's real Description block is correct content but the wrong shape (up to ~2000 chars / 16 sentences, never one sentence). Both PPMs now emit identity.desc=null unconditionally from Extract; every one of their entries is now a legitimate curated/supplement/supplement-<ppm>.json candidate, not just the previously-null subset. NCCL and SHMEM are unaffected -- see curated/README.md. (Original finding, kept for history: MPI's mpi_comm_rank/mpi_comm_size were confirmed nulls; mpi_send/mpi_recv were a non-null-but-vacuous edge case the precedence rule blocked -- both are now moot since Extract nulls all of MPI's desc unconditionally.)"
+    },
+    {
+      "path": "identity.type_family",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Resolved 2026-07-16 (supersedes the original semantic/stage-C classification below, kept for history): for NVSHMEM and OpenSHMEM, the type axis is a purely mechanical, source-derived signal -- NVSHMEM's NVSHMEMI_REPT_FOR_* macro invocations and OpenSHMEM's TYPE/TYPENAME tex tables both enumerate the exact concrete type list a family is generic over, with no judgment call involved in reading it off. (Original rationale, no longer current: 'Recognizing that the type axis collapses while the operation axis does not ... is a cross-entry judgment, even when the source uses a naming convention that hints at it.' The operation axis still never collapses -- that part of the original reasoning stands; only which stage populates the type axis changed.) See workflow/extract/nvshmem/adapter.py and workflow/extract/shmem/adapter.py."
+    },
+    {
+      "path": "bindings.*",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Directly derivable from which language bindings the source declares and their exact declared signatures."
+    },
+    {
+      "path": "execution.blocking",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "Retiered 2026-09-13 from semantic/supplement, which had produced 215 of 3912 entries and left the other 3697 failing strict-schema validation on a required, non-nullable field. Each of the four standards defines this axis by complement and marks the nonblocking side in the symbol -- MPI 4.1 §2.4 ('nonblocking if it is incomplete and local'; 'blocking if it is not nonblocking') plus the Forum's own procedure_class, OpenSHMEM/NVSHMEM's _nbi suffix, OpenMP's _async suffix -- while NCCL and CUDA carry it syntactically in a cudaStream_t argument, with CUDA's api-sync-behavior.md naming the asynchronous families exhaustively. So it is recognizable per PPM rather than only readable from prose, which is what semantic_heuristic means. Owned by Heuristic Classification (workflow/classify/<ppm>/classify_<ppm>.py's _blocking); the rules reproduce all 215 former supplement values, which were removed from curated/supplement/ in the same commit rather than left ineligible."
+    },
+    {
+      "path": "execution.execute_once",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "Retiered 2026-09-13 from semantic/supplement, which had produced 215 of 3912 entries and left the other 3697 failing strict-schema validation on a required, non-nullable field. The criterion docs/schema/field-semantics.md states is narrow and checkable -- 'it may be called at most once per process' -- and exactly one of the six standards imposes it: MPI 5.1 says the world model 'cannot be initialized more than once' and that no MPI procedure may be called once MPI_FINALIZE has returned, which fixes mpi_init/mpi_init_thread/mpi_finalize true and every other MPI procedure false. The other five say the opposite in their own text, so they are false throughout by reading rather than by default: OpenSHMEM and NVSHMEM explicitly permit the repeat ('may be called multiple times', each matched by a finalize), NCCL initializes per-communicator, CUDA initializes implicitly and per-device, and OpenMP has no init/finalize entry point at all. See each classifier's _execute_once docstring."
+    },
+    {
+      "path": "execution.collective",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "Retiered 2026-09-13 from semantic/supplement, which had produced 215 of 3912 entries and left the other 3697 failing strict-schema validation on a required, non-nullable field -- the last such field in the corpus; with this the strict-schema failure count reaches 0. 'Every process in the group must call this' is a standard-text statement rather than a signature property, which is why this is an enumerated set per model rather than a naming rule: MPI's collective-communication chapter plus four blanket statements the standard makes about whole sections (Communicator Constructors; window Initialization; topology creation; and the I/O data-access table's own collective column), OpenSHMEM's one content file per routine, 20 of which say so outright, NVSHMEM's per-area documentation, and NCCL's per-function 'must be called by all participating ranks'. CUDA and OpenMP are false throughout by scope -- neither runtime API has a team to be collective over. identity.api_group is a start but demonstrably not the rule: shmem_malloc and nvshmem_free are 'management' and collective, MPI_REDUCE_LOCAL is 'collective' and is not. See each classifier's _collective docstring."
+    },
+    {
+      "path": "execution.thread_safety",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Read from the standard's thread-safety table/prose.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "execution.launch",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "Syntactic when the source has __host__/__device__ qualifiers (CUDA, NVSHMEM headers); otherwise a fixed derived constant for CPU-only PPMs like MPI. Treated as heuristic-assisted overall since not every PPM's source encodes it. CUDA (2026-09-11): read off the __host__/__cudart_builtin__ prefix the adapter keeps on bindings.c.signature. OpenMP: left null by Heuristic Classification -- omp.h is the same header for host and offload-device compilation, so no declaration says which routines are device-callable; filled per entry from the supplement."
+    },
+    {
+      "path": "execution.runs_on",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "NOT derivable from qualifiers \u2014 ncclAllReduce is launch=cpu, runs_on=gpu. A genuine judgment about where the work executes.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "execution.gpu_scope",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "A _block suffix is a strong naming hint, but final scope classification (thread/warp/block/device) is read from docs/prose."
+    },
+    {
+      "path": "execution.stages",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "Partially inferable from naming (_init suffix, I-prefix) but the MPI-4 procedure-taxonomy classification itself is semantic."
+    },
+    {
+      "path": "execution.locality",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Read from prose describing where the operation's effect is visible.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "execution.completion",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Base value is semantic even though it may shift at runtime (see tool_integration.context_dependencies).",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "execution.procedure_class",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "I-prefix and _init-suffix naming conventions are strong priors for nb-op/p-op but not authoritative on their own."
+    },
+    {
+      "path": "semantics.collective.*",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Requires reading what the collective actually does \u2014 type, algorithm shape, topology-awareness are not in the signature.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "semantics.point_to_point.*",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Synchronous/buffered/ready are prose-level distinctions between near-identical signatures (Send vs Ssend vs Bsend vs Rsend).",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "semantics.one_sided.*",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Epoch type and ordering guarantees are prose-level.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "semantics.atomic.*",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "operation is often name-derivable (_add, _cswap suffixes); fetch/compare confirmation still needs the prose."
+    },
+    {
+      "path": "semantics.atomic",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "The container's own presence is governed by a LATER tier than its leaves (semantics.atomic.* above): Heuristic Classification may populate all 3 leaves together early when a naming signal fires, but only AI-Assisted Classification's operation_class reasoning can CONFIRM 'not atomic' -- and only that confirmation justifies the key's absence as a settled fact rather than 'nothing found yet'. This entry governs staging requiredness only (when the schema demands the key be present); it does not restrict which stage may write the key early -- see workflow/classify/emit.py's atomic handling and docs/overview/glossary.md (Staging schema).",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "semantics.memory.*",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Memory consistency semantics live entirely in descriptive text, never in a signature.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "semantics.formal",
+      "tier": "formal",
+      "stage": "D",
+      "rationale": "The whole subject of this project. Synthesized as shape_ref+bindings against shapes.json, or a full inline draft when no shape fits; validated by running the proposal through the expander (Stage E) before it is ever shipped."
+    },
+    {
+      "path": "parameters[].name",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Literal from the signature."
+    },
+    {
+      "path": "parameters[].kind",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "A `const void*` named 'count' vs 'buf' gives strong priors, but classifying BUFFER vs COUNT vs RANK etc. is a role judgment, not a type-level fact."
+    },
+    {
+      "path": "parameters[].direction",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Already present as an explicit in/out/inout annotation in the source's own parameter macros in every PPM's raw dump seen so far."
+    },
+    {
+      "path": "parameters[].desc",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Copied and cleaned from the source's own per-parameter description text; extraction, not interpretation."
+    },
+    {
+      "path": "parameters[].binding_type.*",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Directly from the declared per-language signature types."
+    },
+    {
+      "path": "parameters[].asynchronous",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Already present as an explicit flag in the source's own parameter annotations."
+    },
+    {
+      "path": "parameters[].constant",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "const-qualification, read directly from the signature."
+    },
+    {
+      "path": "parameters[].pointer",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Read directly from the signature."
+    },
+    {
+      "path": "parameters[].array_type",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Where the source states it (MPI's apis.json length form), read by Extract; for every other array, completed during the merge by workflow/assemble/array_shape.py from the same inputs as length, and null exactly when length is. The provenance report attributes each value to the step that set it."
+    },
+    {
+      "path": "parameters[].func_type",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "The function-pointer type name, read directly from the signature when this parameter is a callback."
+    },
+    {
+      "path": "parameters[].length",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Where the source states it (MPI's apis.json), read by Extract. Every other array is sized during the merge by workflow/assemble/array_shape.py -- from its formal extent (attributed to that shape assignment), a sibling parameter its description or an explicit list names, or '*' -- because deciding what is an array needs parameters[].kind. null means not an array; docs/schema/field-semantics.md has the convention."
+    },
+    {
+      "path": "parameters[].parameter_bindings",
+      "tier": "derived",
+      "stage": "B",
+      "rationale": "A mechanical transform of other already-classified fields in the same parameter entry (the old optional/large_only/suppress booleans) into the new inclusion-list form \u2014 not read from source directly as a single value."
+    },
+    {
+      "path": "parameters[].root_only",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Already present as an explicit literal flag in the source's own parameter annotations in every PPM's raw dump seen so far."
+    },
+    {
+      "path": "parameters[].constraints.not_null",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "Sometimes inferable from const/pointer non-nullability conventions, but confirmed against prose where the standard states it explicitly."
+    },
+    {
+      "path": "parameters[].constraints.value_range",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Validity ranges are prose-level ('0 <= dest < comm_size(comm)').",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "parameters[].constraints.paired_with",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Which parameter this one's validity depends on is usually stated in prose, occasionally only implicit in the description.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "parameters[].memory_space",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Requires understanding the PPM's memory model \u2014 fixed for NVSHMEM's symmetric-heap parameters, genuinely ambiguous ('either') for CUDA-aware MPI. A bare C signature (void*) never states this.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "return.kind",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Read directly from the declared return type."
+    },
+    {
+      "path": "return.value_kind",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "Whether a returned int is a rank, a team size, a device number or neither is a role judgment the C type does not carry -- the same judgment parameters[].kind makes, in the same vocabulary, so the same stage owns it. Heuristic Classification assigns it from an explicit per-function list (workflow/classify/heuristics.py _RETURN_VALUE_KINDS), each member read against its standard's own wording, never from a name pattern. Written for every entry: null is the examined answer for a return that is not a value, and for a value with no fitting kind."
+    },
+    {
+      "path": "return.binding_type.*",
+      "tier": "syntactic",
+      "stage": "B",
+      "rationale": "Directly from the declared per-language return types."
+    },
+    {
+      "path": "return.possible_errors",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Requires reading the standard's error-condition prose; some sources have a machine-readable errata table worth checking per-PPM before defaulting to semantic.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "return.possible_successes",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Same as possible_errors \u2014 multi-outcome success semantics are prose-level.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "tool_integration.profiling_name",
+      "tier": "derived",
+      "stage": "B",
+      "rationale": "A fixed naming-convention transform (PMPI_/PNCCL_ prefix) applied to the already-classified identity.name field in the same entry, mechanical once the convention is known \u2014 not read from source directly."
+    },
+    {
+      "path": "tool_integration.invariants",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Preconditions are read from the standard's error-condition prose.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "tool_integration.buffer_aliasing",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "In-place/aliasing permission is a prose-level statement about the operation.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "tool_integration.context_dependencies",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Requires understanding runtime-dependent behavior that sometimes isn't even in the primary spec text (the NCCL blocking example needed the group-call documentation, not just the function's own entry).",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "relationships.variants.*",
+      "tier": "semantic_heuristic",
+      "stage": "C",
+      "rationale": "I-prefix and _init-suffix naming conventions are strong priors, but confirming the two entries are truly the same operation's variants (not just similarly named) is a judgment call."
+    },
+    {
+      "path": "relationships.variants",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "Same container-vs-leaves split as semantics.atomic above: Heuristic Classification (workflow/classify/mpi/classify_mpi.py's _variants()) only ever PROPOSES this key when a naming pattern actually fires -- it never confirms 'this function genuinely has no variants', so the key's absence at that stage means 'not examined for a match', not 'confirmed none'. No currently-built stage confirms the negative case; this entry keeps the key out of `required` until one does, rather than forcing a false confirmation.",
+      "stage_c_mechanism": "supplement"
+    },
+    {
+      "path": "relationships.superseded_by",
+      "tier": "semantic",
+      "stage": "C",
+      "rationale": "The replacement function is sometimes named in deprecation prose, sometimes only implied \u2014 requires interpretation and cross-referencing the entry corpus.",
+      "stage_c_mechanism": "supplement",
+      "final_null_fill": "No stage writes a default null for this field. Where no real value exists, the key stays absent through 0_..3_ and is filled with null once, at the very end, by workflow/concretize/materialize_nulls.py -- see its docstring. Worth recording here because this field is the reason that step exists: it was briefly given a stage-written default null (2026-07-22), which was the wrong shape of fix. There is no signal to condition on at any stage -- identity.deprecated_in is null for all 980 corpus entries, every PPM -- so a stage writing null here would have been asserting a decision it never made."
+    },
+    {
+      "path": "relationships.supersedes",
+      "tier": "derived",
+      "stage": "E",
+      "rationale": "The mechanical inverse of relationships.superseded_by, computed by inverting the whole corpus's edges (workflow/assemble/assemble.py's _derive_supersedes, run on the 3_ merged corpus once every superseded_by value is final). Never authored: hand-maintaining both directions of one edge is how a graph desyncs. Note this is the one 'derived' field computed from OTHER entries rather than same-entry fields \u2014 the tier description's 'in the same entry' is a description of the other two cases, not a constraint this one violates meaningfully."
+    },
+    {
+      "path": "semantics.formal.participants[]",
+      "tier": "formal",
+      "stage": "D",
+      "rationale": "Part of the formal-layer synthesis; see semantics.formal."
+    },
+    {
+      "path": "semantics.formal.data_flow[]",
+      "tier": "formal",
+      "stage": "D",
+      "rationale": "Part of the formal-layer synthesis; see semantics.formal."
+    },
+    {
+      "path": "semantics.formal.sync",
+      "tier": "formal",
+      "stage": "D",
+      "rationale": "Part of the formal-layer synthesis; see semantics.formal."
+    },
+    {
+      "path": "semantics.formal.handle_lifecycle[]",
+      "tier": "formal",
+      "stage": "D",
+      "rationale": "Part of the formal-layer synthesis; see semantics.formal."
+    },
+    {
+      "path": "shape_ref",
+      "tier": "authoring_only",
+      "stage": "D",
+      "rationale": "Exists only in the authored source document before expansion. Erased by the expander before an instance is validated against api-schema.json."
+    },
+    {
+      "path": "bindings (shape-expansion sense)",
+      "tier": "authoring_only",
+      "stage": "D",
+      "rationale": "The slot-name-to-param-ref map used to expand a shape_ref. Not the same field as the top-level entry.bindings section, which is syntactic \u2014 disambiguated here to avoid confusion between the two uses of the word."
+    },
+    {
+      "path": "extra",
+      "tier": "authoring_only",
+      "stage": "D",
+      "rationale": "The escape-hatch patch merged onto a shape expansion at authoring time. Erased by the expander."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+\apisummary{
+    This routine returns the vendor defined name string that is consistent
+    with the library constant \CONST{SHMEM\_VENDOR\_STRING}.
+}
+
+\begin{apidefinition}
+
+\begin{Csynopsis}
+void @\FuncDecl{shmem\_info\_get\_name}@(char *name);
+\end{Csynopsis}
+
+\begin{apiarguments}
+    \apiargument{OUT}{name}{The vendor defined string.}
+\end{apiarguments}
+
+\apidescription{
+    This routine returns the vendor defined name string of size defined by
+    the library constant \CONST{SHMEM\_MAX\_NAME\_LEN}. The program calling
+    this function provides the \VAR{name} memory buffer of at least size
+    \CONST{SHMEM\_MAX\_NAME\_LEN}. The implementation copies the vendor defined
+    string of size at most \CONST{SHMEM\_MAX\_NAME\_LEN} to \VAR{name}. In
+    \CorCpp, the string is terminated by a null character. If the
+    \VAR{name} memory buffer is provided with size less than
+    \CONST{SHMEM\_MAX\_NAME\_LEN}, behavior is undefined. For a given library
+    implementation, the vendor string returned is consistent with the library
+    constant \CONST{SHMEM\_VENDOR\_STRING}.
+}
+
+\apireturnvalues{
+    None.
+}
+
+\end{apidefinition}

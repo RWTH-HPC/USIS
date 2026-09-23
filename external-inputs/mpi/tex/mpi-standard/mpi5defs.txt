@@ -1,0 +1,100 @@
+#
+# Extra definitions
+nop gb 0
+hdef mbox 1 '<span style="white-space:nowrap">'#1'</span>'
+name class 0 <CLASS>
+begin-env funcdef 2 '<TABLE><TR><TD COLSPAN=2>'#1#2'</TD></TR>'\index{#1}
+end-env funcdef   0 '</TABLE>'
+begin-env ffuncdef 1 '<TABLE><TR><TD COLSPAN=2>'#1'</TD></TR>'
+end-env ffuncdef   0 '</TABLE>'
+begin-env cfuncdef 1 '<TABLE><TR><TD COLSPAN=2>'#1'</TD></TR>'
+end-env cfuncdef   0 '</TABLE>'
+begin-env funcdefna 2 '<TABLE><TR><TD COLSPAN=2>'#1#2'</TD></TR>'\index{#1}
+end-env funcdefna   0 '</TABLE>'
+hdef funcarg 3 '<TR><TD>'#1 #2'</TD><TD>'#3'</TD></TR>'
+hdef cfuncarg 3 '<TR><TD>'#1 #2'</TD><TD>'#3'</TD></TR>'
+hdef ffuncarg 3 '<TR><TD>'#1 #2'</TD><TD>'#3'</TD></TR>'
+begin-env sloppy 0
+end-env sloppy
+# New with 2.1
+#hdef color 1 '<font color="#1">
+# In MPI2.2, a different model was used, so the mergecolor command is defined
+# as \relax
+#hdef mpimergecolor 1 '<font color='"#1"'>'
+# There is some misuse of \center in the document
+hdef center 1 '<CENTER>'#1'</CENTER>'
+# There are some uses of \mpiii...begin%...\ninteger that get
+# converted into a single token - this works around this bug in tohtml
+name mpiiidotiMergeFromONEdotTHREEbegininteger 0 integer
+name mpiiidotiMergeFromONEdotTHREEbeginwhere 0 where
+name mpiiidotiMergeFromONEdotTHREEbeginreturn 0 return
+name mpiiidotiMergeFromONEdotTHREEbeginPredefined 0 Predefined
+name mpiiidotiMergeFromTWOdotZERObegininteger 0 integer
+name mpiiidotiMergeNEWforSINGLEbeginnon 0 non
+#
+# These are the new update macros introduced in MPI 2.2
+hdef MPIupdateBegin 2 '<font color="red">'
+hdef MPIupdateEnd 1 '<font color="black">'
+hdef MPIupdate 3 '<font color="red">'#3'<font color="black">'
+hdef MPIreplace 4 '<font color="red">'#4'<font color="black">'
+hdef MPIupdatenc 3 '<font color="red">'#3'<font color="black">'
+hdef MPIreplacenc 4 '<font color="red">'#4'<font color="black">'
+nop MPIdeleteBegin 2
+nop MPIdeleteEnd
+nop MPIdelete 3
+nop MPIdeletenc 3
+#
+# Tell tohtml not to try and process our special-purpose macros;
+# instead, read a special definitions file
+replaceinclude mpi-macs 0 mpi-macs-html
+# Some PDF macros
+nop phantomsection 0
+hdef texorpdfstring 2 #1
+if ifpdf 0 true
+if ifbookprinting 0 false
+if ifusecolor 0 false
+nop startchap 0
+nop withlinenumbers 0
+if ifdraft 0 false
+if ifdraftspec 0 false
+if ifbindinglabel 0 true
+hdef constfootnotesize 1 #1
+nop footnotesize
+#
+# New MPI 3.1 definitions
+nop flushline 0
+nop mainmatter 0
+nop frontmatter 0
+nop backmatter 0
+nop SetFigFont 5
+nop undefined 0
+#
+if ifinfloat 0 false
+if ifodd 0 false
+if ifcontents 0 false
+# For a tabbing environment still being used.
+hdef > 0 '&nbsp;&nbsp;&nbsp;'
+hdef quad 0 '&nbsp;&nbsp;&nbsp;'
+hdef textit 1 {\em #1}
+hdef in 0 contained in
+nop cline 1
+# This is used to create a different entry in the annex.  For the HTML version,
+# we just ignore this for now.
+nop mpifoverloadOnlyInAnnex 1
+nop appendix 0
+nop mpifoverloadStartInAnnex 0
+name dots 0 ...
+# New MPI4 definitions
+if  ifmpiInAnnex 0 false
+# MPI macros that we don't want processed in full
+# constfmt has an optional argument, which we can't handle. This definition
+# helps catch some problems
+replaceinclude mpi-macs.tex 0 mpi-macs-html.tex
+# The filename needs to exactly match what is used in the include statement
+replaceinclude func-index 0 func-index-html.tex
+nop Exindex 3
+nop vlgb 0
+nop thickhline 0
+nop filbreak 0
+#nop bindinglabeltrue 0
+nop DeclareGraphicsExtensions 1

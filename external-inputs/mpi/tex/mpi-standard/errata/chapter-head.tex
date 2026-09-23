@@ -1,0 +1,100 @@
+% Version as of 25 March 1997 by shl
+
+%
+%chapter-head.tex
+
+%Version of July 29, 1993 - Steve Otto, Oregon Graduate Institute
+%Version of April 5, 2009 - William Gropp, University of Illinois
+
+\documentclass[twoside,11pt,fleqn]{scrbook}
+\usepackage{scrlayer-scrpage}
+\pagestyle{plain}
+%\markright{ {\em Draft Document of the MPI Standard,\/ \today} }
+\marginparwidth 0pt
+\oddsidemargin=.25in
+\evensidemargin  .25in
+\marginparsep 0pt
+\topmargin=-.5in
+\textwidth=6.0in
+\textheight=9.0in
+\parindent=2em
+% Keep the document parindent in a separate length so it is constant
+\newlength{\docparindent}
+\setlength{\docparindent}{2em}
+\parindent=\docparindent
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{makeidx}         % Index generation, please see "man makeindex"
+                             % and README
+\usepackage{enumitem}
+
+\usepackage{ifpdf}
+\ifpdf
+  \typeout{  }
+  \typeout{Loading PDF-Graphicx packages ... }
+  \typeout{-------------------------------------------------------------------}
+
+  \usepackage[pdftex]{graphicx}                   % graphics extension
+  \DeclareGraphicsExtensions{.pdf}                % In case of using pdflatex set ext.
+  \usepackage[pdftex,                             % For PDF output
+              a4paper,
+              backref,
+              baseurl={http://www.mpi-forum.org},
+              colorlinks=true,
+              filecolor=black,
+% for normal and reviewcolors versions: 
+              linkcolor=blue,
+              citecolor=red,
+              urlcolor=blue,
+% for normal and reviewcolors versions: 
+% (colorlinks is not changed, to be absolutely sure that all spacing is the same)
+%              linkcolor=black,
+%              citecolor=black,
+%              urlcolor=black,
+              hypertexnames=true,
+              pdfauthor={MPI-Forum},
+              pdftitle={MPI: A Message-Passing Interface Standard},
+              pdfsubject={MPI: A Message-Passing Interface Standard},
+              pdfkeywords={Message Passing, MPI, Standard},
+              pdfpagelabels,
+              plainpages=false
+              ]{hyperref}      % For hyperlinks
+  \usepackage{color}
+\else
+  \typeout{  }
+  \typeout{Loading EPS-Graphicx packages ... }
+  \typeout{-------------------------------------------------------------------}
+
+  \usepackage{graphicx}                           % graphics extension
+  \DeclareGraphicsExtensions{.eps}                % In case of using pdflatex set ext.
+  \usepackage[
+              dvips,                              % For PS output
+              a4paper,
+              backref,
+              colorlinks=true,
+              filecolor=black,
+% for normal and reviewcolors versions: 
+              linkcolor=blue,
+              citecolor=red,
+              urlcolor=blue,
+% for normal and reviewcolors versions: 
+% (colorlinks is not changed, to be absolutely sure that all spacing is the same)
+%              linkcolor=black,
+%              citecolor=black,
+%              urlcolor=black,
+              hypertexnames=false]{hyperref}      % For hyperlinks
+  \usepackage[dvips]{color}
+\fi
+
+\makeindex
+
+\input{mpi-macs.tex}
+
+\begin{document}
+
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\pagestyle{headings}  \withlinenumbers
+

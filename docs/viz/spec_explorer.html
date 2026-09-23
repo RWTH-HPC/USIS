@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unified Semantic Interface Spec — Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3f4f6; --panel:#ffffff; --line:#dde1e7; --line-soft:#e8eaee;
+    --ink:#161a1f; --muted:#5b6270; --faint:#9aa1ad;
+    --blue:#2454c7; --blue-soft:#eaf0fd;
+    --amber:#9a6b08; --amber-soft:#fbf2dd;
+    --teal:#0f7d72; --teal-soft:#e3f5f2;
+    --violet:#7c3aed; --violet-soft:#f1eafe;
+    --crimson:#b91c1c; --crimson-soft:#fbeaea;
+    --mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.5; }
+  ::selection{ background:var(--blue-soft); }
+  :focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
+
+  header{ border-bottom:1px solid var(--line); background:var(--panel); padding:18px 24px 16px; position:sticky; top:0; z-index:30; }
+  .header-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .title-block .eyebrow{ font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--blue); font-weight:600; margin-bottom:4px; display:flex; gap:8px; align-items:center; }
+  h1{ font-family:var(--mono); font-size:19px; font-weight:600; margin:0 0 4px; letter-spacing:-0.01em; }
+  .subtitle{ color:var(--muted); font-size:13px; max-width:58ch; }
+
+  .ppm-matrix{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .chip{ font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.04em; padding:5px 9px; border-radius:3px; border:1.5px solid var(--line); color:var(--faint); background:var(--panel); transition:all .15s ease; text-transform:uppercase; }
+  .chip.experimental{ border-style:dashed; }
+  .chip.active{ color:#fff; border-color:transparent; }
+  .chip[data-ppm="mpi"].active{ background:var(--blue); }
+  .chip[data-ppm="nccl"].active{ background:var(--teal); }
+  .chip[data-ppm="nvshmem"].active{ background:var(--violet); }
+  .chip[data-ppm="shmem"].active{ background:var(--amber); }
+  .chip[data-ppm="openmp"].active{ background:var(--crimson); }
+  .chip[data-ppm="cuda"].active{ background:#1f7a3f; }
+  .chip.dim{ opacity:.35; }
+
+  .tabs{ display:flex; gap:2px; margin-top:14px; }
+  .tab-btn{ font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:.03em; background:transparent; border:1px solid var(--line); border-bottom:none; padding:8px 16px; cursor:pointer; color:var(--muted); border-radius:4px 4px 0 0; position:relative; top:1px; }
+  .tab-btn.active{ background:var(--paper); color:var(--ink); border-color:var(--line); }
+  .tab-btn:hover:not(.active){ color:var(--ink); }
+
+  .layout{ display:flex; align-items:flex-start; max-width:1320px; margin:0 auto; }
+  aside{ width:248px; flex-shrink:0; padding:20px 16px; position:sticky; top:158px; max-height:calc(100vh - 158px); overflow-y:auto; }
+  main{ flex:1; min-width:0; padding:20px 24px 80px; }
+
+  .side-block{ margin-bottom:22px; }
+  .side-label{ font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-bottom:8px; font-weight:600; }
+  .offset-nav a{ display:flex; gap:8px; align-items:baseline; text-decoration:none; color:var(--ink); padding:4px 6px; border-radius:3px; font-size:12.5px; }
+  .offset-nav a:hover{ background:var(--blue-soft); }
+  .offset-nav .ofs{ font-family:var(--mono); color:var(--faint); font-size:11px; width:30px; flex-shrink:0; }
+
+  select, input[type="text"]{ width:100%; font-family:var(--mono); font-size:12px; padding:7px 9px; border:1px solid var(--line); border-radius:4px; background:var(--panel); color:var(--ink); }
+  input[type="text"]::placeholder{ color:var(--faint); }
+
+  .legend-row{ display:flex; align-items:center; gap:7px; font-size:12px; margin-bottom:5px; color:var(--muted); }
+  .dot{ width:9px; height:9px; border-radius:2px; flex-shrink:0; }
+  .dot.str{ background:var(--amber); } .dot.bool{ background:var(--teal); }
+  .dot.arr{ background:var(--violet); } .dot.obj{ background:var(--blue); }
+  .dot.enum{ background:var(--crimson); } .dot.null{ background:var(--faint); }
+
+  .toolbar{ display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+  .btn{ font-family:var(--mono); font-size:11.5px; font-weight:600; letter-spacing:.03em; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:7px 12px; cursor:pointer; color:var(--ink); }
+  .btn:hover{ border-color:var(--blue); color:var(--blue); }
+  .toolbar input[type="text"]{ flex:1; min-width:180px; }
+  .note{ font-size:12px; color:var(--muted); background:var(--blue-soft); border:1px solid #d6e2fa; padding:9px 12px; border-radius:5px; margin-bottom:16px; }
+  .note.changed{ background:#fdf3e3; border-color:#f0dcae; }
+
+  .section-card{ background:var(--panel); border:1px solid var(--line); border-radius:7px; margin-bottom:12px; overflow:hidden; }
+  .section-head{ display:flex; align-items:center; gap:12px; padding:13px 16px; cursor:pointer; user-select:none; }
+  .section-head:hover{ background:#fafbfc; }
+  .ofs-tag{ font-family:var(--mono); font-size:11.5px; color:var(--blue); background:var(--blue-soft); padding:2px 7px; border-radius:3px; font-weight:600; flex-shrink:0; }
+  .section-name{ font-family:var(--mono); font-weight:600; font-size:14px; flex-shrink:0; }
+  .section-caption{ color:var(--muted); font-size:12px; flex:1; }
+  .chev{ font-family:var(--mono); color:var(--faint); font-size:12px; transition:transform .15s ease; flex-shrink:0; }
+  .section-card.open > .section-head .chev{ transform:rotate(90deg); }
+  .section-body{ display:none; padding:4px 16px 14px 16px; }
+  .section-card.open > .section-body{ display:block; }
+
+  .node{ margin:1px 0; }
+  .node-head{ display:flex; align-items:baseline; gap:9px; padding:5px 6px; cursor:pointer; border-radius:4px; flex-wrap:wrap; }
+  .node-head:hover{ background:#f6f7f9; }
+  .node.leaf > .node-head{ cursor:default; }
+  .node.leaf > .node-head:hover{ background:transparent; }
+  .twirl{ font-family:var(--mono); color:var(--faint); font-size:10px; width:10px; flex-shrink:0; }
+  .node:not(.leaf) > .node-head .twirl::before{ content:"▸"; }
+  .node.open > .node-head .twirl::before{ content:"▾"; }
+  .node.leaf > .node-head .twirl::before{ content:""; }
+  .key{ font-family:var(--mono); font-weight:500; font-size:12.5px; color:var(--ink); flex-shrink:0; }
+  .type{ font-family:var(--mono); font-size:10.5px; padding:1px 6px; border-radius:3px; flex-shrink:0; font-weight:600; white-space:nowrap; }
+  .type-str{ color:var(--amber); background:var(--amber-soft); }
+  .type-bool{ color:var(--teal); background:var(--teal-soft); }
+  .type-arrtype{ color:var(--violet); background:var(--violet-soft); }
+  .type-objtype{ color:var(--blue); background:var(--blue-soft); }
+  .type-enum{ color:var(--crimson); background:var(--crimson-soft); }
+  .type-other{ color:var(--muted); background:#eef0f3; }
+  .desc{ color:var(--muted); font-size:12px; flex-basis:100%; }
+  .children{ margin-left:19px; padding-left:10px; border-left:1px solid var(--line-soft); display:none; }
+  .node.open > .children{ display:block; }
+  .arr-of-label{ font-size:11px; color:var(--faint); font-style:italic; margin:2px 0 2px 19px; }
+
+  .val-str{ color:var(--amber); font-family:var(--mono); font-size:12.5px; }
+  .val-bool{ color:var(--teal); font-family:var(--mono); font-size:12.5px; font-weight:600; }
+  .val-num{ color:#1f7a3f; font-family:var(--mono); font-size:12.5px; }
+  .val-null{ color:var(--faint); font-family:var(--mono); font-size:12.5px; font-style:italic; }
+
+  .hl{ background:#fff3b0 !important; border-radius:3px; }
+
+  .notes-wrap{ max-width:940px; }
+  .req-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px; }
+  @media (max-width:760px){ .req-grid{ grid-template-columns:1fr; } }
+  .req-card{ background:var(--panel); border:1px solid var(--line); border-radius:7px; padding:14px 16px; }
+  .req-id{ font-family:var(--mono); color:var(--blue); font-weight:700; font-size:12px; margin-bottom:3px; }
+  .req-title{ font-weight:600; font-size:13px; margin-bottom:6px; }
+  .req-body{ color:var(--muted); font-size:12.5px; }
+  h2.notes-h{ font-family:var(--mono); font-size:14px; letter-spacing:.02em; margin:26px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+  .lede{ color:var(--muted); font-size:13px; margin-bottom:4px; }
+  .decision-list{ list-style:none; margin:0; padding:0; }
+  .decision-list li{ padding:10px 0; border-bottom:1px solid var(--line-soft); font-size:13px; }
+  .decision-list li:last-child{ border-bottom:none; }
+  .decision-list b{ font-family:var(--mono); font-size:12.5px; color:var(--blue); }
+  .qa-card{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--violet); border-radius:7px; padding:16px 18px; margin-bottom:14px; }
+  .qa-title{ font-weight:600; font-size:13.5px; margin-bottom:8px; }
+  .qa-body{ color:var(--muted); font-size:12.5px; }
+  .flag-card{ background:#fdf3e3; border:1px solid #f0dcae; border-radius:6px; padding:10px 14px; font-size:12.5px; color:#5b4a1f; margin-bottom:8px; }
+  .status-line{ font-family:var(--mono); font-size:12px; color:var(--muted); background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px 14px; margin-top:18px; }
+
+  @media (prefers-reduced-motion: reduce){ .chev, .chip{ transition:none; } }
+  @media (max-width:880px){
+    .layout{ flex-direction:column; }
+    aside{ position:static; width:100%; max-height:none; display:flex; flex-wrap:wrap; gap:0 28px; }
+    .side-block{ flex:1 1 200px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="title-block">
+      <div class="eyebrow">spec explorer</div>
+      <h1>Unified Semantic Interface Specification</h1>
+      <div class="subtitle">One JSON schema shared by every parallel programming model — MPI, NCCL, NVSHMEM, OpenSHMEM, with OpenMP and CUDA as experimental additions. Browse the eight-section entry format, walk through real example instances, or read the design rationale behind it.</div>
+    </div>
+    <div class="ppm-matrix" id="ppmMatrix">
+      <span class="chip" data-ppm="mpi">MPI</span>
+      <span class="chip" data-ppm="nccl">NCCL</span>
+      <span class="chip" data-ppm="nvshmem">NVSHMEM</span>
+      <span class="chip" data-ppm="shmem">SHMEM</span>
+      <span class="chip experimental" data-ppm="openmp">OpenMP</span>
+      <span class="chip experimental" data-ppm="cuda">CUDA</span>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="schema">Schema</button>
+    <button class="tab-btn" data-tab="example">Example instances</button>
+    <button class="tab-btn" data-tab="notes">Design notes</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="side-block" id="navBlock">
+      <div class="side-label">Sections (0x0–0x7)</div>
+      <div class="offset-nav" id="offsetNav"></div>
+    </div>
+    <div class="side-block" id="exampleSelectBlock" style="display:none;">
+      <div class="side-label">Instance</div>
+      <select id="exampleSelect">
+        <option value="mpi:mpi_send">mpi : mpi_send — production-validated, source:null</option>
+        <option value="mpi:mpi_bcast">mpi : mpi_bcast — source:"structural"</option>
+        <option value="mpi:mpi_isend">mpi : mpi_isend — handle_lifecycle "create"</option>
+        <option value="mpi:mpi_irecv">mpi : mpi_irecv — source:"matched"</option>
+        <option value="mpi:mpi_allgather">mpi : mpi_allgather — source:"gathered"</option>
+        <option value="mpi:mpi_accumulate">mpi : mpi_accumulate — reduce + passive_target</option>
+        <option value="nvshmem:nvshmem_int_put">nvshmem : nvshmem_int_put — host+device, one entry</option>
+        <option value="nvshmem:nvshmemx_int_put_block">nvshmem : nvshmemx_int_put_block — device-only, separate entry</option>
+        <option value="shmem:shmem_put">shmem : shmem_{T}_put — type-generic</option>
+        <option value="nccl:ncclAllReduce">nccl : ncclAllReduce — source:"reduced" + context_dependencies</option>
+      </select>
+    </div>
+    <div class="side-block">
+      <div class="side-label">Type legend</div>
+      <div class="legend-row"><span class="dot str"></span>String</div>
+      <div class="legend-row"><span class="dot enum"></span>Enum (closed value set)</div>
+      <div class="legend-row"><span class="dot bool"></span>Boolean</div>
+      <div class="legend-row"><span class="dot arr"></span>Array</div>
+      <div class="legend-row"><span class="dot obj"></span>Object</div>
+      <div class="legend-row"><span class="dot null"></span>null (explicit, never omitted)</div>
+    </div>
+  </aside>
+
+  <main>
+    <div id="schemaPane">
+      <div class="toolbar">
+        <button class="btn" id="expandAllBtn">Expand all</button>
+        <button class="btn" id="collapseAllBtn">Collapse all</button>
+        <input type="text" id="searchBox" placeholder="Search field names — e.g. 'stages', 'binding_type', 'collective'">
+      </div>
+      <div id="sectionsContainer"></div>
+    </div>
+
+    <div id="examplePane" style="display:none;">
+      <div class="toolbar">
+        <button class="btn" id="expandAllBtn2">Expand all</button>
+        <button class="btn" id="collapseAllBtn2">Collapse all</button>
+      </div>
+      <div class="note">mpi:mpi_send is copied verbatim from docs/schema/examples/mpi-api.json — a real, schema-validated entry. Every formal block below (semantics.formal) is copied from a golden, expander-tested expansion in curated/shapes/seed-assignments.json, not invented for this page; the surrounding sections are hand-authored to fill out the rest of the entry. Together the ten instances cover all 5 data_flow[].source.kind values and 5 sync.matching.kind values — see Design notes for what each demonstrates.</div>
+      <div id="exampleContainer"></div>
+    </div>
+
+    <div id="notesPane" class="notes-wrap" style="display:none;"></div>
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   SCHEMA DATA (abstract types + descriptions). Mirrors
+   curated/schemas/api-schema.json's $defs 1:1 (field order, requiredness,
+   enum values, nullability). See docs/schema/schema-overview.md
+   and docs/schema/semantics-formal.md for the prose this compresses.
+   ============================================================ */
+function L(type, desc){ return { k:'leaf', type, desc }; }
+function O(desc, fields){ return { k:'obj', desc, fields }; }
+function NO(type, desc, fields){ return { k:'nobj', type, desc, fields }; }
+function ARR(desc, of){ return { k:'arr', desc, of }; }
+
+function bindingTypeFragment(note){
+  return O("One concrete type string per language binding, mirroring the structure of the top-level bindings section. " + note, {
+    c: L("String | null", 'e.g. "MPI_Comm", "void*", or "{T}*" for type-generic entries'),
+    fortran90: L("String | null", 'e.g. "INTEGER", "TYPE(MPI_Comm)"'),
+    fortran08: L("String | null", 'e.g. "TYPE(MPI_Comm)"'),
+    lis: L("String | null", "Large-count interface type string"),
+    cpp: L("String | null", "C++ type string, if a dedicated binding exists")
+  });
+}
+
+const PARAM_FIELDS = {
+  name: L("String", "Parameter name as it appears in the signature"),
+  kind: L("Enum | null", 'BUFFER | COUNT | RANK | DATATYPE | COMMUNICATOR | OPERATION | TAG | STATUS | REQUEST | TEAM | WINDOW | KEY | ERROR_CODE | STREAM | SCALAR | ID | TEAM_SIZE | THREAD_LEVEL | DEVICE | SIG_OP | null. STREAM = a CUDA stream handle (ncclAllReduce\'s "stream" and every NCCL/NVSHMEM on-stream call). SCALAR = a by-value operand that is neither buffer, handle, nor operator (SHMEM/NVSHMEM atomics\' "value"/"cond", and pointer-to-scalar outputs like mpi_type_size\'s "size"). TEAM_SIZE = the number of members of a team, group or communicator (mpi_comm_size\'s "size", ncclCommCount\'s "count") — assigned per function, never to a bare pointer "size", which is a byte size in mpi_type_size. RANK = any rank value, the caller\'s own included (mpi_comm_rank\'s "rank"). THREAD_LEVEL = a thread-support level (MPI_Init_thread\'s required/provided); DEVICE = a device number (cudaSetDevice\'s device, OpenMP\'s device_num); SIG_OP = the *_put_signal signal operator. The enum lives in $defs/parameter_kind, shared with return.value_kind. ID = an opaque out-of-band identifier (ncclCommInitRank\'s ncclUniqueId). null = no fitting kind in this deliberately-incomplete enum (CONTEXT/SIGNAL/CONFIG remain logged gaps, added only when a worked entry needs one, not speculatively) — never "not yet classified".'),
+  direction: L("Enum", '"in" | "out" | "inout"'),
+  desc: L("String | null", "Plain-English role description"),
+  binding_type: bindingTypeFragment("Covers C++ and LIS parameter types too, not just C/Fortran."),
+  asynchronous: L("Boolean", "Buffer may be accessed by the runtime after the call returns"),
+  constant: L("Boolean", "const-qualified in C"),
+  pointer: L("Boolean | null", "Whether this parameter is passed by pointer"),
+  array_type: L("Enum | null", '"fixed" | "variable" | "2d" | null. null exactly when length is: not an array. fixed = length is an integer or a PPM constant; 2d = a declared T x[][n] (length holds the outer dimension, the C type the inner one); variable = otherwise.'),
+  func_type: L("String | null", "Full signature, if this is a function pointer"),
+  length: L("Int | String | null", 'How many elements the array holds. Int = that many; a sibling parameter\'s name = that parameter\'s value, in units of the buffer\'s datatype ("count", "nelems"); a PPM constant = that constant ("MPI_MAX_OBJECT_NAME"); "*" = an array whose length is not recorded as a number, parameter or constant (a communicator\'s group size, several parameters, a terminator, or unstated — desc says more); null = not an array.'),
+  parameter_bindings: L("Enum[]", 'Which binding-variants include this parameter — the positive inverse of a "suppress this binding" flag. Tokens: "c" | "c_large" | "fortran90" | "fortran90_optional" | "fortran08" | "fortran08_optional" | "lis" | "lis_large" | "cpp". An "_optional" suffix marks the parameter optional in that binding; a "*_large" token with no plain counterpart marks a large-count-interface-only parameter.'),
+  root_only: L("Boolean", "Only meaningful on the root process"),
+  constraints: O("Validity constraints on this parameter", {
+    not_null: L("Boolean | null", 'Nullable, like its two sibling constraints. Null = no nullability constraint asserted — either not applicable (a by-value parameter can\'t be null at all) or genuinely undetermined (a blanket true would be wrong for e.g. MPI_STATUS_IGNORE / MPI_Init(NULL,NULL)). A consumer derives no proof obligation from null.'),
+    value_range: L("String | null", 'e.g. "0 <= rank < comm_size"'),
+    paired_with: L("String | null", "Key of the matching param in the paired call")
+  }),
+  memory_space: L("Enum | null", '"host" | "device" | "symmetric_heap" | "unified" | "either" | null. Fixed value for most PPM/parameter combinations; "either" pairs with a tool_integration.context_dependencies entry (e.g. CUDA-aware MPI, where the real value depends on pointer provenance and build config, not the symbol alone). null for non-buffer parameters. Deliberately states WHAT KIND of memory, not HOW to move it — multi-GPU routing (GPUDirect RDMA vs. staged host copy) is a consuming tool\'s job, not the schema\'s (see docs/schema/gpu-memory-semantics.md).')
+};
+
+/* --- semantics.formal — the operational data-flow/sync layer --- */
+const DATA_FLOW_FIELDS = {
+  id: L("String", "Local id for this memory access, referenced by other data_flow entries' source/inputs"),
+  participant: L("String | null", "id of the owning participant; null for reduce nodes, which aren't scoped to a single participant"),
+  op: L("Enum", '"read" | "write" | "reduce" | "read_modify_write" — reduce is its own op (not folded into write) because a reduction\'s written value is a function over ALL participant instances\' reads, not any single sibling; it has no single owning participant.'),
+  buffer: L("String | null", 'Reference-grammar pointer to the buffer touched, e.g. "param:buf"; null for reduce nodes'),
+  extent: O("Element count + datatype this access spans", {
+    count_ref: L("String", 'Reference to the count parameter, e.g. "param:count"'),
+    datatype_ref: L("String", 'Reference to the datatype parameter, or a "type:{T}" literal for a type_family entry')
+  }),
+  offset: L("String | null", "Reference-grammar expression giving this access's slice offset. null for uniform-copy shapes where every participant gets an identical extent (bcast); populated for indexed shapes where each participant's slice depends on its rank (scatter)."),
+  inputs: ARR('For op:"reduce" only — which sibling data_flow reads feed the reduction, and over what scope. scope is a deliberately open string, not a closed enum, so a new aggregation pattern doesn\'t force a schema version bump — but it IS a closed registry at the consumer-contract level (docs/schema/semantics-formal.md): "all_participant_instances" (allreduce), "instances_before_self_in_order" (scan), "rma_target_prior" (accumulate\'s two-party case — the origin\'s incoming value combined with the target\'s own resident value, not a sibling call-instance read at all).', {
+    ref: L("String", "id of the sibling data_flow entry supplying one contribution"),
+    scope: L("String", "Registry-controlled scope string — see description above")
+  }),
+  operation_ref: L("String | null", 'Reference to the reduction-operator parameter, e.g. "param:op"; null unless op == "reduce"'),
+  valid_during: ARR("Epoch preconditions this access must fall inside — how an RMA transfer between an open access epoch and an open exposure epoch on the same window gets checked (e.g. a put issued between MPI_Win_start/MPI_Win_complete).", {
+    epoch_scope: L("Enum", '"access" | "exposure"'),
+    bound_to: L("String", "Handle parameter the epoch is bound to"),
+    role: L("String", 'Which side of the epoch pair this access requires be open on this participant — "origin" for the access epoch, "target" for the exposure epoch.')
+  }),
+  source: L("Object | null", 'Tagged union — where a WRITTEN value provably came from. This is the field the actual verification/codegen value lives in. kind:"structural" = copy from one named sibling read in the SAME call instance (bcast, put). kind:"reduced" = aggregation over a scoped set of sibling reads via a reduce node (allreduce, scan, accumulate), optionally sliced per recipient via "offset" (reduce_scatter). kind:"gathered" = per-participant assembly of a named sibling read across a scope with NO operator — every contribution survives verbatim, placed at "placement_offset" evaluated in the CONTRIBUTING participant\'s own context (allgather, SHMEM fcollect); needed its own kind because faking it as an operator-less "reduced" would hand consumers a value that looks like a reduction and isn\'t. kind:"matched" = resolved at runtime by sync.matching against a SEPARATE call instance; "via" names the sync.events id that gates when the value becomes valid (irecv). null = comes from implementation/runtime state, not modeled (most query calls).')
+};
+
+const FORMAL_FIELDS = {
+  participants: ARR("Who is involved in a call instance, and whether each one actually invokes the function.", {
+    id: L("String", "Local name for this role, referenced by data_flow[].participant and sync.events[].participant. Scoped to this entry only."),
+    role_kind: L("Enum", '"initiator" | "member" | "passive_target"'),
+    calls_function: L("Boolean", "False for the passive side of a one-sided op — tells a static analyzer the target rank of e.g. mpi_put has no matching call site of its own on that rank, a distinction that trips up naive collective-matching checkers if not represented explicitly"),
+    cardinality: L("Enum", '"one" | "many"'),
+    selector: L("String", 'Predicate in the reference/selector grammar (docs/schema/reference-grammar.md), e.g. "rank == param:root" or "rank in param:comm"')
+  }),
+  data_flow: ARR("One entry per memory access — who reads/writes/reduces what, and where a written value provably came from. Empty array for pure-sync ops like barrier.", DATA_FLOW_FIELDS),
+  sync: O("Ordering, events, and cross-call-instance matching. Always present whenever formal is non-null.", {
+    events: ARR("Named points, or open/close interval endpoints for RMA epochs.", {
+      id: L("String", "Local name for this event, referenced by sync.ordering and by a data_flow source of kind \'matched\' via its \'via\' field."),
+      participant: L("String", "id of the participant this event occurs on."),
+      event_type: L("Enum", '"point" | "open_epoch" | "close_epoch"'),
+      epoch_scope: L("Enum | null", '"access" | "exposure" | null'),
+      bound_to: L("String | null", 'Handle parameter this event is bound to, e.g. "param:request" or "param:win" — the same mechanism unifies request completion (point event) and RMA epochs (open/close_epoch event) as one interval abstraction'),
+      group_ref: L("String | null", "For PSCW-style epochs, the explicit process group the epoch pairs against")
+    }),
+    ordering: ARR("Happens-before relationships between events, scoped to how widely they're enforced.", {
+      before: L("Any", "A data_flow id, a sync.events id, or a call-boundary literal"),
+      after: L("Any", "Same shape as before"),
+      scope: L("Enum", '"same_participant_instance" | "all_participant_instances" | "cross_call"'),
+      note: L("String", "Short human-readable explanation of why this field is not fixed by the symbol — read by a human triaging the dependency, not parsed.")
+    }),
+    matching: NO("Object | null", "States how separate call instances pair up with each other. null when there's nothing to match against (e.g. mpi_wait, which only closes a handle interval).", {
+      kind: L("Enum", '"collective_rendezvous" (every instance in the participant group, no key — bcast/barrier/allreduce) | "tag_match" (comm+tag+source/dest, non-overtaking — MPI isend/irecv) | "peer_match" (comm+peer rank, program order, no tag — NCCL send/recv, which has no tag concept) | "group_match" (explicit process-group equality — MPI PSCW) | "epoch_scoped" (deferred to an enclosing epoch, no matching at this call site — RMA put/get inside lock/fence)'),
+      match_keys: L("String[]", "Reference-grammar keys that must agree across the paired instances"),
+      matched_across: L("String", 'e.g. "paired_call", "all_participant_instances"'),
+      program_order_required: L("Boolean | null", 'Must instances be paired in the order the program issues them? True for NCCL peer_match (no tags exist, so issue order IS the pairing key). False for MPI tag_match (non-overtaking applies per envelope, not across differing tags). null where the matching kind makes it meaningless (collective_rendezvous).')
+    })
+  }),
+  handle_lifecycle: ARR('Tracks a handle across its create → (any number of) use → destroy interval. Also the mechanism behind RMA epochs (a "use" with epoch fields) and request completion (a "create"/"destroy" pair) — unifies five real patterns (request completion, RMA epochs, plain resource lifecycle, persistent-op re-arm, split-collective I/O) as one interval abstraction with only enum growth needed, not new mechanism.', {
+    handle: L("String", 'A "param:" ref, or "return_value" for handles created by return (e.g. nvshmem_malloc)'),
+    handle_kind: L("Enum", '"REQUEST" | "WINDOW" | "COMMUNICATOR" | "DATATYPE" | "SYMMETRIC_ALLOCATION" | "FILE" | "SESSION"'),
+    role: L("Enum", '"create" | "use" | "destroy"'),
+    derived_from: L("String | null", "For a \"create\" that also consumes an existing handle, e.g. MPI_Comm_split's newcomm derived_from comm")
+  })
+};
+
+const SCHEMA = {
+  identity: O("Stable provenance & classification — every consumer starts here.", {
+    model: L("Enum", '"mpi" | "nccl" | "nvshmem" | "shmem" | "openmp" | "cuda"'),
+    name: L("String", "Canonical function name"),
+    api_group: L("Enum | null", '"collective" | "point_to_point" | "one_sided" | "query" | "management" | "synchronization" | "io" | null. "synchronization" covers local completion/ordering primitives (mpi_wait, nvshmem_fence, shmem_quiet, *_wait_until) that are neither inquiries nor lifecycle calls; "io" covers the mpi_file_* family. null = no fitting category in this deliberately-incomplete enum (e.g. mpi_pack-style local data manipulation) — never "not yet classified".'),
+    since: L("String | null", 'Version introduced, as "<PPM>-<version>" — "MPI-1.0", "OpenSHMEM-1.5", "NCCL-2.7", "NVSHMEM-2.0" — enforced by a schema pattern.'),
+    deprecated_in: L("String | null", 'Version deprecated — a version string, never a boolean. Same "<PPM>-<version>" pattern as since.'),
+    standard_refs: L("String[]", 'e.g. ["MPI-4.1 §5.4.2"]'),
+    desc: L("String | null", "One-sentence plain-English description"),
+    type_family: L("String[] | null", 'Lists the concrete type suffixes this entry is generic over, e.g. ["int","long","float",...] — the typename axis (shmem_int_put/shmem_long_put/...) collapses cleanly this way since it\'s pure substitution. The operation axis (add vs. fetch vs. cswap) does NOT collapse the same way — those stay separate entries, told apart by semantics.atomic.operation. When non-null, identity.name and parameters[].binding_type use a "{T}" placeholder, substituted per type by the implementation. null = an ordinary, non-generic entry. See shmem:shmem_put in the example dropdown.')
+  }),
+  bindings: O("Per-language binding metadata — null means unsupported by this PPM, never omitted.", {
+    c: NO("Object | null", "null = no C binding", { expressible: L("Boolean", "Whether this function is expressible in this language binding at all — false marks a function the binding deliberately omits, not a gap in this data."), header: L("String", 'e.g. "mpi.h", "nccl.h"'), signature: L("String", "Full C prototype") }),
+    fortran90: NO("Object | null", "null = no Fortran 90 binding", { name: L("String", 'e.g. "MPI_COMM_RANK"'), expressible: L("Boolean", "Whether this function is expressible in this binding at all."), use_colons: L("Boolean", "Whether the Fortran declaration uses assumed-shape (:) array syntax."), index_overload: L("Boolean | null", "Whether a separate large-index overload of this routine exists in this binding."), not_with_mpif: L("Boolean", "True if this routine is unavailable when including the legacy mpif.h rather than the mpi module.") }),
+    fortran08: NO("Object | null", "null = no Fortran 2008 binding", { name: L("String", 'Routine name in this binding, e.g. "MPI_Send".'), expressible: L("Boolean", "Whether this function is expressible in this binding at all."), abstract_interface: L("Boolean", "True if the binding declares this via an ABSTRACT INTERFACE (the F08 form used for callback-shaped routines)."), module: L("String", 'e.g. "mpi_f08"') }),
+    lis: NO("Object | null", "Large-count interface binding", { expressible: L("Boolean", "Whether a large-count (LIS) form of this routine exists.") }),
+    cpp: NO("Object | null", "null = no dedicated C++ binding", { expressible: L("Boolean", "Whether a dedicated C++ binding exists."), class_method: L("String | null", "Owning class and method name, when the C++ binding is a member function rather than a free function.") })
+  }),
+  execution: O("When and where the call executes.", {
+    blocking: L("Boolean", "Blocks until locally complete? Always refers to the immediate caller's own context — the host thread when launch includes cpu, the calling GPU thread/warp/block when launch includes gpu — not a comparison across launch sites. For PPMs where this isn't fixed by the symbol alone (e.g. NCCL under ncclGroupStart/ncclGroupEnd), the value here is the default case; see tool_integration.context_dependencies."),
+    execute_once: L("Boolean", 'True ONLY for process-lifetime singleton calls the standard forbids repeating: MPI_Init, MPI_Init_thread and MPI_Finalize, and nothing else across the six models covered. False for ordinary collectives, and false for an init/finalize routine whose own standard allows a second call \u2014 OpenSHMEM and NVSHMEM both do. "Every rank must call this" is execution.collective, not execute_once.'),
+    collective: L("Boolean", 'True if every process / PE / thread in the team must call this operation (a collective call pattern) — an axis genuinely independent of api_group: mpi_init is collective AND management. e.g. true for MPI_Win_fence just as much as for MPI_Bcast; also true for a GPU block-collective RMA call at the thread-block level.'),
+    thread_safety: L("Enum | null", '"single" | "funneled" | "serialized" | "multiple"'),
+    launch: L("Enum | null", '"cpu" | "gpu" | "cpu+gpu" — where in the program text this can be called FROM. "cpu+gpu" means one entry covers both a host-callable form and an identically-shaped device-callable overload.'),
+    runs_on: L("Enum | null", '"cpu" | "gpu" | "cpu+gpu" — what hardware actually carries out the work, independent of launch. e.g. ncclAllreduce: launch = "cpu" (called from host code) but runs_on = "gpu" (the reduction executes on the GPU).'),
+    gpu_scope: L("Enum | null", '"thread" | "warp" | "block" | "device"'),
+    stages: L("Enum[] | null", 'Items from {"i","s","c","f"}: initialization / starting / completion / freeing, per the MPI-4 procedure taxonomy. A call performs at least part of the indicated stage(s); e.g. a blocking call is typically ["s","c"], MPI_Isend is ["s"], MPI_Wait is ["c"].'),
+    locality: L("Enum | null", '"local" | "remote" | "both" — whether the call touches only local state, a remote PE\'s state, or both.'),
+    completion: L("Enum | null", '"ic" (incomplete procedure, leaves a request needing further completion) | "c" (completing procedure) | "f" (freeing procedure) | "stream_ordered" (completion implied by CUDA-stream order with no request-like handle at all, e.g. NCCL/NVSHMEM host calls; observable only via the caller\'s own stream/event sync, not via this call\'s return — for calls like this, NCCL genuinely has no REQUEST-shaped handle to bind completion to).'),
+    procedure_class: L("Enum | null", 'Kept distinct from semantics.atomic.operation / semantics.collective.type, which describe the data operation (put, add, broadcast), not the call\'s blocking/persistence category. Values: "b-op" (blocking) | "nb-op" (nonblocking) | "p-op" (persistent) | "pp-op" (persistent partitioned).')
+  }),
+  semantics: O("What the call does. At most one of the conditional sub-objects is non-null — which one is non-null IS the operation class; memory and formal are separately, independently nullable — see their own descriptions below.", {
+    collective: NO("Object | null", 'Non-null only when this is a collective operation', {
+      type: L("Enum", '"broadcast" | "reduce" | "allreduce" | "scatter" | "gather" | "allgather" | "alltoall" | "scan" | "reduce_scatter" (extensible)'),
+      root_involved: L("Boolean", "Does a root process play a special role?"),
+      in_place: L("Boolean", 'Does the PPM define a DISTINGUISHED in-place mode for this call — a documented way to make the send and receive buffers coincide? Not "would aliasing the buffers happen to work". MPI spells it MPI_IN_PLACE (true for mpi_allreduce/reduce/gather/scatter); NCCL documents a per-call aliasing condition (true for AllReduce/Broadcast/Reduce, and with an offset for AllGather/ReduceScatter — see external-inputs/nccl/docs/2.30/api/colls.md); OpenSHMEM/NVSHMEM reductions require source and dest to be either the same symmetric address or fully disjoint, which is an in-place mode. FALSE for a single-buffer call like mpi_bcast: one inout buffer is not an in-place VARIANT, it is the only form the call has. Mirrored by tool_integration.buffer_aliasing.'),
+      comm_scope: L("Enum", '"intracommunicator" | "intercommunicator" | "both"'),
+      algorithm_class: L("Enum", '"one_to_all" | "all_to_one" | "all_to_all" (extensible)'),
+      reduction_op: L("Boolean", "Consumes a reduction operator?"),
+      topology_aware: L("Boolean", 'TRUE ONLY for MPI\'s neighborhood collectives — the family (MPI_Neighbor_allgather, MPI_Neighbor_alltoall, and their v/w/nonblocking/persistent variants) that requires a topology communicator built by MPI_Cart_create or MPI_Dist_graph_create, and moves data along that attached graph rather than across the whole group. It does NOT mean "the implementation uses a topology-aware ring/tree algorithm" — that is true of essentially every production collective in every PPM and would carry no information. Reading it the second way is what previously marked every NCCL collective true and every MPI collective false, which is backwards. In the formal layer this family is expressed by the is_neighbor() selector built-in, not by a separate shape.')
+    }),
+    point_to_point: NO("Object | null", 'Non-null only when this is a point-to-point operation', {
+      direction: L("Enum", '"send" | "receive" | "send_receive"'),
+      synchronous: L("Boolean | null", 'These three describe SEND-mode variants (Send/Ssend/Bsend/Rsend) — null when direction != "send" (no meaning for a receive; see mpi:mpi_irecv) or when genuinely implementation-defined (MPI standard-mode Send is free to buffer or not, per-implementation — no single correct boolean exists; pair with a tool_integration.context_dependencies entry, see mpi:mpi_send).'),
+      buffered: L("Boolean | null", "Same nullability rationale as synchronous."),
+      ready: L("Boolean | null", "Same nullability rationale as synchronous.")
+    }),
+    one_sided: NO("Object | null", 'Non-null only when this is a one-sided operation', {
+      operation: L("Enum", '"put" | "get" | "accumulate" | "fetch_op" | "compare_swap"'),
+      epoch_type: L("Enum", '"fence" | "pscw" | "lock" | "lockall" | "implicit"'),
+      ordering: L("Enum", '"none" | "relaxed" | "release_acquire"')
+    }),
+    atomic: NO("Object | null", 'Non-null only when this is an atomic operation', {
+      operation: L("Enum | null", '"add" | "fetch" | "fetch_add" | "set" | "swap" | "cswap" | "inc" | "fetch_inc" | "and" | "or" | "xor" | "fetch_and" | "fetch_or" | "fetch_xor" | null (extensible). null = the operator is runtime-parameterized via an OPERATION-kind parameter (e.g. MPI_Fetch_and_op\'s MPI_Op argument), statically undeterminable, while fetch/compare stay statically known — otherwise the whole atomic object would have to be withheld for calls like this.'),
+      fetch: L("Boolean", "Does the call return the target location's PREVIOUS value? True for fetch_add/swap/cswap/fetch; false for a pure add/set/inc."), compare: L("Boolean", "Does the update happen only if the target matches a supplied comparand? True only for compare-and-swap.")
+    }),
+    memory: NO("Object | null", 'Null = no memory-completion/buffer-reuse contract applies at all (query/management calls with no user-visible buffer, e.g. mpi_comm_rank), mirroring formal\'s null convention — never "not yet classified".', {
+      local_completion: L("Enum", 'When is the caller\'s side of the OPERATION done? Usually agrees with buffer_reuse, but they are not the same question — they diverge for buffered sends, where the buffer is copied out (reusable) well before the operation completes. Values: "after_return" | "after_wait" | "after_test" | "after_flush"'),
+      remote_completion: L("Enum | null", 'When does this operation\'s effect become visible at the REMOTE target? Null means the operation has NO remote side at all — a purely local call, or a get, whose only effect lands locally. It does NOT mean "unknown". This matters most for puts: shmem_{T}_put returning means the local source buffer is reusable, not that the target\'s memory has been updated, so the value is "after_quiet" — null there would tell a verifier a put never writes anything remotely, inverting the meaning of the operation. Values: "after_return" | "after_fence" | "after_quiet" | null'),
+      buffer_reuse: L("Enum", 'Enum for consistency — same value set as local_completion, since buffer reuse usually tracks local completion: "after_return" | "after_wait" | "after_test" | "after_flush" | "never"'),
+      fence_semantics: L("Enum", 'WHICH SIDE this call actually completes or guards — not which side issues it. "none" = it is not an ordering/completion primitive at all. "local" = it completes only the caller\'s own side (source buffers become reusable). "remote" = it guards delivery/ordering at the target PEs without waiting for local completion (shmem_fence, nvshmem_fence). "both" = it completes both sides (shmem_quiet, nvshmem_quiet, and any barrier that implies a quiet). Values: "none" | "local" | "remote" | "both".'),
+      symmetric_heap: L("Boolean", "Operates on the SHMEM/NVSHMEM symmetric heap"),
+      memory_model: L("Enum | null", '"relaxed" | "release_acquire" | "seq_consistent"')
+    }),
+    formal: NO("Object | null", 'The operational data-flow/synchronization layer — who touches what memory, in what order, relative to whom, precise enough for a code generator to lower directly or a verifier to derive a real proof obligation from. null wherever it doesn\'t earn its keep: most query/management calls (e.g. mpi_comm_rank), whose correctness is already fully carried by execution.stages + tool_integration.invariants. Non-null doesn\'t require data movement, either — mpi_wait has an empty data_flow and no sync.matching, but a real handle_lifecycle "destroy" entry closing the request opened by isend/irecv. See every example instance in the dropdown.', FORMAL_FIELDS)
+  }),
+  parameters: ARR("Per-argument semantics — identical shape across every PPM. Array, one element per formal parameter.", PARAM_FIELDS),
+  return: O("Return-value semantics, independent of how the model signals errors.", {
+    kind: L("Enum", '"ERROR_CODE" | "RESULT" | "void" | "bool" | "value"'),
+    value_kind: L("Enum | null", 'What a returned datum IS, in parameters[].kind\'s vocabulary: RANK (shmem_my_pe, omp_get_thread_num), TEAM_SIZE (shmem_n_pes, omp_get_num_threads) or DEVICE (omp_get_device_num) — the same kind MPI_Comm_rank/MPI_Comm_size give their out-parameters. Non-null only when kind is "value"; null otherwise, and for a value with no fitting kind. omp_get_max_threads is deliberately null: an upper bound, not a team size.'),
+    binding_type: bindingTypeFragment("Same per-language shape as parameters[].binding_type."),
+    possible_errors: L("String[]", "All error codes/classes that may be returned"),
+    possible_successes: L("String[]", 'The positive counterpart of possible_errors: every distinct successful outcome the return value can signal, instead of squeezing multi-outcome returns into one sentence.')
+  }),
+  tool_integration: O("Correctness / perf-tool hooks: profiling symbol, machine-readable invariants, the buffer-aliasing contract, and any fields elsewhere in the entry whose true value depends on runtime state rather than the symbol alone.", {
+    profiling_name: L("String | null", "PMPI_xxx, PNCCL_xxx, ..."),
+    invariants: L("String[]", "Machine-readable preconditions"),
+    buffer_aliasing: L("Enum | null", '"forbidden" | "allowed" | "in_place_only" | null. Null = not applicable — the function has no user-supplied buffer parameters at all (e.g. mpi_comm_rank, mpi_wait).'),
+    context_dependencies: ARR('Fields elsewhere in THIS entry whose true value at a given call site isn\'t fixed by the function symbol alone, but depends on runtime state (communicator configuration, surrounding group/epoch brackets, pointer provenance, etc.) a consuming tool has to track itself. Empty array = every field in this entry is a fixed, static contract. See mpi:mpi_send (buffer memory_space under CUDA-aware MPI) and nccl:ncclAllReduce (blocking under group/config state) in the example dropdown.', {
+      field: L("String", 'Dotted path to the affected field within this same entry, e.g. "execution.blocking", "semantics.memory.local_completion"'),
+      default_value: L("Boolean | String | null", "The value documented elsewhere in this entry — valid under the common/default runtime configuration, so tools that don't track the relevant context still have a sane fallback"),
+      depends_on: L("String[]", 'Plain-English runtime factors that actually determine the value, e.g. ["communicator config.blocking", "ncclGroupStart/ncclGroupEnd nesting"]'),
+      note: L("String", "Free-text explanation of how the factors in depends_on combine to determine the actual value")
+    })
+  }),
+  relationships: O("Variant family + related-operation graph, via model-qualified keys.", {
+    variants: O('Links use the "model:function_key" format, e.g. "mpi:mpi_ibcast"', {
+      nonblocking: L("String | null", "Nonblocking counterpart, if this entry is blocking"),
+      blocking: L("String | null", "Inverse of nonblocking: points a nonblocking/persistent entry back at its blocking counterpart"),
+      persistent: L("String | null", 'Persistent counterpart (MPI\'s "_init" family, e.g. "mpi:mpi_send_init"), which initializes an operation once and restarts it with MPI_Start.'),
+      neighborhood: L("String | null", 'Neighborhood counterpart for a collective that has one, e.g. "mpi:mpi_neighbor_allgather" — the topology-communicator form; see semantics.collective.topology_aware.'),
+      host: L("String | null", "Host-callable counterpart, for device-only entries. Pairs with gpu."),
+      gpu: L("String | null", "GPU-callable counterpart. Leave null when this same entry already covers GPU launch via execution.launch = \"cpu+gpu\".")
+    }),
+    superseded_by: L("String | null", 'Key of the recommended replacement, or null. The schema\'s only supersession edge: a cross-entry reference belongs here in relationships, while everything in identity is self-describing. Written as a confirmed null for every entry by Heuristic Classification (there is no signal to condition on: deprecated_in is null corpus-wide), with real values supplied from supplement.json.'),
+    supersedes: L("String[]", 'The inverse edge: every entry this one replaces. An array because supersession is many-to-one, where superseded_by is single-valued; [] = supersedes nothing. Derived mechanically by inverting the corpus\'s superseded_by edges, never hand-authored — maintaining both directions of one edge by hand is how a graph desyncs.'),
+  })
+};
+
+const SECTION_META = [
+  ["identity","0x0"],["bindings","0x1"],["execution","0x2"],["semantics","0x3"],
+  ["parameters","0x4"],["return","0x5"],["tool_integration","0x6"],["relationships","0x7"]
+];
+
+/* ============================================================
+   EXAMPLE INSTANCE DATA. mpi:mpi_send is copied verbatim
+   from docs/schema/examples/mpi-api.json (a real, schema-validated entry).
+   Every semantics.formal block below is copied from a golden,
+   expander-tested expansion in curated/shapes/seed-assignments.json — the
+   surrounding sections are hand-authored to fill out the rest.
+   ============================================================ */
+const EXAMPLES = {
+"mpi:mpi_send": {
+  identity:{ model:"mpi", name:"MPI_Send", api_group:"point_to_point", since:"MPI-1.0", deprecated_in:null, standard_refs:["MPI-4.1 §3.2.1"], desc:"Blocking send of a message to a destination process.", type_family:null },
+  bindings:{
+    c:{ expressible:true, header:"mpi.h", signature:"int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)" },
+    fortran90:{ name:"MPI_SEND", expressible:true, use_colons:false, index_overload:null, not_with_mpif:false },
+    fortran08:{ name:"MPI_Send", expressible:true, abstract_interface:true, module:"mpi_f08" },
+    lis:{ expressible:true }, cpp:{ expressible:true, class_method:"Comm::Send" }
+  },
+  execution:{ blocking:true, execute_once:false, collective:false, thread_safety:"multiple", launch:"cpu", runs_on:"cpu", gpu_scope:null, stages:["s","c"], locality:"both", completion:"c", procedure_class:"b-op" },
+  semantics:{
+collective:null,
+    point_to_point:{ direction:"send", synchronous:false, buffered:false, ready:false },
+    one_sided:null, atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:null, buffer_reuse:"after_return", fence_semantics:"none", symmetric_heap:false, memory_model:null },
+    formal:{
+      participants:[
+        { id:"sender", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"self" }
+      ],
+      data_flow:[
+        { id:"df_read", participant:"sender", op:"read", buffer:"param:buf", extent:{ count_ref:"param:count", datatype_ref:"param:datatype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:null }
+      ],
+      sync:{ events:[], ordering:[], matching:{ kind:"tag_match", match_keys:["param:comm","param:tag","param:dest","self_rank_as_source"], matched_across:"paired_call", program_order_required:false } },
+      handle_lifecycle:[]
+    }
+  },
+  parameters:[
+    { name:"buf", kind:"BUFFER", direction:"in", desc:"Initial address of send buffer.", binding_type:{ c:"const void*", fortran90:"TYPE(*), DIMENSION(..)", fortran08:"TYPE(*), DIMENSION(..)", lis:null, cpp:"const void*" }, asynchronous:false, constant:true, pointer:true, array_type:"variable", func_type:null, length:"count", parameter_bindings:["c","c_large","fortran90","fortran08","cpp"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:"count" }, memory_space:"either" },
+    { name:"count", kind:"COUNT", direction:"in", desc:"Number of elements in send buffer.", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:null, cpp:"int" }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false, constraints:{ not_null:false, value_range:">= 0", paired_with:"buf" }, memory_space:null },
+    { name:"datatype", kind:"DATATYPE", direction:"in", desc:"Datatype of each send buffer element.", binding_type:{ c:"MPI_Datatype", fortran90:"TYPE(MPI_Datatype)", fortran08:"TYPE(MPI_Datatype)", lis:null, cpp:"const MPI_Datatype&" }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"dest", kind:"RANK", direction:"in", desc:"Rank of destination process.", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:null, cpp:"int" }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false, constraints:{ not_null:false, value_range:"0 <= dest < comm_size(comm)", paired_with:null }, memory_space:null },
+    { name:"tag", kind:"TAG", direction:"in", desc:"Message tag.", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:null, cpp:"int" }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false, constraints:{ not_null:false, value_range:"0 <= tag <= MPI_TAG_UB", paired_with:null }, memory_space:null },
+    { name:"comm", kind:"COMMUNICATOR", direction:"in", desc:"Communicator.", binding_type:{ c:"MPI_Comm", fortran90:"INTEGER", fortran08:"TYPE(MPI_Comm)", lis:null, cpp:"const MPI_Comm&" }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","cpp"], root_only:false, constraints:{ not_null:true, value_range:"comm != MPI_COMM_NULL", paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"ERROR_CODE", value_kind:null, binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:null, cpp:"void" }, possible_errors:["MPI_ERR_COMM","MPI_ERR_COUNT","MPI_ERR_TYPE","MPI_ERR_RANK","MPI_ERR_TAG"], possible_successes:["MPI_SUCCESS"] },
+  tool_integration:{ profiling_name:"PMPI_Send", invariants:["comm != MPI_COMM_NULL","count >= 0","dest >= 0 && dest < comm_size(comm)"], buffer_aliasing:"forbidden", context_dependencies:[
+    { field:"param:buf.memory_space", default_value:"host", depends_on:["pointer provenance of the argument bound to buf","whether the MPI implementation was built with CUDA-aware support"], note:"A code generator cannot resolve this from the symbol alone; requires the consumer's own pointer-provenance analysis." }
+  ] },
+  relationships:{ variants:{ nonblocking:"mpi:mpi_isend", blocking:null, persistent:"mpi:mpi_send_init", neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+},
+"mpi:mpi_bcast": {
+  identity:{ model:"mpi", name:"MPI_Bcast", api_group:"collective", since:"MPI-1.0", deprecated_in:null, standard_refs:["MPI-4.1 §5.4"], desc:"Broadcasts a message from the root process to all other processes in a communicator.", type_family:null },
+  bindings:{
+    c:{ expressible:true, header:"mpi.h", signature:"int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm)" },
+    fortran90:{ name:"MPI_BCAST", expressible:true, use_colons:false, index_overload:null, not_with_mpif:false },
+    fortran08:{ name:"MPI_Bcast", expressible:true, abstract_interface:true, module:"mpi_f08" },
+    lis:{ expressible:true }, cpp:null
+  },
+  execution:{ blocking:true, execute_once:false, collective:true, thread_safety:"multiple", launch:"cpu", runs_on:"cpu", gpu_scope:null, stages:["s","c"], locality:"both", completion:"c", procedure_class:"b-op" },
+  semantics:{
+    collective:{ type:"broadcast", root_involved:true, in_place:false, comm_scope:"intracommunicator", algorithm_class:"one_to_all", reduction_op:false, topology_aware:false },
+    point_to_point:null, one_sided:null, atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:null, buffer_reuse:"after_return", fence_semantics:"none", symmetric_heap:false, memory_model:null },
+    formal:{
+      participants:[
+        { id:"root", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"rank == param:root" },
+        { id:"member", role_kind:"member", calls_function:true, cardinality:"many", selector:"rank in param:comm" }
+      ],
+      data_flow:[
+        { id:"df_read", participant:"root", op:"read", buffer:"param:buffer", extent:{ count_ref:"param:count", datatype_ref:"param:datatype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:null },
+        { id:"df_write", participant:"member", op:"write", buffer:"param:buffer", extent:{ count_ref:"param:count", datatype_ref:"param:datatype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:{ kind:"structural", ref:"df_read" } }
+      ],
+      sync:{ events:[], ordering:[], matching:{ kind:"collective_rendezvous", match_keys:[], matched_across:"all_participant_instances", program_order_required:null } },
+      handle_lifecycle:[]
+    }
+  },
+  parameters:[
+    { name:"buffer", kind:"BUFFER", direction:"inout", desc:"Starting address of the buffer", binding_type:{ c:"void*", fortran90:"<type>", fortran08:"<type>", lis:"void*", cpp:null }, asynchronous:false, constant:false, pointer:true, array_type:"variable", func_type:null, length:"count", parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"either" },
+    { name:"count", kind:"COUNT", direction:"in", desc:"Number of entries in buffer", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"count >= 0", paired_with:null }, memory_space:null },
+    { name:"datatype", kind:"DATATYPE", direction:"in", desc:"Data type of buffer elements", binding_type:{ c:"MPI_Datatype", fortran90:"INTEGER", fortran08:"TYPE(MPI_Datatype)", lis:"MPI_Datatype", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"root", kind:"RANK", direction:"in", desc:"Rank of the broadcast root", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"0 <= root < comm_size", paired_with:null }, memory_space:null },
+    { name:"comm", kind:"COMMUNICATOR", direction:"in", desc:"Communicator", binding_type:{ c:"MPI_Comm", fortran90:"INTEGER", fortran08:"TYPE(MPI_Comm)", lis:"MPI_Comm", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"ERROR_CODE", value_kind:null, binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, possible_errors:["MPI_ERR_COMM","MPI_ERR_COUNT","MPI_ERR_TYPE","MPI_ERR_ROOT","MPI_ERR_BUFFER"], possible_successes:["MPI_SUCCESS: buffer now holds the root's data on every rank in comm"] },
+  tool_integration:{ profiling_name:"PMPI_Bcast", invariants:["comm != MPI_COMM_NULL","root must be a valid rank in comm","count >= 0","datatype must be a committed type"], buffer_aliasing:"forbidden", context_dependencies:[
+    { field:"param:buffer.memory_space", default_value:"host", depends_on:["pointer provenance of the argument bound to buffer","whether the MPI implementation was built with CUDA-aware support"], note:"Same CUDA-aware-MPI pattern as mpi:mpi_send — not resolvable from the symbol alone." }
+  ] },
+  relationships:{ variants:{ nonblocking:"mpi:mpi_ibcast", blocking:null, persistent:"mpi:mpi_bcast_init", neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+},
+"mpi:mpi_isend": {
+  identity:{ model:"mpi", name:"MPI_Isend", api_group:"point_to_point", since:"MPI-1.0", deprecated_in:null, standard_refs:["MPI-4.1 §3.7"], desc:"Begins a nonblocking send operation.", type_family:null },
+  bindings:{
+    c:{ expressible:true, header:"mpi.h", signature:"int MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)" },
+    fortran90:{ name:"MPI_ISEND", expressible:true, use_colons:false, index_overload:null, not_with_mpif:false },
+    fortran08:{ name:"MPI_Isend", expressible:true, abstract_interface:true, module:"mpi_f08" },
+    lis:{ expressible:true }, cpp:null
+  },
+  execution:{ blocking:false, execute_once:false, collective:false, thread_safety:"multiple", launch:"cpu", runs_on:"cpu", gpu_scope:null, stages:["s"], locality:"local", completion:"ic", procedure_class:"nb-op" },
+  semantics:{
+collective:null,
+    point_to_point:{ direction:"send", synchronous:null, buffered:null, ready:null },
+    one_sided:null, atomic:null,
+    memory:{ local_completion:"after_test", remote_completion:null, buffer_reuse:"after_wait", fence_semantics:"none", symmetric_heap:false, memory_model:null },
+    formal:{
+      participants:[
+        { id:"sender", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"self" }
+      ],
+      data_flow:[
+        { id:"df_send_read", participant:"sender", op:"read", buffer:"param:buf", extent:{ count_ref:"param:count", datatype_ref:"param:datatype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:null }
+      ],
+      sync:{ events:[ { id:"local_complete", participant:"sender", event_type:"point", bound_to:"param:request", epoch_scope:null, group_ref:null } ], ordering:[], matching:{ kind:"tag_match", match_keys:["param:comm","param:tag","param:dest","self_rank_as_source"], matched_across:"paired_call", program_order_required:false } },
+      handle_lifecycle:[ { handle:"param:request", handle_kind:"REQUEST", role:"create", derived_from:null } ]
+    }
+  },
+  parameters:[
+    { name:"buf", kind:"BUFFER", direction:"in", desc:"Initial address of send buffer", binding_type:{ c:"const void*", fortran90:"<type>", fortran08:"<type>", lis:"const void*", cpp:null }, asynchronous:true, constant:true, pointer:true, array_type:"variable", func_type:null, length:"count", parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"either" },
+    { name:"count", kind:"COUNT", direction:"in", desc:"Number of elements in send buffer", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"count >= 0", paired_with:null }, memory_space:null },
+    { name:"datatype", kind:"DATATYPE", direction:"in", desc:"Data type of each send buffer element", binding_type:{ c:"MPI_Datatype", fortran90:"INTEGER", fortran08:"TYPE(MPI_Datatype)", lis:"MPI_Datatype", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:"mpi:mpi_irecv.datatype" }, memory_space:null },
+    { name:"dest", kind:"RANK", direction:"in", desc:"Rank of destination", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"0 <= dest < comm_size, or MPI_PROC_NULL", paired_with:null }, memory_space:null },
+    { name:"tag", kind:"TAG", direction:"in", desc:"Message tag", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"0 <= tag <= MPI_TAG_UB, or MPI_ANY_TAG on the receive side", paired_with:null }, memory_space:null },
+    { name:"comm", kind:"COMMUNICATOR", direction:"in", desc:"Communicator", binding_type:{ c:"MPI_Comm", fortran90:"INTEGER", fortran08:"TYPE(MPI_Comm)", lis:"MPI_Comm", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"request", kind:"REQUEST", direction:"out", desc:"Communication request handle", binding_type:{ c:"MPI_Request*", fortran90:"INTEGER", fortran08:"TYPE(MPI_Request)", lis:"MPI_Request*", cpp:null }, asynchronous:false, constant:false, pointer:true, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"ERROR_CODE", value_kind:null, binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, possible_errors:["MPI_ERR_COMM","MPI_ERR_COUNT","MPI_ERR_TYPE","MPI_ERR_RANK","MPI_ERR_TAG"], possible_successes:["MPI_SUCCESS: request initiated; must be completed via MPI_Wait/MPI_Test before buf is reused"] },
+  tool_integration:{ profiling_name:"PMPI_Isend", invariants:["comm != MPI_COMM_NULL","0 <= dest < comm_size or dest == MPI_PROC_NULL","request != MPI_REQUEST_NULL on return"], buffer_aliasing:"forbidden", context_dependencies:[
+    { field:"param:buf.memory_space", default_value:"host", depends_on:["pointer provenance of the argument bound to buf","whether the MPI implementation was built with CUDA-aware support"], note:"Same CUDA-aware-MPI pattern as mpi:mpi_send." }
+  ] },
+  relationships:{ variants:{ nonblocking:null, blocking:"mpi:mpi_send", persistent:"mpi:mpi_send_init", neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+},
+"mpi:mpi_irecv": {
+  identity:{ model:"mpi", name:"MPI_Irecv", api_group:"point_to_point", since:"MPI-1.0", deprecated_in:null, standard_refs:["MPI-4.1 §3.7"], desc:"Begins a nonblocking receive operation.", type_family:null },
+  bindings:{
+    c:{ expressible:true, header:"mpi.h", signature:"int MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request)" },
+    fortran90:{ name:"MPI_IRECV", expressible:true, use_colons:false, index_overload:null, not_with_mpif:false },
+    fortran08:{ name:"MPI_Irecv", expressible:true, abstract_interface:true, module:"mpi_f08" },
+    lis:{ expressible:true }, cpp:null
+  },
+  execution:{ blocking:false, execute_once:false, collective:false, thread_safety:"multiple", launch:"cpu", runs_on:"cpu", gpu_scope:null, stages:["s"], locality:"local", completion:"ic", procedure_class:"nb-op" },
+  semantics:{
+collective:null,
+    point_to_point:{ direction:"receive", synchronous:null, buffered:null, ready:null },
+    one_sided:null, atomic:null,
+    memory:{ local_completion:"after_wait", remote_completion:null, buffer_reuse:"after_wait", fence_semantics:"none", symmetric_heap:false, memory_model:null },
+    formal:{
+      participants:[
+        { id:"receiver", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"self" }
+      ],
+      data_flow:[
+        { id:"df_recv_write", participant:"receiver", op:"write", buffer:"param:buf", extent:{ count_ref:"param:count", datatype_ref:"param:datatype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:{ kind:"matched", via:"local_complete" } }
+      ],
+      sync:{ events:[ { id:"local_complete", participant:"receiver", event_type:"point", bound_to:"param:request", epoch_scope:null, group_ref:null } ], ordering:[], matching:{ kind:"tag_match", match_keys:["param:comm","param:tag","param:source"], matched_across:"paired_call", program_order_required:false } },
+      handle_lifecycle:[ { handle:"param:request", handle_kind:"REQUEST", role:"create", derived_from:null } ]
+    }
+  },
+  parameters:[
+    { name:"buf", kind:"BUFFER", direction:"out", desc:"Initial address of receive buffer", binding_type:{ c:"void*", fortran90:"<type>", fortran08:"<type>", lis:"void*", cpp:null }, asynchronous:true, constant:false, pointer:true, array_type:"variable", func_type:null, length:"count", parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"either" },
+    { name:"count", kind:"COUNT", direction:"in", desc:"Maximum number of elements the buffer can hold", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"count >= 0", paired_with:null }, memory_space:null },
+    { name:"datatype", kind:"DATATYPE", direction:"in", desc:"Data type of each receive buffer element", binding_type:{ c:"MPI_Datatype", fortran90:"INTEGER", fortran08:"TYPE(MPI_Datatype)", lis:"MPI_Datatype", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:"mpi:mpi_isend.datatype" }, memory_space:null },
+    { name:"source", kind:"RANK", direction:"in", desc:"Rank of source process, or MPI_ANY_SOURCE", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"0 <= source < comm_size, or MPI_ANY_SOURCE", paired_with:null }, memory_space:null },
+    { name:"tag", kind:"TAG", direction:"in", desc:"Message tag, or MPI_ANY_TAG", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"0 <= tag <= MPI_TAG_UB, or MPI_ANY_TAG", paired_with:null }, memory_space:null },
+    { name:"comm", kind:"COMMUNICATOR", direction:"in", desc:"Communicator", binding_type:{ c:"MPI_Comm", fortran90:"INTEGER", fortran08:"TYPE(MPI_Comm)", lis:"MPI_Comm", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"request", kind:"REQUEST", direction:"out", desc:"Communication request handle", binding_type:{ c:"MPI_Request*", fortran90:"INTEGER", fortran08:"TYPE(MPI_Request)", lis:"MPI_Request*", cpp:null }, asynchronous:false, constant:false, pointer:true, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"ERROR_CODE", value_kind:null, binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, possible_errors:["MPI_ERR_COMM","MPI_ERR_COUNT","MPI_ERR_TYPE","MPI_ERR_RANK","MPI_ERR_TAG"], possible_successes:["MPI_SUCCESS: request initiated; buf is not safe to read until completed via MPI_Wait/MPI_Test"] },
+  tool_integration:{ profiling_name:"PMPI_Irecv", invariants:["comm != MPI_COMM_NULL","0 <= source < comm_size or source == MPI_ANY_SOURCE","request != MPI_REQUEST_NULL on return"], buffer_aliasing:"forbidden", context_dependencies:[
+    { field:"param:buf.memory_space", default_value:"host", depends_on:["pointer provenance of the argument bound to buf","whether the MPI implementation was built with CUDA-aware support"], note:"Same CUDA-aware-MPI pattern as mpi:mpi_send." }
+  ] },
+  relationships:{ variants:{ nonblocking:null, blocking:"mpi:mpi_recv", persistent:"mpi:mpi_recv_init", neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+},
+"mpi:mpi_allgather": {
+  identity:{ model:"mpi", name:"MPI_Allgather", api_group:"collective", since:"MPI-1.0", deprecated_in:null, standard_refs:["MPI-4.1 §5.7"], desc:"Gathers data from all processes and distributes the combined data to all processes.", type_family:null },
+  bindings:{
+    c:{ expressible:true, header:"mpi.h", signature:"int MPI_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm)" },
+    fortran90:{ name:"MPI_ALLGATHER", expressible:true, use_colons:false, index_overload:null, not_with_mpif:false },
+    fortran08:{ name:"MPI_Allgather", expressible:true, abstract_interface:true, module:"mpi_f08" },
+    lis:{ expressible:true }, cpp:null
+  },
+  execution:{ blocking:true, execute_once:false, collective:true, thread_safety:"multiple", launch:"cpu", runs_on:"cpu", gpu_scope:null, stages:["s","c"], locality:"both", completion:"c", procedure_class:"b-op" },
+  semantics:{
+    collective:{ type:"allgather", root_involved:false, in_place:true, comm_scope:"intracommunicator", algorithm_class:"all_to_all", reduction_op:false, topology_aware:false },
+    point_to_point:null, one_sided:null, atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:null, buffer_reuse:"after_return", fence_semantics:"none", symmetric_heap:false, memory_model:null },
+    formal:{
+      participants:[
+        { id:"member", role_kind:"member", calls_function:true, cardinality:"many", selector:"rank in param:comm" }
+      ],
+      data_flow:[
+        { id:"df_read", participant:"member", op:"read", buffer:"param:sendbuf", extent:{ count_ref:"param:sendcount", datatype_ref:"param:sendtype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:null },
+        { id:"df_write", participant:"member", op:"write", buffer:"param:recvbuf", extent:{ count_ref:"param:recvcount", datatype_ref:"param:recvtype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:{ kind:"gathered", ref:"df_read", scope:"all_participant_instances", placement_offset:"rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)" } }
+      ],
+      sync:{ events:[], ordering:[], matching:{ kind:"collective_rendezvous", match_keys:[], matched_across:"all_participant_instances", program_order_required:null } },
+      handle_lifecycle:[]
+    }
+  },
+  parameters:[
+    { name:"sendbuf", kind:"BUFFER", direction:"in", desc:"Starting address of this rank's contribution", binding_type:{ c:"const void*", fortran90:"<type>", fortran08:"<type>", lis:"const void*", cpp:null }, asynchronous:false, constant:true, pointer:true, array_type:"variable", func_type:null, length:"sendcount", parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"either" },
+    { name:"sendcount", kind:"COUNT", direction:"in", desc:"Number of elements in sendbuf", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"sendcount >= 0", paired_with:null }, memory_space:null },
+    { name:"sendtype", kind:"DATATYPE", direction:"in", desc:"Data type of sendbuf elements", binding_type:{ c:"MPI_Datatype", fortran90:"INTEGER", fortran08:"TYPE(MPI_Datatype)", lis:"MPI_Datatype", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"recvbuf", kind:"BUFFER", direction:"out", desc:"Starting address of the receive buffer, one recvcount-sized block per rank", binding_type:{ c:"void*", fortran90:"<type>", fortran08:"<type>", lis:"void*", cpp:null }, asynchronous:false, constant:false, pointer:true, array_type:"variable", func_type:null, length:"*", parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"either" },
+    { name:"recvcount", kind:"COUNT", direction:"in", desc:"Number of elements received from each process", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"recvcount >= 0", paired_with:null }, memory_space:null },
+    { name:"recvtype", kind:"DATATYPE", direction:"in", desc:"Data type of recvbuf elements", binding_type:{ c:"MPI_Datatype", fortran90:"INTEGER", fortran08:"TYPE(MPI_Datatype)", lis:"MPI_Datatype", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"comm", kind:"COMMUNICATOR", direction:"in", desc:"Communicator", binding_type:{ c:"MPI_Comm", fortran90:"INTEGER", fortran08:"TYPE(MPI_Comm)", lis:"MPI_Comm", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"ERROR_CODE", value_kind:null, binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, possible_errors:["MPI_ERR_COMM","MPI_ERR_COUNT","MPI_ERR_TYPE","MPI_ERR_BUFFER"], possible_successes:["MPI_SUCCESS: recvbuf holds every rank's sendbuf contribution, placed at offset rank*recvcount"] },
+  tool_integration:{ profiling_name:"PMPI_Allgather", invariants:["comm != MPI_COMM_NULL","sendcount/sendtype must produce the same type signature as recvcount/recvtype on every rank in comm"], buffer_aliasing:"in_place_only", context_dependencies:[] },
+  relationships:{ variants:{ nonblocking:"mpi:mpi_iallgather", blocking:null, persistent:null, neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+},
+"mpi:mpi_accumulate": {
+  identity:{ model:"mpi", name:"MPI_Accumulate", api_group:"one_sided", since:"MPI-2.0", deprecated_in:null, standard_refs:["MPI-4.1 §11.7.1"], desc:"Combines the contents of the origin buffer with the target buffer using a reduction operator, storing the result at the target.", type_family:null },
+  bindings:{
+    c:{ expressible:true, header:"mpi.h", signature:"int MPI_Accumulate(const void *origin_addr, int origin_count, MPI_Datatype origin_datatype, int target_rank, MPI_Aint target_disp, int target_count, MPI_Datatype target_datatype, MPI_Op op, MPI_Win win)" },
+    fortran90:{ name:"MPI_ACCUMULATE", expressible:true, use_colons:false, index_overload:null, not_with_mpif:false },
+    fortran08:{ name:"MPI_Accumulate", expressible:true, abstract_interface:true, module:"mpi_f08" },
+    lis:{ expressible:true }, cpp:null
+  },
+  execution:{ blocking:true, execute_once:false, collective:false, thread_safety:"multiple", launch:"cpu", runs_on:"cpu", gpu_scope:null, stages:["s","c"], locality:"remote", completion:"c", procedure_class:"b-op" },
+  semantics:{
+collective:null, point_to_point:null,
+    one_sided:{ operation:"accumulate", epoch_type:"lock", ordering:"none" },
+    atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:null, buffer_reuse:"after_return", fence_semantics:"remote", symmetric_heap:false, memory_model:null },
+    formal:{
+      participants:[
+        { id:"origin", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"self" },
+        { id:"target", role_kind:"passive_target", calls_function:false, cardinality:"one", selector:"rank == param:target_rank" }
+      ],
+      data_flow:[
+        { id:"df_read", participant:"origin", op:"read", buffer:"param:origin_addr", extent:{ count_ref:"param:origin_count", datatype_ref:"param:origin_datatype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:null },
+        { id:"df_reduce", participant:null, op:"reduce", buffer:null, extent:{ count_ref:"param:origin_count", datatype_ref:"param:origin_datatype" }, offset:null, inputs:[ { ref:"df_read", scope:"rma_target_prior" } ], operation_ref:"param:op", valid_during:null, source:null },
+        { id:"df_write", participant:"target", op:"write", buffer:"param:win", extent:{ count_ref:"param:origin_count", datatype_ref:"param:origin_datatype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:{ kind:"reduced", ref:"df_reduce" } }
+      ],
+      sync:{ events:[], ordering:[], matching:{ kind:"epoch_scoped", match_keys:[], matched_across:"", program_order_required:null } },
+      handle_lifecycle:[]
+    }
+  },
+  parameters:[
+    { name:"origin_addr", kind:"BUFFER", direction:"in", desc:"Initial address of the origin buffer", binding_type:{ c:"const void*", fortran90:"<type>", fortran08:"<type>", lis:"const void*", cpp:null }, asynchronous:false, constant:true, pointer:true, array_type:"variable", func_type:null, length:"origin_count", parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"either" },
+    { name:"origin_count", kind:"COUNT", direction:"in", desc:"Number of entries in origin buffer", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"origin_count >= 0", paired_with:null }, memory_space:null },
+    { name:"origin_datatype", kind:"DATATYPE", direction:"in", desc:"Data type of each origin buffer entry", binding_type:{ c:"MPI_Datatype", fortran90:"INTEGER", fortran08:"TYPE(MPI_Datatype)", lis:"MPI_Datatype", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"target_rank", kind:"RANK", direction:"in", desc:"Rank of target", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"0 <= target_rank < win's group size", paired_with:null }, memory_space:null },
+    { name:"target_disp", kind:"SCALAR", direction:"in", desc:"Displacement into the target window, in units of target_datatype", binding_type:{ c:"MPI_Aint", fortran90:"INTEGER(KIND=MPI_ADDRESS_KIND)", fortran08:"INTEGER(KIND=MPI_ADDRESS_KIND)", lis:"MPI_Aint", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:null, value_range:"target_disp >= 0", paired_with:null }, memory_space:null },
+    { name:"target_count", kind:"COUNT", direction:"in", desc:"Number of entries in target buffer", binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:false, value_range:"target_count >= 0", paired_with:null }, memory_space:null },
+    { name:"target_datatype", kind:"DATATYPE", direction:"in", desc:"Data type of each target buffer entry", binding_type:{ c:"MPI_Datatype", fortran90:"INTEGER", fortran08:"TYPE(MPI_Datatype)", lis:"MPI_Datatype", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"op", kind:"OPERATION", direction:"in", desc:"Reduction operator (or MPI_REPLACE / MPI_NO_OP)", binding_type:{ c:"MPI_Op", fortran90:"INTEGER", fortran08:"TYPE(MPI_Op)", lis:"MPI_Op", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"win", kind:"WINDOW", direction:"in", desc:"Window object used for communication", binding_type:{ c:"MPI_Win", fortran90:"INTEGER", fortran08:"TYPE(MPI_Win)", lis:"MPI_Win", cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c","fortran90","fortran08","lis"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"ERROR_CODE", value_kind:null, binding_type:{ c:"int", fortran90:"INTEGER", fortran08:"INTEGER", lis:"int", cpp:null }, possible_errors:["MPI_ERR_WIN","MPI_ERR_RANK","MPI_ERR_COUNT","MPI_ERR_TYPE","MPI_ERR_OP"], possible_successes:["MPI_SUCCESS: target's window memory now holds op(origin's contribution, target's prior value)"] },
+  tool_integration:{ profiling_name:"PMPI_Accumulate", invariants:["win must have an open access epoch on the calling process","target_rank must be a valid rank in the window's group","op must be a valid predefined or user-defined reduction operator, or MPI_REPLACE/MPI_NO_OP"], buffer_aliasing:"forbidden", context_dependencies:[
+    { field:"semantics.one_sided.epoch_type", default_value:"lock", depends_on:["which epoch-opening call brackets this Accumulate — MPI_Win_lock/lock_all, MPI_Win_fence, or MPI_Win_start/post"], note:"Accumulate is legal inside any of MPI's three epoch mechanisms; the value here is the common lock-based case, not a constraint on which one a given call site actually uses." }
+  ] },
+  relationships:{ variants:{ nonblocking:null, blocking:null, persistent:null, neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+},
+"nvshmem:nvshmem_int_put": {
+  identity:{ model:"nvshmem", name:"nvshmem_int_put", api_group:"one_sided", since:"NVSHMEM-1.0", deprecated_in:null, standard_refs:["NVSHMEM Spec §8.2 RMA"], desc:"Writes a contiguous array of int elements to a symmetric object on a remote PE. Callable from host code or from within a device kernel — one entry, both launch sites.", type_family:null },
+  bindings:{ c:{ expressible:true, header:"nvshmem.h", signature:"void nvshmem_int_put(int *dest, const int *source, size_t nelems, int pe)" }, fortran90:null, fortran08:null, lis:null, cpp:null },
+  execution:{ blocking:true, execute_once:false, collective:false, thread_safety:"multiple", launch:"cpu+gpu", runs_on:"gpu", gpu_scope:"thread", stages:["s","c"], locality:"remote", completion:"c", procedure_class:"b-op" },
+  semantics:{
+collective:null, point_to_point:null,
+    one_sided:{ operation:"put", epoch_type:"implicit", ordering:"relaxed" },
+    atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:"after_quiet", buffer_reuse:"after_return", fence_semantics:"remote", symmetric_heap:true, memory_model:"relaxed" },
+    formal:{
+      participants:[
+        { id:"origin", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"self" },
+        { id:"target", role_kind:"passive_target", calls_function:false, cardinality:"one", selector:"rank == param:pe" }
+      ],
+      data_flow:[
+        { id:"df_read", participant:"origin", op:"read", buffer:"param:source", extent:{ count_ref:"param:nelems", datatype_ref:"type:int" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:null },
+        { id:"df_write", participant:"target", op:"write", buffer:"param:dest", extent:{ count_ref:"param:nelems", datatype_ref:"type:int" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:{ kind:"structural", ref:"df_read" } }
+      ],
+      sync:{ events:[], ordering:[], matching:{ kind:"epoch_scoped", match_keys:[], matched_across:"", program_order_required:null } },
+      handle_lifecycle:[]
+    }
+  },
+  parameters:[
+    { name:"dest", kind:"BUFFER", direction:"out", desc:"Symmetric address on the destination PE", binding_type:{ c:"int*", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:true, constant:false, pointer:true, array_type:"variable", func_type:null, length:"nelems", parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"symmetric_heap" },
+    { name:"source", kind:"BUFFER", direction:"in", desc:"Local source address", binding_type:{ c:"const int*", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:true, array_type:"variable", func_type:null, length:"nelems", parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"symmetric_heap" },
+    { name:"nelems", kind:"COUNT", direction:"in", desc:"Number of elements to transfer", binding_type:{ c:"size_t", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:false, value_range:"nelems >= 0", paired_with:null }, memory_space:null },
+    { name:"pe", kind:"RANK", direction:"in", desc:"PE number of the remote PE", binding_type:{ c:"int", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:false, value_range:"0 <= pe < npes", paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"void", value_kind:null, binding_type:{ c:"void", fortran90:null, fortran08:null, lis:null, cpp:null }, possible_errors:[], possible_successes:[] },
+  tool_integration:{ profiling_name:null, invariants:["pe must be a valid PE in the current team","dest must point into the symmetric heap on pe"], buffer_aliasing:"forbidden", context_dependencies:[] },
+  relationships:{ variants:{ nonblocking:"nvshmem:nvshmem_int_put_nbi", blocking:null, persistent:null, neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+},
+"nvshmem:nvshmemx_int_put_block": {
+  identity:{ model:"nvshmem", name:"nvshmemx_int_put_block", api_group:"one_sided", since:"NVSHMEM-2.0", deprecated_in:null, standard_refs:["NVSHMEM Spec §8.2.3 Block/warp-collective RMA"], desc:"Block-collective put: every thread in the calling CUDA thread block must call this together; the block cooperatively performs one logical put. Device-only — no host-callable form, so it is its own entry rather than folded into nvshmem_int_put.", type_family:null },
+  bindings:{ c:{ expressible:true, header:"nvshmemx.h", signature:"void nvshmemx_int_put_block(int *dest, const int *source, size_t nelems, int pe)" }, fortran90:null, fortran08:null, lis:null, cpp:null },
+  execution:{ blocking:true, execute_once:false, collective:true, thread_safety:"multiple", launch:"gpu", runs_on:"gpu", gpu_scope:"block", stages:["s","c"], locality:"remote", completion:"c", procedure_class:"b-op" },
+  semantics:{
+collective:null, point_to_point:null,
+    one_sided:{ operation:"put", epoch_type:"implicit", ordering:"relaxed" },
+    atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:"after_quiet", buffer_reuse:"after_return", fence_semantics:"remote", symmetric_heap:true, memory_model:"relaxed" },
+    formal:{
+      participants:[
+        { id:"origin", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"self" },
+        { id:"target", role_kind:"passive_target", calls_function:false, cardinality:"one", selector:"rank == param:pe" }
+      ],
+      data_flow:[
+        { id:"df_read", participant:"origin", op:"read", buffer:"param:source", extent:{ count_ref:"param:nelems", datatype_ref:"type:int" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:null },
+        { id:"df_write", participant:"target", op:"write", buffer:"param:dest", extent:{ count_ref:"param:nelems", datatype_ref:"type:int" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:{ kind:"structural", ref:"df_read" } }
+      ],
+      sync:{ events:[], ordering:[], matching:{ kind:"epoch_scoped", match_keys:[], matched_across:"", program_order_required:null } },
+      handle_lifecycle:[]
+    }
+  },
+  parameters:[
+    { name:"dest", kind:"BUFFER", direction:"out", desc:"Symmetric address on the destination PE", binding_type:{ c:"int*", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:true, constant:false, pointer:true, array_type:"variable", func_type:null, length:"nelems", parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"symmetric_heap" },
+    { name:"source", kind:"BUFFER", direction:"in", desc:"Local source address", binding_type:{ c:"const int*", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:true, array_type:"variable", func_type:null, length:"nelems", parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"symmetric_heap" },
+    { name:"nelems", kind:"COUNT", direction:"in", desc:"Number of elements to transfer", binding_type:{ c:"size_t", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:false, value_range:"nelems >= 0", paired_with:null }, memory_space:null },
+    { name:"pe", kind:"RANK", direction:"in", desc:"PE number of the remote PE", binding_type:{ c:"int", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:false, value_range:"0 <= pe < npes", paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"void", value_kind:null, binding_type:{ c:"void", fortran90:null, fortran08:null, lis:null, cpp:null }, possible_errors:[], possible_successes:[] },
+  tool_integration:{ profiling_name:null, invariants:["must be called by every thread in the CUDA thread block, with identical dest/source/nelems/pe arguments","pe must be a valid PE in the current team"], buffer_aliasing:"forbidden", context_dependencies:[] },
+  relationships:{ variants:{ nonblocking:null, blocking:null, persistent:null, neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+},
+"shmem:shmem_put": {
+  identity:{ model:"shmem", name:"shmem_{T}_put", api_group:"one_sided", since:"OpenSHMEM-1.0", deprecated_in:null, standard_refs:["OpenSHMEM 1.5 §10.4 RMA"], desc:"Type-generic contiguous put. One entry stands in for shmem_int_put, shmem_long_put, shmem_float_put, ... via type_family, instead of one entry per type.", type_family:["short","int","long","longlong","float","double","longdouble"] },
+  bindings:{ c:{ expressible:true, header:"shmem.h", signature:"void shmem_{T}_put({T} *dest, const {T} *source, size_t nelems, int pe)" }, fortran90:null, fortran08:null, lis:null, cpp:null },
+  execution:{ blocking:true, execute_once:false, collective:false, thread_safety:"multiple", launch:"cpu", runs_on:"cpu", gpu_scope:null, stages:["s","c"], locality:"remote", completion:"c", procedure_class:"b-op" },
+  semantics:{
+collective:null, point_to_point:null,
+    one_sided:{ operation:"put", epoch_type:"implicit", ordering:"relaxed" },
+    atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:"after_quiet", buffer_reuse:"after_return", fence_semantics:"remote", symmetric_heap:true, memory_model:"relaxed" },
+    formal:{
+      participants:[
+        { id:"origin", role_kind:"initiator", calls_function:true, cardinality:"one", selector:"self" },
+        { id:"target", role_kind:"passive_target", calls_function:false, cardinality:"one", selector:"rank == param:pe" }
+      ],
+      data_flow:[
+        { id:"df_read", participant:"origin", op:"read", buffer:"param:source", extent:{ count_ref:"param:nelems", datatype_ref:"type:{T}" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:null },
+        { id:"df_write", participant:"target", op:"write", buffer:"param:dest", extent:{ count_ref:"param:nelems", datatype_ref:"type:{T}" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:{ kind:"structural", ref:"df_read" } }
+      ],
+      sync:{ events:[], ordering:[], matching:{ kind:"epoch_scoped", match_keys:[], matched_across:"", program_order_required:null } },
+      handle_lifecycle:[]
+    }
+  },
+  parameters:[
+    { name:"dest", kind:"BUFFER", direction:"out", desc:"Symmetric address of type {T} on the destination PE", binding_type:{ c:"{T}*", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:true, constant:false, pointer:true, array_type:"variable", func_type:null, length:"nelems", parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"symmetric_heap" },
+    { name:"source", kind:"BUFFER", direction:"in", desc:"Local source address of type {T}", binding_type:{ c:"const {T}*", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:true, array_type:"variable", func_type:null, length:"nelems", parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"host" },
+    { name:"nelems", kind:"COUNT", direction:"in", desc:"Number of elements of type {T} to transfer", binding_type:{ c:"size_t", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:false, value_range:"nelems >= 0", paired_with:null }, memory_space:null },
+    { name:"pe", kind:"RANK", direction:"in", desc:"PE number of the remote PE", binding_type:{ c:"int", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:false, value_range:"0 <= pe < npes", paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"void", value_kind:null, binding_type:{ c:"void", fortran90:null, fortran08:null, lis:null, cpp:null }, possible_errors:[], possible_successes:[] },
+  tool_integration:{ profiling_name:null, invariants:["pe must be a valid PE","dest must reference symmetric data of type {T} on pe"], buffer_aliasing:"forbidden", context_dependencies:[] },
+  relationships:{ variants:{ nonblocking:"shmem:shmem_{T}_put_nbi", blocking:null, persistent:null, neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+},
+"nccl:ncclAllReduce": {
+  identity:{ model:"nccl", name:"ncclAllReduce", api_group:"collective", since:"NCCL-1.0", deprecated_in:null, standard_refs:["NCCL API docs — Collective Communication"], desc:"All-reduce across every rank in a communicator: combines values with a reduction operator and replicates the result to every rank. Demonstrates context_dependencies — see Design notes.", type_family:null },
+  bindings:{ c:{ expressible:true, header:"nccl.h", signature:"ncclResult_t ncclAllReduce(const void* sendbuff, void* recvbuff, size_t count, ncclDataType_t datatype, ncclRedOp_t op, ncclComm_t comm, cudaStream_t stream)" }, fortran90:null, fortran08:null, lis:null, cpp:null },
+  execution:{ blocking:true, execute_once:false, collective:true, thread_safety:"serialized", launch:"cpu", runs_on:"gpu", gpu_scope:null, stages:["s","c"], locality:"both", completion:"c", procedure_class:"b-op" },
+  semantics:{
+    collective:{ type:"allreduce", root_involved:false, in_place:true, comm_scope:"intracommunicator", algorithm_class:"all_to_all", reduction_op:true, topology_aware:false },
+    point_to_point:null, one_sided:null, atomic:null,
+    memory:{ local_completion:"after_return", remote_completion:null, buffer_reuse:"after_return", fence_semantics:"none", symmetric_heap:false, memory_model:null },
+    formal:{
+      participants:[
+        { id:"member", role_kind:"member", calls_function:true, cardinality:"many", selector:"rank in param:comm" }
+      ],
+      data_flow:[
+        { id:"df_read", participant:"member", op:"read", buffer:"param:sendbuff", extent:{ count_ref:"param:count", datatype_ref:"param:datatype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:null },
+        { id:"df_reduce", participant:null, op:"reduce", buffer:null, extent:{ count_ref:"param:count", datatype_ref:"param:datatype" }, offset:null, inputs:[ { ref:"df_read", scope:"all_participant_instances" } ], operation_ref:"param:op", valid_during:null, source:null },
+        { id:"df_write", participant:"member", op:"write", buffer:"param:recvbuff", extent:{ count_ref:"param:count", datatype_ref:"param:datatype" }, offset:null, inputs:[], operation_ref:null, valid_during:null, source:{ kind:"reduced", ref:"df_reduce" } }
+      ],
+      sync:{ events:[], ordering:[], matching:{ kind:"collective_rendezvous", match_keys:[], matched_across:"all_participant_instances", program_order_required:null } },
+      handle_lifecycle:[]
+    }
+  },
+  parameters:[
+    { name:"sendbuff", kind:"BUFFER", direction:"in", desc:"Device address of the send buffer", binding_type:{ c:"const void*", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:true, constant:true, pointer:true, array_type:"variable", func_type:null, length:"count", parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"device" },
+    { name:"recvbuff", kind:"BUFFER", direction:"out", desc:"Device address of the receive buffer — may alias sendbuff for an in-place reduction", binding_type:{ c:"void*", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:true, constant:false, pointer:true, array_type:"variable", func_type:null, length:"count", parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:"device" },
+    { name:"count", kind:"COUNT", direction:"in", desc:"Number of elements to reduce", binding_type:{ c:"size_t", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:false, value_range:"count >= 0", paired_with:null }, memory_space:null },
+    { name:"datatype", kind:"DATATYPE", direction:"in", desc:"Data type of each element", binding_type:{ c:"ncclDataType_t", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"op", kind:"OPERATION", direction:"in", desc:"Reduction operator", binding_type:{ c:"ncclRedOp_t", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"comm", kind:"COMMUNICATOR", direction:"in", desc:"NCCL communicator — its config.blocking setting governs whether this call actually blocks; see tool_integration.context_dependencies", binding_type:{ c:"ncclComm_t", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:true, value_range:null, paired_with:null }, memory_space:null },
+    { name:"stream", kind:"STREAM", direction:"in", desc:"CUDA stream the operation is enqueued on", binding_type:{ c:"cudaStream_t", fortran90:null, fortran08:null, lis:null, cpp:null }, asynchronous:false, constant:true, pointer:false, array_type:null, func_type:null, length:null, parameter_bindings:["c"], root_only:false, constraints:{ not_null:false, value_range:null, paired_with:null }, memory_space:null }
+  ],
+  return:{ kind:"RESULT", value_kind:null, binding_type:{ c:"ncclResult_t", fortran90:null, fortran08:null, lis:null, cpp:null }, possible_errors:["ncclSystemError","ncclInternalError","ncclInvalidArgument","ncclInvalidUsage"], possible_successes:["ncclSuccess: enqueued (default/blocking communicator) — actual GPU execution may still be pending on the stream","ncclInProgress: returned instead of ncclSuccess when comm has config.blocking = 0 and initialization hasn't finished; caller must poll ncclCommGetAsyncError"] },
+  tool_integration:{
+    profiling_name:null,
+    invariants:["comm must not be null","count/datatype/op must match across every rank in the communicator"],
+    buffer_aliasing:"in_place_only",
+    context_dependencies:[
+      { field:"execution.blocking", default_value:true, depends_on:["comm's config.blocking (set at ncclCommInitRankConfig)","whether the call is nested inside ncclGroupStart()/ncclGroupEnd()"], note:"Outside a group, on a default (blocking) communicator, the call behaves as documented above (blocking = true). Inside ncclGroupStart()/ncclGroupEnd(), individual calls do not block — blocking, if any, is deferred to ncclGroupEnd(). If comm was created with config.blocking = 0, even ncclGroupEnd() returns immediately and the caller must poll ncclCommGetAsyncError() instead of relying on a blocking return." },
+      { field:"execution.completion", default_value:"c", depends_on:["same factors as execution.blocking"], note:"Effectively becomes \"ic\" (incomplete) when grouped or when comm is non-blocking — the real completion point moves to ncclGroupEnd() or to a later ncclCommGetAsyncError() poll." },
+      { field:"semantics.memory.local_completion", default_value:"after_return", depends_on:["same factors as execution.blocking"], note:"Only holds for the default / ungrouped / blocking-communicator case; see execution.blocking for the full condition." }
+    ]
+  },
+  relationships:{ variants:{ nonblocking:null, blocking:null, persistent:null, neighborhood:null, host:null, gpu:null }, superseded_by:null, supersedes:[] }
+}
+};
+
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+let nid = 0;
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function typeClass(type){
+  if (/Boolean/.test(type)) return 'bool';
+  if (/\[\]/.test(type)) return 'arrtype';
+  if (/Enum/.test(type)) return 'enum';
+  if (/Object/.test(type)) return 'objtype';
+  if (/String/.test(type)) return 'str';
+  return 'other';
+}
+
+function renderSchemaNode(name, node){
+  if (node.k === 'leaf'){
+    return `<div class="node leaf" data-field="${esc(name.toLowerCase())}">
+      <div class="node-head"><span class="twirl"></span>
+        <span class="key">${esc(name)}</span>
+        <span class="type type-${typeClass(node.type)}">${esc(node.type)}</span>
+        <span class="desc">${esc(node.desc)}</span>
+      </div></div>`;
+  }
+  const id = 'n' + (nid++);
+  if (node.k === 'arr'){
+    const childrenHtml = Object.entries(node.of).map(([k,v]) => renderSchemaNode(k, v)).join('');
+    return `<div class="node" id="${id}" data-field="${esc(name.toLowerCase())}">
+      <div class="node-head" onclick="toggleNode('${id}')"><span class="twirl"></span>
+        <span class="key">${esc(name)}</span>
+        <span class="type type-arrtype">Array</span>
+        <span class="desc">${esc(node.desc)}</span>
+      </div>
+      <div class="arr-of-label">each element →</div>
+      <div class="children">${childrenHtml}</div>
+    </div>`;
+  }
+  const typeLabel = node.k === 'nobj' ? node.type : 'Object';
+  const childrenHtml = Object.entries(node.fields).map(([k,v]) => renderSchemaNode(k, v)).join('');
+  return `<div class="node" id="${id}" data-field="${esc(name.toLowerCase())}">
+    <div class="node-head" onclick="toggleNode('${id}')"><span class="twirl"></span>
+      <span class="key">${esc(name)}</span>
+      <span class="type type-${typeClass(typeLabel)}">${esc(typeLabel)}</span>
+      <span class="desc">${esc(node.desc)}</span>
+    </div>
+    <div class="children">${childrenHtml}</div>
+  </div>`;
+}
+
+function renderValueNode(name, value){
+  if (value === null){
+    return `<div class="node leaf"><div class="node-head"><span class="twirl"></span><span class="key">${esc(name)}</span><span class="val-null">null</span></div></div>`;
+  }
+  const t = typeof value;
+  if (t === 'string'){
+    return `<div class="node leaf"><div class="node-head"><span class="twirl"></span><span class="key">${esc(name)}</span><span class="val-str">"${esc(value)}"</span></div></div>`;
+  }
+  if (t === 'boolean'){
+    return `<div class="node leaf"><div class="node-head"><span class="twirl"></span><span class="key">${esc(name)}</span><span class="val-bool">${value}</span></div></div>`;
+  }
+  if (t === 'number'){
+    return `<div class="node leaf"><div class="node-head"><span class="twirl"></span><span class="key">${esc(name)}</span><span class="val-num">${value}</span></div></div>`;
+  }
+  const id = 'e' + (nid++);
+  if (Array.isArray(value)){
+    if (value.length === 0){
+      return `<div class="node leaf"><div class="node-head"><span class="twirl"></span><span class="key">${esc(name)}</span><span class="type type-arrtype">[ ]</span><span class="desc">empty array</span></div></div>`;
+    }
+    const items = value.map((v,i) => {
+      const label = (v && typeof v === 'object' && !Array.isArray(v) && v.name) ? `[${i}] ${v.name}` : `[${i}]`;
+      return renderValueNode(label, v);
+    }).join('');
+    return `<div class="node" id="${id}">
+      <div class="node-head" onclick="toggleNode('${id}')"><span class="twirl"></span><span class="key">${esc(name)}</span><span class="type type-arrtype">Array[${value.length}]</span></div>
+      <div class="children">${items}</div>
+    </div>`;
+  }
+  const entries = Object.entries(value).map(([k,v]) => renderValueNode(k, v)).join('');
+  return `<div class="node" id="${id}">
+    <div class="node-head" onclick="toggleNode('${id}')"><span class="twirl"></span><span class="key">${esc(name)}</span><span class="type type-objtype">Object</span></div>
+    <div class="children">${entries}</div>
+  </div>`;
+}
+
+function toggleNode(id){ document.getElementById(id).classList.toggle('open'); }
+
+function buildSections(container, dataObj, valueMode){
+  container.innerHTML = '';
+  SECTION_META.forEach(([key, ofs]) => {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.id = 'sec-' + key;
+    const caption = SCHEMA[key].desc;
+    card.innerHTML = `
+      <div class="section-head" onclick="this.parentElement.classList.toggle('open')">
+        <span class="ofs-tag">${ofs}</span>
+        <span class="section-name">${key}</span>
+        <span class="section-caption">${esc(caption)}</span>
+        <span class="chev">▸</span>
+      </div>
+      <div class="section-body" id="body-${key}"></div>
+    `;
+    container.appendChild(card);
+    const bodyEl = card.querySelector('.section-body');
+    if (valueMode){
+      const val = dataObj[key];
+      if (Array.isArray(val)){
+        bodyEl.innerHTML = `<div class="arr-of-label">${val.length} element(s)</div>` + val.map((v,i) => {
+          const label = (v && typeof v === 'object' && v.name) ? `[${i}] ${v.name}` : `[${i}]`;
+          return renderValueNode(label, v);
+        }).join('');
+      } else {
+        bodyEl.innerHTML = Object.entries(val).map(([k,v]) => renderValueNode(k, v)).join('');
+      }
+    } else {
+      const obj = SCHEMA[key];
+      if (obj.k === 'arr'){
+        bodyEl.innerHTML = `<div class="arr-of-label">each element →</div>` + Object.entries(obj.of).map(([k,v]) => renderSchemaNode(k, v)).join('');
+      } else {
+        bodyEl.innerHTML = Object.entries(obj.fields).map(([k,v]) => renderSchemaNode(k, v)).join('');
+      }
+    }
+  });
+}
+
+function buildOffsetNav(){
+  const nav = document.getElementById('offsetNav');
+  nav.innerHTML = SECTION_META.map(([key, ofs]) =>
+    `<a href="#sec-${key}" onclick="jumpTo('${key}')"><span class="ofs">${ofs}</span>${key}</a>`
+  ).join('');
+}
+function jumpTo(key){
+  const card = document.getElementById('sec-' + key);
+  if (!card) return;
+  card.classList.add('open');
+  setTimeout(() => card.scrollIntoView({behavior:'smooth', block:'start'}), 10);
+}
+
+function expandAll(scope){ scope.querySelectorAll('.section-card').forEach(c=>c.classList.add('open')); scope.querySelectorAll('.node').forEach(n=>n.classList.add('open')); }
+function collapseAll(scope){ scope.querySelectorAll('.section-card').forEach(c=>c.classList.remove('open')); scope.querySelectorAll('.node').forEach(n=>n.classList.remove('open')); }
+
+function runSearch(q){
+  const container = document.getElementById('sectionsContainer');
+  container.querySelectorAll('.hl').forEach(el => el.classList.remove('hl'));
+  if (!q){ return; }
+  expandAll(container);
+  container.querySelectorAll('.node.leaf .key').forEach(el => {
+    if (el.textContent.toLowerCase().includes(q.toLowerCase())){
+      el.classList.add('hl');
+      el.closest('.section-card').classList.add('open');
+    }
+  });
+}
+
+/* ============================================================
+   DESIGN NOTES — current design rationale only: requirements,
+   the enum-vs-string convention, and genuinely still-open
+   questions.
+   ============================================================ */
+const REQUIREMENTS = [
+  ["R1","Unified schema","Every PPM shares an identical top-level field structure. In a FINAL entry, a field that doesn't apply is explicit null, never omitted — semantics.memory, atomic.operation, point_to_point's send-mode booleans, tool_integration.buffer_aliasing, identity.api_group, and parameters[].kind can all legitimately hold null as a real, considered answer. Staging artifacts before an entry is complete are a deliberately different case — omitted, not null; see docs/overview/glossary.md (Staging schema)."],
+  ["R2","Semantic completeness","Execution properties, memory completion semantics, collective classification, one-sided epoch requirements, correctness invariants — plus semantics.formal: real data-provenance and ordering/matching precision (who reads/writes/reduces what, and where a written value came from), not just classification labels. See the Semantics section and every example instance."],
+  ["R3","Language-binding coverage","C, Fortran 90, Fortran 2008, LIS, C++ in a consistent sub-structure — including parameter/return types via binding_type."],
+  ["R4","Extensibility","New PPMs and fields can be added without breaking existing entries or consumers. Several enums (identity.api_group, parameters[].kind, semantics.collective.type) are documented as deliberately incomplete and nullable, growing only when a real worked function needs the value — not speculatively."],
+  ["R5","Tool agnosticism","No section encodes knowledge specific to one tool. Buffer-overlap/alias analysis and multi-GPU transfer routing are explicit non-goals, left to the consuming tool — memory_space states WHAT KIND of memory, deliberately not HOW to move it."],
+  ["R6","GPU / heterogeneous-context awareness","launch + runs_on + gpu_scope separate where a call is issued from from what hardware executes it; parameters[].memory_space adds per-parameter host/device/symmetric_heap/unified/either."],
+  ["R7","API lifecycle tracking","since / deprecated_in are version strings, with superseded_by."],
+  ["R8","Machine readability","Plain JSON, parseable with any standard library."]
+];
+
+const ENUM_NOTE = 'JSON itself has no enum type — every value here is still, at the wire level, a JSON string (or boolean / number / array). "Enum" vs. "String" is a documentation-layer distinction, not a JSON one: a field is labelled Enum when it draws from a closed (if sometimes extensible) set of legal values, spelled out in the description, and String when it\'s genuinely open text — names, version strings, free-form prose, cross-reference keys. One documented asymmetry survives on purpose: data_flow[].inputs[].scope is schema-open (plain string, no enum) so a new aggregation pattern never forces a validation-breaking schema change — but it IS closed at the consumer-contract level, via the scope registry in docs/schema/semantics-formal.md (currently all_participant_instances / instances_before_self_in_order / rma_target_prior). Schema-open, registry-closed — not an oversight.';
+
+const OPEN_QUESTIONS = [
+  {
+    title: "Partitioned communication (MPI Psend_init/Pready/Parrived) — the one gap treated as most significant",
+    body: "Not modeled. Needs a per-partition sub-extent with independent completion state, which nothing in data_flow currently expresses — every entry so far describes one whole buffer with one completion event. Full detail in docs/cross-ppm-analysis/known-gaps-and-open-questions.md."
+  },
+  {
+    title: "Value-dependent blocking (shmem_int_wait_until and friends)",
+    body: '"Block until this memory location satisfies a runtime predicate" has no representation — and deliberately so: adding one risks reopening the predicate-language door semantics.formal was designed specifically to avoid. Not modeled, on purpose, not by oversight.'
+  },
+  {
+    title: "ncclGroupStart / ncclGroupEnd — a context bracket with no handle attached",
+    body: "Not modeled. It's thread-local call-stack state, not a value flowing through any parameter, so handle_lifecycle doesn't apply as written."
+  },
+  {
+    title: "MPI_Type_commit-style state transition — undecided",
+    body: 'Doesn\'t cleanly fit create/use/destroy: the handle stays valid but changes state, and using it pre-transition is itself an error. A fourth handle_lifecycle role ("transition") is plausible — two concrete cases exist (Type_commit, shmem_realloc), not yet enough evidence to add it.'
+  },
+  {
+    title: "_nbi nonblocking family (SHMEM/NVSHMEM put_nbi / get_nbi / atomic_*_nbi) — judged tractable",
+    body: 'No handle to bind completion to at all — only observable via a later quiet/fence. Needs a new matching.kind (tentatively "implicit_all_prior") where any quiet/fence closes every open window for that participant. Logged in docs/cross-ppm-analysis/known-gaps-and-open-questions.md.'
+  },
+  {
+    title: "Typed-API implicit datatype/reduction-op (nvshmem_int_sum_reduce, shmem_int_sum_reduce, ...)",
+    body: 'Confirmed directly against real headers and standard text: the datatype AND the reduction operator are baked into the function symbol via macro expansion, not passed as DATATYPE/OPERATION-kind runtime parameters the way MPI/NCCL do it. The seed shapes bind literal type/operation tokens ("type:int", "literal:sum") instead of param: refs — outside the documented param:-ref convention for those slot kinds. Needs a real decision: extend the reference grammar with a literal-token form, or something else. Not resolved.'
+  },
+  {
+    title: "data_flow[].buffer assumes a nameable BUFFER-kind parameter — MPI_Put's real signature breaks that",
+    body: 'MPI_Put has no target-buffer parameter at all — the remote address is resolved via (win, target_disp) against a region a separate MPI_Win_create call already registered, not a literal pointer argument. The seed shape binds target_buffer to the window handle itself as a pragmatic stand-in — an honestly-flagged forced fit, not a clean one. A proposed fix is a tagged window_region buffer object; see docs/cross-ppm-analysis/known-gaps-and-open-questions.md.'
+  },
+  {
+    title: "Pairwise/doubly-indexed collectives (MPI Alltoall) — attempted, deliberately not shipped",
+    body: "Every real PE-pair (i,j) needs an independent offset into BOTH the sender's own buffer (by destination rank) and the receiver's own buffer (by source rank) — two independent rank-dependent offset dimensions on what the schema can only express as a single data_flow[].offset per entry. No built-ins currently close this gap."
+  }
+];
+
+const FLAGS = [
+  "mpi_init/mpi_finalize's argc/argv constraints.not_null=true is possibly wrong — MPI_Init(NULL,NULL) is recalled as standard-legal, which would make not_null=true incorrect for both parameters. Not confirmed against the vendored MPI standard sources; left unchanged until it is.",
+  "Cross-PPM vocabulary unification (MPI \"communicator\" vs. NVSHMEM \"team\" vs. SHMEM \"PE\") is conceptually similar but stays encoded as distinct parameters[].kind values, per \"don't force a wrong fit\" — whether a shared process-group abstraction would help cross-PPM shape reuse, or would just be a wrong-fit unification, hasn't been evaluated."
+];
+
+function buildNotesPane(){
+  const pane = document.getElementById('notesPane');
+  let html = `<h2 class="notes-h" style="margin-top:0;">Requirements (R1–R8)</h2>
+  <div class="req-grid">`;
+  REQUIREMENTS.forEach(([id,title,body]) => {
+    html += `<div class="req-card"><div class="req-id">${id}</div><div class="req-title">${esc(title)}</div><div class="req-body">${esc(body)}</div></div>`;
+  });
+  html += `</div>
+
+  <h2 class="notes-h">Enums vs. strings</h2>
+  <p class="qa-body">${esc(ENUM_NOTE)}</p>
+
+  <h2 class="notes-h">Known gaps and open questions — schema level, still open</h2>
+  <p class="lede">Curated from docs/cross-ppm-analysis/known-gaps-and-open-questions.md (full table there). "Not modeled" = a real gap worth eventually closing; "deliberately" = the direction was considered and rejected on purpose, not overlooked.</p>`;
+  OPEN_QUESTIONS.forEach(q => {
+    html += `<div class="qa-card"><div class="qa-title">${esc(q.title)}</div><div class="qa-body">${esc(q.body)}</div></div>`;
+  });
+
+  html += `<h2 class="notes-h">Flagged, not yet resolved</h2>`;
+  FLAGS.forEach(f => { html += `<div class="flag-card">${esc(f)}</div>`; });
+
+  html += `<div class="status-line">Schema v0.1.0 (curated/schemas/api-schema.json). This page covers the schema only; the generation workflow is described in workflow/README.md.</div>`;
+  pane.innerHTML = html;
+}
+
+/* ============================================================
+   PPM matrix + tabs + init (unchanged machinery)
+   ============================================================ */
+function setMatrixForExample(key){
+  const model = key.split(':')[0];
+  document.querySelectorAll('.chip').forEach(chip => {
+    if (chip.dataset.ppm === model){ chip.classList.add('active'); chip.classList.remove('dim'); }
+    else { chip.classList.remove('active'); chip.classList.add('dim'); }
+  });
+}
+function resetMatrix(){ document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active','dim')); }
+
+buildOffsetNav();
+buildSections(document.getElementById('sectionsContainer'), null, false);
+buildNotesPane();
+
+document.getElementById('expandAllBtn').onclick = () => expandAll(document.getElementById('schemaPane'));
+document.getElementById('collapseAllBtn').onclick = () => collapseAll(document.getElementById('schemaPane'));
+document.getElementById('expandAllBtn2').onclick = () => expandAll(document.getElementById('examplePane'));
+document.getElementById('collapseAllBtn2').onclick = () => collapseAll(document.getElementById('examplePane'));
+document.getElementById('searchBox').addEventListener('input', e => runSearch(e.target.value.trim()));
+
+const exampleSelect = document.getElementById('exampleSelect');
+function loadExample(key){
+  buildSections(document.getElementById('exampleContainer'), EXAMPLES[key], true);
+  setMatrixForExample(key);
+}
+exampleSelect.addEventListener('change', e => loadExample(e.target.value));
+
+const tabBtns = document.querySelectorAll('.tab-btn');
+const panes = { schema: document.getElementById('schemaPane'), example: document.getElementById('examplePane'), notes: document.getElementById('notesPane') };
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.values(panes).forEach(p => p.style.display = 'none');
+    panes[btn.dataset.tab].style.display = 'block';
+    document.getElementById('navBlock').style.display = btn.dataset.tab === 'notes' ? 'none' : 'block';
+    document.getElementById('exampleSelectBlock').style.display = btn.dataset.tab === 'example' ? 'block' : 'none';
+    if (btn.dataset.tab === 'example'){ loadExample(exampleSelect.value); }
+    if (btn.dataset.tab === 'schema'){ resetMatrix(); }
+  });
+});
+</script>
+</body>
+</html>

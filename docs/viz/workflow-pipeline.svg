@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="25.5 17.5 1375 241" width="1375" height="241">
+  <title>PPM machine specs: generation workflow</title>
+  <desc>Four groups: External Inputs and Curated Inputs feed the Generator, which writes the
+  Outputs. Badges that hold for a whole group sit on the group: script on the Generator, given
+  and per-PPM on the External Inputs, derived on the Curated Inputs, all-PPM on the Outputs.
+  Box badges are left only where they mark an exception
+  to their group. Machine-Readable Spec is such an exception, marked with an asterisk on its
+  title and explained in the legend. Solid arrows are directly read or written; dashed arrows are indirect flow, e.g.
+  material read by AI rather than by a script.</desc>
+
+  <defs>
+    <marker id="ar" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7.5" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 z" fill="#3A403E"/>
+    </marker>
+    <marker id="ad" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7.5" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 z" fill="#7A6B8C"/>
+    </marker>
+  </defs>
+
+  <style>
+    .ttl  { font: bold 14px Helvetica, Arial, sans-serif; fill: #161B1A; text-anchor: middle; }
+    .ttls { font: bold 13px Helvetica, Arial, sans-serif; fill: #161B1A; text-anchor: middle; }
+    .clab { font: bold 13px Helvetica, Arial, sans-serif; }
+    .lgl  { font: bold 10px Helvetica, Arial, sans-serif; fill: #3A403E; }
+    .grpL { fill: #FBFBFA; stroke: #C6CCCA; stroke-width: 1.2; }
+    .bdg  { font: bold 9px Helvetica, Arial, sans-serif; text-anchor: middle; }
+    .flow { fill: none; stroke: #3A403E; stroke-width: 1.5; marker-end: url(#ar); }
+    .ind  { fill: none; stroke: #7A6B8C; stroke-width: 1.3; stroke-dasharray: 5 3.5; marker-end: url(#ad); }
+    .indb { fill: none; stroke: #7A6B8C; stroke-width: 1.3; stroke-dasharray: 5 3.5; }
+    .grpA { fill: #F2F6F9; stroke: #4A6B80; stroke-width: 1.2; }
+    .grpB { fill: #F6F3F9; stroke: #5B4B73; stroke-width: 1.2; }
+    .grpC { fill: #F1F8F8; stroke: #0E7A82; stroke-width: 1.2; }
+    .grpD { fill: #F7F8F7; stroke: #8A938C; stroke-width: 1.2; }
+    .ext  { fill: #E4ECF1; stroke: #4A6B80; stroke-width: 1.3; }
+    .proc { fill: #DCEEEE; stroke: #0E7A82; stroke-width: 1.4; }
+    .data { fill: #F3F5F1; stroke: #8A938C; stroke-width: 1.4; }
+    .back { fill: #E8ECE9; stroke: #A7AEAB; stroke-width: 1.1; }
+    .cur  { fill: #E7E1EF; stroke: #5B4B73; stroke-width: 1.3; }
+    .bg   { fill: #FFFFFF; stroke: #4A6B80; stroke-width: 1.1; }
+    .bp   { fill: #FFFFFF; stroke: #5B4B73; stroke-width: 1.1; }
+    .ba   { fill: #5B4B73; stroke: #5B4B73; stroke-width: 1.1; }
+    .bs   { fill: #FFFFFF; stroke: #0E7A82; stroke-width: 1.1; }
+    .bn   { fill: #FFFFFF; stroke: #8A938C; stroke-width: 1.1; }
+  </style>
+
+  <!-- ================= external-inputs/ =================
+       Group badges are h=14, vertically centred on their group label's optical centre,
+       leaving 4 px between the pill and the group's own border. -->
+  <rect class="grpA" x="28" y="36" width="494" height="92" rx="7"/>
+  <text class="clab" x="40" y="52" fill="#33556B">External Inputs</text>
+  <rect class="bg" x="146" y="40" width="34" height="14" rx="4"/>
+  <text class="bdg" x="163" y="50" fill="#33556B">given</text>
+  <rect class="bg" x="184" y="40" width="46" height="14" rx="4"/>
+  <text class="bdg" x="207" y="50" fill="#33556B">per-PPM</text>
+
+  <rect class="ext" x="40" y="58" width="150" height="60" rx="5"/>
+  <text class="ttls" x="115" y="104">Specs and Docs</text>
+  <rect class="bg" x="94" y="64" width="42" height="16" rx="4"/>
+  <text class="bdg" x="115" y="75" fill="#33556B">derived</text>
+
+  <rect class="ext" x="200" y="58" width="150" height="60" rx="5"/>
+  <text class="ttls" x="275" y="86">Implementation</text>
+  <text class="ttls" x="275" y="100">(Headers, Source)</text>
+
+  <rect class="ext" x="360" y="58" width="150" height="60" rx="5"/>
+  <text class="ttls" x="435" y="86">Machine-Readable</text>
+  <text class="ttls" x="435" y="100">Spec*</text>
+
+  <!-- ================= curated/ ================= -->
+  <rect class="grpB" x="540" y="36" width="654" height="92" rx="7"/>
+  <text class="clab" x="552" y="52" fill="#4A3D5E">Curated Inputs</text>
+  <rect class="bp" x="652" y="40" width="42" height="14" rx="4"/>
+  <text class="bdg" x="673" y="50" fill="#5B4B73">derived</text>
+
+  <rect class="cur" x="552" y="58" width="150" height="60" rx="5"/>
+  <text class="ttls" x="627" y="104">Shape Catalog</text>
+  <rect class="ba" x="567" y="64" width="59" height="16" rx="4"/>
+  <text class="bdg" x="596.5" y="75" fill="#FFFFFF">AI + human</text>
+  <rect class="bp" x="630" y="64" width="57" height="16" rx="4"/>
+  <text class="bdg" x="658.5" y="75" fill="#5B4B73">cross-PPM</text>
+
+  <rect class="cur" x="712" y="58" width="150" height="60" rx="5"/>
+  <text class="ttls" x="787" y="104">Shape Assignments</text>
+  <rect class="ba" x="757.5" y="64" width="59" height="16" rx="4"/>
+  <text class="bdg" x="787" y="75" fill="#FFFFFF">AI + human</text>
+
+  <rect class="cur" x="872" y="58" width="150" height="60" rx="5"/>
+  <text class="ttls" x="947" y="98">Supplement</text>
+  <text class="ttls" x="947" y="112">MR Spec</text>
+  <rect class="ba" x="892" y="64" width="59" height="16" rx="4"/>
+  <text class="bdg" x="921.5" y="75" fill="#FFFFFF">AI + human</text>
+  <rect class="bp" x="956" y="64" width="46" height="16" rx="4"/>
+  <text class="bdg" x="979" y="75" fill="#5B4B73">per-PPM</text>
+
+  <rect class="cur" x="1032" y="58" width="150" height="60" rx="5"/>
+  <text class="ttls" x="1107" y="98">Schemas for Output</text>
+  <text class="ttls" x="1107" y="112">and Curated Files</text>
+  <rect class="bp" x="1087" y="64" width="40" height="16" rx="4"/>
+  <text class="bdg" x="1107" y="75" fill="#5B4B73">human</text>
+
+  <!-- offline AI authoring: the sources inform the two curated files it writes.
+       The Shape Catalog branch enters from the left, through the 522..540 gutter, so it
+       clears the group-label band the derived badge now occupies. -->
+  <path class="indb" d="M230,36 L230,20 L947,20"/>
+  <path class="ind"  d="M530,20 L530,88 L552,88"/>
+  <path class="ind"  d="M947,20 L947,58"/>
+
+  <!-- ================= legend =================
+       Three rows. Top-aligned with the two input groups at y=36; the height for the third
+       row comes from the Outputs group below, whose cards went 42 -> 38 px. -->
+  <rect class="grpL" x="1206" y="36" width="192" height="74" rx="7"/>
+  <text class="clab" x="1218" y="50" fill="#7A8280">Legend</text>
+  <path class="flow" d="M1218,67 L1244,67"/>
+  <text class="lgl" x="1252" y="70.5">directly read or written</text>
+  <path class="ind" d="M1218,83 L1244,83"/>
+  <text class="lgl" x="1252" y="86.5">indirect flow (e.g. read by AI)</text>
+  <text class="ttls" x="1231" y="107">*</text>
+  <text class="lgl" x="1252" y="102.5">only MPI ships one</text>
+
+  <!-- ================= workflow/ ================= -->
+  <rect class="grpC" x="28" y="164" width="1140" height="92" rx="7"/>
+  <text class="clab" x="40" y="180" fill="#0A5D63">Generator</text>
+  <rect class="bs" x="110" y="168" width="35" height="14" rx="4"/>
+  <text class="bdg" x="127.5" y="178" fill="#0A5D63">script</text>
+
+  <rect class="proc" x="40" y="184" width="166" height="58" rx="5"/>
+  <text class="ttl" x="123" y="210">Extract</text>
+  <text class="ttl" x="123" y="226">Syntactic Fields</text>
+
+  <rect class="proc" x="230" y="184" width="166" height="58" rx="5"/>
+  <text class="ttl" x="313" y="218">Classify Semantics</text>
+
+  <rect class="proc" x="420" y="184" width="166" height="58" rx="5"/>
+  <text class="ttl" x="503" y="218">Generate Formal</text>
+
+  <rect class="proc" x="610" y="184" width="166" height="58" rx="5"/>
+  <text class="ttl" x="693" y="210">Apply</text>
+  <text class="ttl" x="693" y="226">Supplement Fields</text>
+
+  <rect class="proc" x="800" y="184" width="166" height="58" rx="5"/>
+  <text class="ttl" x="883" y="210">Concretize</text>
+  <text class="ttl" x="883" y="226">Generic Entries</text>
+
+  <rect class="proc" x="990" y="184" width="166" height="58" rx="5"/>
+  <text class="ttl" x="1073" y="210">Validate Grammar</text>
+  <text class="ttl" x="1073" y="226">and Field Rules</text>
+
+  <path class="flow" d="M206,213 L230,213"/>
+  <path class="flow" d="M396,213 L420,213"/>
+  <path class="flow" d="M586,213 L610,213"/>
+  <path class="flow" d="M776,213 L800,213"/>
+  <path class="flow" d="M966,213 L990,213"/>
+
+  <!-- ================= inputs into the steps ================= -->
+  <!-- the drop into Extract moved 123 -> 160 to clear the Generator's script badge -->
+  <path class="flow" d="M160,128 L160,184"/>
+  <path class="ind"  d="M313,128 L313,184"/>
+  <path class="flow" d="M570,118 L570,184"/>
+  <path class="flow" d="M787,118 L787,146 L460,146 L460,184"/>
+  <path class="flow" d="M947,118 L947,155 L693,155 L693,184"/>
+  <path class="flow" d="M1107,118 L1107,184"/>
+
+  <!-- ================= instances/ =================
+       Cards are 36 px tall (was 42), which frees the 12 px the legend needed to top-align at
+       y=36. The back card keeps its +28 offset: that 20 px band below the stack is what the
+       intermediates badge sits in, and shrinking it clipped the card edge behind the badge. -->
+  <path class="flow" d="M1168,213 L1187,213 L1187,161 L1206,161"/>
+
+  <rect class="grpD" x="1206" y="116" width="192" height="140" rx="7"/>
+  <text class="clab" x="1218" y="134" fill="#5E6663">Outputs</text>
+  <rect class="bn" x="1276" y="122" width="44" height="14" rx="4"/>
+  <text class="bdg" x="1298" y="132" fill="#5E6663">all-PPM</text>
+
+  <rect class="back" x="1242" y="171" width="144" height="36" rx="5"/>
+  <rect class="back" x="1232" y="151" width="144" height="36" rx="5"/>
+  <rect class="back" x="1226" y="147" width="144" height="36" rx="5"/>
+  <rect class="data" x="1220" y="143" width="144" height="36" rx="5"/>
+  <text class="ttls" x="1292" y="166">Unified API Spec</text>
+  <rect class="bn" x="1259" y="189" width="106" height="14" rx="4"/>
+  <text class="bdg" x="1312" y="199" fill="#5E6663">intermediates optional</text>
+
+  <rect class="data" x="1220" y="214" width="144" height="36" rx="5"/>
+  <text class="ttls" x="1292" y="237">Provenance Report</text>
+</svg>

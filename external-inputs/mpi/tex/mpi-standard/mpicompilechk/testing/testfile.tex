@@ -1,0 +1,457 @@
+Examples drawn from the MPI Standard document
+
+A simple `hello world' example usage of point-to-point communication.
+
+%% FIXME: Use MPI_STATUS_IGNORE instead of declare, ignore status?
+%%HEADER
+%%LANG: C
+%%DECL:#include <string.h>
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#include "mpi.h"
+int main(int argc, char *argv[])
+{
+  char message[20];
+  int myrank;
+  MPI_Status status;
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  if (myrank == 0)    /* code for process zero */
+  {
+      strcpy(message,"Hello, there");
+      MPI_Send(message, strlen(message)+1, MPI_CHAR, 1, 99,
+               MPI_COMM_WORLD);
+  }
+  else if (myrank == 1)  /* code for process one */
+  {
+      MPI_Recv(message, 20, MPI_CHAR, 0, 99, MPI_COMM_WORLD, &status);
+      printf("received :%s:\n", message);
+  }
+  MPI_Finalize();
+  return 0;
+}
+\end{lstlisting}
+\end{example}
+
+In Example~\ref{ex:pt2pt-helloworld}, process zero (\code{myrank = 0}) sends a \mpiterm{message} to process one
+using the
+\mpiterm{send} operation \mpifunc{MPI\_SEND}.
+
+The following examples illustrate the first two cases.
+\label{page:pt2pt-3examples}
+
+\begin{example}
+\label{pt2pt-exA}
+\exindex{MPI\_SEND}%
+\exindex{MPI\_RECV}%
+\exindex{Datatypes!matching}%
+Sender and receiver specify matching types.
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%DECL: integer comm, rank, ierr, tag, a(2), b(2)
+%%DECL: integer status(MPI_STATUS_SIZE)
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+CALL MPI_COMM_RANK(comm, rank, ierr)
+IF (rank .EQ. 0) THEN
+   CALL MPI_SEND(a(1), 10, MPI_REAL, 1, tag, comm, ierr)
+ELSE IF (rank .EQ. 1) THEN
+   CALL MPI_RECV(b(1), 15, MPI_REAL, 0, tag, comm, status, ierr)
+END IF
+\end{lstlisting}
+
+\begin{example}
+\label{pt2pt-exB}
+\exindex{MPI\_SEND}%
+\exindex{MPI\_RECV}%
+\exindex{Datatypes!not matching}%
+Sender and receiver do not specify matching types.
+
+   CALL MPI_RECV(recvbuf, count, MPI_REAL, 1, tag, comm, status, ierr)
+ELSE IF (rank .EQ. 1) THEN
+   CALL MPI_SEND(sendbuf, count, MPI_REAL, 0, tag, comm, ierr)
+   CALL MPI_RECV(recvbuf, count, MPI_REAL, 0, tag, comm, status, ierr)
+END IF
+\end{lstlisting}
+The message sent by each process has to be copied out before the send operation
+returns and the receive operation starts.  For the program to complete, it is
+necessary that at least one of the two messages sent be buffered.
+Thus, this program can
+succeed only if
+the communication system can buffer at least \mpiarg{count} words of data.
+\end{example}
+
+
+\begin{example}
+\label{pt2pt-exZ}
+\exindex{MPI\_Buffer\_attach}%
+\exindex{MPI\_Buffer\_detach}%
+Calls to attach and detach buffers.
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#define BUFFSIZE 10000
+int size;
+char *buff;
+MPI_Buffer_attach(malloc(BUFFSIZE), BUFFSIZE);
+/* a buffer of 10000 bytes can now be used by MPI_Bsend */
+MPI_Buffer_detach(&buff, &size);
+/* Buffer size reduced to zero */
+MPI_Buffer_attach(buff, size);
+/* Buffer of 10000 bytes available again */
+\end{lstlisting}
+\end{example}
+
+
+
+\begin{example}
+\label{pt2pt-exJ}
+\exindex{MPI\_ISEND}%
+\exindex{MPI\_IRECV}%
+\exindex{MPI\_WAIT}%
+\exindex{Nonblocking operations}%
+Simple usage of nonblocking operations and \mpifunc{MPI\_WAIT}.
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%DECL: integer comm, rank, ierr, tag, request
+%%DECL: real a(10)
+%%DECL: integer status(MPI_STATUS_SIZE)
+%%SUBST:\*\*.*:tag=1
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+CALL MPI_COMM_RANK(comm, rank, ierr)
+IF (rank .EQ. 0) THEN
+   CALL MPI_ISEND(a(1), 10, MPI_REAL, 1, tag, comm, request, ierr)
+   ! **** do some computation to mask latency ****
+   CALL MPI_WAIT(request, status, ierr)
+ELSE IF (rank .EQ. 1) THEN
+   CALL MPI_IRECV(a(1), 15, MPI_REAL, 0, tag, comm, request, ierr)
+   ! **** do some computation to mask latency ****
+   CALL MPI_WAIT(request, status, ierr)
+END IF
+\end{lstlisting}
+\end{example}
+
+A request object can be \mpitermni{freed}\mpitermindex{request objects!freeing} using the following \MPI/ procedure.
+
+\begin{example}
+\label{pt2pt-exK}
+\exindex{MPI\_REQUEST\_FREE}%
+\exindex{MPI\_ISEND}%
+\exindex{MPI\_IRECV}%
+\exindex{MPI\_WAIT}%
+\exindex{Nonblocking operations}%
+An example using \mpifunc{MPI\_REQUEST\_FREE}.
+
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%DECL: integer rank, req, ierr, outval, inval, i, n
+%%DECL: integer status(MPI_STATUS_SIZE)
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran},basicstyle=\lstsmall]
+CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+IF (rank .EQ. 0) THEN
+   DO i=1,n
+      CALL MPI_ISEND(outval, 1, MPI_REAL, 1, 0, MPI_COMM_WORLD, req, ierr)
+      CALL MPI_REQUEST_FREE(req, ierr)
+      CALL MPI_IRECV(inval, 1, MPI_REAL, 1, 0, MPI_COMM_WORLD, req, ierr)
+      CALL MPI_WAIT(req, status, ierr)
+   END DO
+ELSE IF (rank .EQ. 1) THEN
+   CALL MPI_IRECV(inval, 1, MPI_REAL, 0, 0, MPI_COMM_WORLD, req, ierr)
+   CALL MPI_WAIT(req, status, ierr)
+   DO I=1,n-1
+      CALL MPI_ISEND(outval, 1, MPI_REAL, 0, 0, MPI_COMM_WORLD, req, ierr)
+      CALL MPI_REQUEST_FREE(req, ierr)
+      CALL MPI_IRECV(inval, 1, MPI_REAL, 0, 0, MPI_COMM_WORLD, req, ierr)
+      CALL MPI_WAIT(req, status, ierr)
+   END DO
+   CALL MPI_ISEND(outval, 1, MPI_REAL, 0, 0, MPI_COMM_WORLD, req, ierr)
+   CALL MPI_WAIT(req, status, ierr)
+END IF
+\end{lstlisting}
+\end{example}
+
+\subsection{Semantics of Nonblocking Communications}
+\mpitermtitleindex{semantics!nonblocking communications}
+\label{subsec:pt2pt-semantics}
+
+\begin{example}
+\label{coll-exX-fortran}
+\exindex{MPI\_Reduce}%
+\exindex{MPI\_Op\_create}%
+\exindex{MPI\_User\_function}%
+\mpicallbackindex{MPI\_User\_function}%
+How to use the \ftype{mpi\_f08} interface of the Fortran \ftype{MPI\_User\_function}.
+%%HEADER
+%%LANG: FORTRAN08
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI08]Fortran}]
+subroutine my_user_function(invec, inoutvec, len, dtype)   bind(c)
+   use, intrinsic :: iso_c_binding, only : c_ptr, c_f_pointer
+   use mpi_f08
+   type(c_ptr), value :: invec, inoutvec
+   integer :: len
+   type(MPI_Datatype) :: dtype
+   real, pointer :: invec_r(:), inoutvec_r(:)
+   if (dtype%MPI_VAL == MPI_REAL%MPI_VAL) then
+      call c_f_pointer(invec, invec_r, (/ len /))
+      call c_f_pointer(inoutvec, inoutvec_r, (/ len /))
+      inoutvec_r = invec_r + inoutvec_r
+   end if
+end subroutine
+\end{lstlisting}
+\end{example}
+
+%%HEADER
+%%LANG: FORTRAN90
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+SUBROUTINE SUM(A, B, map, m, comm, p)
+USE MPI
+INTEGER m, map(m), comm, p, win, ierr, disp_int, i, j
+REAL A(m), B(m)
+INTEGER(KIND=MPI_ADDRESS_KIND) lowerbound, size, realextent, disp_aint
+
+CALL MPI_TYPE_GET_EXTENT(MPI_REAL, lowerbound, realextent, ierr)
+size = m * realextent
+disp_int = realextent
+CALL MPI_WIN_CREATE(B, size, disp_int, MPI_INFO_NULL,  &
+                    comm, win, ierr)
+
+CALL MPI_WIN_FENCE(0, win, ierr)
+DO i=1,m
+   j = map(i)/m
+   disp_aint = MOD(map(i),m)
+   CALL MPI_ACCUMULATE(A(i), 1, MPI_REAL, j, disp_aint, 1, MPI_REAL,   &
+                       MPI_SUM, win, ierr)
+END DO
+CALL MPI_WIN_FENCE(0, win, ierr)
+
+CALL MPI_WIN_FREE(win, ierr)
+RETURN
+END
+\end{lstlisting}
+
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%SKIPELIPSIS
+%%DECL: int converged(int), i, A; MPI_Win win;
+%%DECL: int toneighbors, toneighbor[10], frombuf[10]; int update(int);
+%%DECL: MPI_Datatype totype[10], fromtype[10];
+%%DECL: MPI_Aint todisp[10];
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+...
+while (!converged(A)) {
+  update(A);
+  MPI_Win_fence(MPI_MODE_NOPRECEDE, win);
+  for(i=0; i < toneighbors; i++)
+    MPI_Put(&frombuf[i], 1, fromtype[i], toneighbor[i],
+                         todisp[i], 1, totype[i], win);
+  MPI_Win_fence((MPI_MODE_NOSTORE | MPI_MODE_NOSUCCEED), win);
+}
+\end{lstlisting}
+
+\exindex{MPI\_TYPE\_CREATE\_SUBARRAY}%
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%DECL:void foobar(double [100][25]);
+%%TAIL:(void)foobar(subarray);
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+   double subarray[100][25];
+   MPI_Datatype filetype;
+   int sizes[2], subsizes[2], starts[2];
+   int rank;
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+   sizes[0]=100; sizes[1]=100;
+   subsizes[0]=100; subsizes[1]=25;
+   starts[0]=0; starts[1]=rank*subsizes[1];
+
+   MPI_Type_create_subarray(2, sizes, subsizes, starts, MPI_ORDER_C,
+                            MPI_DOUBLE, &filetype);
+\end{lstlisting}
+
+Or, equivalently in Fortran:
+
+%%HEADER
+%%LANG: FORTRAN
+%%FRAGMENT
+%%TAIL: call foobar(subarray)
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+double precision subarray(100,25)
+integer filetype, rank, ierror
+integer sizes(2), subsizes(2), starts(2)
+
+call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
+sizes(1)    = 100
+sizes(2)    = 100
+subsizes(1) = 100
+subsizes(2) = 25
+starts(1)   = 0
+starts(2)   = rank*subsizes(2)
+
+call MPI_TYPE_CREATE_SUBARRAY(2, sizes, subsizes, starts, &
+           MPI_ORDER_FORTRAN, MPI_DOUBLE_PRECISION,       &
+           filetype, ierror)
+\end{lstlisting}
+
+%%HEADER
+%%LANG: C
+%%SKIPELIPSIS
+%%TOP:#define MAX_DATA 10
+%%TOP:#define FATAL 12
+%%TOP:void error(int,char *);
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#include "mpi.h"
+int main(int argc, char *argv[])
+{
+    MPI_Comm client;
+    MPI_Status status;
+    char port_name[MPI_MAX_PORT_NAME];
+    double buf[MAX_DATA];
+    int    size, again;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    if (size != 1) error(FATAL, "Server too big");
+    MPI_Open_port(MPI_INFO_NULL, port_name);
+    printf("server available at %s\n", port_name);
+    while (1) {
+        MPI_Comm_accept(port_name, MPI_INFO_NULL, 0, MPI_COMM_WORLD, 
+                        &client);
+        again = 1;
+        while (again) {
+            MPI_Recv(buf, MAX_DATA, MPI_DOUBLE, 
+                     MPI_ANY_SOURCE, MPI_ANY_TAG, client, &status);
+            switch (status.MPI_TAG) {
+                case 0: MPI_Comm_free(&client);
+                        MPI_Close_port(port_name);
+                        MPI_Finalize();
+                        return 0;
+                case 1: MPI_Comm_disconnect(&client);
+                        again = 0;
+                        break;
+                case 2: /* do something */
+                ...
+                default:
+                        /* Unexpected message type */
+                        MPI_Abort(MPI_COMM_WORLD, 1);
+                }
+            }
+        }
+}
+\end{lstlisting}
+
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{verbatim}
+    mpiexec spec0 [: spec1 : spec2 : ...]
+\end{verbatim}
+\const{MPI\_APPNUM} should be set to the number of the corresponding
+specification.
+
+
+The following code fragment shows
+some possible ways to send scalars or arrays of interoperable
+derived types in Fortran. The example assumes that all data is passed by address.
+\exindex{Fortran 90!derived types}%
+\exindex{MPI\_TYPE\_CREATE\_RESIZED}%
+\exindex{MPI\_TYPE\_CREATE\_STRUCT}%
+\exindex{MPI\_GET\_ADDRESS}%
+\exindex{MPI\_TYPE\_COMMIT}%
+%%HEADER
+%%LANG: FORTRAN
+%%EXTRAFLAGS:mismatch
+%%FRAGMENT
+%%DECL: integer ierr, dest, tag, comm
+%%DECL: integer newtype, newarrtype
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]Fortran}]
+type, BIND(C) :: mytype
+   integer :: i
+   real :: x
+   double precision :: d
+   logical :: l
+end type mytype
+
+type(mytype) :: foo, fooarr(5)
+integer :: blocklen(4), dtype(4)
+integer(KIND=MPI_ADDRESS_KIND) :: disp(4), base, lb, extent
+
+call MPI_GET_ADDRESS(foo%i, disp(1), ierr)
+call MPI_GET_ADDRESS(foo%x, disp(2), ierr)
+call MPI_GET_ADDRESS(foo%d, disp(3), ierr)
+call MPI_GET_ADDRESS(foo%l, disp(4), ierr)
+
+base = disp(1)
+disp(1) = disp(1) - base
+disp(2) = disp(2) - base
+disp(3) = disp(3) - base
+disp(4) = disp(4) - base
+
+blocklen(1) = 1
+blocklen(2) = 1
+blocklen(3) = 1
+blocklen(4) = 1
+
+dtype(1) = MPI_INTEGER
+dtype(2) = MPI_REAL
+dtype(3) = MPI_DOUBLE_PRECISION
+dtype(4) = MPI_LOGICAL
+
+call MPI_TYPE_CREATE_STRUCT(4, blocklen, disp, dtype, newtype, ierr)
+call MPI_TYPE_COMMIT(newtype, ierr)
+
+call MPI_SEND(foo%i, 1, newtype, dest, tag, comm, ierr)
+! or
+call MPI_SEND(foo, 1, newtype, dest, tag, comm, ierr)
+! expects that base == address(foo%i) == address(foo)
+
+call MPI_GET_ADDRESS(fooarr(1), disp(1), ierr)
+call MPI_GET_ADDRESS(fooarr(2), disp(2), ierr)
+extent = disp(2) - disp(1)
+lb = 0
+call MPI_TYPE_CREATE_RESIZED(newtype, lb, extent, newarrtype, ierr)
+call MPI_TYPE_COMMIT(newarrtype, ierr)
+
+call MPI_SEND(fooarr, 5, newarrtype, dest, tag, comm, ierr)
+\end{lstlisting}
+\exindex{MPI\_TYPE\_CREATE\_RESIZED}%
+\exindex{MPI\_TYPE\_CREATE\_STRUCT}%
+\exindex{MPI\_GET\_ADDRESS}%
+\exindex{MPI\_TYPE\_COMMIT}%
+
+%%HEADER
+%%LANG: C
+%%FRAGMENT
+%%DECL: MPI_Comm comm; int ndims, d, rank_source, rank_dest;
+%%DECL: int sendbuf[1], sendcount, recvbuf[1], recvcount;
+%%DECL: MPI_Datatype recvtype, sendtype;
+%%DECL: MPI_Status status;
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C},basicstyle=\lstsmall,escapeinside=`']
+MPI_Cartdim_get(comm, &ndims);
+for( /*direction*/ d=0; d < ndims; d++) {
+    MPI_Cart_shift(comm, /*direction*/ d, /*disp*/ 1, &rank_source, &rank_dest);
+    MPI_Sendrecv(&sendbuf[d*2`\underline{+0}'],sendcount,sendtype,`\underline{rank\_source}',/*sendtag*/d*2,
+                 &recvbuf[d*2`\underline{+1}'],recvcount,recvtype,`\underline{rank\_dest}', /*recvtag*/ d*2,
+                 comm,&status);/*communication in direction of displacment -1*/
+    MPI_Sendrecv(&sendbuf[d*2`\underline{+1}'],sendcount,sendtype,`\underline{rank\_dest}', /*sendtag*/ d*2+1,
+                 &recvbuf[d*2`\underline{+0}'],recvcount,recvtype,`\underline{rank\_source}',/*recvtag*/d*2+1,
+                 comm,&status);/*communication in direction of displacment +1*/
+}
+\end{lstlisting}
+

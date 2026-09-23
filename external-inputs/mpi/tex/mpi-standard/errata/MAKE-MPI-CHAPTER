@@ -1,0 +1,192 @@
+#!/bin/csh
+#MAKE-MPI-CHAPTER
+unalias rm
+
+# adopted from HPF script -- thanks to David Loveman
+#Version of July 29, 1993 - Steve Otto, Oregon Graduate Institute
+
+#  MAKE-MPI-CHAPTER - a script similar to MAKE-MPI-REPORT. It takes 
+#     the filename of the chapter to be produced.  It 
+#     uses the file chapter-head.tex and a set of 
+#     temporary files named tempch.*
+
+set only_one_latex = "no"
+# use "yes" if want quick run but not guaranteed correct refs, etc.,
+# by only running latex one time - by default does 3 times.
+
+set check = "yes"
+# use "yes" skip check that commands in path.  default does check.
+
+set f = "NOGOOD"
+
+while ($#argv > 0) 
+    switch ("$1")
+    case "-echo":
+	set echo
+        shift argv
+	breaksw
+    case "-one":
+	set only_one_latex = "yes"
+	shift argv
+	breaksw
+    case "-nocheck":
+	set check = "no"
+	shift argv
+	breaksw
+    case "-help":
+    case "-h":
+    case "-u":
+	cat <<EOF
+    $0 [ -echo ] [ -one ] [ -nocheck ] filename
+    Build one chapter of MPI-2 document (as postscript).  
+    If -one then only do one pass with LaTeX (instead of 3) - 
+    faster for testing but refs, etc., may be off.
+    If -nopath then don't do checks or echo date - slightly faster.
+EOF
+        exit 1
+	breaksw
+    default:
+# assume argument is file name
+	set f = "$1"
+	shift argv
+	breaksw
+    endsw
+end
+
+if ("$check" == "yes") then
+  if ("$f" == "NOGOOD") then
+    echo "$0 : filename must be provided"
+    exit 1
+  else if ( ! (-e $f) ) then
+    echo "$0 : file $f does not exist"
+    exit 1
+  else if ( ! (-r $f) ) then
+    echo "$0 : file $f is not readable"
+    exit 1
+  else
+    echo "file $f exists and is readable"
+  endif
+
+  if (`which latex | grep -v 'no latex in' | wc -w` == 0) then
+    echo "$0 :no latex in path: $path"
+    exit(99)
+  endif
+
+  if (`which bibtex | grep -v 'no bibtex in' | wc -w` == 0) then
+    echo "$0 :no bibtex in path: $path"
+    exit(99)
+  endif
+
+  if (`which dvips | grep -v 'no dvips in' | wc -w` == 0) then
+    echo "$0 :no dvips in path: $path"
+    exit(99)
+  endif
+
+  set thedate = `date`
+  echo "  "
+  echo BEGIN JOB ON: $thedate
+endif
+
+/bin/rm -f tempch.tex tempch.log tempch1.tex >& /dev/null
+cat chapter-head.tex $f > tempch.tex
+cp ../mpi-macs.tex .
+cp tempch.tex tempch1.tex	# we will cp tempch1 to tempch if there are no \cite's
+# Writing a backslash with echo is tricky, since different shell 
+# implementations handle backslashes in different ways, depending on 
+# whether they want to interpret \<char> as an escape character or not
+set a=`echo '\\end' | grep "\\\\"`
+if ($a != "") then
+    echo "\bibliographystyle{plain}" >> tempch.tex
+    echo "\bibliography{refs}" >> tempch.tex
+    echo '\end{document}' >> tempch.tex
+    echo '\end{document}' >> tempch1.tex
+else
+    echo "\\bibliographystyle{plain}" >> tempch.tex
+    echo "\\bibliography{refs}" >> tempch.tex
+    echo '\\end{document}' >> tempch.tex
+    echo '\\end{document}' >> tempch1.tex
+endif
+echo "  "
+if ("$check" == "yes") then
+  which latex
+endif
+
+grep '\cite' tempch.tex >& /dev/null
+if ($status == 1) then
+    cp tempch1.tex tempch.tex
+endif
+##################################################
+#        Run LATEX the first time
+##################################################
+echo "  "
+echo "latex $f the first time"
+pdflatex tempch #< /dev/null
+if($status != 0) then
+   echo "first LATEX run fails, quit"
+   exit(1)
+endif
+
+##################################################
+#        Run BIBTEX
+##################################################
+echo "  "
+echo "bibtex $f"
+/bin/rm -f temp-biblog.log
+bibtex tempch < /dev/null >&temp-biblog.log
+set bibstatus = $status
+cat temp-biblog.log
+if (`fgrep -c 'error message' temp-biblog.log` != 0) then
+    set bibstatus = 1
+endif
+/bin/rm -f temp-biblog.log
+if($bibstatus != 0) then
+# see if failed because no citations, if so then ignore error
+   if ( `fgrep -c \\cite tempch.tex` != 0) then
+      echo "BibTeX run fails, quit"
+      exit(1)
+   else
+      echo "Ignoring BibTeX failures since there are no citations in the file"
+   endif
+endif
+
+grep "\item" tempch.bbl	# check to see if any items have appeared in bbl file
+if($status == 1) then	# if not, overwrite tempch with tempch1
+    /bin/rm -f tempch.tex >& /dev/null
+    mv tempch1.tex tempch.tex
+endif
+
+if ("$only_one_latex" == "no") then
+  ##################################################
+  #        Run LATEX the second time
+  ##################################################
+  echo "  "
+  echo "pdflatex $f the second time"
+  pdflatex tempch < /dev/null
+  if($status != 0) then
+     echo "second LATEX run fails, quit"
+     exit(1)
+  endif
+  
+  ##################################################
+  #        Run LATEX the third time
+  ##################################################
+  echo "  "
+  echo "pdflatex $f the third time"
+  pdflatex tempch < /dev/null
+  if($status != 0) then
+     echo "third LATEX run fails, quit"
+     exit(1)
+  endif
+  
+endif
+
+set fbase = `basename $f '.tex'`
+/bin/rm -f $fbase.pdf >& /dev/null
+mv tempch.pdf $fbase.pdf
+echo "  "
+echo "file $fbase.pdf has been created"
+
+/bin/rm -f tempch.* >& /dev/null
+/bin/rm -f tempch1.tex >& /dev/null
+echo "done"
+echo "  "

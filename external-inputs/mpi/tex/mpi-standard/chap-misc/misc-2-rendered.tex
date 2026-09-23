@@ -1,0 +1,280 @@
+
+% \chapter{Miscellany}
+\chapter{The \texorpdfstring{\mpiarg{Info}}{Info} Object}
+\mpitermtitleindex{info object}
+\label{sec:misc-2}
+\label{chap:misc-2}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%This chapter contains topics that do not fit conveniently into other chapters.
+
+
+% Moved here from Dynamic
+\label{subsec:info}
+\label{chap:info}
+
+Many of the procedures in 
+\MPI/ 
+take an argument
+\mpiarg{info}. \mpiarg{info} is an opaque object with a handle of type
+\cdeclmainindex{MPI\_Info}\cdeclmainindex{TYPE(MPI\_Info)}%
+\mpictype{MPI\_Info} in C and Fortran with the \code{mpi\_f08} module, 
+and 
+\ftype{INTEGER} in Fortran with the \code{mpi} module or the (deprecated) \code{mpif.h} include file. 
+It stores an unordered set of
+(\mpiarg{key},\mpiarg{value}) pairs (both \mpiarg{key} and
+\mpiarg{value} are strings). 
+A key 
+can
+have only one
+value. \MPI/ reserves several keys and requires that if an
+implementation uses a reserved key, it must provide the specified
+functionality.  An implementation is not required to support these
+keys and may support any others not reserved by \MPI/.
+
+Some info hints allow the \MPI/ library to
+restrict its support for certain operations
+in order to improve performance or resource utilization.  If an
+application provides such an info hint, it must be compatible with
+any changes in the behavior of the \MPI/ library that are allowed by the info
+hint.
+
+
+An implementation must support info objects as caches for arbitrary (\mpiarg{key},\mpiarg{value}) pairs, regardless of whether it recognizes the key. Each procedure that
+takes hints in the form of an \mpictype{MPI\_Info} must be prepared to ignore any key it
+does not recognize. This description of info objects does not attempt to
+define how a particular procedure should react if it recognizes a key but not the
+associated value. 
+\mpifunc{MPI\_INFO\_GET\_NKEYS}, \mpifunc{MPI\_INFO\_GET\_NTHKEY},
+and \mpifunc{MPI\_INFO\_GET\_STRING}
+must retain all (\mpiarg{key},\mpiarg{value})
+pairs so that layered functionality can also use the \mpiarg{Info} object. 
+
+\begin{sloppy}
+Keys have an implementation-defined maximum length of
+\mpiconstmain{MPI\_MAX\_INFO\_KEY}-1,
+where \mpiconst{MPI\_MAX\_INFO\_KEY} is at least 33 and at most 256.
+Values have an implementation-defined maximum length of
+\mpiconstmain{MPI\_MAX\_INFO\_VAL}.  
+In Fortran, leading and trailing spaces are stripped from
+both.  Returned values will never be larger than these maximum
+lengths.
+Both \mpiarg{key} and \mpiarg{value} are case sensitive.
+
+\end{sloppy}
+
+\begin{rationale}
+Keys have a maximum length because the set of known keys will always
+be finite and known to the implementation and because there is no
+reason for keys to be complex.  The small maximum size allows
+applications to declare keys of size \mpiconst{MPI\_MAX\_INFO\_KEY}.
+The limitation on value sizes is so that an implementation is not
+forced to deal with arbitrarily long
+strings.
+\end{rationale}
+\begin{users}
+\mpiconst{MPI\_MAX\_INFO\_VAL} might be very large, so it
+might not be wise to declare a string of that size.
+\end{users}
+
+When \mpiarg{info} is used as an argument to any \MPI/ procedure, it
+is interpreted before that procedure returns, so that it may
+be read, modified, or freed immediately after return.
+Changes to an info object after return from a procedure do not affect
+that interpretation.
+
+\begin{rationale}
+Prior to \mpiivdoto/, the above statement was restricted to nonblocking \MPI/ procedures.
+For simplicity this restriction was removed, as it currently applies to all \MPI/
+procedures that use \mpiarg{info} arguments. Note, this has to be revisited for new
+procedures added in the future, e.g., for future procedures that could return an \mpiarg{info}
+argument to be filled in after the return from the procedure.
+\end{rationale}
+
+When the descriptions refer to a key or value as being a boolean, an
+integer, or a list, they mean the string representation of these
+types.  An implementation may define its own rules for how info value
+strings are converted to other types, but to ensure portability, every
+implementation must support the following representations.  Valid
+values for a boolean must include the strings \infovalmain{true} and \infovalmain{false}
+(all lowercase).  For integers, valid values must include string
+representations of decimal values of integers that are within the
+range of a standard integer type in the program.  (However it is
+possible that not every integer is a valid value for a given
+key.)  On positive numbers, $+$ signs are optional.  No space may
+appear between a $+$ or $-$ sign and the leading digit of a number.  For
+comma separated lists, the string must contain valid elements
+separated by commas.  Leading and trailing spaces are stripped
+automatically from the types of info values described above and for
+each element of a comma separated list.  These rules apply to all info
+values of these types.  Implementations are free to specify a
+different interpretation for values of other info keys.
+
+\cdeclindex{MPI\_Info}%
+\begin{funcdef}{MPI\_INFO\_CREATE}{(\mbox{info})}
+\funcarg{\OUT}{info}{info object created (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_Info\_create}{(\gb{}MPI\_Info~*info)}
+\mpifnewbindmain{MPI\_Info\_create}{(info, ierror) \fargs TYPE(MPI\_Info), INTENT(OUT)\ ::\ \mbox{info}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_INFO\_CREATE}{(INFO, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{INFO}, \mbox{IERROR}}
+
+\mpifunc{MPI\_INFO\_CREATE} creates a new info object. The newly created object contains
+no key/value pairs. 
+
+\cdeclindex{MPI\_Info}%
+\begin{funcdef}{MPI\_INFO\_SET}{(\mbox{info}, \mbox{key}, \mbox{value})}
+\funcarg{\INOUT}{info}{info object (handle)}
+\funcarg{\IN}{key}{key (string)}
+\funcarg{\IN}{value}{value (string)}
+\end{funcdef}
+\mpibindmain{MPI\_Info\_set}{(\gb{}MPI\_Info~info, const~char~*key, const~char~*value)}
+\mpifnewbindmain{MPI\_Info\_set}{(info, key, value, ierror) \fargs TYPE(MPI\_Info), INTENT(IN)\ ::\ \mbox{info}\fnarg{}CHARACTER(LEN=*), INTENT(IN)\ ::\ \mbox{key}, \mbox{value}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_INFO\_SET}{(INFO, KEY, VALUE, IERROR) \fargs INTEGER \mbox{INFO}, \mbox{IERROR}\fnfinalarg{}CHARACTER*(*) \mbox{KEY}, \mbox{VALUE}}
+
+\mpifunc{MPI\_INFO\_SET} adds the (\mpiarg{key},\mpiarg{value}) pair to \mpiarg{info}, and  overrides the value if a value for the same key was previously set. 
+\mpiarg{key} and \mpiarg{value} are null-terminated strings in C. 
+In Fortran, leading and trailing spaces in \mpiarg{key} and \mpiarg{value} are stripped. 
+If either \mpiarg{key} or \mpiarg{value} are longer than 
+the respective maximum length, the call raises an error of class \errormain{MPI\_ERR\_INFO\_KEY} or
+\errormain{MPI\_ERR\_INFO\_VALUE}, respectively.
+
+\cdeclindex{MPI\_Info}%
+\begin{funcdef}{MPI\_INFO\_DELETE}{(\mbox{info}, \mbox{key})}
+\funcarg{\INOUT}{info}{info object (handle)}
+\funcarg{\IN}{key}{key (string)}
+\end{funcdef}
+\mpibindmain{MPI\_Info\_delete}{(\gb{}MPI\_Info~info, const~char~*key)}
+\mpifnewbindmain{MPI\_Info\_delete}{(info, key, ierror) \fargs TYPE(MPI\_Info), INTENT(IN)\ ::\ \mbox{info}\fnarg{}CHARACTER(LEN=*), INTENT(IN)\ ::\ \mbox{key}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_INFO\_DELETE}{(INFO, KEY, IERROR) \fargs INTEGER \mbox{INFO}, \mbox{IERROR}\fnfinalarg{}CHARACTER*(*) \mbox{KEY}}
+
+\mpifunc{MPI\_INFO\_DELETE} deletes a (\mpiarg{key},\mpiarg{value}) pair from \mpiarg{info}.
+If \mpiarg{key} is not defined in \mpiarg{info}, the call
+raises an error of class \errormain{MPI\_ERR\_INFO\_NOKEY}.
+
+\cdeclindex{MPI\_Info}%
+\begin{funcdef}{MPI\_INFO\_GET\_STRING}{(\mbox{info}, \mbox{key}, \mbox{buflen}, \mbox{value}, \mbox{flag})}
+\funcarg{\IN}{info}{info object (handle)}
+\funcarg{\IN}{key}{key (string)}
+\funcarg{\INOUT}{buflen}{length of buffer (integer)}
+\funcarg{\OUT}{value}{value (string)}
+\funcarg{\OUT}{flag}{\mpicode{true} if \mpiarg{key} is defined, \mpicode{false} otherwise (logical)}
+\end{funcdef}
+\mpibindmain{MPI\_Info\_get\_string}{(\gb{}MPI\_Info~info, const~char~*key, int~*buflen, char~*value, int~*flag)}
+\mpifnewbindmain{MPI\_Info\_get\_string}{(info, key, buflen, value, flag, ierror) \fargs TYPE(MPI\_Info), INTENT(IN)\ ::\ \mbox{info}\fnarg{}CHARACTER(LEN=*), INTENT(IN)\ ::\ \mbox{key}\fnarg{}INTEGER, INTENT(INOUT)\ ::\ \mbox{buflen}\fnarg{}CHARACTER(LEN=*), INTENT(OUT)\ ::\ \mbox{value}\fnarg{}LOGICAL, INTENT(OUT)\ ::\ \mbox{flag}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_INFO\_GET\_STRING}{(INFO, KEY, BUFLEN, VALUE, FLAG, IERROR) \fargs INTEGER \mbox{INFO}, \mbox{BUFLEN}, \mbox{IERROR}\fnarg{}CHARACTER*(*) \mbox{KEY}, \mbox{VALUE}\fnfinalarg{}LOGICAL \mbox{FLAG}}
+
+
+
+This procedure retrieves the value associated with \mpiarg{key} from \mpiarg{info}, if any.
+If such a key exists in \mpiarg{info}, it sets \mpiarg{flag} to \mpicode{true}
+and returns the value in \mpiarg{value},
+otherwise it sets \mpiarg{flag} to \mpicode{false} and leaves
+\mpiarg{value} unchanged. 
+\mpiarg{buflen} on input is the size of the provided buffer, \mpiarg{value}, for the output of \mpiarg{buflen} it is the size of the buffer needed to store the
+value string. If the \mpiarg{buflen} passed into the procedure is less than the
+actual size needed to store the value string (including null terminator in C), the value is
+truncated. On return, the value of \mpiarg{buflen} will be set to the required
+buffer size to hold the value string. If \mpiarg{buflen} is set to \mpicode{0}, \mpiarg{value} is not changed. 
+In C, \mpiarg{buflen} 
+includes the required space for the null terminator. In C,
+this procedure returns a null terminated string in all cases where
+the \mpiarg{buflen} input value is greater than \mpicode{0}.
+
+If \mpiarg{key} is larger than \mpiconst{MPI\_MAX\_INFO\_KEY}, 
+the call is erroneous. 
+
+\begin{users}
+The \mpifunc{MPI\_INFO\_GET\_STRING} procedure can be used to obtain the size of
+the required buffer for a value string by setting the \mpiarg{buflen} to \mpicode{0}. The returned
+\mpiarg{buflen} can then be used to allocate memory before calling
+\mpifunc{MPI\_INFO\_GET\_STRING} again to obtain the value string.
+\end{users}
+
+\cdeclindex{MPI\_Info}%
+\begin{funcdef}{MPI\_INFO\_GET\_NKEYS}{(\mbox{info}, \mbox{nkeys})}
+\funcarg{\IN}{info}{info object (handle)}
+\funcarg{\OUT}{nkeys}{number of defined keys (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_Info\_get\_nkeys}{(\gb{}MPI\_Info~info, int~*nkeys)}
+\mpifnewbindmain{MPI\_Info\_get\_nkeys}{(info, nkeys, ierror) \fargs TYPE(MPI\_Info), INTENT(IN)\ ::\ \mbox{info}\fnarg{}INTEGER, INTENT(OUT)\ ::\ \mbox{nkeys}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_INFO\_GET\_NKEYS}{(INFO, NKEYS, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{INFO}, \mbox{NKEYS}, \mbox{IERROR}}
+
+\mpifunc{MPI\_INFO\_GET\_NKEYS} returns the number of currently defined keys in \mpiarg{info}.
+
+
+\cdeclindex{MPI\_Info}%
+\begin{funcdef}{MPI\_INFO\_GET\_NTHKEY}{(\mbox{info}, \mbox{n}, \mbox{key})}
+\funcarg{\IN}{info}{info object (handle)}
+\funcarg{\IN}{n}{key number (integer)}
+\funcarg{\OUT}{key}{key (string)}
+\end{funcdef}
+\mpibindmain{MPI\_Info\_get\_nthkey}{(\gb{}MPI\_Info~info, int~n, char~*key)}
+\mpifnewbindmain{MPI\_Info\_get\_nthkey}{(info, n, key, ierror) \fargs TYPE(MPI\_Info), INTENT(IN)\ ::\ \mbox{info}\fnarg{}INTEGER, INTENT(IN)\ ::\ \mbox{n}\fnarg{}CHARACTER(LEN=*), INTENT(OUT)\ ::\ \mbox{key}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_INFO\_GET\_NTHKEY}{(INFO, N, KEY, IERROR) \fargs INTEGER \mbox{INFO}, \mbox{N}, \mbox{IERROR}\fnfinalarg{}CHARACTER*(*) \mbox{KEY}}
+
+This procedure returns the \mpiarg{n}th defined key in \mpiarg{info}.
+Keys are numbered $0 \ldots N-1$ where $N$ is the
+value returned by \mpifunc{MPI\_INFO\_GET\_NKEYS}. 
+All keys between $0$ and $N-1$ are guaranteed to 
+be defined. The number of a given key does not change
+as long as \mpiarg{info} is not modified with 
+\mpifunc{MPI\_INFO\_SET} or \mpifunc{MPI\_INFO\_DELETE}.
+
+
+\cdeclindex{MPI\_Info}%
+\begin{funcdef}{MPI\_INFO\_DUP}{(\mbox{info}, \mbox{newinfo})}
+\funcarg{\IN}{info}{info object (handle)}
+\funcarg{\OUT}{newinfo}{info object created (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_Info\_dup}{(\gb{}MPI\_Info~info, MPI\_Info~*newinfo)}
+\mpifnewbindmain{MPI\_Info\_dup}{(info, newinfo, ierror) \fargs TYPE(MPI\_Info), INTENT(IN)\ ::\ \mbox{info}\fnarg{}TYPE(MPI\_Info), INTENT(OUT)\ ::\ \mbox{newinfo}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_INFO\_DUP}{(INFO, NEWINFO, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{INFO}, \mbox{NEWINFO}, \mbox{IERROR}}
+
+\mpifunc{MPI\_INFO\_DUP} duplicates an existing info object, creating a new
+object, with the same (\mpiarg{key},\mpiarg{value}) pairs and the same ordering of keys.
+
+\cdeclindex{MPI\_Info}%
+\begin{funcdef}{MPI\_INFO\_FREE}{(\mbox{info})}
+\funcarg{\INOUT}{info}{info object (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_Info\_free}{(\gb{}MPI\_Info~*info)}
+\mpifnewbindmain{MPI\_Info\_free}{(info, ierror) \fargs TYPE(MPI\_Info), INTENT(INOUT)\ ::\ \mbox{info}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_INFO\_FREE}{(INFO, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{INFO}, \mbox{IERROR}}
+
+This procedure frees \mpiarg{info} and sets it to \mpiconstmain{MPI\_INFO\_NULL}.
+
+\begin{funcdef}{MPI\_INFO\_CREATE\_ENV}{(\mbox{info})}
+\funcarg{\OUT}{info}{info object (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_Info\_create\_env}{(\gb{}int~argc, char~*argv[], MPI\_Info~*info)}
+\mpifnewbindmain{MPI\_Info\_create\_env}{(info, ierror) \fargs TYPE(MPI\_Info), INTENT(OUT)\ ::\ \mbox{info}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_INFO\_CREATE\_ENV}{(INFO, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{INFO}, \mbox{IERROR}}
+
+This procedure creates an output object \mpiarg{info} with the same construction as
+\mpiconst{MPI\_INFO\_ENV} as created during \mpifunc{MPI\_INIT} or \mpifunc{MPI\_INIT\_THREAD} when the
+same arguments are used.
+This construction is described in Section~\ref{sec:inquiry-startup};
+however, this procedure can be called when not using the \wpm{}, e.g., when using the \spm{}.
+This object is not a direct
+copy or alias of the \mpiconst{MPI\_INFO\_ENV} object and could contain different values based on the
+input arguments and other sources.  Multiple calls to this procedure that are given the same input
+arguments will produce \mpiarg{info} objects consistent with the definition of
+\mpiconst{MPI\_INFO\_ENV}.  The version for ISO C accepts the \mpiarg{argc} and \mpiarg{argv} that are
+provided by the arguments to \code{main} or \code{0} for \mpiarg{argc} and \code{NULL} for
+\mpiarg{argv}.  The user is responsible for freeing the \mpiarg{info} object via
+\mpifunc{MPI\_INFO\_FREE}.  This procedure is local.
+
+This procedure must always be thread-safe, as defined in Section~\ref{sec:dynamic:threads}.  It is
+one of the few procedures that may be called before \MPI/ is initialized or after \MPI/ is finalized.
+
+\begin{users}
+
+    In some circumstances (e.g., when passing \code{0} to \mpiarg{argc} and \code{NULL} to
+    \mpiarg{argv} in C or in Fortran where such arguments do not exist), the \mpiarg{info} object
+    may not be populated or may be populated incompletely because this procedure is local and the
+    implementation may not be able to determine the correct values. Note that this could result in
+    different values in the resulting \mpiarg{info} object at different \MPI/ processes.
+
+\end{users}
+

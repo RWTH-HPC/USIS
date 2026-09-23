@@ -1,0 +1,373 @@
+\section{Profiling Interface}
+\mpitermtitleindex{profiling interface}
+
+\label{sec:prof}
+\label{chap:prof}
+
+\subsection{Requirements}
+\label{sec:prof:require}
+
+To meet the requirements for the \MPI/ profiling interface, an
+implementation of the \MPI/ functions \emph{must}
+\begin{enumerate}
+\item provide a mechanism through which all of the \MPI/ defined functions,
+  except those allowed as macros (See Section~\ref{sec:macros}), may be
+  accessed with a name shift.  This requires, in C and Fortran, an
+  alternate entry point name, with the prefix \mpifuncskip{PMPI\_} for each \mpi/
+  \mpitermdefindex{PMPI\_} function in each provided language binding and
+  language support method.  For routines implemented as macros, it is still
+  required that the \mpifuncskip{PMPI\_} version be supplied and work as
+  expected, but it is not possible to replace the
+  \mpifuncskip{MPI\_} version with a user-defined version at link time.
+ 
+  For Fortran, the different support methods cause several specific
+  procedure names.  Therefore, several profiling routines (with these
+  specific procedure names) are needed for each Fortran \MPI/ routine, as
+  described in \sectionref{sec:f90:linker-names}.
+
+\item ensure that those \MPI/ functions that are not replaced may still be
+  linked into an executable image without causing name clashes.
+
+\item document the implementation of different language bindings of the
+  \MPI/ interface if they are layered on top of each other, so that the
+  profiler developer knows whether to implement the profile interface
+  for each binding, or to economize by implementing it only for the lowest
+  level routines.
+
+\item where the implementation of different language bindings is done
+  through a layered approach (e.g., the Fortran binding is a set of
+  ``wrapper'' functions that  call the C implementation), ensure that these
+  wrapper functions are separable from the rest of the library.
+
+  This separability is necessary to allow a separate profiling library to
+  be correctly implemented, since (at least with Unix linker semantics) the
+  profiling library must contain these wrapper functions if it is to
+  perform as expected.  This requirement allows the person who builds the
+  profiling library to extract these functions from the original \MPI/
+  library and add them into the profiling library without bringing along
+  any other unnecessary code.
+
+\item provide a no-op routine \mpifunc{MPI\_PCONTROL} in the \MPI/ library.
+\end{enumerate}
+
+\subsection{Discussion}
+
+The objective of the \MPI/ profiling interface is to ensure that it is
+relatively easy for authors of profiling (and other similar) tools to
+interface their codes to \MPI/ implementations on different machines.
+
+Since \MPI/ is a machine independent standard with many different
+implementations, it is unreasonable to expect that the authors of profiling
+tools for \MPI/ will have access to the source code that  implements \MPI/
+on any particular machine.  It is therefore necessary to provide a
+mechanism by which the implementors of such tools can collect whatever
+performance information they wish \emph{without} access to the underlying
+implementation.
+
+We believe that having such an interface is important if \MPI/ is to be
+attractive to end users, since the availability of many different tools
+will be a significant factor in attracting users to the \MPI/ standard.
+
+The profiling interface is just that, an interface.  It says \emph{nothing}
+about the way in which it is used.  There is therefore no attempt to lay
+down what information is collected through the interface, or how the
+collected information is saved, filtered, or displayed.
+
+While the initial impetus for the development of this interface arose from
+the desire to permit the implementation of profiling tools, it is clear
+that an interface like that specified may also prove useful for other
+purposes, such as ``internetworking'' multiple \MPI/ implementations.
+Since all that is defined is an interface, there is no objection to it
+being used wherever it is useful.
+
+As the issues being addressed here are intimately tied up with the way in
+which executable images are built, which may differ greatly on different
+machines, the examples given below should be treated solely as one way of
+implementing the objective of the \MPI/ profiling interface.  The actual
+requirements made of an implementation are those detailed in the
+Requirements section above, the whole of the rest of this section is only
+present as justification and discussion of the logic for those
+requirements.
+
+Examples~\ref{exa:prof:measurement-wrapper}, \ref{exa:prof:weak-symbols}, \ref{exa:prof:macros}, and~\ref{exa:prof:linking} show ways in which an implementation could be
+constructed to meet the requirements on a Unix system (there may be others that would be equally valid).
+
+\subsection{Logic of the Design}
+
+Provided that an \MPI/ implementation meets the requirements above, it is
+possible for the implementor of the profiling system to intercept the \MPI/
+calls that  are made by the user program.  The profiling system implementor can then collect any required
+information before calling the underlying \MPI/ implementation
+(through its name shifted entry points) to achieve the desired effects.
+
+
+\begin{example}
+\label{exa:prof:measurement-wrapper}
+\exindex{Profiling interface!measurement wrapper}%
+\Exindex{C}{Measurement wrapper}{MPI\_Type\_size,MPI\_Send,MPI\_Wtime}%
+A wrapper to accumulate the total amount of data sent by the
+\mpifunc{MPI\_SEND} function, along with the total elapsed time spent in
+the function.
+
+%%HEADER
+%%LANG: C
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+static int totalBytes = 0;
+static double totalTime = 0.0;
+
+int MPI_Send(const void* buffer, int count, MPI_Datatype datatype,
+             int dest, int tag, MPI_Comm comm)
+{
+    double tstart = MPI_Wtime();       /* Pass on all arguments */
+    int size;
+    int result    = PMPI_Send(buffer, count, datatype, dest, tag, comm);
+
+    totalTime    += MPI_Wtime() - tstart;  /* Compute time */
+
+    MPI_Type_size(datatype, &size);        /* and size */
+    totalBytes += count*size;
+
+    return result;
+}
+\end{lstlisting}
+\end{example}
+
+\subsection{\texorpdfstring{\MPI/}{MPI} Library Implementation}
+
+If the \MPI/ library is implemented in C on a Unix system, then there are
+various options, including the two presented here, for supporting the
+name-shift requirement.  The choice between these two options depends
+partly on whether the linker and compiler support weak symbols.
+
+If the compiler and linker support weak external symbols, then only 
+a single library is required as the following example shows: 
+
+\begin{example}
+\label{exa:prof:weak-symbols}
+\Exindex[Profiling interface, implementation using weak symbols]{C}{Profiling interface!implementation using weak symbols}{}
+Library implementation using weak symbols.
+%%HEADER
+%%LANG: C
+%%SUBST:/\* Useful content \*/:return 1;
+%%SUBST:/\* appropriate args \*/:void
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+#pragma weak MPI_Example = PMPI_Example
+
+int PMPI_Example(/* appropriate args */)
+{
+    /* Useful content */
+}
+\end{lstlisting}
+\end{example}
+
+The effect of this \code{\#pragma} is to define the external symbol
+\code{MPI\_Example} as a weak definition.  This means that the linker will
+not complain if there is another definition of the symbol (for instance in
+the profiling library); however if no other definition exists, then the
+linker will use the weak definition.
+
+In the absence of weak symbols then one possible solution would be to use
+the C macro preprocessor as the following example shows:
+
+\begin{example}
+\label{exa:prof:macros}
+\Exindex[Profiling interface, implementation using the C macro preprocessor]{C}{Profiling interface!implementation using the C macro preprocessor}{}
+Library implementation using C pre-processor macros.
+%%HEADER
+%%LANG: C
+%%ENDHEADER
+\begin{lstlisting}[language=C]
+#ifdef PROFILELIB
+#    ifdef __STDC__
+#        define FUNCTION(name) P##name
+#    else
+#        define FUNCTION(name) P/**/name
+#    endif
+#else
+#    define FUNCTION(name) name
+#endif
+\end{lstlisting}
+
+Each of the user visible functions in the library would then be declared
+thus
+
+%%HEADER
+%%LANG: C
+%%TOP:#define FUNCTION(name) name
+%%SUBST:/\* Useful content \*/:return 1;
+%%SUBST:/\* appropriate args \*/:void
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+int FUNCTION(MPI_Example)(/* appropriate args */)
+{
+    /* Useful content */
+}
+\end{lstlisting}
+
+The same source file can then be compiled to produce both versions of the
+library, depending on the state of the \code{PROFILELIB} macro symbol.
+\end{example}
+
+It is required that the standard \MPI/ library be built in such a way that
+the inclusion of \MPI/ functions can be achieved one at a time.  This may mean that each external function must reside in its own compilation unit. This is
+necessary so that the author of the profiling library need only define
+those \MPI/ functions that need to be intercepted, references to any
+others being fulfilled by the normal \MPI/ library.
+
+\begin{example}
+\label{exa:prof:linking}
+  \exindex{Linking libraries when using the profiling interface}
+
+	The following example shows a potential link step when using the profiling
+	interface.
+
+%%HEADER
+%%SKIP
+%%ENDHEADER
+\begin{lstlisting}
+% cc ... -lmyprof -lpmpi -lmpi
+\end{lstlisting}
+
+Here \code{libmyprof.a} contains the profiler functions that  intercept
+some of the \MPI/ functions, \code{libpmpi.a} contains the ``name shifted''
+\MPI/ functions, and \code{libmpi.a} contains the normal definitions of the
+\MPI/ functions.
+
+\end{example}
+
+\subsection{Complications}
+\label{sec:prof:complications}
+
+\subsubsection{Multiple Counting}
+
+Since parts of the \MPI/ library may themselves be implemented using more
+basic \MPI/ functions (e.g., a portable implementation of the collective
+operations implemented using point-to-point communications), there is
+potential for profiling functions to be called from within an \MPI/
+function that  was called from a profiling function.  This could lead to
+``double counting'' of the time spent in the inner routine.  Since this
+effect could actually be useful under some circumstances (e.g., it might
+allow one to answer the question ``How much time is spent in the
+point-to-point routines when they are called from collective functions?''),
+we have
+decided not to enforce any restrictions on the author of the \MPI/ library
+that  would overcome this.  Therefore the author of the profiling library
+should be aware of this problem, and guard against it.  In a
+single-threaded world this is easily achieved through use of a static
+variable in the profiling code that  remembers if you are already inside a
+profiling routine.  It becomes more complex in a multithreaded environment
+(as does the meaning of the times recorded).
+
+\subsubsection{Linker Oddities}
+
+The Unix linker traditionally operates in one pass: the effect of this is
+that functions from libraries are only included in the image if they are
+needed at the time the library is scanned.  When combined with weak
+symbols, or multiple definitions of the same function, this can cause odd
+(and unexpected) effects.
+
+Consider, for instance, an implementation of \MPI/ in which the Fortran
+binding is achieved by using wrapper functions on top of the C
+implementation.  The author of the profile library then assumes that it is
+reasonable only to provide profile functions for the C binding, since
+Fortran will eventually call these, and the cost of the wrappers is assumed
+to be small.  However, if the wrapper functions are not in the profiling
+library, then none of the profiled entry points will be undefined when the
+profiling library is called.  Therefore none of the profiling code will be
+included in the image.  When the standard \MPI/ library is scanned, the
+Fortran wrappers will be resolved, and will also pull in the base versions
+of the \MPI/ functions.  The overall effect is that the code will link
+successfully, but will not be profiled.
+
+To overcome this we must ensure that the Fortran wrapper functions are
+included in the profiling version of the library.  We ensure that this is
+possible by requiring that these be separable from the rest of the base
+\MPI/ library.  This allows them to be copied out of the base library and
+into the profiling one using a tool such as \code{ar}.
+
+\subsubsection{Fortran Support Methods}
+
+The different Fortran support methods and possible options for the support
+of subarrays (depending on whether the compiler can support \code{TYPE(*),
+DIMENSION(..)} choice buffers) imply different specific procedure names for
+the same Fortran \MPI/ routine.  The rules and implications for the
+profiling interface are described in \sectionref{sec:f90:linker-names}.
+ 
+\subsection{Multiple Levels of Interception}
+
+The scheme given here does not directly support the nesting of profiling
+functions, since it provides only a single alternative name for each \MPI/
+function.  Consideration was given to an implementation that  would allow
+multiple levels of call interception, however we were unable to construct
+an implementation of this that  did not have the following disadvantages
+\begin{itemize}
+\item
+  assuming a particular implementation language, and
+\item
+  imposing a run time cost even when no profiling was taking place.
+\end{itemize}
+Since one of the objectives of \MPI/ is to permit efficient, low latency
+implementations, and it is not the business of a standard to require a
+particular implementation language, we decided to accept the scheme
+outlined above.
+
+Note, however, that it is possible to use the scheme above to implement a
+multi-level system, since the function called by the user may call many
+different profiling functions before calling the underlying \MPI/ function.
+This capability has been demonstrated in the P$^N$MPI tool
+infrastructure~\cite{schulz+:sc07}.
+
+\subsection{Miscellaneous Control of Profiling}
+
+There is a clear requirement for the user code to be able to control the
+profiler dynamically at run time.  This capability is normally used for (at
+least) the purposes of
+\begin{itemize}
+\item Enabling and disabling profiling depending on the state of the
+  calculation.
+\item Flushing trace buffers at noncritical points in the calculation.
+\item Adding user events to a trace file.
+\end{itemize}
+These requirements are met by use of \mpifunc{MPI\_PCONTROL}.
+
+\begin{mpi-binding}
+    function_name("MPI_Pcontrol")
+    parameter("level", "PROFILE_LEVEL", desc=r"Profiling level", constant=True)
+    parameter("varargs", "VARARGS")
+    no_ierror()
+\end{mpi-binding}
+
+\MPI/ libraries themselves make no use of this routine, and simply return
+immediately to the user code.  However the presence of calls to this
+routine allows a profiling package to be explicitly called by the user.
+
+Since \MPI/ has no control of the implementation of the profiling code, we
+are unable to specify precisely the semantics that  will be provided by
+calls to \mpifunc{MPI\_PCONTROL}.  This vagueness extends to the number of
+arguments to the function, and their datatypes.
+
+However to provide some level of portability of user codes to different
+profiling libraries, we request the following meanings for certain values
+of level.
+\begin{itemize}
+\item{\code{level=0}}
+  Profiling is disabled.
+\item{\code{level=1}}
+  Profiling is enabled at a normal default level of detail.
+\item{\code{level=2}}
+  Profile buffers are flushed, which may be a no-op in some profilers.
+\item{All other values of \code{level}}
+  have profile library defined effects and additional arguments.
+\end{itemize}
+
+We also request that the default state after \MPI/ has been
+initialized is for profiling to be enabled at the normal default level.  (i.e.,
+as if \mpifunc{MPI\_PCONTROL} had just been called with the argument 1).
+This allows users to link with a profiling library and to obtain profile
+output without having to modify their source code at all.
+
+The provision of \mpifunc{MPI\_PCONTROL} as a no-op in the standard \MPI/
+library supports the collection of more detailed profiling information with
+source code that can still link against the standard \MPI/ library.

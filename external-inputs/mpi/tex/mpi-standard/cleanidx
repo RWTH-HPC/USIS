@@ -1,0 +1,403 @@
+#! /usr/bin/env python3
+#
+# -*- mode: python-mode; -*-
+#
+# Clean an index file. Currently, this works on tohtmlindexentry, but
+# in principle could be applied to the latex indexentry.
+#
+# Clean in this case means:
+# 1. Remove arguments in function definitions
+# 2. Add index names as required
+#
+# There are several indices:
+#   TERM - General index
+#   CONST - MPI Constants and predefined handles
+#   EXAMPLES - Examples
+#   NEWEXAMPLES - Examples with a special format; see below
+#   TYPEDEF - MPI C typedefs
+#   <null> - MPI Functions
+
+import re
+import os
+import datetime
+import sys
+import argparse
+
+# Known special cases. This is used in checking for problems in the
+# index entries.  These are allowed. Only the MPI Document Editor should update
+# this list.
+knownOK = { 'basic datatypes!C++' : 'Ok',
+            '"!(_c)' : 'Ok',
+            'communication!typed, untyped, and packed' : 'Ok',
+            'neighborhood collective communication!periodic and dims==1 or 2' : 'Ok'
+        }
+
+# Mapping of indexnames to a subset that we process for the HTML document
+namemap = {
+    "STRINGCONST" : "CONST",
+    "BCFUNCTION" : "",
+    "INFOCONST=VAL" : "CONST",
+    "INFOCONST=KEY" : "CONST"
+}
+
+def writeIndexData( lst, fname ):
+    "Output the index data entries"
+    outInd = open( fname, "w" )
+    for i in range(len(lst)):
+        outInd.write(r"\indexentry{"+lst[i]+"}\n")
+    outInd.close()
+    return
+
+def createIndex( infile, outfile ):
+    # Run the process to create the index file.
+    subprocess.run(["makeindex", "-c", "-o", outfile, infile], stderr=mklog)
+    return
+
+def appendFile( ofile, fname ):
+    " Append the file name to the open file ofile"
+    ifile = open( fname, "r" )
+    for line in ifile:
+        # Special case: change the environment for each index
+        if re.match(r'\\begin\{theindex\}', line):
+            line = "\\begin{myindex}\n"
+        elif re.match(r'\\end\{theindex\}', line):
+            line = "\\end{myindex}\n"
+
+        ofile.write(line)
+    ifile.close()
+    return
+
+def writeHeader( ofile, idxname, shortname, header ):
+    " Format the header and append to ofile"
+    ofile.write("%%%% THIS FILE CREATED BY buildindices on %s.  DO NOT EDIT\n" % datetime.datetime.now())
+    ofile.write("\\newpage\n\\phantomsection\n\\addcontentsline{toc}{chapter}")
+    ofile.write("{%s}\n" % idxname )
+    # For scrbook, we must manually set the running headers
+    ofile.write("\\markboth{%s}{%s}\n" % (idxname, idxname) )
+    ofile.write("\\label{index:%s}\n" % shortname )
+    ofile.write("\\makeatletter\n\\renewcommand{\\@index}{%s}\n" % idxname )
+    ofile.write("\\renewcommand{\\@introtext}{%s}\n\\makeatother\n" % header )
+    return
+
+def funcidxUpcaseOrder( lst ):
+    " Use upper-case only to sort function names, and use standard formatting for functions"
+    listtmp = []
+    for i in range(len(lst)):
+        # Extract the name for sorting
+        item = re.match(r'([^|@!]*)([\|!].*)$', lst[i], 0)
+        if item :
+            name = item.group(1)
+            rem  = item.group(2)
+            name = name.upper() + "@\\IImpifuncfmt{" + name + "}"
+            listtmp.append(name + rem)
+        else :
+            listtmp.append(lst[i]);
+    return listtmp
+
+# Write the list out, using replcmd for the command for the name, and
+# add eol text to the end of the line
+def writeConstList( lst, replcmd, eoltext, ofile ):
+    lastname = "ZZZ"
+    for name in sorted(lst, key=str.casefold) :
+        # Extract just the name
+        snameObj = re.match(r'([^@]*)@([^\|]*)\|',name,0)
+        if snameObj :
+            sname = snameObj.group(1)
+            if sname != lastname :
+                ofile.write(replcmd + "{" + snameObj.group(1) + "}" + eoltext + "\n")
+        lastname = sname
+
+# For functions and typedefs, we remove (...) from the entry - if set,
+# this warns about each such occurance
+warnParens = 0
+# Set to 0 to suppress warnings
+warnings   = 1
+# Keep track of problems
+warncount  = 0
+# Set to 1 to return a status code of 1 if there are any warnings.  Use
+# to ensure that the index build is free of problems
+warnFails = 0
+# Set to 1 to ignore constants that do not start with MPI
+# (Warnings will still be produced)
+ignoreBadConst = 1
+# Use this to turn off warnings on bad constants (warnings must also be true)
+warnBadConst = 1
+# Set to 1 to ignore functions that do not start with MPI (or mpiexec/mpirun)
+# (Warnings will still be produced)
+ignoreBadFunc  = 1
+# Use this to turn off warnings on bad functions (warnings must also be true)
+warnBadFunc = 1
+# Set to 1 to ignore missing primary index entry
+ignoreNoPrimary = 1
+printNoPrimary  = 0
+# Set to 1 to ignore checking for functions in lower case
+ignoreFunctionCase = 0
+# Set to 1 for debugging
+verbose = 0
+# remove intermediate files
+cleanupFiles = 1
+# Set to true to remove index entries on the same page as a primary index
+# entry
+removeDupSecondaryEntries = 1
+# Set true to create files with the info values and the string values
+# (Currently under development; can be compared with the values in
+# applang-const)
+createConstListFiles = 0
+#
+# Enhanced Example Index options
+# if true, add "Example x.xx: short description" to the Examples index
+ExamplesAddByNumber = 0
+# if true, add the short description with the routine as a subitem to the
+# examples index
+ExamplesAddByDesc = 0
+# if true, add the routine with the short description as a subitem to the
+# examples index
+ExamplesAddWithDesc = 0
+# if true, add a subitem to the routine entry in the Functions index with the
+# location of the example, and whether it is in C or Fortran
+ExamplesAddToFuncs = 0
+# Ditto for constants, declarations, and callbacks (typedefs)
+ExamplesAddToConsts = 0
+ExamplesAddToDecls = 0
+ExamplesAddToTypedefs = 0
+
+# Generate a log file of entries without a primary index entry
+logNoPrimary = 0
+noprimefile  = 0
+
+def printToNoPrimary( itemname, page ):
+    noprimefile.write( itemname + "\t" + page + "\n")
+
+
+## Output of problems
+warningfile = sys.stderr
+def printWarning( str ):
+    global warncount, warningfile
+    if warnings :
+         warncount += 1
+         print( "WARNING:" + str, file=warningfile )
+def printWarningNNL( str ):
+    global warncount, warningfile
+    if warnings :
+         warncount += 1
+         print( "WARNING:" + str, file=warningfile, end='' )
+
+
+## Check for problems
+def checkForPrimary( lst, lstnamestr, doWarn ):
+    "Check the list for primary entries"
+    namedefs = dict()
+    nameprimary = dict()
+    titleWritten = 0
+    for i in range(len(lst)):
+        # Extract the name and the page type
+        # Name is <name>|hyperpage}{page#  OR
+        #         <name>|hyperindexformat{\uu}}{page#
+        idxObj = re.match(r'([^|]*)\|([^}]*)}.*{([0-9]*)$', lst[i], 0)
+        if idxObj :
+            name = idxObj.group(1)
+            if verbose:
+                print( "  (cPrimary)Name = " + name)
+            if idxObj.group(2) == "hyperpage" :
+                if verbose:
+                    print( "      use entry")
+                if name in namedefs :
+                    if namedefs[name] != "defined" :
+                        # Must compare locations as integers
+                        if int(namedefs[name]) > int(idxObj.group(3)) :
+                            namedefs[name] = idxObj.group(3)
+                else:
+                    namedefs[name] = idxObj.group(3)
+            elif idxObj.group(2) == "hyperindexformat{\\uu" or idxObj.group(2) == "hyperindexformat{\\bold":
+                if verbose:
+                    print( "      defining entry: " + idxObj.group(2) )
+                namedefs[name] = 'defined'
+                nameprimary[name] = "," + idxObj.group(3) + ","
+            else :
+                printWarning( "unrecognized format in list " + lstnamestr + ": " + idxObj.group(2) + " on page " + idxObj.group(3))
+
+    if doWarn :
+        for name in sorted(namedefs):
+            if namedefs[name] != 'defined' :
+                if not titleWritten :
+                    if printNoPrimary:
+                        print( "List " + lstnamestr)
+                    if logNoPrimary:
+                        noprimefile.write( "List " + lstnamestr + "\n")
+                    titleWritten = 1
+                # Use sort name
+                namebase = re.match(r'([^|@]*)@', name, 0)
+                if namebase :
+                    itemname = namebase.group(1)
+                else:
+                    itemname = name
+                if printNoPrimary:
+                    printWarning(itemname + " does not have a primary index, first used on page " + namedefs[name])
+                if logNoPrimary:
+                    printToNoPrimary(itemname, namedefs[name])
+
+    # Now that we know which names have a primary entry, we can remove
+    # non-primary references on the same page. Move backwards through the
+    # list so that the removals don't change the index
+    if removeDupSecondaryEntries :
+        for i in range(len(lst)-1,0,-1):
+            # Extract the name and the page type
+            # Name is <name>|hyperpage}{page#  OR
+            #         <name>|hyperindexformat{\uu}}{page#
+            idxObj = re.match(r'([^|]*)\|([^}]*)}.*{([0-9]*)$', lst[i], 0)
+            if idxObj :
+                name = idxObj.group(1)
+                if verbose:
+                    print( "  (removeDup)Name = " + name)
+                if idxObj.group(2) == "hyperpage" and namedefs[name] == 'defined' and re.match( ","+idxObj.group(3)+",",nameprimary[name],0) :
+                    if verbose :
+                        print("Need to remove " + name + " in " + lst[i])
+                    del lst[i]
+
+    return
+
+def checkForCase( lst, lstnamestr, exceptionStr, allowsuffix ):
+    "Check the list for lower case, ignoring those in the exceptions, and those ending with allowsuffix"
+    namedefs = dict()
+    titleWritten = 0
+    for i in range(len(lst)):
+        # Extract the name and the page type
+        # Name is <name>|hyperpage}{page#  OR
+        #         <name>|hyperindexformat{\uu}}{page#
+        idxObj = re.match(r'([^|]*)\|[^}]*}.*{([0-9]*)$', lst[i], 0)
+        if idxObj :
+            page = idxObj.group(2)
+            name = idxObj.group(1)
+            # If Name includes a second level, ignore that and extract only
+            # the top-level name
+            idxObj = re.match(r'([^!]*)!.*', name, 0)
+            if idxObj :
+                name = idxObj.group(1)
+            if verbose:
+                print( "  (checkCase)Name = " + name)
+            if re.search(r'[a-z]+', name, 0) and not re.search(name, exceptionStr, 0) and not re.search(allowsuffix+'$', name, 0) :
+                printWarning("Lowercase " + name + " in " + lstnamestr + " on page " + page)
+    return
+
+# Check for characters that should not be used in the text of an index entry
+# allow is a string of extra characters to allow in str; may be empty
+def checkForBadChars( str, eText, eType, ePage, allow ):
+    nameObj = re.match('([^|]*)|', str + '|', 0)
+    if nameObj :
+        if verbose :
+            print( "Name is " + nameObj.group(1) )
+        # Look for problems. The name should contain only alphanum and
+        # ! and \_
+        # Handle the special case of sortkey@formatted line - strip
+        # the @... from the clean name
+        nameclean = nameObj.group(1).replace('\\_', '_')
+        nameclean = re.sub('@.*','', nameclean)
+        if allow != '':
+            nameclean = re.sub("["+allow+"]", '', nameclean)
+        # Special case for {RMA} and {MPI}, to suppress getlatex
+        # warnings (yes, a hack)
+        nameclean = re.sub('{RMA}', 'RMA', nameclean)
+        nameclean = re.sub('{MPI}', 'MPI', nameclean)
+        # Do NOT include a comma - this usually means that a subitem
+        # was intended
+        if re.search('[^a-zA-Z0-9_!:/\(\)\. *-]',nameclean) :
+            # First, check for the exceptions
+            if nameclean not in knownOK :
+                printWarning( "Name contains invalid characters:" + nameclean + " on page " + ePage + " entry type " + eType)
+                printWarning( "Full entry is: " + eText )
+
+def checkSpecialLists(str):
+    # Look for the known prefixes for the special constants.  Str is known
+    # to be a CONST
+    for prefix in constPrefixes.keys():
+        if re.match(prefix,str):
+            constPrefixes[prefix].append(str)
+            break
+
+## Process arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('--leavefiles', help="Do not remove temporary files", action="store_true")
+parser.add_argument('--verbose', help="Verbose for debugging this script", action="store_true")
+parser.add_argument('--warnfile', help="Use this file for warning messages", type=str)
+parser.add_argument('--inputfile', help="Use this as the input index file", type=str)
+parser.add_argument('--outputfile', help="Use this as the output index file", type=str)
+
+idxfilename = 'mpi-report.idx'
+idxoutname  = 'mpi-report-clean.idx'
+
+args = parser.parse_args()
+# Convert determined arg values into internal variable values
+if args.leavefiles :
+    cleanupFiles = 0
+if args.verbose :
+    verbose = 1
+if args.warnfile:
+    warningfile = open(args.warnfile, "w")
+if args.inputfile:
+    idxfilename = args.inputfile
+if args.outputfile:
+    idxoutname = args.outputfile
+
+## Process the index file from the latex run
+idxfile = open(idxfilename)
+idxout  = open(idxoutname, "w")
+
+for line in idxfile:
+    # Match \indexentry{[NAME:]text}{page}
+    # or match \tohtmlindexentry{[NAME:]text}{file}{nodenumber}{section name}
+    # where text make have ! (subindex) and |(formatting) as in
+    # TERM:get!in function name|hyperindexformat{\uu}
+    entryObj = re.match(r'\\tohtmlindexentry{([^:]*:?.*)}({.+}{[0-9]+}{.*})', line, 0)
+    if entryObj:
+        entryKind = "tohtmlindexentry"
+        entryText = entryObj.group(1)
+        entryOther = entryObj.group(2)
+    else:
+        entryObj = re.match(r'\\indexentry\{([^:]*:?.*)}({[0-9]+})', line, 0)
+        if entryObj:
+            entryKind  = "indexentry"
+            entryText  = entryObj.group(1)
+            entryOther = entryObj.group(2)
+        else:
+            printWarningNNL("Did not match entry " + line)
+
+    # Look for kind and strip that off
+    entryObj = re.match(r'([^:]*):(.*)', entryText, 0)
+    entryIdxname = ""
+    if entryObj:
+        entryIdxname = entryObj.group(1)
+        entryText    = entryObj.group(2)
+
+    # Clean up entry Text
+    if entryIdxname == "":
+        splitObj = re.search(r'(.*)\([^\(\)]*\)(.*)', entryText, re.DOTALL)
+        while splitObj:
+            if verbose:
+                print("Removing a balanced paren from " + entryText)
+            entryText = splitObj.group(1) + splitObj.group(2)
+            splitObj = re.search(r'(.*)\([^\(\)]*\)(.*)', entryText, re.DOTALL)
+
+            # FIXME: This is an ugly hack
+#            if not re.match("MPI",entryText) and not re.match("PMPI",entryText) and not re.match("mpiexec",entryText) and not re.match("mpirun",entryText) and not re.match("COPY\\\\_FUNCTION",entryText) and not re.match("DELETE\\\\_FUNCTION", entryText) and not re.match("COMM\\\\_COPY\\\\_ATTR\\\\_FUNCTION",entryText) and not re.match("COMM\\\\_DELETE\\\\_ATTR\\\\_FUNCTION",entryText):
+#                if warnBadFunc :
+#                    printWarning("function index not MPI: " + entryText + " page " + entryPage)
+#                if ignoreBadFunc:
+#                    entryType = "Unknown"
+#            elif not re.match("MPI",entryText) and not re.match("PMPI",entryText) and not re.match("mpiexec",entryText) and not re.match("mpirun",entryText):
+#                printWarning("function index is exception: " + entryText + " page " + entryPage)
+#        else:
+#            entryType = "Unknown"
+#            entryText = ""
+
+    # Output to the outfile
+    entryFullText = entryText
+    if entryIdxname:
+        # For the html index, we collapse some of the names
+        if entryIdxname in namemap:
+            entryIdxname = namemap[entryIdxname]
+        entryFullText = entryIdxname + ":" + entryText
+    print("\\" + entryKind + "{" + entryFullText + "}" + entryOther, file=idxout)
+
+# Return non-zero error code if there were warnings
+if warncount and warnFails :
+    sys.exit(1)

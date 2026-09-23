@@ -1,0 +1,6 @@
+pytest
+#pytest-sugar
+#pytest-tldr
+pytest-cov
+pytest-azurepipelines
+hypothesis

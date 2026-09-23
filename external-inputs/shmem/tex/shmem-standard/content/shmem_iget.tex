@@ -1,0 +1,58 @@
+\apisummary{
+    Copies strided data from a specified \ac{PE}.
+}
+
+\begin{apidefinition}
+
+\begin{C11synopsis}
+void @\FuncDecl{shmem\_iget}@(TYPE *dest, const TYPE *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
+void @\FuncDecl{shmem\_iget}@(shmem_ctx_t ctx, TYPE *dest, const TYPE *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
+\end{C11synopsis}
+where \TYPE{} is one of the standard \ac{RMA} types specified by Table \ref{stdrmatypes}.
+
+\begin{Csynopsis}
+void @\FuncDecl{shmem\_\FuncParam{TYPENAME}\_iget}@(TYPE *dest, const TYPE *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
+void @\FuncDecl{shmem\_ctx\_\FuncParam{TYPENAME}\_iget}@(shmem_ctx_t ctx, TYPE *dest, const TYPE *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
+\end{Csynopsis}
+where \TYPE{} is one of the standard \ac{RMA} types and has a corresponding \TYPENAME{} specified by Table \ref{stdrmatypes}.
+
+\begin{CsynopsisCol}
+void @\FuncDecl{shmem\_iget\FuncParam{SIZE}}@(void *dest, const void *source, ptrdiff_t dst, ptrdiff_t sst, size_t  nelems, int pe);
+void @\FuncDecl{shmem\_ctx\_iget\FuncParam{SIZE}}@(shmem_ctx_t ctx, void *dest, const void *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
+\end{CsynopsisCol}
+where \SIZE{} is one of \CONST{8, 16, 32, 64, 128}.
+
+\begin{apiarguments}
+    \apiargument{IN}{ctx}{A context handle specifying the context on which to perform the operation.
+        When this argument is not provided, the operation is performed on
+        the default context.}
+    \apiargument{OUT}{dest}{Local address of the array to be updated.
+        The type of \dest{} should match that implied in the SYNOPSIS section.}
+    \apiargument{IN}{source}{Symmetric address of the source array data object.
+        The type of \source{} should match that implied in the SYNOPSIS section.}
+    \apiargument{IN}{dst}{The stride between consecutive elements of the \dest{}
+        array. The stride must be greater than or equal to \CONST{1} and is
+        scaled by the element size of the \dest{} array. A value of \CONST{1}
+        indicates contiguous data.}
+    \apiargument{IN}{sst}{The stride between consecutive elements of the \source{}
+        array. The stride must be greater than or equal to \CONST{1} and is
+        scaled by the element size of the \source{} array. A value of \CONST{1}
+        indicates contiguous data.}
+    \apiargument{IN}{nelems}{Number of elements in the \dest{} and \source{}
+        arrays.}
+    \apiargument{IN}{pe}{\ac{PE} number of the remote \ac{PE} relative to the team associated
+      with the given \VAR{ctx} when provided, or the default context otherwise.}
+\end{apiarguments}
+
+\apidescription{
+    The \FUNC{shmem\_iget} routines provide a method for copying strided data elements from
+    a symmetric array from a specified remote \ac{PE} to strided locations on a
+    local array.  The routines return when the data has been copied into the local
+    \VAR{dest} array.
+}
+
+\apireturnvalues{
+    None.
+}
+
+\end{apidefinition}

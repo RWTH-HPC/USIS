@@ -1,0 +1,78 @@
+\begin{DeprecateBlock}
+\apisummary{
+    Performs all operations described in the \FUNC{shmem\_barrier\_all} interface
+    but with respect to a subset of \acp{PE} defined by the active set.
+}
+
+\begin{apidefinition}
+
+\begin{Csynopsis}
+void @\FuncDecl{shmem\_barrier}@(int PE_start, int logPE_stride, int PE_size, long *pSync);
+\end{Csynopsis}
+
+\begin{apiarguments}
+
+    \apiargument{IN}{PE\_start}{The lowest \ac{PE} number of the active set of \acp{PE}.}
+\apiargument{IN}{logPE\_stride}{The log (base 2) of the stride between consecutive
+    \ac{PE} numbers in the active set.}
+    \apiargument{IN}{PE\_size}{The number of \acp{PE} in the active set.}
+\apiargument{IN}{pSync}{
+    Symmetric address of a work array of size at least \CONST{SHMEM\_BARRIER\_SYNC\_SIZE}.}
+
+\end{apiarguments}
+
+\apidescription{
+    \FUNC{shmem\_barrier} is a collective synchronization routine over an
+    active set. Control returns from \FUNC{shmem\_barrier} after all \acp{PE} in
+    the active set (specified by \VAR{PE\_start}, \VAR{logPE\_stride}, and
+    \VAR{PE\_size}) have called \FUNC{shmem\_barrier}.
+
+    As with all \openshmem collective routines, each of these routines assumes that
+    only \acp{PE} in the active set call the routine.  If a \ac{PE} not  in  the
+    active set calls an \openshmem collective routine, the behavior is undefined.
+
+    The values of arguments \VAR{PE\_start}, \VAR{logPE\_stride}, and \VAR{PE\_size}
+    must be the same value on all \acp{PE} in the active set.  The same work array must be
+    passed in \VAR{pSync} to all \acp{PE} in the active set.
+
+    \FUNC{shmem\_barrier} ensures that all previously issued stores and remote
+    memory updates, including \acp{AMO} and \ac{RMA} operations, done by any of the
+    \acp{PE} in the active set on the default context are complete before returning.
+
+    The same \VAR{pSync} array may be reused on consecutive calls to
+    \FUNC{shmem\_barrier} if the same active set is used.
+}
+
+\apireturnvalues{
+    None.
+}
+
+\apinotes{
+    As of \openshmem[1.5], \FUNC{shmem\_barrier} has been deprecated.
+    No team-based barrier is provided by \openshmem, as a team may have any
+    number of communication contexts associated with the team.
+    Applications seeking such an idiom should call
+    \FUNC{shmem\_ctx\_quiet} on the desired communication context,
+    followed by a call to \FUNC{shmem\_team\_sync} on the desired
+    team.
+
+    The \FUNC{shmem\_barrier} routine can be used to
+    portably ensure that memory access operations observe remote updates in the order
+    enforced by initiator \acp{PE}.
+
+    Calls to \FUNC{shmem\_ctx\_quiet} can be performed prior
+    to calling the barrier routine to ensure completion of operations issued on
+    additional contexts.
+}
+
+\begin{apiexamples}
+
+\apicexample
+    {The following barrier example is for \Cstd[11] programs:}
+    {./example_code/shmem_barrier_example.c}
+    {}
+
+\end{apiexamples}
+
+\end{apidefinition}
+\end{DeprecateBlock}

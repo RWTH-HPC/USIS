@@ -1,0 +1,562 @@
+% Version as of July 19, 2012
+% Version as of October 8, 1993
+
+\chapter{Introduction to \texorpdfstring{\MPI/}{MPI}}
+\label{sec:intro}
+\label{chap:intro}
+\label{sec:intro-2}
+\label{chap:intro-2}
+
+\section{Overview and Goals}
+\MPI/ (Message-Passing Interface) is a \emph{message-passing library
+  interface specification}.  All parts of this definition are
+significant.  \MPI/ addresses primarily the message-passing parallel
+programming model, in which data is moved from the address space of
+one process to that of another process through cooperative operations
+on each process.  Extensions to the ``classical'' message-passing model
+are provided in collective operations, remote-memory access
+operations, dynamic process creation, and parallel I/O.  \MPI/ is a
+\emph{specification}, not an implementation; there are multiple
+implementations of \MPI/.  This specification is for a \emph{library
+  interface}; \MPI/ is not a language, and all \MPI/ operations are
+expressed as functions, subroutines, or methods, according to the
+appropriate language bindings
+that, for C and Fortran, are part of the \MPI/ standard.  The standard has been
+defined through an open process by a community of parallel computing
+vendors, computer scientists, and application developers.  The next
+few sections provide an overview of the history of \MPI/'s development.
+
+The main advantages of establishing a message-passing standard are portability
+and ease of use. In a distributed memory communication environment in which
+the higher level routines and/or abstractions are
+built
+upon lower level
+message-passing routines, the benefits of standardization are particularly
+apparent. Furthermore, the definition of a message-passing standard, such
+as that proposed here, provides vendors with a clearly defined base set of
+routines that they can implement efficiently, or in some cases for which they can provide hardware support, thereby enhancing scalability.
+
+The goal of the Message-Passing Interface, simply stated, is to
+develop a widely used
+standard for writing message-passing programs.
+As such the interface should
+establish a practical, portable, efficient, and flexible standard for message
+passing.
+
+A complete list of goals follows.
+
+\begin{itemize}
+
+\item
+Design an application programming interface (not necessarily for compilers
+or a system implementation library).
+
+\item
+Allow efficient communication: Avoid memory-to-memory copying,
+allow overlap of computation and communication, and offload to communication
+co-processors, where available.
+
+\item
+Allow for implementations that can be used in a heterogeneous environment.
+
+\item
+Allow convenient
+C and Fortran
+bindings for the interface.
+
+\item
+Assume a reliable communication interface:
+the user need not cope with communication failures.
+Such failures are dealt with by the underlying communication subsystem.
+
+\item
+Define an interface that can be implemented on many
+vendor's platforms, with no significant changes in the underlying
+communication and system software.
+
+\item
+Semantics of the interface should be language independent.
+
+\item
+The interface should be designed to allow for thread safety.
+\end{itemize}
+
+
+\section{Background of \texorpdfstring{\MPIIDOTO/}{MPI-1.0}}
+\label{sec:background:i}
+
+\MPI/ sought to make use of the most attractive features
+of a number of existing message-passing systems, rather than selecting one of
+them and adopting it as the standard. Thus, \MPI/ was strongly influenced
+by work at the IBM T. J. Watson Research Center
+\cite{IBM-report1,IBM-report2}, Intel's NX/2 \cite{NX-2}, Express
+\cite{express}, nCUBE's Vertex \cite{Vertex},
+p4 \cite{p4manual,p4paper}, and
+PARMACS \cite{parmacs1,parmacs2}.
+Other important contributions have come
+from Zipcode\mpitermindex{Zipcode} \cite{zipcode1,zipcode2}, Chimp\mpitermindex{Chimp} \cite{chimp1,chimp2}, PVM\mpitermindex{PVM}
+\cite{PVM2,PVM1}, Chameleon\mpitermindex{Chameleon} \cite{chameleon-user-ref}, and PICL\mpitermindex{PICL} \cite{picl}.
+
+
+The \MPI/ standardization effort involved about 60 people from 40 organizations
+mainly from the United States and Europe. Most of the major vendors of
+concurrent computers were involved in \MPI/, along with researchers from
+universities, government laboratories, and industry. The standardization
+process began with the Workshop on
+Standards for Message-Passing in a Distributed Memory Environment,
+sponsored by the Center for Research on Parallel Computing, held April 29--30,
+1992, in Williamsburg, Virginia
+\cite{walker92b}. At this workshop the basic features essential
+to a standard message-passing interface were discussed, and a working group
+established to continue the standardization process.
+
+A preliminary draft proposal, known as \MPII/, was put forward by Dongarra,
+Hempel, Hey, and Walker in November 1992, and a revised version was completed
+in February 1993 \cite{mpi1}. \MPII/ embodied the main features that were
+identified at the Williamsburg workshop as being necessary in a message
+passing standard.  Since \MPII/ was primarily intended to promote discussion
+and ``get the ball rolling,'' it focused mainly on point-to-point
+communications.  \MPII/ brought to the forefront a number of important
+standardization issues, but did not include any collective communication
+routines and was not thread-safe\mpitermindex{threads!thread-safe}.
+
+In November 1992, a
+meeting of the \MPI/ working group was held in Minneapolis, at which it was
+decided to place the standardization process on a more formal footing, and
+to generally adopt the procedures and organization of the High Performance
+Fortran Forum. Subcommittees were formed for the major
+component areas of the standard, and an email discussion service established
+for each. In addition, the goal of producing a draft \MPI/ standard by the Fall
+of 1993 was set.
+To achieve this goal the \MPI/ working group met every
+6 weeks for two days throughout the first 9 months of 1993, and
+presented the draft \MPI/ standard at the
+Supercomputing 93 conference in November 1993. These meetings and the email
+discussion together constituted the \MPI/ Forum, membership of which has been open
+to all members of the high performance computing community.
+
+
+\section{Background of \texorpdfstring{\MPIIDOTI/}{MPI-1.1}, \texorpdfstring{\MPIIDOTII/}{MPI-1.2}, and \texorpdfstring{\MPIIIDOTO/}{MPI-2.0}}
+\label{sec:background}
+
+Beginning in March 1995, the \MPI/ Forum began meeting to
+consider corrections and extensions to the original \MPI/ standard
+document~\cite{MPISTDORG}.  The first product of these deliberations was
+Version 1.1 of the \MPI/ specification, released in June of 1995
+\cite{MPISTD}
+(see \\
+\url{http://www.mpi-forum.org} for official \MPI/ document releases).
+At that time, effort focused
+in
+five areas.
+\begin{enumerate}
+\item Further corrections and clarifications for the \mpiidoti/ document.
+\item Additions to \mpiidoti/ that do not significantly change its types of
+  functionality (new datatype constructors, language interoperability, etc.).
+\item Completely new types of functionality (dynamic processes, one-sided
+  communication, parallel I/O, etc.) that are what everyone thinks of as
+  ``\MPIII/ functionality.''
+\item Bindings for Fortran 90 and C++.
+\MPIII/ specifies
+  C++ bindings
+  for both \mpii/ and \mpiii/ functions, and extensions to the Fortran 77
+  binding of \mpii/ and \mpiii/ to handle Fortran 90 issues.
+\item Discussions of areas in which the \MPI/ process and framework seem likely
+  to be useful, but where more discussion and experience are needed before
+  standardization (e.g.,
+  zero-copy
+  semantics on shared-memory machines, real-time
+  specifications).
+\end{enumerate}
+
+Corrections and clarifications (items of type 1 in the above list)
+were
+collected in Chapter~3 of the \MPIII/ document:
+``Version 1.2 of \MPI/.''
+That
+chapter also contains the function for
+identifying the version number.  Additions to \mpiidoti/ (items of
+types 2, 3, and 4 in the above list) are in the
+remaining chapters of the \MPIII/ document,
+and constitute the specification for
+\mpiii/.
+Items of type 5 in the
+above list have been moved to a separate document, the ``\MPI/ Journal
+of Development'' (JOD), and are not part of the \mpiii/ standard.
+
+This structure makes it easy for users and implementors to understand
+what level of \MPI/ compliance a given implementation has:
+\begin{itemize}
+\item \mpii/ compliance will mean compliance with \mpiidotiii/.
+  This is a useful level of compliance.  It means that the
+  implementation conforms to the clarifications of \mpiidoti/ function
+  behavior given in Chapter~3 of the \MPIII/ document.  Some
+  implementations may require changes to be \mpii/ compliant.
+\item \mpiii/ compliance will mean compliance with all of
+  \mpiiidoti/.
+\item The \MPI/ Journal of Development is not part of the \MPI/ standard.
+\end{itemize}
+
+
+It is to be emphasized that forward compatibility is preserved.  That is,
+a valid \mpiidoti/ program is both a valid
+\mpiidotiii/
+program and a valid
+\mpiiidoti/
+program, and a valid
+\mpiidotiii/
+program is a valid
+\mpiiidoti/
+program.
+
+
+
+\section{Background of \texorpdfstring{\MPIIDOTIII/}{MPI-1.3} and \texorpdfstring{\MPIIIDOTI/}{MPI-2.1}}
+\label{sec:background:ii:i}
+After the release of \MPIIIDOTO/, the \MPI/ Forum kept working on
+errata and clarifications for both standard documents (\MPIIDOTI/ and \MPIIIDOTO/).
+The short document ``Errata for \MPIIDOTI/'' was released October 12, 1998.
+On
+July 5, 2001, a first ballot of errata and clarifications for \MPIIIDOTO/
+was released, and a second ballot was voted on May 22, 2002.
+Both votes were done
+electronically.
+Both ballots were combined into one document:
+``Errata
+for \MPIII/,'' May
+15, 2002.
+This errata process was then interrupted, but the
+Forum and its e-mail reflectors kept working
+on new requests for clarification.
+
+Restarting regular work of the \MPI/ Forum was initiated in
+three meetings,
+at EuroPVM/MPI'06 in Bonn, at EuroPVM/MPI'07 in Paris, and
+at SC'07 in Reno.
+In December 2007,
+a steering committee started the
+organization of new \MPI/ Forum meetings at regular 8-weeks intervals.
+At the January 14--16, 2008
+meeting in Chicago, the \MPI/ Forum decided to combine
+the existing and future \MPI/ documents to one document for
+each version of the \MPI/ standard.
+For technical and historical reasons, this series was started with \MPIIDOTIII/.
+Additional Ballots~3 and~4
+solved
+old questions from the
+errata list started in 1995
+up to
+new questions from the last years.
+After all documents (\MPIIDOTI/, \MPIII/, Errata for \MPIIDOTI/ (Oct.~12, 1998),
+and \MPIIIDOTI/ Ballots 1--4) were combined into one draft document,
+for each chapter, a chapter author and review team were defined.
+They cleaned up the document to achieve a consistent \MPIIIDOTI/ document.
+The
+final \MPIIIDOTI/ standard document
+was
+finished in June 2008, and finally released with a second vote
+in September 2008 in the meeting at Dublin,
+just
+before EuroPVM/MPI'08.
+
+\section{Background of \texorpdfstring{\MPIIIDOTII/}{MPI-2.2}}
+\MPIIIDOTII/ is a minor update to the \MPIIIDOTI/ standard.  This version
+addresses additional errors and ambiguities that were not corrected in
+the \MPIIIDOTI/ standard as well as a small number of extensions to
+\MPIIIDOTI/ that met the following criteria:
+\begin{itemize}
+\item Any correct \MPIIIDOTI/ program is a correct \MPIIIDOTII/ program.
+\item Any extension must have significant benefit for users.
+\item Any extension must not require significant implementation
+  effort.  To that end, all such changes are accompanied by an open
+  source implementation.
+\end{itemize}
+The discussions of \MPIIIDOTII/ proceeded concurrently with the \MPIIII/
+discussions; in some cases, extensions were proposed for \MPIIIDOTII/ but
+were later moved to \MPIIII/.
+
+\section{Background of \texorpdfstring{\MPIIIIDOTO/}{MPI-3.0}}
+\MPIIIIDOTO/ is a major update to the \MPI/ standard.  The updates include
+the extension of collective operations to
+include nonblocking versions, extensions to the one-sided operations, and
+a new Fortran 2008 binding.  In addition, the deprecated C++ bindings
+have been removed, as well as many of the deprecated routines and \MPI/
+objects (such as the \mpidtype{MPI\_UB} datatype). Any valid \MPIIIDOTII/
+program not using any of these removed \MPI/ procedures or objects is a valid
+\MPIIIIDOTO/ program.
+
+\section{Background of \texorpdfstring{\MPIIIIDOTI/}{MPI-3.1}}
+\MPIIIIDOTI/ is a minor update to the \MPI/ standard.  Most of the updates
+are corrections and clarifications to the standard,
+especially for the Fortran bindings.  New functions added
+include routines to manipulate \code{MPI\_Aint} values in a portable manner, nonblocking
+collective I/O routines, and routines to get the index value by name for
+\mpiskipfunc{MPI\_T} performance and control variables.
+A general index was also added. Any valid \MPIIIIDOTO/ program is a valid
+\MPIIIIDOTI/ program.
+
+\section{Background of \texorpdfstring{\MPIIVDOTO/}{MPI-4.0}}
+\MPIIVDOTO/ is a major update to the \MPI/ standard.
+The largest changes are the addition of large-count versions of many
+routines to address the limitations of using an \code{int}
+or \code{INTEGER} for the count parameter, persistent collectives, partitioned
+communications, an alternative way to initialize \MPI/, application
+info assertions, and improvements to the definitions of error handling.
+In addition, there are a number of smaller improvements and corrections.
+Any
+valid \MPIIIIDOTI/ program is a valid \MPIIVDOTO/ program with the exception of
+semantic changes listed in Chapter~\ref{chap:semantic-changes}.
+
+\section{Background of \texorpdfstring{\MPIIVDOTI/}{MPI-4.1}}
+\MPIIVDOTI/ is a minor update to the \MPI/ standard.
+It contains mostly corrections
+and clarifications to the \MPIIVDOTO/ document.
+Several routines, the
+attribute key \mpiconst{MPI\_HOST}, and the \code{mpif.h} Fortran
+include file are deprecated.
+A new routine provides a way to inquire about the hardware on which
+the \MPI/ program is running.
+Any valid \MPIIVDOTO/ program is a valid \MPIIVDOTI/ program with the
+exception of semantic changes listed in
+Chapter~\ref{chap:semantic-changes}.
+
+\section{Background of \texorpdfstring{\MPIVDOTO/}{MPI-5.0}}
+\MPIVDOTO/ is a major update to the \MPI/ standard.
+The largest change is the addition of a standard Application
+Binary Interface (ABI) to allow interoperability of different
+implementations.
+In addition, there are a number of smaller improvements and corrections.
+Any valid \MPIIVDOTI/ program is a valid \MPIVDOTO/ program.
+
+%% draft items will be removed after 5.1 is final
+\ifdraftspec
+\section{Background of 202X Draft Specification}
+The 202X draft specification is expected to become the \MPIVDOTI/
+specification once all features have been merged.
+\else
+\fi
+
+
+\section{Who Should Use This Standard?}
+
+This standard is intended for use by all those who want to write portable
+message-passing programs in
+Fortran and C (and access the C bindings
+from C++).
+This includes individual application programmers,
+developers of software designed to run on parallel machines, and creators of
+environments and tools.  In order to be
+attractive to this wide audience, the standard must provide a simple, easy-to-use
+interface for the basic user while not semantically precluding the
+high-performance message-passing operations available on advanced machines.
+
+
+\section{What Platforms Are Targets for Implementation?}
+
+The attractiveness of the message-passing paradigm at least partially
+stems from its wide portability.  Programs expressed this way may run
+on distributed-memory
+multiprocessors, networks of workstations, and combinations of all of these.
+In addition, shared-memory implementations,
+including those for multi-core processors and hybrid
+architectures,
+are possible.
+The paradigm will not be made obsolete by architectures combining the shared-
+and distributed-memory views, or by increases in network speeds.  It thus
+should be both possible and useful to implement this standard on a great
+variety of machines, including those ``machines'' consisting of collections of
+other machines, parallel or not, connected by a communication network.
+
+The interface is suitable for use by fully general MIMD (Multiple Instruction,
+Multiple Data) programs, as well as
+those written in the more restricted style of
+SPMD (Single Program, Multiple Data).
+\MPI/ provides many features intended to improve performance on
+scalable parallel computers with
+specialized interprocessor communication
+hardware.  Thus, we expect that native, high-performance
+implementations of \MPI/ will be provided on such machines.  At the
+same time, implementations of \MPI/ on top of standard Unix
+interprocessor communication protocols will provide portability to
+workstation clusters and heterogenous networks of workstations.
+
+\section{What Is Included in the Standard?}
+
+The standard includes:
+
+\begin{itemize}
+    \item Point-to-point communication,
+    \item Partitioned communication,
+    \item Datatypes,
+    \item Collective operations,
+    \item Process groups,
+    \item Communication contexts,
+    \item Virtual Topologies for \MPI/ Processes,
+    \item Environmental management and inquiry,
+    \item The Info object,
+    \item Process initialization, creation, and management,
+    \item One-sided communication,
+    \item External interfaces,
+    \item Parallel file I/O,
+    \item Tool support,
+    \item Process fault tolerance,
+    \item Language bindings for Fortran and C,
+    \item Application Binary Interface, and
+    \item Additional topics in side-documents.
+\end{itemize}
+
+\section{Side-documents}
+\label{sec:side-documents}
+
+Side-documents extend and/or modify features, semantics, language bindings, and other aspects covered in this document.
+Side-documents shall not modify any aspects defined in the \MPI/ Standard without providing a mechanism that explicitly enables these deviations.
+Execution of a program that does not explicitly enable deviations from the \MPI/ Standard will comply with the \MPI/ Standard, even when using an \MPI/ implementation that implements a side-document that modifies any aspects.
+
+Each side-document is versioned with a scheme that is independent from the \MPI/ Standard version and from other side-documents.
+All side-documents specify compatibility and interoperability with versions of the \MPI/ Standard and may define interoperability with features and semantics from other side-documents.
+Side-documents are not required to provide full coverage of all \MPI/ concepts, but shall document which \MPI/ concepts are affected.
+A compliant implementation is not required to comply with any side-documents.
+However, if compliance with a particular version of a side-document is claimed, the implementation must comply with the entire side-document.
+Side-documents will be found at the same location as the \MPI/ Standard~\cite{mpi-standard-location}.
+
+\section{Organization of This Document}
+
+The following is a list of the remaining chapters in this document, along with
+a brief description of each.
+
+\begin{itemize}
+\item
+Chapter~\ref{sec:terms}, \nameref{sec:terms},
+explains notational terms and conventions used
+throughout the \MPI/ document.
+\item
+Chapter~\ref{sec:pt2pt}, \nameref{sec:pt2pt},
+defines the basic, pairwise communication subset of \MPI/.
+\emph{Send}
+and \emph{receive} are found here, along with many associated functions
+designed to make basic communication powerful and efficient.
+\item
+Chapter~\ref{sec:part}, \nameref{sec:part},
+defines a method of performing partitioned communication in \MPI/. 
+Partitioned communication allows multiple contributions of data to be made, 
+potentially, from multiple actors (e.g., threads or tasks) in an \MPI/ process 
+to a single message.
+\item
+Chapter~\ref{chap:datatypes}, \nameref{chap:datatypes}, defines a method to describe any data layout,
+e.g., an array of structures.
+\item
+Chapter~\ref{sec:coll}, \nameref{sec:coll}, defines
+process-group collective communication operations.  Well known
+examples of this are barrier and broadcast over a group of processes (not
+necessarily all the processes).
+\item
+Chapter~\ref{sec:context}, \nameref{sec:context},
+shows how groups of processes are formed and manipulated, how unique
+communication contexts are obtained, and how the two are bound together
+into a \emph{communicator}.
+\item
+Chapter~\ref{sec:topol}, \nameref{sec:topol}, explains a set
+of utility functions meant to assist in the mapping of \MPI/ process
+groups (a linearly ordered set) to richer topological structures
+such as multi-dimensional grids.
+\item
+Chapter~\ref{sec:environment}, \nameref{sec:environment}, explains
+how the programmer can manage and make inquiries of the current \MPI/ environment.
+These functions are needed for the writing of correct, robust programs,
+and are especially important for the construction of highly-portable
+message-passing programs.
+\end{itemize}
+\begin{itemize}
+\item
+Chapter~\ref{sec:misc-2}, \nameref{sec:misc-2}, defines an opaque object that is used as input in several \MPI/ routines.
+\item
+Chapter~\ref{sec:dynamic-2}, \nameref{sec:dynamic-2},
+defines
+several approaches to \MPI/ initialization, process creation,
+and process management while placing minimal restrictions on the execution environment.
+\item
+Chapter~\ref{sec:one-side-2}, \nameref{sec:one-side-2}, defines
+communication routines that can be completed by a single process.  These include
+shared-memory operations (put/get) and remote accumulate operations.
+\item
+Chapter~\ref{sec:ei-2}, \nameref{sec:ei-2},
+defines routines designed to allow developers to layer on
+top of \MPI/.
+\item
+Chapter~\ref{sec:io-2}, \nameref{sec:io-2}, defines
+\MPI/
+support for parallel I/O.
+\item
+Chapter~\ref{chap:tools}, \nameref{chap:tools},
+covers interfaces that allow debuggers, performance
+analyzers, and other tools to obtain data about the operation of \MPI/
+processes.
+\item
+Chapter~\ref{chap:ft}, \nameref{chap:ft},
+covers interfaces that allow developers to design applications tolerant to
+\MPI/ process failures. The definitions and interfaces presented in this
+chapter describe the behavior of \MPI/ operations after a process failure
+error has been raised, and provide supplementary interfaces to restore the
+communication capabilities of \MPI/.
+\item
+Chapter~\ref{chap:deprecated}, \nameref{chap:deprecated}, describes routines that
+are kept for reference. However usage of these functions is discouraged, as
+they may be deleted in future versions of the standard.
+\item
+Chapter~\ref{chap:removed}, \nameref{chap:removed}, describes
+routines and constructs that have been removed from \MPI/.
+\item
+Chapter~\ref{chap:semantic-changes}, \nameref{chap:semantic-changes}, describes
+semantic changes from previous versions of \MPI/.
+\item
+Chapter~\ref{sec:binding-2},
+\nameref{sec:binding-2}, discusses Fortran issues
+and describes language interoperability aspects between
+C and Fortran.
+\item
+Chapter~\ref{sec:abi},
+\nameref{sec:abi}, discusses Application Binary Interface issues
+and describes interoperability of compiled code.
+\end{itemize}
+
+The Appendices are:
+
+\begin{itemize}
+\item
+Annex~\ref{sec:lang},
+\nameref{sec:lang},
+gives specific syntax in
+C and Fortran
+for all \MPI/ functions,
+constants, and types.
+
+\item
+Annex~\ref{chap:change},
+\nameref{chap:change}, summarizes some changes since the previous
+version of the standard.
+\item
+Several \textTitleFont{index} pages show the locations of
+\hyperref[index:general]{general terms and definitions},    %%ALLOWLATEX%
+\hyperref[index:example]{examples},    %%ALLOWLATEX%
+\hyperref[index:constant]{constants and predefined handles}, %%ALLOWLATEX%
+\hyperref[index:declaration]{declarations of C and Fortran types}, %%ALLOWLATEX%
+\hyperref[index:callback]{callback routine prototypes}, and all %%ALLOWLATEX%
+\hyperref[index:function]{\MPI/ functions}. %%ALLOWLATEX%
+
+\end{itemize}
+
+\mpi/
+provides various interfaces to facilitate interoperability
+  of distinct  \mpi/ implementations.  Among these are the canonical
+  data representation for \mpi/ I/O and for \mpifunc{MPI\_PACK\_EXTERNAL} and
+  \mpifunc{MPI\_UNPACK\_EXTERNAL}.
+The definition of an actual binding of these interfaces that will
+enable interoperability is outside the scope of this document.
+
+A separate document consists of ideas that were discussed in the
+\MPI/ Forum during the \MPIII/ development and
+deemed to have value, but were not included in the \mpi/
+standard.  They are part of the ``Journal of Development'' (JOD),
+which was created to capture these ideas and discussions.
+The JOD is available at \url{https://www.mpi-forum.org/docs}.
+

@@ -1,0 +1,625 @@
+\chapter{Deprecated Interfaces}
+\mpitermtitleindex{deprecated interfaces}
+\label{chap:deprecated}
+ 
+\section{Deprecated since \texorpdfstring{\mpiiidoto/}{MPI-2.0}} 
+\label{sec:deprecated:since20}
+
+The following function is deprecated and is superseded by \mpifunc{MPI\_COMM\_CREATE\_KEYVAL} in \mpiiidoto/. 
+The language independent definition 
+of the deprecated function is the same as that of the new function,
+  except for the function name and a different behavior in the
+  C/Fortran language interoperability, see \sectionref{sec:misc-attr}.
+The language bindings are modified.
+
+\begin{mpi-binding}
+    function_name("MPI_Keyval_create")
+    no_f08_binding(proxy_render=True)
+    deprecate()
+    
+    parameter(
+        "copy_fn",
+        "FUNCTION",
+        func_type="MPI_Copy_function",
+        desc=r"Copy callback function for \mpiarg{keyval}",
+        suppress="lis_paren",
+    )
+    parameter(
+        "delete_fn",
+        "FUNCTION",
+        func_type="MPI_Delete_function",
+        desc=r"Delete callback function for \mpiarg{keyval}",
+        suppress="lis_paren",
+    )
+    parameter(
+        "keyval", "KEYVAL", direction="out", desc=r"key value for future access"
+    )
+    parameter(
+        "extra_state", "EXTRA_STATE2", desc=r"Extra state for callback functions"
+    )
+\end{mpi-binding}
+
+
+The \mpiarg{copy\_fn} function is invoked when a communicator is
+duplicated by \mpifunc{MPI\_COMM\_DUP}.  \mpiarg{copy\_fn} should be
+of type \mpicallbackskip{MPI\_Copy\_function}, which is defined as follows:
+
+\mpicallbackmainindex{MPI\_Copy\_function}
+%%HEADER
+%%SKIP
+%%ENDHEADER
+
+\begin{mpi-binding}
+    callback()
+    no_lis_binding()
+    no_f08_binding(proxy_render=True)
+    no_render("f08, f90")
+    deprecate()
+    
+    function_name("MPI_Copy_function", "COPY_FUNCTION")
+    
+    parameter("oldcomm", "COMMUNICATOR")
+    parameter("keyval", "KEYVAL")
+    parameter("extra_state", "EXTRA_STATE2")
+    parameter("attribute_val_in", "ATTRIBUTE_VAL_10")
+    parameter("attribute_val_out", "ATTRIBUTE_VAL_10", direction="out")
+    parameter("flag", "LOGICAL", direction="out")
+    
+    no_ierror()
+    parameter("ierr", "ERROR_CODE", suppress="c_parameter")
+\end{mpi-binding}
+
+A Fortran declaration for such a function is as follows:
+
+\begin{mpi-binding}
+    render("mpi_copy_function", "f08")
+\end{mpi-binding}
+
+\mpicallbackmainindex{COPY\_FUNCTION}%
+\begin{mpi-binding}
+    render("mpi_copy_function", "f90")
+\end{mpi-binding}
+
+\mpiarg{copy\_fn} may be specified as
+\mpiconstfuncmain{MPI\_NULL\_COPY\_FN} or
+\mpiconstfuncmain{MPI\_DUP\_FN}
+from either C or Fortran;
+\mpiconstfuncskip{MPI\_NULL\_COPY\_FN}
+is a function that does nothing other than return \mbox{\mpiarg{flag}\mpicode{ = 0}}
+and \error{MPI\_SUCCESS}.
+\mpiconstfuncskip{MPI\_DUP\_FN} is a simple-minded
+copy function that sets \mbox{\mpiarg{flag}\mpicode{ = 1}},
+returns the value of
+\mpiarg{attribute\_val\_in} in \mpiarg{attribute\_val\_out}, and
+returns \error{MPI\_SUCCESS}.
+Note that \mpiconstfuncskip{MPI\_NULL\_COPY\_FN}
+and \mpiconstfuncskip{MPI\_DUP\_FN} are also deprecated.
+
+% The folowing declarations are needed for generating the deprecated
+% list of functions in the annex.
+% They are not used for printing here.
+% Therefore, they are surrounded by a deleting macro.
+\begin{mpi-binding}
+    predefined_function("MPI_Copy_function")
+    no_lis_binding()
+    no_f08_binding()
+    deprecate()
+    
+    function_name("MPI_NULL_COPY_FN")
+    
+    parameter("oldcomm", "COMMUNICATOR")
+    parameter("keyval", "KEYVAL")
+    parameter("extra_state", "EXTRA_STATE2")
+    parameter("attribute_val_in", "ATTRIBUTE_VAL_10")
+    parameter("attribute_val_out", "ATTRIBUTE_VAL_10")
+    parameter("flag", "LOGICAL", direction="out")
+    
+    no_ierror()
+    parameter("ierr", "ERROR_CODE", suppress="c_parameter")
+\end{mpi-binding}
+
+\begin{mpi-binding}
+    predefined_function("MPI_Copy_function")
+    no_lis_binding()
+    no_f08_binding()
+    deprecate()
+    
+    function_name("MPI_DUP_FN")
+    
+    parameter("oldcomm", "COMMUNICATOR")
+    parameter("keyval", "KEYVAL")
+    parameter("extra_state", "EXTRA_STATE2")
+    parameter("attribute_val_in", "ATTRIBUTE_VAL_10")
+    parameter("attribute_val_out", "ATTRIBUTE_VAL_10")
+    parameter("flag", "LOGICAL", direction="out")
+    
+    no_ierror()
+    parameter("ierr", "ERROR_CODE", suppress="c_parameter")
+\end{mpi-binding}
+
+
+%Note that the C version of these two functions assume that the
+%callback functions follow the C prototype, while the corresponding
+%Fortran version assumes the Fortran prototype.
+
+Analogous to \mpiarg{copy\_fn} is a callback deletion function, defined
+as follows.  The \mpiarg{delete\_fn} function is invoked when a communicator is
+deleted by \mpifunc{MPI\_COMM\_FREE} or when a call is made explicitly
+to \mpifunc{MPI\_ATTR\_DELETE}.  \mpiarg{delete\_fn} should be
+of type \mpicallbackskip{MPI\_Delete\_function}, which is defined as follows:
+
+\mpicallbackmainindex{MPI\_Delete\_function}
+%%HEADER
+%%SKIP
+%%ENDHEADER
+
+
+\begin{mpi-binding}
+    callback()
+    function_name("MPI_Delete_function", "DELETE_FUNCTION")
+    no_lis_binding()
+    no_f08_binding(proxy_render=True)
+    no_render("f90, f08")
+    deprecate()
+    
+    parameter("comm", "COMMUNICATOR")
+    parameter("keyval", "KEYVAL")
+    parameter("attribute_val", "ATTRIBUTE_VAL_10")
+    parameter("extra_state", "EXTRA_STATE2")
+    
+    no_ierror()
+    parameter("ierr", "ERROR_CODE", suppress="c_parameter")
+\end{mpi-binding}
+
+A Fortran declaration for such a function is as follows:
+
+\begin{mpi-binding}
+    render("mpi_delete_function", "f08")
+\end{mpi-binding}
+
+\mpicallbackmainindex{DELETE\_FUNCTION}%
+\begin{mpi-binding}
+    render("mpi_delete_function", "f90")
+\end{mpi-binding}
+
+% RAB: The predefined callbacks are "constant" "function" pointers, therefore in both indexes
+\mpiarg{delete\_fn} may be specified as
+\mpiconstfuncmain{MPI\_NULL\_DELETE\_FN}
+from either C or Fortran;
+\mpiconstfuncskip{MPI\_NULL\_DELETE\_FN} is a function that does nothing other
+than return \error{MPI\_SUCCESS}.
+Note that \mpiconstfuncskip{MPI\_NULL\_DELETE\_FN} is also deprecated.
+
+% The folowing declarations are needed for generating the deprecated
+% list of functions in the annex.
+% They are not used for printing here.
+% Therefore, they are surrounded by a deleting macro.
+\begin{mpi-binding}
+    predefined_function("MPI_Delete_function")
+    no_lis_binding()
+    no_f08_binding()
+    deprecate()
+    
+    function_name("MPI_NULL_DELETE_FN")
+    
+    parameter("comm", "COMMUNICATOR")
+    parameter("keyval", "KEYVAL")
+    parameter("attribute_val", "ATTRIBUTE_VAL_10")
+    parameter("extra_state", "EXTRA_STATE2")
+    
+    no_ierror()
+    parameter("ierror", "ERROR_CODE", suppress="c_parameter")
+\end{mpi-binding}
+
+
+\deprecatedsep
+The following function is deprecated and is superseded by \mpifunc{MPI\_COMM\_FREE\_KEYVAL} in \mpiiidoto/. 
+The language independent definition 
+of the deprecated function is the same as the new function,
+except for the function name. 
+The language bindings are modified.
+
+\begin{mpi-binding}
+    function_name("MPI_Keyval_free")
+    no_f08_binding(proxy_render=True)
+    deprecate()
+    
+    parameter(
+        "keyval",
+        "KEYVAL",
+        direction="inout",
+        desc=r"Frees the integer key value",
+    )
+\end{mpi-binding}
+
+
+\deprecatedsep
+The following function is deprecated and is superseded by \mpifunc{MPI\_COMM\_SET\_ATTR} in \mpiiidoto/. 
+The language independent definition 
+of the deprecated function is the same as the new function,
+except for the function name. 
+The language bindings are modified.
+
+\begin{mpi-binding}
+    function_name("MPI_Attr_put")
+    no_f08_binding(proxy_render=True)
+    deprecate()
+    
+    # This is a special case: it's an INOUT, but the C binding does NOT
+    # have a pointer/star on the parameter
+    parameter(
+        "comm",
+        "COMMUNICATOR",
+        direction="lis:inout,param:in",
+        pointer=False,
+        desc=r"communicator to which attribute will be attached",
+    )
+    parameter(
+        "keyval",
+        "KEYVAL",
+        desc=r"key value, as returned by \mpifunc{MPI_KEYVAL_CREATE}",
+    )
+    parameter("attribute_val", "ATTRIBUTE_VAL_10", desc=r"attribute value")
+\end{mpi-binding}
+
+\deprecatedsep
+The following function is deprecated and is superseded by \mpifunc{MPI\_COMM\_GET\_ATTR} in \mpiiidoto/. 
+The language independent definition 
+of the deprecated function is the same as the new function,
+except for the function name. 
+The language bindings are modified.
+
+\begin{mpi-binding}
+    function_name("MPI_Attr_get")
+    no_f08_binding(proxy_render=True)
+    deprecate()
+    
+    parameter(
+        "comm",
+        "COMMUNICATOR",
+        desc=r"communicator to which attribute is attached",
+    )
+    parameter("keyval", "KEYVAL", desc=r"key value")
+    parameter(
+        "attribute_val",
+        "ATTRIBUTE_VAL_10",
+        direction="out",
+        desc=r"attribute value, unless \mpiarg{flag} \mpicode{= false}",
+    )
+    parameter(
+        "flag",
+        "LOGICAL",
+        direction="out",
+        desc=(
+            r"\mpicode{true} if an attribute value was extracted; "
+            r"\mpicode{false} if no attribute is associated with the key"
+        ),
+        suppress="lis_paren",
+    )
+\end{mpi-binding}
+
+
+\deprecatedsep
+The following function is deprecated and is superseded by \mpifunc{MPI\_COMM\_DELETE\_ATTR} in \mpiiidoto/. 
+The language independent definition 
+of the deprecated function is the same as the new function,
+except for the function name. 
+The language bindings are modified.
+
+\begin{mpi-binding}
+    function_name("MPI_Attr_delete")
+    no_f08_binding(proxy_render=True)
+    deprecate()
+    
+    parameter(
+        "comm",
+        "COMMUNICATOR",
+        direction="lis:inout,param:in",
+        desc=r"communicator to which attribute is attached",
+    )
+    parameter("keyval", "KEYVAL", desc=r"The key value of the deleted attribute")
+\end{mpi-binding}
+
+
+\section{Deprecated since \texorpdfstring{\mpiiidotii/}{MPI-2.2}} 
+\label{sec:deprecated:since22}
+
+\label{sec:deprecated-cxx-bindings}
+The entire set of C++ language bindings was deprecated
+as of \MPIIIDOTII/ and removed in \MPIIIIDOTO/.
+See Chapter~\ref{chap:removed}, \nameref{chap:removed}
+for more information.
+
+\deprecatedsep
+The following function typedefs have been deprecated and are 
+superseded by new names.  Other than the typedef names, the function 
+signatures are exactly the same; the names were updated to match 
+conventions of other function typedef names. 
+ 
+\begin{center} 
+\begin{tabular}{ll} 
+\textbf{Deprecated Name} & \textbf{New Name} \\ 
+\hline 
+\mpicallbackmain{MPI\_Comm\_errhandler\_fn} & \mpicallback{MPI\_Comm\_errhandler\_function} \\ 
+\mpicallbackmain{MPI\_File\_errhandler\_fn} & \mpicallback{MPI\_File\_errhandler\_function} \\ 
+\mpicallbackmain{MPI\_Win\_errhandler\_fn}  & \mpicallback{MPI\_Win\_errhandler\_function}  \\ 
+\hline 
+\end{tabular} 
+\end{center}  
+
+
+\section{Deprecated since \texorpdfstring{\mpiivdoto/}{MPI-4.0}}
+\label{sec:deprecated:since40}
+
+\label{sec:deprecated-send-cancel}
+\mpitermindex{cancel}
+Cancelling a send request by calling \mpifunc{MPI\_CANCEL} has been deprecated and may be removed in a future version of the \MPI/ specification.
+
+
+\deprecatedsep
+The following function is deprecated and is superseded by the new
+\mpifunc{MPI\_INFO\_GET\_STRING} call in \mpiivdoto/. 
+
+\cdeclindex{MPI\_Info}%
+\begin{mpi-binding}
+    function_name("MPI_Info_get")
+    deprecate()
+    
+    parameter("info", "INFO", desc=r"info object")
+    parameter("key", "STRING", constant=True, desc=r"key")
+    parameter("valuelen", "INFO_VALUE_LENGTH", desc=r"length of value associated with \mpiarg{key}")
+    parameter(
+        "value", "STRING", direction="out", desc=r"value", length="valuelen"
+    )
+    parameter(
+        "flag",
+        "LOGICAL",
+        direction="out",
+        desc=r"\mpicode{true} if \mpiarg{key} defined, \mpicode{false} if not",
+    )
+\end{mpi-binding}
+
+This function retrieves the value associated with key in a previous call to 
+\mpifunc{MPI\_INFO\_SET}. If such a key exists, it sets \mpiarg{flag} to \mpicode{true} 
+and returns the value in \mpiarg{value},
+otherwise it sets \mpiarg{flag} to \mpicode{false} and leaves
+\mpiarg{value} unchanged. 
+\mpiarg{valuelen} is the number of characters available in 
+value. If it is less than the actual size of the value, the value is
+truncated. In C, \mpiarg{valuelen} should
+be one less than the amount of allocated space to allow
+for the null terminator. 
+
+If \mpiarg{key} is larger than \mpiconst{MPI\_MAX\_INFO\_KEY}, 
+the call is erroneous. 
+
+The function \mpifunc{MPI\_INFO\_GET} is allowed to be called at any time, following the description for \MPI/ functionality that is always available in \sectionref{subsec:dynamic:preinit_functions}.
+
+\deprecatedsep
+The following function is deprecated and is superseded by the new
+\mpifunc{MPI\_INFO\_GET\_STRING} call in \mpiivdoto/. 
+
+\begin{mpi-binding}
+    function_name("MPI_Info_get_valuelen")
+    deprecate()
+    
+    parameter("info", "INFO", desc=r"info object")
+    parameter("key", "STRING", constant=True, desc=r"key")
+    parameter(
+        "valuelen",
+        "INFO_VALUE_LENGTH",
+        direction="out",
+        desc=r"length of value associated with \mpiarg{key}",
+    )
+    parameter(
+        "flag",
+        "LOGICAL",
+        direction="out",
+        desc=r"\mpicode{true} if \mpiarg{key} defined, \mpicode{false} if not",
+    )
+\end{mpi-binding}
+
+Retrieves the length of the \mpiarg{value} associated with
+\mpiarg{key}. If \mpiarg{key} is defined, \mpiarg{valuelen} is set
+to the length of its associated value and \mpiarg{flag} is set to
+\mpicode{true}.  If \mpiarg{key} is not defined, \mpiarg{valuelen} is not
+touched and \mpiarg{flag} is set to \mpicode{false}. The length returned in 
+C does not include the end-of-string character.
+
+If \mpiarg{key} is larger than \mpiconst{MPI\_MAX\_INFO\_KEY}, 
+the call is erroneous.
+
+The function \mpifunc{MPI\_INFO\_GET\_VALUELEN} is allowed to be called at any time, following the description for \MPI/ functionality that is always available in \sectionref{subsec:dynamic:preinit_functions}.
+
+\deprecatedsep
+The following return code has been deprecated and is superseded by a new name in \MPIIVDOTO/.
+\begin{center}
+\begin{tabular}{ll}
+\textbf{Deprecated Name} & \textbf{Replacement Name} \\
+\hline
+\error{MPI\_T\_ERR\_INVALID\_ITEM} & \error{MPI\_T\_ERR\_INVALID\_INDEX} \\
+\hline
+\end{tabular}
+\end{center}
+
+
+\deprecatedsep
+\label{sec:deprecated-fortran-sizeof}
+The following Fortran subroutines are deprecated because the Fortran
+language \cfunc{storage\_size()} and \cfunc{c\_sizeof()} intrinsic
+functions provide similar functionality.  Note that while
+\mpifunc{MPI\_SIZEOF} and \cfunc{c\_sizeof()} return the size in
+bytes, \cfunc{storage\_size()} provides the size in bits.
+\mpitermtitleindex{MPI\_SIZEOF and storage\_size@\protect\mpifuncskip{MPI\_SIZEOF} and \protect\cfunc{storage\_size()}}
+
+\begin{mpi-binding}
+    function_name("MPI_Sizeof")
+    
+    # There is no C binding for this function
+    no_c_binding()
+    deprecate()
+    
+    parameter(
+        "x",
+        "BUFFER",
+        suppress="f08_intent f90_parenthesis",
+        desc=r"a Fortran variable of numeric intrinsic type",
+    )
+    parameter(
+        "size",
+        "NUM_BYTES_SMALL",
+        direction="out",
+        desc=r"size of machine representation of that type",
+    )
+\end{mpi-binding}
+
+This function returns the size in bytes of the machine representation of
+the given variable. It is a generic Fortran routine and has a Fortran
+binding only. 
+
+\begin{users} 
+This function is similar to the C \code{sizeof} operator
+but behaves slightly differently. If given an array argument, it 
+returns the size of the base element, not the size of the
+whole array.
+\end{users}  
+
+\begin{rationale}
+This function is not available in other languages because it would
+not be useful. 
+\end{rationale}
+
+\section{Deprecated since \texorpdfstring{\mpiivdoti/}{MPI-4.1}}
+
+\label{sec:deprecated:since41}
+
+\label{sec:deprecated-mpif.h}
+The use of the \code{mpif.h} include file has been deprecated.
+Information supporting the transition to \code{USE mpi} or \code{USE mpi\_f08} is provided in Section~\ref{f90:basic}.
+
+\deprecatedsep
+\label{sec:deprecated-mpi-host}
+The predefined attribute key \mpiconst{MPI\_HOST} for \mpiconst{MPI\_COMM\_WORLD} when using the \wpm{} is deprecated.
+
+\mpiconstmain{MPI\_HOST}: Host process rank, if such exists, \mpiconst{MPI\_PROC\_NULL}, otherwise.
+
+\subsubsection*{Host Rank}
+\mpitermtitleindex{host rank}
+The value returned for \mpiconst{MPI\_HOST} gets the rank of the \mpitermni{HOST} process in the group associated
+with communicator \mpiconst{MPI\_COMM\_WORLD}, if there is such.
+\mpiconst{MPI\_PROC\_NULL} is returned if there is no host.
+\MPI/ does not specify what it
+means for a process to be a \mpitermni{HOST}, nor does it requires that a \mpitermni{HOST}
+exists.
+
+The attribute \mpiconst{MPI\_HOST} has the same value on all processes
+of \mpiconst{MPI\_COMM\_WORLD}.
+
+\begin{center}
+\begin{tabular}{l}
+\multicolumn{1}{c}{\textbf{Environmental inquiry keys}} \\
+\hline
+{\small C type: \ctype{const int} (or unnamed \ctype{enum})} \\
+{\small Fortran type: \ftype{INTEGER}} \\
+\hline
+\mpiconst{MPI\_HOST} \\
+\hline
+\end{tabular}
+\end{center}
+
+\deprecatedsep
+All \mpiskipfunc{MPI\_\XXX/\_X} procedures have been deprecated and may be removed in a future version of the \MPI/ specification.
+In the case of their C binding and their Fortran binding through the \code{mpi\_f08} module, they are superseded by the large count and large byte displacement bindings of their counterpart in the form of \mpiskipfunc{MPI\_\XXX/}.
+
+\begin{mpi-binding}
+    function_name("MPI_Type_size_x")
+    deprecate()
+    parameter("datatype", "DATATYPE", desc=r"datatype to get information on")
+    parameter("size", "XFER_NUM_ELEM", direction="out", desc=r"datatype size")
+\end{mpi-binding}
+
+The description of \mpifunc{MPI\_TYPE\_SIZE} is applicable to this deprecated \mpiskipfunc{MPI\_TYPE\_SIZE\_X} accordingly,
+see \sectionref{subsec:pt2pt-addfunc}.
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Type_get_extent_x")
+    deprecate()
+    parameter("datatype", "DATATYPE", desc=r"datatype to get information on")
+    parameter(
+        "lb", "XFER_NUM_ELEM", direction="out", desc=r"lower bound of datatype"
+    )
+    parameter(
+        "extent", "XFER_NUM_ELEM", direction="out", desc=r"extent of datatype"
+    )
+\end{mpi-binding}
+
+The description of \mpifunc{MPI\_TYPE\_GET\_EXTENT} is applicable to this deprecated \mpiskipfunc{MPI\_TYPE\_GET\_EXTENT\_X} accordingly,
+see \sectionref{subsec:pt2pt-extent}.
+
+\cdeclindex{MPI\_Aint}%
+\begin{mpi-binding}
+    function_name("MPI_Type_get_true_extent_x")
+    deprecate()
+    parameter("datatype", "DATATYPE", desc=r"datatype to get information on")
+    parameter(
+        "true_lb",
+        "XFER_NUM_ELEM",
+        direction="out",
+        desc=r"true lower bound of datatype",
+    )
+    parameter(
+        "true_extent",
+        "XFER_NUM_ELEM",
+        direction="out",
+        desc=r"true extent of datatype",
+    )
+\end{mpi-binding}
+
+The description of \mpifunc{MPI\_TYPE\_GET\_TRUE\_EXTENT} is applicable to this deprecated \mpiskipfunc{MPI\_TYPE\_GET\_TRUE\_EXTENT\_X} accordingly,
+see \sectionref{subsec:pt2pt-true-extent}.
+
+\label{func:mpi-get-elements-x}
+\cdeclindex{MPI\_Status}%
+\begin{mpi-binding}
+    function_name("MPI_Get_elements_x")
+    deprecate()
+    parameter(
+        "status", "STATUS", desc=r"return status of receive operation", constant=True
+    )
+    parameter("datatype", "DATATYPE", desc=r"datatype used by receive operation")
+    parameter(
+        "count",
+        "NUM_BYTES",
+        direction="out",
+        desc=r"number of received basic elements",
+    )
+\end{mpi-binding}
+
+The description of \mpifunc{MPI\_GET\_ELEMENTS} is applicable to this deprecated \mpiskipfunc{MPI\_GET\_ELEMENTS\_X} accordingly,
+see \sectionref{subsec:pt2pt-datatypeuse}.
+
+
+\label{func:mpi-status-set-elements-x}
+
+\cdeclindex{MPI\_Status}%
+\begin{mpi-binding}
+    function_name("MPI_Status_set_elements_x")
+    deprecate()
+    parameter(
+        "status",
+        "STATUS",
+        direction="inout",
+        desc=r"status with which to associate count",
+    )
+    parameter("datatype", "DATATYPE", desc=r"datatype associated with count")
+    parameter(
+        "count",
+        "XFER_NUM_ELEM",
+        desc=r"number of elements to associate with status",
+    )
+\end{mpi-binding}
+
+The description of \mpifunc{MPI\_STATUS\_SET\_ELEMENTS} is applicable to this deprecated \mpiskipfunc{MPI\_STATUS\_SET\_ELEMENTS\_X} accordingly,
+see \sectionref{sec:ei-status}.
+

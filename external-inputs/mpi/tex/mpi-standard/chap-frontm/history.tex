@@ -1,0 +1,149 @@
+% General note: This is not the place to describe the changes in detail;
+% that should be done either in the introduction or through the change log.
+% Provide only the highest level summary here.
+
+\ifdraftspec
+\paragraph*{202X Draft Specification, XXXX, 202X.}
+This document contains a draft of the \MPI/ specification as of the date of
+publication.
+It has not been adopted as an official \MPI/ specification, and
+is provided for comment only.
+This document includes updates and new features that will be present in the
+final \mpivdoti/ document.
+\else
+\fi
+
+\paragraph*{Version 5.0: June 5, 2025.}
+This version of the \MPIV/ standard is a major update and includes
+significant new functionality.
+The largest change is the addition of a standard Application
+Binary Interface (ABI) to allow interoperability of different
+implementations.
+
+\paragraph*{Version 4.1: November 2, 2023.}
+This version of the \MPIIVDOTI/ standard contains mostly corrections
+and clarifications to the \MPIIVDOTO/ document. Several routines, the
+attribute key \mpiconstskip{MPI\_HOST}, and the \code{mpif.h} Fortran
+include file are deprecated.
+
+\paragraph*{Version 4.0: June 9, 2021.}
+This version of the \MPIIV/ standard is a major update and includes
+significant new functionality.
+The largest changes are the addition of large-count versions of many
+routines to address the limitations of using an \code{int}
+or \code{INTEGER} for the count parameter, persistent collectives, partitioned
+communications, an alternative way to initialize \MPI/, application
+info assertions, and improvements to the definitions of error handling.
+In addition, there are a number of smaller improvements and corrections.
+
+\paragraph*{Version 3.1:  June 4, 2015.}
+This document contains mostly corrections and clarifications to the
+\mpiiiidoto/ document.  The largest change is a correction to the Fortran
+bindings introduced in \mpiiiidoto/.
+Additionally, new functions added
+include routines to manipulate \code{MPI\_Aint} values in a portable manner, nonblocking
+collective I/O routines, and routines to get the index value by name for
+\mpiskipfunc{MPI\_T} performance and control variables.
+
+% It would be a terrible mistake to list all changes to MPI-3 here.  If
+% this list is unsatisfactory, the next best option is to list *no*
+% specific enhancements, and instead simply instruct the reader that there
+% are many extensions.
+%
+\paragraph*{Version 3.0:  September 21, 2012.}
+Coincident with the development of \mpiiidotii/, the \MPI/ Forum began
+discussions of a major extension to \MPI/.  This document contains the
+\MPIIII/ standard.  This version of the \mpiiii/ standard
+contains significant extensions to \MPI/ functionality, including
+nonblocking collectives, new one-sided communication operations, and
+Fortran 2008 bindings.  Unlike \mpiiidotii/, this standard is
+considered a major update to the \MPI/ standard.  As with previous
+versions, new features have been adopted only when there were
+compelling needs for the users.  Some features, however, may have more
+than a minor impact on existing \MPI/ implementations.
+
+\paragraph*{Version 2.2:  September 4, 2009.}
+This document contains mostly corrections and clarifications to the
+\mpiiidoti/ document.  A few extensions have been added; however all
+correct \mpiiidoti/ programs are correct
+\mpiiidotii/ programs.  New features
+were adopted only when there were compelling needs for users, open
+source implementations, and minor impact on existing \MPI/
+implementations.  
+
+% the double 2008 is a typo, but not corrected in the moment, because the official standard should be printed 
+% \paragraph*{Version 2.1: \today, 2008.}
+\paragraph*{Version 2.1: June 23, 2008.}
+This document combines the previous documents 
+\mpiidotiii/ (May 30, 2008) 
+and \mpiiidoto/ (July 18, 1997). 
+Certain parts of \mpiiidoto/, such as some sections of Chapter~4, 
+Miscellany, and Chapter~7, Extended Collective
+Operations, have  
+been merged into the chapters of \mpiidotiii/. Additional errata and 
+clarifications collected by the \mpi/ Forum are also included in 
+this document.
+
+\paragraph*{Version 1.3: May 30, 2008.}
+This document combines the previous 
+documents \mpiidoti/ (June 12, 1995) and the \mpiidotii/ chapter in \mpiii/ 
+(July 18, 1997). Additional errata collected by the \mpi/ Forum 
+referring to \mpiidoti/ and \mpiidotii/ are also included in this 
+document.
+
+\paragraph*{Version 2.0: July 18, 1997.}
+Beginning after the release of 
+\mpiidoti/, the \mpi/ Forum began meeting to consider corrections and 
+extensions. \mpiii/ has been focused on process creation and 
+management, one-sided communications, extended collective 
+communications, external interfaces and parallel I/O. A miscellany 
+chapter discusses items that do not fit elsewhere, in particular 
+language interoperability.
+
+\paragraph*{Version 1.2: July 18, 1997.}
+The \mpiii/ Forum introduced \mpiidotii/ as 
+Chapter~3 
+in the standard ``\mpiii/: Extensions to the Message-Passing
+Interface'', July 18, 1997.  This section contains clarifications 
+and minor corrections to Version 1.1 of the \mpi/ standard. The only 
+new function in \mpiidotii/ is one for identifying to which version of 
+the \mpi/ standard the implementation conforms. There are small 
+differences between \mpii/ and \mpiidoti/. There are very few differences 
+between \mpiidoti/ and \mpiidotii/, but large differences between \mpiidotii/
+and \mpiii/.
+
+\paragraph*{Version 1.1: June, 1995.}
+Beginning in March, 1995, the Message-Passing Interface Forum reconvened to 
+correct errors and make clarifications in the \mpi/ document of May 5, 1994,
+referred to below as Version~1.0.  These discussions resulted in 
+Version~1.1.  The changes from Version~1.0 are minor.  A version
+of this document with all changes marked is available.  
+
+%MPx-1.2
+\paragraph*{Version 1.0:  May, 1994.}
+The Message-Passing Interface Forum, with participation from over
+40 organizations, has been meeting since January 1993 to discuss and
+define a set of library interface standards for message
+passing.
+The Message-Passing Interface Forum
+is not sanctioned or supported by any official
+standards organization.
+
+The goal of the Message-Passing Interface, simply stated, is to
+develop a widely used
+standard for writing message-passing programs.
+As such the interface should
+establish a practical, portable, efficient, and flexible standard 
+for message-passing.
+
+This is the final report, Version~1.0, of
+the Message-Passing Interface Forum.
+This document contains all the
+technical features proposed for the interface.  This copy of the draft
+was processed by \LaTeX{} on
+May 5, 1994.
+
+%% WDG - I'm ok with just deleting this, as it can be viewed as either attached 
+%% to Version 1.0 (in which case it should be left) or as a separate point,
+%% in which case, it should be deleted (but *not* replaced with a newer
+%% version)

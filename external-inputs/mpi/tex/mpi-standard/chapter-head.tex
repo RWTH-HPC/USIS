@@ -1,0 +1,148 @@
+% Version as of 25 March 1997 by shl
+
+%
+%chapter-head.tex
+
+%Version of July 29, 1993 - Steve Otto, Oregon Graduate Institute
+%Version of April 5, 2009 - William Gropp, University of Illinois
+%Version of December 10, 2025 - William Gropp, University of Illinois
+
+\documentclass[twoside,11pt,fleqn,letterpaper,pagesize]{scrbook}
+\usepackage{scrlayer-scrpage}
+\pagestyle{plain}
+\setcounter{tocdepth}{3}
+\marginparwidth 0pt
+\oddsidemargin=.25in
+\evensidemargin  .25in
+\marginparsep 0pt
+\topmargin=-.5in
+\textwidth=6.0in
+\textheight=9.0in
+% Keep the document parindent in a separate length so it is constant
+\newlength{\docparindent}
+\setlength{\docparindent}{2em}
+\parindent=\docparindent
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{makeidx}         % Index generation, please see "man makeindex"
+                             % and README
+\usepackage{tabularx}        % Enhanced tabular environment
+
+\usepackage{multirow}
+
+% control of description environment
+\usepackage{enumitem}
+\usepackage{ifpdf}
+\usepackage{color}
+
+\input{mpi-macs.tex}
+
+% Use drafttrue while constructing the draft
+\drafttrue
+%\draftfalse
+% Use draftspectrue to include a text block about the draft specification
+\draftspectrue
+%\draftspecfalse
+
+% Use \bindinglabeltrue to issue a language label before every binding
+% definition
+\bindinglabeltrue
+
+%% scrbook customization
+\KOMAoptions{chapterprefix=true}
+\KOMAoptions{numbers=noendperiod}
+\KOMAoptions{headings=openright}
+\KOMAoptions{open=right}
+\setkomafont{disposition}{\normalcolor\rmfamily}
+\setkomafont{chapter}{\normalcolor\rmfamily\bfseries\huge}
+% \bfseries might be a better choice for the title
+\setkomafont{title}{\normalcolor\rmfamily\mdseries\Huge}
+\setkomafont{descriptionlabel}{\normalfont\bfseries}
+
+% 4.0 used \sffamily for paragraph and sections. 4.1 is using rmfamily
+% throughout
+%\setkomafont{paragraph}{\normalfont\sffamily}
+% 4.1 changed subsubsections to be in italics so that they stand out in the
+% text.
+\setkomafont{subsubsection}{\normalfont\itshape}
+
+% Not included: KOMA commands to manage tocstyle
+
+\typeout{  }
+\typeout{Loading PDF-Graphicx packages ... }
+\typeout{-------------------------------------------------------------------}
+
+\usepackage{graphicx}                   % graphics extension
+\DeclareGraphicsExtensions{.pdf}                % In case of using pdflatex set ext.
+\definecolor{mpidarkblue}{HTML}{003670}         % Dark blue in the MPI logo
+\usepackage[pdftex,                             % For PDF output
+            backref=page,
+            baseurl={http://www.mpi-forum.org},
+            colorlinks=true,
+            filecolor=black,
+            linkcolor=mpidarkblue,
+            citecolor=red,
+            urlcolor=blue,
+            hypertexnames=true,
+            bookmarksnumbered=true,
+            pdfauthor={MPI-Forum},
+            pdftitle={MPI: A Message-Passing Interface Standard},
+            pdfsubject={MPI: A Message-Passing Interface Standard},
+            pdfkeywords={Message Passing, MPI, Standard},
+            pdfpagelabels,
+            plainpages=false
+            ]{hyperref}      % For hyperlinks
+
+\makeindex
+
+\begin{document}
+
+% \setcounter{page}{1}  % obsolete due use of documenttype 'book'
+\pagestyle{empty}
+\pagenumbering{roman}
+
+\title{\MPI/:  A Message-Passing Interface Standard
+        \\ {\Large Version 5.1}
+\ifdraft
+        \\ {\large (Draft)}
+        \\ {\large Unofficial, for comment only}
+\fi
+}
+
+\author{Message Passing Interface Forum}
+
+\date{\today}
+
+\maketitle
+\hfuzz=5pt
+
+\newpage
+\vspace{5.0in}
+This is the result of a LaTeX run of a draft of a single chapter of
+the MPIF document.
+\newpage
+
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\pagestyle{scrheadings}  %\withlinenumbers
+% headings and scrheadings with scrbook does not include pagenumbers
+% on the head. The following fixes that.
+\rehead{\upshape\textrm{\normalsize\thepage}}
+\lohead{\upshape\textrm{\normalsize\thepage}}
+% Line numbers ruler
+\lefoot{\hbox to 0pt{\hss\LineNumberRuler\hskip1.5pc}}
+\rofoot{\hbox to 0pt{\hskip1.5pc\LineNumberRuler\hss}}
+% Mark the page as draft if in draftmode
+\ifdraft
+\cfoot{\drafttext}
+% Clear left/right foot set above
+\refoot{}
+\lofoot{}
+\else
+\cfoot{}
+\fi
+
+\startchap
+

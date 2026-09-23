@@ -1,0 +1,114 @@
+#! /usr/bin/env python3
+#
+# -*- mode: python-mode; -*-
+#
+# Filter the LaTeX error log for errors, and keep track of the current file
+# and page, to provide a better error summary
+#
+#	    egrep 'multiply defined|Overfull |undefined |Warning: |\(\./chap-.*/.*\.tex|\(\./func-index\.tex|\(\./mpi-report\.bbl' mpi-report.log ;\
+#	fi
+#	@if test -s warnindex.txt ; then \
+#	    echo "Warnings from buildindices:" ; \
+#	    cat warnindex.txt ; fi
+
+import re
+import os
+import datetime
+import argparse
+
+# Set defaults
+verbose = 0
+skipexindex = 0
+inputfile = 'mpi-report.log'
+
+# Check for commandline options
+parser = argparse.ArgumentParser()
+parser.add_argument('--noexindex', help="Do not include exindex or Exindex warnings", action="store_true")
+parser.add_argument('--verbose', help="Provide verbose output", action="store_true")
+parser.add_argument('--inputfile', help="Use this file for input", type=str)
+args = parser.parse_args()
+if args.noexindex:
+    skipexindex = 1
+if args.inputfile:
+    inputfile = args.inputfile
+if args.verbose:
+    verbose = 1
+
+# Process the input file
+latexlog = open(inputfile,'r')
+curfile=inputfile
+curpage=-1
+messageCount = 0
+inEndMatter = 0
+for line in latexlog:
+    # Match file and page entry, or error
+    # (chap-*.tex occurs first on a line, possibly with preceeding spaces
+    # [0-9*] occurs multiple times on a line, for the page number
+    # [0-9* (no closing ]) occurs at the end of a line; the subsequent line
+    # contains a message, typically a warning or error
+    # Other files read may occur on a line, e.g., (./mpi-report.bbl
+    findchapfile = re.search(r' *\(\.?/?(chap-.*\.tex)(.*)', line, 0)
+    if findchapfile:
+        curfile = findchapfile.group(1)
+        if verbose:
+            print("Chapter " + curfile)
+        line    = findchapfile.group(2)
+    else:
+        # Check for other files (but must be in top directory)
+        findfilename = re.search(r' *\(\.?/?([a-zA-Z0-9-]+\.[a-z]+)(.*)', line, 0)
+        if findfilename:
+            # Is the name actually a file?
+            if os.path.isfile(findfilename.group(1)):
+                curfile = findfilename.group(1)
+                if verbose:
+                    print("File " + curfile)
+                if curfile == "mpi-report.bbl":
+                    inEndMatter = 1
+                line = findfilename.group(2)
+
+    findpage = re.search(r' *\[([0-9]+)\](.*)',line,0)
+    while findpage:
+        curpage = findpage.group(1)
+        if verbose:
+            print("page " + curpage);
+        line    = findpage.group(2)
+        findpage = re.search(r' *\[([0-9]+)\](.*)',line,0)
+
+    # Look for [digits with no closing bracket
+    findpage = re.search(r' *\[([0-9]+)(.*)',line,0)
+    if findpage:
+        curpage = findpage.group(1)
+        if verbose:
+            print("page " + curpage);
+        line    = findpage.group(2)
+
+    # Look for messages to output
+#	    egrep 'multiply defined|Overfull |undefined |Warning: |\(\./chap-.*/.*\.tex|\(\./func-index\.tex|\(\./mpi-report\.bbl' mpi-report.log ;
+    findmsg = re.search(r'multiply defined|Overfull |undefined |Warning:',line,0)
+    if findmsg:
+        # Optionally ignore some messages
+        skipmsg = re.search(r'LaTeX Font Warning',line,0)
+        if skipmsg:
+            continue
+        skipmsg = re.search(r'Class scrbook Warning:',line,0)
+        if skipmsg:
+            continue
+        # Skip Overful box in endmatter
+        if inEndMatter:
+            skipmsg = re.search(r'Overfull \\hbox',line,0)
+            if skipmsg:
+                continue
+        # Optionally: skip over exindex misuse
+        skipmsg = re.search(r'Warning: [Ee]xindex used outside of an example',line,0)
+        if skipexindex and skipmsg:
+            continue
+        messageCount += 1
+        print(curfile + " after page " + curpage + ":")
+        print("\t" + line,end="")
+
+
+# set return code based on whether any error messages are found
+if messageCount > 0:
+    exit(1)
+else:
+    exit(0)

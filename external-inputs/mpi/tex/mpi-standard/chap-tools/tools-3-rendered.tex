@@ -1,0 +1,24 @@
+\chapter{Tool Support}
+\mpitermtitleindex{tool support}
+\label{sec:tools}
+\label{chap:tools}
+
+\section{Introduction}
+
+This chapter discusses interfaces that allow debuggers, performance
+analyzers, and other tools to extract information about the behavior of
+\MPI/ processes.  Specifically, this chapter defines both the \MPI/
+profiling interface (Section~\ref{sec:prof}), which supports the
+transparent interception and inspection of \MPI/ calls, and the \MPI/ tool
+information interface (Section~\ref{sec:mpit}), which supports the
+inspection and manipulation of \MPI/ control and performance variables,
+as well as the registration of callbacks for \MPI/ library events.
+The interfaces described in this chapter are all defined in the context of
+an \MPI/ process, i.e., are callable from the same code that invokes other
+\MPI/ functions.
+
+% We need to include the Python-rendered .tex files, not the raw
+% (unrendered) .tex files.
+\input{chap-tools/prof-rendered}
+\input{chap-tools/mpit-rendered}
+

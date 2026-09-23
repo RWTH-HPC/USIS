@@ -1,0 +1,635 @@
+
+\chapter{External Interfaces}
+\label{sec:ei-2}
+\label{chap:ei-2}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:ei-intro}
+
+This chapter
+contains
+calls used to
+create \mpitermdef{generalized requests},
+which allow users 
+to create new nonblocking
+operations with an interface similar to what is present in \mpi/.
+These calls can be used to layer new functionality on top of \mpi/. 
+Section~\ref{sec:ei-status} deals with setting the information found
+in
+\mpiarg{status}.  
+This functionality is needed for generalized 
+requests.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Generalized Requests}
+\mpitermtitleindex{generalized requests}
+\label{sec:ei-gr}
+
+The goal of 
+generalized requests 
+is to allow users to define new
+nonblocking operations.  Such an outstanding nonblocking operation is
+represented by a (generalized) request.  A fundamental property of 
+nonblocking operations is that 
+\mpitermni{progress}\mpitermindex{progress!generalized requests}\mpitermindex{generalized requests!progress}\mpitermindex{semantics!generalized requests!progress}
+toward the completion of this
+operation occurs asynchronously, i.e., concurrently with normal program
+execution.  Typically, this requires execution of code concurrently
+with the execution of the user code, e.g., in a separate thread or in a
+signal handler.  Operating systems provide a variety of mechanisms in
+support of concurrent execution.
+\MPI/ does not attempt to standardize or 
+to replace these mechanisms: it is assumed
+programmers who wish to define new asynchronous operations will use
+the  mechanisms provided by the underlying operating system. 
+Thus, the calls in this section only provide a means for
+defining the effect of \MPI/ calls such as \mpifunc{MPI\_WAIT} or
+\mpifunc{MPI\_CANCEL} when they apply to generalized requests, and for
+signaling to \MPI/ the completion of a generalized operation. 
+
+\begin{rationale}
+It is tempting to also define an \MPI/ standard mechanism for
+achieving concurrent execution of
+user-defined nonblocking operations.  
+However, it is difficult to define such a mechanism without
+consideration of the specific mechanisms used in the operating system.
+The Forum feels that concurrency mechanisms are a proper part
+of the underlying operating system and should not be standardized by
+\MPI/; the \MPI/ standard should only deal with the interaction of
+such mechanisms with \MPI/.
+\end{rationale}
+
+For a regular request, the operation associated with the request is
+performed by the \MPI/ implementation, and the operation
+completes without intervention by the application.  For a generalized
+request, the operation associated with the request is performed by the
+application; therefore, the application must notify \MPI/ 
+through a call to \mpifunc{MPI\_GREQUEST\_COMPLETE} when the
+operation completes.
+\MPI/ maintains the ``completion'' status of generalized requests.  Any
+other request state has to be maintained by the user. 
+ 
+A new generalized request is started with
+
+\cdeclindex{MPI\_Request}%
+\begin{funcdef}{MPI\_GREQUEST\_START}{(\mbox{query\_fn}, \mbox{free\_fn}, \mbox{cancel\_fn}, \mbox{extra\_state}, \mbox{request})}
+\funcarg{\IN}{query\_fn}{callback function invoked when request status is queried (function)}
+\funcarg{\IN}{free\_fn}{callback function invoked when request is freed (function)}
+\funcarg{\IN}{cancel\_fn}{callback function invoked when request is cancelled (function)}
+\funcarg{\IN}{extra\_state}{extra state}
+\funcarg{\OUT}{request}{generalized request (handle)}
+\end{funcdef}
+\mpicallbackindex{MPI\_Grequest\_query\_function}%
+\mpicallbackindex{MPI\_Grequest\_free\_function}%
+\mpicallbackindex{MPI\_Grequest\_cancel\_function}%
+\mpibindmain{MPI\_Grequest\_start}{(\gb{}MPI\_Grequest\_query\_function~*query\_fn, MPI\_Grequest\_free\_function~*free\_fn, MPI\_Grequest\_cancel\_function~*cancel\_fn, void~*extra\_state, MPI\_Request~*request)}
+\mpifnewbindmain{MPI\_Grequest\_start}{(query\_fn, free\_fn, cancel\_fn, extra\_state, request, ierror) \fargs PROCEDURE(MPI\_Grequest\_query\_function)\ ::\ \mbox{query\_fn}\fnarg{}PROCEDURE(MPI\_Grequest\_free\_function)\ ::\ \mbox{free\_fn}\fnarg{}PROCEDURE(MPI\_Grequest\_cancel\_function)\ ::\ \mbox{cancel\_fn}\fnarg{}INTEGER(KIND=MPI\_ADDRESS\_KIND), INTENT(IN)\ ::\ \mbox{extra\_state}\fnarg{}TYPE(MPI\_Request), INTENT(OUT)\ ::\ \mbox{request}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpicallbackindex{GREQUEST\_QUERY\_FUNCTION}%
+\mpicallbackindex{GREQUEST\_FREE\_FUNCTION}%
+\mpicallbackindex{GREQUEST\_CANCEL\_FUNCTION}%
+\mpifbindmain{MPI\_GREQUEST\_START}{(QUERY\_FN, FREE\_FN, CANCEL\_FN, EXTRA\_STATE, REQUEST, IERROR) \fargs EXTERNAL \mbox{QUERY\_FN}, \mbox{FREE\_FN}, \mbox{CANCEL\_FN}\fnarg{}INTEGER(KIND=MPI\_ADDRESS\_KIND) \mbox{EXTRA\_STATE}\fnfinalarg{}INTEGER \mbox{REQUEST}, \mbox{IERROR}}
+
+\begin{users}
+Note that a generalized request is of the same type as regular requests, in C and Fortran.
+\end{users}
+
+The call starts a generalized request and returns a handle to it in
+\mpiarg{request}.
+
+The syntax and meaning of the callback functions are listed below.
+All callback functions are passed the \mpiarg{extra\_state} argument
+that was associated with the request by the starting call
+\mpifunc{MPI\_GREQUEST\_START}; \mpiarg{extra\_state} can be used to maintain user-defined
+state for the request.  
+
+In 
+C, the query procedure is
+
+\cdeclindex{MPI\_Status}%
+\mpitypedefbindmain{MPI\_Grequest\_query\_function}{(\gb{}void~*extra\_state, MPI\_Status~*status)}
+
+\par\noindent
+in Fortran with the \code{mpi\_f08} module
+
+\mpifnewsubbind{MPI\_Grequest\_query\_function}{(extra\_state, status, ierror) \fargs INTEGER(KIND=MPI\_ADDRESS\_KIND)\ ::\ \mbox{extra\_state}\fnarg{}TYPE(MPI\_Status)\ ::\ \mbox{status}\fnfinalarg{}INTEGER\ ::\ \mbox{ierror}}
+
+\par\noindent
+in Fortran with the \code{mpi} module and (deprecated) \code{mpif.h} include file
+
+\mpifsubbindmain{GREQUEST\_QUERY\_FUNCTION}{(EXTRA\_STATE, STATUS, IERROR) \fargs INTEGER(KIND=MPI\_ADDRESS\_KIND) \mbox{EXTRA\_STATE}\fnfinalarg{}INTEGER \mbox{STATUS(MPI\_STATUS\_SIZE)}, \mbox{IERROR}}
+
+\par\noindent
+
+The \mpiarg{query\_fn} function computes the status
+that should be returned for the generalized request.
+The status
+also includes information about successful/unsuccessful cancellation of
+the request (result to be returned by \mpifunc{MPI\_TEST\_CANCELLED}).
+
+The \mpiarg{query\_fn} callback is invoked by the 
+\mpifuncindex{MPI\_WAITANY}% 
+\mpifuncindex{MPI\_WAITSOME}% 
+\mpifuncindex{MPI\_WAITALL}% 
+\mpifuncindex{MPI\_TESTANY}% 
+\mpifuncindex{MPI\_TESTSOME}% 
+\mpifuncindex{MPI\_TESTALL}%
+\mpifuncindex{MPI\_WAIT}%
+\mpifuncindex{MPI\_TEST}%
+\mpiskipfunc{MPI\_\{WAIT$|$TEST\}\{$|$ANY$|$SOME$|$ALL\}} call that
+completed the generalized request associated with this callback.  
+The callback function
+is also 
+invoked by calls to \mpifunc{MPI\_REQUEST\_GET\_STATUS}, if the request is
+complete when the call occurs.  In 
+both
+cases, the callback is passed a reference to the corresponding status variable
+passed by the user to the \MPI/ call; the status set by the callback
+function is returned by the \MPI/ call. 
+If the user provided \mpiconst{MPI\_STATUS\_IGNORE} or
+\mpiconst{MPI\_STATUSES\_IGNORE} to the \MPI/ procedure that causes
+\mpiarg{query\_fn} to be called, then \MPI/ will pass
+a valid status object to \mpiarg{query\_fn}, and this status will be
+ignored upon return of the callback function.  
+Note that \mpiarg{query\_fn}
+is invoked only after 
+\mpifunc{MPI\_GREQUEST\_COMPLETE} is called on the request; 
+it may be invoked several times for
+the same generalized request, e.g., if the user calls
+\mpifunc{MPI\_REQUEST\_GET\_STATUS} several times for this request.
+Note also that a call to 
+\mpifuncindex{MPI\_WAITSOME}%
+\mpifuncindex{MPI\_WAITALL}%
+\mpifuncindex{MPI\_TESTSOME}%
+\mpifuncindex{MPI\_TESTALL}%
+\mpiskipfunc{MPI\_\{WAIT$|$TEST\}\{SOME$|$ALL\}} may cause multiple
+invocations of
+\mpiarg{query\_fn} callback functions, one for each
+generalized request that is completed by the \MPI/ call.  The order of
+these invocations is not specified by \mpi/.
+
+In C, the free procedure is
+
+\mpitypedefbindmain{MPI\_Grequest\_free\_function}{(\gb{}void~*extra\_state)}
+
+\par\noindent
+in Fortran with the \code{mpi\_f08} module
+
+\mpifnewsubbind{MPI\_Grequest\_free\_function}{(extra\_state, ierror) \fargs INTEGER(KIND=MPI\_ADDRESS\_KIND)\ ::\ \mbox{extra\_state}\fnfinalarg{}INTEGER\ ::\ \mbox{ierror}}
+
+\par\noindent
+in Fortran with the \code{mpi} module and (deprecated) \code{mpif.h} include file
+
+\mpifsubbindmain{GREQUEST\_FREE\_FUNCTION}{(EXTRA\_STATE, IERROR) \fargs INTEGER(KIND=MPI\_ADDRESS\_KIND) \mbox{EXTRA\_STATE}\fnfinalarg{}INTEGER \mbox{IERROR}}
+
+\par\noindent
+The \mpiarg{free\_fn} function is invoked to clean up user-allocated
+resources when the generalized request is freed. 
+
+The \mpiarg{free\_fn} callback is invoked by the 
+\mpifuncindex{MPI\_WAITANY}%
+\mpifuncindex{MPI\_WAITSOME}%
+\mpifuncindex{MPI\_WAITALL}%
+\mpifuncindex{MPI\_TESTANY}%
+\mpifuncindex{MPI\_TESTSOME}%
+\mpifuncindex{MPI\_TESTALL}%
+\mpifuncindex{MPI\_WAIT}%
+\mpifuncindex{MPI\_TEST}%
+\mpiskipfunc{MPI\_\{WAIT$|$TEST\}\{$|$ANY$|$SOME$|$ALL\}} call that
+completed the generalized request associated with this
+callback. \mpiarg{free\_fn} is invoked after the call to
+\mpiarg{query\_fn} for the same request.  However, if the \MPI/ call
+completed multiple generalized requests, the order in which
+\mpiarg{free\_fn} callback functions are invoked is not specified by
+\MPI/.
+ 
+The \mpiarg{free\_fn} callback 
+is also invoked for generalized requests that are freed by a call to
+\mpifunc{MPI\_REQUEST\_FREE} (no call to 
+\mpifuncindex{MPI\_WAITANY}%
+\mpifuncindex{MPI\_WAITSOME}%
+\mpifuncindex{MPI\_WAITALL}%
+\mpifuncindex{MPI\_TESTANY}%
+\mpifuncindex{MPI\_TESTSOME}%
+\mpifuncindex{MPI\_TESTALL}%
+\mpifuncindex{MPI\_WAIT}%
+\mpifuncindex{MPI\_TEST}%
+\mpiskipfunc{MPI\_\{WAIT$|$TEST\}\{$|$ANY$|$SOME$|$ALL\}}
+will occur for
+such a request).  In this case, the callback
+function will be called either in the \MPI/ call
+\mpifunc{MPI\_REQUEST\_FREE}\mpicode{(request)}, or in the \MPI/ call
+\mpifunc{MPI\_GREQUEST\_COMPLETE}\mpicode{(request)}, whichever happens 
+last, i.e., 
+in this case the actual freeing code is executed
+as soon as both calls \mpifunc{MPI\_REQUEST\_FREE} and
+\mpifunc{MPI\_GREQUEST\_COMPLETE} have occurred. 
+The \mpiarg{request} is not deallocated until after
+\mpiarg{free\_fn} completes.
+Note that \mpiarg{free\_fn} will be 
+invoked only once per request by a correct program. 
+
+\begin{users}
+Calling \mpifunc{MPI\_REQUEST\_FREE}\mpicode{(request)} will cause the
+\mpiarg{request} handle to be set to \mpiconst{MPI\_REQUEST\_NULL}.
+This handle to the generalized request is no longer valid.  However,
+user copies of this handle are valid until after
+\mpiarg{free\_fn} completes since \MPI/ does not deallocate the object
+until then.  Since \mpiarg{free\_fn} is not
+called until after \mpifunc{MPI\_GREQUEST\_COMPLETE}, the user copy of
+the handle can be used to make this call.  Users should note that
+\MPI/ will deallocate the object after \mpiarg{free\_fn}
+executes.  At this point, user copies of the \mpiarg{request} handle no
+longer point to a valid request.  \MPI/ will not set user copies to
+\mpiconst{MPI\_REQUEST\_NULL} in this case, so it is up to the user to
+avoid accessing this stale handle.  This is a special case in which \mpi/
+defers deallocating the object until a later time that is known by
+the user.
+\end{users}
+
+In C, the cancel procedure is
+
+\mpitypedefbindmain{MPI\_Grequest\_cancel\_function}{(\gb{}void~*extra\_state, int~complete)}
+
+\par\noindent
+in Fortran with the \code{mpi\_f08} module
+
+\mpifnewsubbind{MPI\_Grequest\_cancel\_function}{(extra\_state, complete, ierror) \fargs INTEGER(KIND=MPI\_ADDRESS\_KIND)\ ::\ \mbox{extra\_state}\fnarg{}LOGICAL\ ::\ \mbox{complete}\fnfinalarg{}INTEGER\ ::\ \mbox{ierror}}
+
+\par\noindent
+in Fortran with the \code{mpi} module and (deprecated) \code{mpif.h} include file
+
+\mpifsubbindmain{GREQUEST\_CANCEL\_FUNCTION}{(EXTRA\_STATE, COMPLETE, IERROR) \fargs INTEGER(KIND=MPI\_ADDRESS\_KIND) \mbox{EXTRA\_STATE}\fnarg{}LOGICAL \mbox{COMPLETE}\fnfinalarg{}INTEGER \mbox{IERROR}}
+
+The \mpiarg{cancel\_fn} function is invoked to start the cancelation of
+a generalized request.
+It is called by \mpifunc{MPI\_CANCEL}\mpicode{(request)}.
+\MPI/ passes \mpiarg{complete} = \mpicode{true} to the callback function if 
+\mpifunc{MPI\_GREQUEST\_COMPLETE} was already called on the request,
+and \mpiarg{complete} = \mpicode{false} otherwise.
+
+All callback functions return an error code.  
+The code is passed back and dealt with as appropriate for the error
+code by the \MPI/ procedure that invoked the callback function.  For
+example, if error codes are returned then the error code returned by
+the callback function will be returned by the \MPI/ procedure that
+invoked the callback function.
+In the case of
+an 
+\mpifuncindex{MPI\_WAITANY}%
+\mpifuncindex{MPI\_TESTANY}%
+\mpiskipfunc{MPI\_\{WAIT$|$TEST\}\{ANY\}} call that invokes both
+\mpiarg{query\_fn} and \mpiarg{free\_fn}, the \MPI/ call will return
+the error code returned by the last callback, namely
+\mpiarg{free\_fn}.  If one or more of the requests in a call to
+\mpifuncindex{MPI\_WAITSOME}%
+\mpifuncindex{MPI\_WAITALL}%
+\mpifuncindex{MPI\_TESTSOME}%
+\mpifuncindex{MPI\_TESTALL}%
+\mpiskipfunc{MPI\_\{WAIT$|$TEST\}\{SOME$|$ALL\}} failed,
+then the \MPI/ call will return
+\error{MPI\_ERR\_IN\_STATUS}. 
+In such a case, if the \MPI/ call was
+passed an array of statuses, then \MPI/ will return in each of the
+statuses that correspond to a completed generalized request the error
+code returned by the corresponding invocation of its \mpiarg{free\_fn}
+callback function.  However, if the \MPI/ procedure was passed
+\mpiconst{MPI\_STATUSES\_IGNORE}, then the individual error codes
+returned by each callback functions will be lost.
+
+\begin{users}
+\mpiarg{query\_fn} must \emph{not} set the error field of
+\mpiarg{status}
+since \mpiarg{query\_fn} may be called by \mpifunc{MPI\_WAIT} or
+\mpifunc{MPI\_TEST}, in which case the error field of \mpiarg{status}
+should not change.  The \MPI/ library knows the ``context'' in which
+\mpiarg{query\_fn} is invoked and can decide correctly when to put
+the returned error code in the error field of \mpiarg{status}.
+\end{users}
+
+\cdeclindex{MPI\_Request}%
+\begin{funcdef}{MPI\_GREQUEST\_COMPLETE}{(\mbox{request})}
+\funcarg{\INOUT}{request}{generalized request (handle)}
+\end{funcdef}
+\mpibindmain{MPI\_Grequest\_complete}{(\gb{}MPI\_Request~request)}
+\mpifnewbindmain{MPI\_Grequest\_complete}{(request, ierror) \fargs TYPE(MPI\_Request), INTENT(IN)\ ::\ \mbox{request}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_GREQUEST\_COMPLETE}{(REQUEST, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{REQUEST}, \mbox{IERROR}}
+
+The call informs \MPI/ that the operations represented by the generalized request
+\mpiarg{request} are 
+complete (see 
+definitions in Section~\ref{terms:semantic}).
+A call to \mpifunc{MPI\_WAIT}\mpicode{(request, status)} will return and a call to
+\mpifunc{MPI\_TEST}\mpicode{(request, flag, status)} will return \mpiarg{flag} = \mpicode{true}
+only after a call to \mpifunc{MPI\_GREQUEST\_COMPLETE} has declared that
+these operations are complete.
+
+\MPI/ imposes no restrictions on the code executed by the callback functions.
+However, new nonblocking operations should be defined so that the general
+semantic rules about \MPI/ calls such as \mpifunc{MPI\_TEST},
+\mpifunc{MPI\_REQUEST\_FREE}, or \mpifunc{MPI\_CANCEL} still hold. 
+Therefore, the
+callback functions \mpiarg{query\_fn}, \mpiarg{free\_fn}, or
+\mpiarg{cancel\_fn} should invoke blocking \MPI/ communication
+calls only if the context is such that these calls are guaranteed to
+return in finite time.  
+Once \mpifunc{MPI\_CANCEL} is invoked, the cancelled operation
+should complete in finite time, irrespective of the state of
+other \MPI/ processes (the operation has acquired ``local'' semantics).  It
+should either succeed, or fail without side-effects.  The user should
+guarantee these properties for newly defined operations.  
+
+\begin{implementors}
+A call to \mpifunc{MPI\_GREQUEST\_COMPLETE} may unblock a blocked user
+process/thread. The \MPI/ library should ensure that the blocked user
+computation will resume.
+\end{implementors}
+
+\subsection{Examples}
+
+\begin{example}
+\Exindex{C}{User-defined reduce}{MPI\_Grequest\_start,MPI\_Grequest\_complete}%
+This example shows the code for a user-defined reduce operation on an
+\code{int} using
+a binary tree: each nonroot \MPI/ process receives two messages, sums them, 
+and sends them up.  We assume that no status is returned and that the
+operation cannot be cancelled.
+
+%%HEADER
+%%LANG: C
+%%SKIPELIPSIS
+%%DECL: #include <pthread.h>
+%%DECL: int query_fn(void *extra_state, MPI_Status *status);
+%%DECL: int free_fn(void *extra_state);
+%%DECL: int cancel_fn(void *extra_state, int complete);
+%%DECL: void* reduce_thread(void *ptr);
+%%ENDHEADER
+\begin{lstlisting}[language={[MPI]C}]
+typedef struct {
+   MPI_Comm comm;
+   int tag;
+   int root;
+   int valin;
+   int *valout;
+   MPI_Request request;
+   } ARGS;
+
+
+int myreduce(MPI_Comm comm, int tag, int root,
+             int valin, int *valout, MPI_Request *request)
+{
+   ARGS *args;
+   pthread_t thread;
+   
+   /* start request */
+   MPI_Grequest_start(query_fn, free_fn, cancel_fn, NULL, request);
+   
+   args = (ARGS*)malloc(sizeof(ARGS));
+   args->comm = comm;
+   args->tag = tag;
+   args->root = root;
+   args->valin = valin;
+   args->valout = valout;
+   args->request = *request;
+   
+   /* spawn thread to handle request */
+   /* The availability of the pthread_create call is system dependent */
+   pthread_create(&thread, NULL, reduce_thread, args);
+   
+   return MPI_SUCCESS;
+}
+
+/* thread code */
+void* reduce_thread(void *ptr) 
+{
+   int lchild, rchild, parent, lval, rval, val;
+   MPI_Request req[2];
+   ARGS *args;
+   
+   args = (ARGS*)ptr;
+   
+   /* compute left and right child and parent in tree; set 
+      to MPI_PROC_NULL if does not exist  */
+   /* code not shown */
+   ...
+     
+   MPI_Irecv(&lval, 1, MPI_INT, lchild, args->tag, args->comm, &req[0]);
+   MPI_Irecv(&rval, 1, MPI_INT, rchild, args->tag, args->comm, &req[1]);
+   MPI_Waitall(2, req, MPI_STATUSES_IGNORE);
+   val = lval + args->valin + rval;
+   MPI_Send(&val, 1, MPI_INT, parent, args->tag, args->comm);
+   if (parent == MPI_PROC_NULL) *(args->valout) = val;
+   MPI_Grequest_complete((args->request));   
+   free(ptr);
+   return(NULL);
+}
+
+int query_fn(void *extra_state, MPI_Status *status)
+{
+   /* always send just one int */
+   MPI_Status_set_elements(status, MPI_INT, 1);
+   /* can never cancel so always true */
+   MPI_Status_set_cancelled(status, 0);
+   /* choose not to return a value for this */
+   status->MPI_SOURCE = MPI_UNDEFINED;
+   /* tag has no meaning for this generalized request */
+   status->MPI_TAG = MPI_UNDEFINED;
+   /* this generalized request never fails */
+   return MPI_SUCCESS;
+}
+
+
+int free_fn(void *extra_state)
+{
+   /* this generalized request does not need to do any freeing */
+   /* as a result it never fails here */
+   return MPI_SUCCESS;
+}
+
+
+int cancel_fn(void *extra_state, int complete)
+{
+   /* This generalized request does not support cancelling.
+      Abort if not already done.
+      If done then treat as if cancel failed.*/
+   if (!complete) {
+     fprintf(stderr,
+             "Cannot cancel generalized request - aborting program\n");
+     MPI_Abort(MPI_COMM_WORLD, 99);
+   }
+   return MPI_SUCCESS;
+}
+\end{lstlisting}
+\end{example}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Associating Information with Status}
+\mpitermtitleindex{status!associating information}
+\label{sec:ei-status}
+
+\MPI/ supports several different types of requests besides those for
+point-to-point operations,
+this includes
+\mpi/ calls for I/O and generalized requests.  It is desirable to allow
+these calls to use the same request mechanism, which allows one to
+wait or test on different types of requests.  However,
+\mpifuncindex{MPI\_WAITANY}%
+\mpifuncindex{MPI\_WAITSOME}%
+\mpifuncindex{MPI\_WAITALL}%
+\mpifuncindex{MPI\_TESTANY}%
+\mpifuncindex{MPI\_TESTSOME}%
+\mpifuncindex{MPI\_TESTALL}%
+\mpifuncindex{MPI\_WAIT}%
+\mpifuncindex{MPI\_TEST}%
+\mpiskipfunc{MPI\_\{TEST$|$WAIT\}\{$|$ANY$|$SOME$|$ALL\}} returns a status
+with information about the request.  With the generalization of
+requests, one needs to define what information will be returned in the
+status object.
+
+Each \MPI/
+call fills in the appropriate fields in the status object.  
+Any unused field will
+have an undefined value.  A call to
+\mpifuncindex{MPI\_WAITANY}%
+\mpifuncindex{MPI\_WAITSOME}%
+\mpifuncindex{MPI\_WAITALL}%
+\mpifuncindex{MPI\_TESTANY}%
+\mpifuncindex{MPI\_TESTSOME}%
+\mpifuncindex{MPI\_TESTALL}%
+\mpifuncindex{MPI\_WAIT}%
+\mpifuncindex{MPI\_TEST}%
+\mpiskipfunc{MPI\_\{TEST$|$WAIT\}\{$|$ANY$|$SOME$|$ALL\}} can modify any of
+the fields in the status object.  Specifically, it can modify fields
+that are undefined.  The fields with meaningful values for a given
+request are defined in the respective sections.
+
+Generalized requests raise additional considerations.  Here, the user
+provides the functions to deal with the request.  Unlike other \mpi/
+calls, the user needs to provide the information to be returned in
+the status.  The status argument is provided directly to the callback
+function where the status needs to be set.  Users can directly set the
+values in 3 of the 5 status values.  The count and cancel fields are
+opaque.  To overcome this, 
+these calls 
+are provided:
+
+\cdeclindex{MPI\_Status}%
+\begin{funcdef}{MPI\_STATUS\_SET\_ELEMENTS}{(\mbox{status}, \mbox{datatype}, \mbox{count})}
+\funcarg{\INOUT}{status}{status with which to associate count (status)}
+\funcarg{\IN}{datatype}{datatype associated with count (handle)}
+\funcarg{\IN}{count}{number of elements to associate with status (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_Status\_set\_elements}{(\gb{}MPI\_Status~*status, MPI\_Datatype~datatype, int~count)}
+\MPIbindindex{MPI\_Status\_set\_elements\_c}
+\mpibindmain{MPI\_Status\_set\_elements\_c}{(\gb{}MPI\_Status~*status, MPI\_Datatype~datatype, MPI\_Count~count)}
+\mpifnewbindmain{MPI\_Status\_set\_elements}{(status, datatype, count, ierror) \fargs TYPE(MPI\_Status), INTENT(INOUT)\ ::\ \mbox{status}\fnarg{}TYPE(MPI\_Datatype), INTENT(IN)\ ::\ \mbox{datatype}\fnarg{}INTEGER, INTENT(IN)\ ::\ \mbox{count}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifnewbindmain{MPI\_Status\_set\_elements}{(status, datatype, count, ierror) !(\_c) \fargs TYPE(MPI\_Status), INTENT(INOUT)\ ::\ \mbox{status}\fnarg{}TYPE(MPI\_Datatype), INTENT(IN)\ ::\ \mbox{datatype}\fnarg{}INTEGER(KIND=MPI\_COUNT\_KIND), INTENT(IN)\ ::\ \mbox{count}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_STATUS\_SET\_ELEMENTS}{(STATUS, DATATYPE, COUNT, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{STATUS(MPI\_STATUS\_SIZE)}, \mbox{DATATYPE}, \mbox{COUNT}, \mbox{IERROR}}
+
+This procedure modifies the opaque part of \mpiarg{status} so calls
+to \mpifunc{MPI\_GET\_ELEMENTS}
+will return \mpiarg{count}.
+Calls to
+\mpifunc{MPI\_GET\_COUNT} will return a compatible value.
+
+\begin{rationale}
+The number of elements is set instead of the count because the former
+can deal with 
+a 
+non-integer number of datatypes.
+\end{rationale}
+
+
+A subsequent call to \mpifunc{MPI\_GET\_COUNT} or \mpifunc{MPI\_GET\_ELEMENTS} must use a
+\mpiarg{datatype} argument that has the same type signature as the
+\mpiarg{datatype} argument that was used in the call to
+\mpifunc{MPI\_STATUS\_SET\_ELEMENTS}.
+
+\begin{rationale}
+The requirement of matching type signatures for these calls is similar to the restriction that holds 
+when 
+\mpiarg{count} is set by a
+receive operation: in that case, calls to
+\mpifunc{MPI\_GET\_COUNT} and \mpifunc{MPI\_GET\_ELEMENTS} must use a
+\mpiarg{datatype} with the same signature as the datatype used in the
+receive call.
+\end{rationale}
+
+\cdeclindex{MPI\_Status}%
+\begin{funcdef}{MPI\_STATUS\_SET\_CANCELLED}{(\mbox{status}, \mbox{flag})}
+\funcarg{\INOUT}{status}{status with which to associate cancel flag (status)}
+\funcarg{\IN}{flag}{if true, indicates request was cancelled (logical)}
+\end{funcdef}
+\mpibindmain{MPI\_Status\_set\_cancelled}{(\gb{}MPI\_Status~*status, int~flag)}
+\mpifnewbindmain{MPI\_Status\_set\_cancelled}{(status, flag, ierror) \fargs TYPE(MPI\_Status), INTENT(INOUT)\ ::\ \mbox{status}\fnarg{}LOGICAL, INTENT(IN)\ ::\ \mbox{flag}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_STATUS\_SET\_CANCELLED}{(STATUS, FLAG, IERROR) \fargs INTEGER \mbox{STATUS(MPI\_STATUS\_SIZE)}, \mbox{IERROR}\fnfinalarg{}LOGICAL \mbox{FLAG}}
+
+If \mpiarg{flag} is set to \mpicode{true} then a subsequent call to 
+\mpifunc{MPI\_TEST\_CANCELLED} will also return \mpiarg{flag}\mpicode{ = true},
+otherwise it will return 
+\mpiarg{false}.  
+
+
+While the \mpiconst{MPI\_SOURCE}, \mpiconst{MPI\_TAG}, and \mpiconst{MPI\_ERROR}
+status values are directly accessible by the user,
+for convenience in some contexts, users can also
+modify them via the procedure calls described below.
+Procedures for querying these fields from a
+status object are defined in Section~\ref{subsec:pt2pt-status}.
+
+
+\cdeclindex{MPI\_Status}%
+\begin{funcdef}{MPI\_STATUS\_SET\_SOURCE}{(\mbox{status}, \mbox{source})}
+\funcarg{\INOUT}{status}{status with which to associate source rank (status)}
+\funcarg{\IN}{source}{rank to set in the \mpiconst{MPI\_SOURCE} field (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_Status\_set\_source}{(\gb{}MPI\_Status~*status, int~source)}
+\mpifnewbindmain{MPI\_Status\_set\_source}{(status, source, ierror) \fargs TYPE(MPI\_Status), INTENT(INOUT)\ ::\ \mbox{status}\fnarg{}INTEGER, INTENT(IN)\ ::\ \mbox{source}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_STATUS\_SET\_SOURCE}{(STATUS, SOURCE, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{STATUS(MPI\_STATUS\_SIZE)}, \mbox{SOURCE}, \mbox{IERROR}}
+
+Set the \mpiconst{MPI\_SOURCE} field in the \mpiarg{status} object to the provided \mpiarg{source} argument.
+
+\cdeclindex{MPI\_Status}%
+\begin{funcdef}{MPI\_STATUS\_SET\_TAG}{(\mbox{status}, \mbox{tag})}
+\funcarg{\INOUT}{status}{status with which to associate tag (status)}
+\funcarg{\IN}{tag}{tag to set in the \mpiconst{MPI\_TAG} field (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_Status\_set\_tag}{(\gb{}MPI\_Status~*status, int~tag)}
+\mpifnewbindmain{MPI\_Status\_set\_tag}{(status, tag, ierror) \fargs TYPE(MPI\_Status), INTENT(INOUT)\ ::\ \mbox{status}\fnarg{}INTEGER, INTENT(IN)\ ::\ \mbox{tag}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_STATUS\_SET\_TAG}{(STATUS, TAG, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{STATUS(MPI\_STATUS\_SIZE)}, \mbox{TAG}, \mbox{IERROR}}
+
+Set the \mpiconst{MPI\_TAG} field in the \mpiarg{status} object to the provided \mpiarg{tag} argument.
+
+\cdeclindex{MPI\_Status}%
+\begin{funcdef}{MPI\_STATUS\_SET\_ERROR}{(\mbox{status}, \mbox{err})}
+\funcarg{\INOUT}{status}{status with which to associate error (status)}
+\funcarg{\IN}{err}{error to set in the \mpiconst{MPI\_ERROR} field (integer)}
+\end{funcdef}
+\mpibindmain{MPI\_Status\_set\_error}{(\gb{}MPI\_Status~*status, int~err)}
+\mpifnewbindmain{MPI\_Status\_set\_error}{(status, err, ierror) \fargs TYPE(MPI\_Status), INTENT(INOUT)\ ::\ \mbox{status}\fnarg{}INTEGER, INTENT(IN)\ ::\ \mbox{err}\fnfinalarg{}INTEGER, OPTIONAL, INTENT(OUT)\ ::\ \mbox{ierror}}
+\mpifbindmain{MPI\_STATUS\_SET\_ERROR}{(STATUS, ERR, IERROR) \fargs \fnfinalarg{}INTEGER \mbox{STATUS(MPI\_STATUS\_SIZE)}, \mbox{ERR}, \mbox{IERROR}}
+
+Set the \mpiconst{MPI\_ERROR} field in the \mpiarg{status} object to the provided \mpiarg{err} error code.
+
+\begin{rationale}
+These functions exist for convenience when using \mpi/ from languages
+other than C and Fortran, where having a function in the \mpi/ library
+with a known API reduces the need for utility code written in C.
+\end{rationale}
+
+\begin{users}
+Users are advised not to reuse the status fields for values other than
+those for which they were intended.  Doing so may lead to unexpected
+results when using the status object.  For example, calling
+\mpifunc{MPI\_GET\_ELEMENTS} may cause an error if the value is
+out of range or it may be impossible to detect such an error.  The
+\mpiarg{extra\_state} argument provided with a generalized request can
+be used to return information that does not logically belong in
+status.
+Furthermore, modifying the values in a status set internally by \MPI/,
+e.g., \mpifunc{MPI\_RECV}, may lead to unpredictable results and is
+strongly discouraged.
+\end{users}
+
+

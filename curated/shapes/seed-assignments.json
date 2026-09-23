@@ -1,0 +1,794 @@
+{
+  "$comment": "The shape assignments workflow/formal/assign.py CANNOT DERIVE -- that, not who authored them, is why this file exists separately from curated/formal-assignments.json. (Both are AI-authored; the distinction is input vs. output.) For 58 real functions it records which shape fits and how its slots are filled, and assign.py consults it as its first matching rule. Measured 2026-07-22 by re-running assign.py against an emptied seed: 30 of the 58 come out differently without it -- 22 fall from shape_assigned to escalate_new_shape or no_formal_applicable (the whole RMA/window family: mpi_put, mpi_get, mpi_accumulate, all seven mpi_win_*, plus mpi_scatter, mpi_gather, mpi_wait, both split-collective MPI-IO calls, and the alloc/free + comm-init pairs across all four PPMs), and 3 keep a shape but change content (mpi_scan gets a different shape_ref; mpi_recv/mpi_irecv get different slot fills). This is therefore also where a correction belongs if it must SURVIVE: curated/formal-assignments.json is rebuilt wholesale by --regenerate formal, this file is not. The expansion each assignment must produce is a test fixture and lives in workflow/formal/testdata/expansions.json, joined on 'ppm:function'.",
+  "$comment_unmatched": "3 of the 58 currently match no corpus entry and so contribute nothing to a build: nvshmem_int_sum_reduce, nvshmem_int_atomic_add, shmem_int_sum_reduce. They are KEPT DELIBERATELY -- they name real functions of their PPMs, so they are evidence of an Extract coverage gap, not dead weight. As of 2026-09-11 the corpus holds 74 NVSHMEM entries, still all untyped *mem variants (broadcastmem, getmem, ...) with none of the typed API; and 279 SHMEM entries containing no reduce operation at all. Deleting these would erase the only in-repo record that assign.py is ready for functions Extract has not yet produced. nvshmem_malloc was a fourth until 2026-09-11, when the NVSHMEM adapter learned the `void *name(...)` and `static inline` declaration forms it had been missing (seven functions, nvshmem_malloc among them) -- exactly the re-check this note asks for whenever Extract's coverage changes. The shmem one may also need the typed-API literal-token convention (shmem_{T}_*) settled first -- see docs/schema/shape-catalog.md's gather_to_all row.",
+  "assignments": [
+    {
+      "bindings": {
+        "dest_buffer": "param:buffer",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "root_selector": "rank == param:root",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:buffer"
+      },
+      "function": "mpi_bcast",
+      "ppm": "mpi",
+      "shape_ref": "collective.one_to_all_uniform"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuff",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "root_selector": "rank == param:root",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuff"
+      },
+      "function": "ncclBroadcast",
+      "ppm": "nccl",
+      "shape_ref": "collective.one_to_all_uniform"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:dest",
+        "extent": {
+          "count_ref": "param:nelems",
+          "datatype_ref": "type:byte"
+        },
+        "root_selector": "rank == param:PE_root",
+        "scope_selector": "rank in param:team",
+        "source_buffer": "param:src"
+      },
+      "function": "nvshmem_broadcastmem",
+      "ppm": "nvshmem",
+      "shape_ref": "collective.one_to_all_uniform"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:dest",
+        "extent": {
+          "count_ref": "param:nelems",
+          "datatype_ref": "type:byte"
+        },
+        "root_selector": "rank == param:PE_root",
+        "scope_selector": "rank in param:team",
+        "source_buffer": "param:source"
+      },
+      "function": "shmem_broadcastmem",
+      "ppm": "shmem",
+      "shape_ref": "collective.one_to_all_uniform"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuf",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "operation": "param:op",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuf"
+      },
+      "function": "mpi_allreduce",
+      "ppm": "mpi",
+      "shape_ref": "collective.all_to_all_reduce"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuff",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "operation": "param:op",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuff"
+      },
+      "function": "ncclAllReduce",
+      "ppm": "nccl",
+      "shape_ref": "collective.all_to_all_reduce"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:dest",
+        "extent": {
+          "count_ref": "param:nreduce",
+          "datatype_ref": "type:int"
+        },
+        "operation": "literal:sum",
+        "scope_selector": "rank in param:team",
+        "source_buffer": "param:src"
+      },
+      "function": "nvshmem_int_sum_reduce",
+      "ppm": "nvshmem",
+      "shape_ref": "collective.all_to_all_reduce"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:dest",
+        "extent": {
+          "count_ref": "param:nreduce",
+          "datatype_ref": "type:int32"
+        },
+        "operation": "literal:sum",
+        "scope_selector": "rank in param:team",
+        "source_buffer": "param:source"
+      },
+      "function": "shmem_int_sum_reduce",
+      "ppm": "shmem",
+      "shape_ref": "collective.all_to_all_reduce"
+    },
+    {
+      "bindings": {
+        "handle": "param:win",
+        "handle_kind": "WINDOW",
+        "role": "create"
+      },
+      "function": "mpi_win_create",
+      "ppm": "mpi",
+      "shape_ref": "resource.lifecycle"
+    },
+    {
+      "bindings": {
+        "handle": "param:win",
+        "handle_kind": "WINDOW",
+        "role": "destroy"
+      },
+      "function": "mpi_win_free",
+      "ppm": "mpi",
+      "shape_ref": "resource.lifecycle"
+    },
+    {
+      "bindings": {
+        "handle": "param:comm",
+        "handle_kind": "COMMUNICATOR",
+        "role": "create",
+        "scope_selector": "rank in all_pes"
+      },
+      "function": "ncclCommInitRank",
+      "ppm": "nccl",
+      "shape_ref": "resource.collective_lifecycle"
+    },
+    {
+      "bindings": {
+        "handle": "param:comm",
+        "handle_kind": "COMMUNICATOR",
+        "role": "destroy",
+        "scope_selector": "rank in param:comm"
+      },
+      "function": "ncclCommDestroy",
+      "ppm": "nccl",
+      "shape_ref": "resource.collective_lifecycle"
+    },
+    {
+      "bindings": {
+        "handle": "return_value",
+        "handle_kind": "SYMMETRIC_ALLOCATION",
+        "role": "create",
+        "scope_selector": "rank in all_pes"
+      },
+      "function": "nvshmem_malloc",
+      "ppm": "nvshmem",
+      "shape_ref": "resource.collective_lifecycle"
+    },
+    {
+      "bindings": {
+        "handle": "param:ptr",
+        "handle_kind": "SYMMETRIC_ALLOCATION",
+        "role": "destroy",
+        "scope_selector": "rank in all_pes"
+      },
+      "function": "nvshmem_free",
+      "ppm": "nvshmem",
+      "shape_ref": "resource.collective_lifecycle"
+    },
+    {
+      "bindings": {
+        "handle": "return_value",
+        "handle_kind": "SYMMETRIC_ALLOCATION",
+        "role": "create",
+        "scope_selector": "rank in all_pes"
+      },
+      "function": "shmem_malloc",
+      "ppm": "shmem",
+      "shape_ref": "resource.collective_lifecycle"
+    },
+    {
+      "bindings": {
+        "handle": "param:ptr",
+        "handle_kind": "SYMMETRIC_ALLOCATION",
+        "role": "destroy",
+        "scope_selector": "rank in all_pes"
+      },
+      "function": "shmem_free",
+      "ppm": "shmem",
+      "shape_ref": "resource.collective_lifecycle"
+    },
+    {
+      "bindings": {
+        "extent": {
+          "count_ref": "param:origin_count",
+          "datatype_ref": "param:origin_datatype"
+        },
+        "origin_buffer": "param:origin_addr",
+        "target_buffer": "param:win",
+        "target_selector": "rank == param:target_rank"
+      },
+      "function": "mpi_put",
+      "ppm": "mpi",
+      "shape_ref": "rma.put"
+    },
+    {
+      "bindings": {
+        "extent": {
+          "count_ref": "param:nelems",
+          "datatype_ref": "type:{T}"
+        },
+        "origin_buffer": "param:source",
+        "target_buffer": "param:dest",
+        "target_selector": "rank == param:pe"
+      },
+      "function": "nvshmem_{T}_put",
+      "ppm": "nvshmem",
+      "shape_ref": "rma.put"
+    },
+    {
+      "bindings": {
+        "extent": {
+          "count_ref": "param:nelems",
+          "datatype_ref": "type:{T}"
+        },
+        "origin_buffer": "param:source",
+        "target_buffer": "param:dest",
+        "target_selector": "rank == param:pe"
+      },
+      "function": "shmem_{T}_put",
+      "ppm": "shmem",
+      "shape_ref": "rma.put"
+    },
+    {
+      "bindings": {
+        "buffer": "param:buf",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "handle": "param:request",
+        "matching": {
+          "kind": "tag_match",
+          "match_keys": [
+            "param:comm",
+            "param:tag",
+            "param:dest",
+            "self_rank_as_source"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": false
+        }
+      },
+      "function": "mpi_isend",
+      "ppm": "mpi",
+      "shape_ref": "handle_bound.post_send"
+    },
+    {
+      "bindings": {
+        "buffer": "param:buf",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "handle": "param:request",
+        "matching": {
+          "kind": "tag_match",
+          "match_keys": [
+            "param:comm",
+            "param:tag",
+            "param:source"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": false
+        }
+      },
+      "function": "mpi_irecv",
+      "ppm": "mpi",
+      "shape_ref": "handle_bound.post_recv"
+    },
+    {
+      "bindings": {
+        "handle": "param:request"
+      },
+      "function": "mpi_wait",
+      "ppm": "mpi",
+      "shape_ref": "handle_bound.wait_on_handle"
+    },
+    {
+      "bindings": {
+        "scope_selector": "rank in param:comm"
+      },
+      "function": "mpi_barrier",
+      "ppm": "mpi",
+      "shape_ref": "sync_only.rendezvous"
+    },
+    {
+      "bindings": {
+        "scope_selector": "rank in param:team"
+      },
+      "function": "shmem_team_sync",
+      "ppm": "shmem",
+      "shape_ref": "sync_only.rendezvous"
+    },
+    {
+      "bindings": {
+        "scope_selector": "rank in param:team"
+      },
+      "function": "nvshmem_barrier",
+      "ppm": "nvshmem",
+      "shape_ref": "sync_only.rendezvous"
+    },
+    {
+      "bindings": {},
+      "function": "shmem_fence",
+      "ppm": "shmem",
+      "shape_ref": "sync_only.local_fence"
+    },
+    {
+      "bindings": {},
+      "function": "nvshmem_fence",
+      "ppm": "nvshmem",
+      "shape_ref": "sync_only.local_fence"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuf",
+        "extent": {
+          "count_ref": "param:recvcount",
+          "datatype_ref": "param:recvtype"
+        },
+        "index_expr": "rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)",
+        "root_selector": "rank == param:root",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuf"
+      },
+      "function": "mpi_scatter",
+      "ppm": "mpi",
+      "shape_ref": "collective.one_to_all_indexed"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuf",
+        "extent": {
+          "count_ref": "param:sendcount",
+          "datatype_ref": "param:sendtype"
+        },
+        "index_expr": "rank_in(param:comm) * extent_size(param:sendcount, param:sendtype)",
+        "root_selector": "rank == param:root",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuf"
+      },
+      "function": "mpi_gather",
+      "ppm": "mpi",
+      "shape_ref": "collective.all_to_one_indexed"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuf",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "operation": "param:op",
+        "root_selector": "rank == param:root",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuf"
+      },
+      "function": "mpi_reduce",
+      "ppm": "mpi",
+      "shape_ref": "collective.all_to_one_reduce"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuff",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "operation": "param:op",
+        "root_selector": "rank == param:root",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuff"
+      },
+      "function": "ncclReduce",
+      "ppm": "nccl",
+      "shape_ref": "collective.all_to_one_reduce"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuf",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "operation": "param:op",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuf"
+      },
+      "function": "mpi_scan",
+      "ppm": "mpi",
+      "shape_ref": "collective.scan_prefix"
+    },
+    {
+      "bindings": {
+        "extent": {
+          "count_ref": "param:origin_count",
+          "datatype_ref": "param:origin_datatype"
+        },
+        "origin_buffer": "param:origin_addr",
+        "target_buffer": "param:win",
+        "target_selector": "rank == param:target_rank"
+      },
+      "function": "mpi_get",
+      "ppm": "mpi",
+      "shape_ref": "rma.get"
+    },
+    {
+      "bindings": {
+        "extent": {
+          "count_ref": "param:nelems",
+          "datatype_ref": "type:{T}"
+        },
+        "origin_buffer": "param:dest",
+        "target_buffer": "param:source",
+        "target_selector": "rank == param:pe"
+      },
+      "function": "nvshmem_{T}_get",
+      "ppm": "nvshmem",
+      "shape_ref": "rma.get"
+    },
+    {
+      "bindings": {
+        "extent": {
+          "count_ref": "param:nelems",
+          "datatype_ref": "type:{T}"
+        },
+        "origin_buffer": "param:dest",
+        "target_buffer": "param:source",
+        "target_selector": "rank == param:pe"
+      },
+      "function": "shmem_{T}_get",
+      "ppm": "shmem",
+      "shape_ref": "rma.get"
+    },
+    {
+      "bindings": {
+        "operand": "param:value",
+        "operation": "literal:add",
+        "target_buffer": "param:dest",
+        "target_selector": "rank == param:pe"
+      },
+      "function": "shmem_{T}_atomic_add",
+      "ppm": "shmem",
+      "shape_ref": "rma.atomic"
+    },
+    {
+      "bindings": {
+        "operand": "param:value",
+        "operation": "literal:add",
+        "target_buffer": "param:dest",
+        "target_selector": "rank == param:pe"
+      },
+      "function": "nvshmem_int_atomic_add",
+      "ppm": "nvshmem",
+      "shape_ref": "rma.atomic"
+    },
+    {
+      "bindings": {
+        "extent": {
+          "count_ref": "param:origin_count",
+          "datatype_ref": "param:origin_datatype"
+        },
+        "operation": "param:op",
+        "origin_buffer": "param:origin_addr",
+        "target_buffer": "param:win",
+        "target_selector": "rank == param:target_rank"
+      },
+      "function": "mpi_accumulate",
+      "ppm": "mpi",
+      "shape_ref": "rma.accumulate"
+    },
+    {
+      "bindings": {
+        "handle": "param:win"
+      },
+      "function": "mpi_win_fence",
+      "ppm": "mpi",
+      "shape_ref": "epoch.fence"
+    },
+    {
+      "bindings": {
+        "handle": "param:win",
+        "role": "open_epoch",
+        "target_selector": "rank == param:rank"
+      },
+      "function": "mpi_win_lock",
+      "ppm": "mpi",
+      "shape_ref": "epoch.lock_unlock"
+    },
+    {
+      "bindings": {
+        "handle": "param:win",
+        "role": "close_epoch",
+        "target_selector": "rank == param:rank"
+      },
+      "function": "mpi_win_unlock",
+      "ppm": "mpi",
+      "shape_ref": "epoch.lock_unlock"
+    },
+    {
+      "bindings": {
+        "epoch_scope": "access",
+        "group": "param:group",
+        "handle": "param:win",
+        "role": "open_epoch"
+      },
+      "function": "mpi_win_start",
+      "ppm": "mpi",
+      "shape_ref": "epoch.pscw"
+    },
+    {
+      "bindings": {
+        "epoch_scope": "access",
+        "group": null,
+        "handle": "param:win",
+        "role": "close_epoch"
+      },
+      "function": "mpi_win_complete",
+      "ppm": "mpi",
+      "shape_ref": "epoch.pscw"
+    },
+    {
+      "bindings": {
+        "epoch_scope": "exposure",
+        "group": "param:group",
+        "handle": "param:win",
+        "role": "open_epoch"
+      },
+      "function": "mpi_win_post",
+      "ppm": "mpi",
+      "shape_ref": "epoch.pscw"
+    },
+    {
+      "bindings": {
+        "epoch_scope": "exposure",
+        "group": null,
+        "handle": "param:win",
+        "role": "close_epoch"
+      },
+      "function": "mpi_win_wait",
+      "ppm": "mpi",
+      "shape_ref": "epoch.pscw"
+    },
+    {
+      "bindings": {
+        "buffer": "param:buf",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "handle": "param:fh",
+        "role": "open_epoch"
+      },
+      "function": "mpi_file_write_at_all_begin",
+      "ppm": "mpi",
+      "shape_ref": "epoch.file_split_collective"
+    },
+    {
+      "bindings": {
+        "buffer": "param:buf",
+        "extent": null,
+        "handle": "param:fh",
+        "role": "close_epoch"
+      },
+      "function": "mpi_file_write_at_all_end",
+      "ppm": "mpi",
+      "shape_ref": "epoch.file_split_collective"
+    },
+    {
+      "bindings": {
+        "buffer": "param:buf",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "matching": {
+          "kind": "tag_match",
+          "match_keys": [
+            "param:comm",
+            "param:tag",
+            "param:dest",
+            "self_rank_as_source"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": false
+        }
+      },
+      "function": "mpi_send",
+      "ppm": "mpi",
+      "shape_ref": "p2p.direct_send"
+    },
+    {
+      "bindings": {
+        "buffer": "param:buf",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "matching": {
+          "kind": "tag_match",
+          "match_keys": [
+            "param:comm",
+            "param:tag",
+            "param:source"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": false
+        }
+      },
+      "function": "mpi_recv",
+      "ppm": "mpi",
+      "shape_ref": "p2p.direct_recv"
+    },
+    {
+      "bindings": {
+        "buffer": "param:sendbuff",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "matching": {
+          "kind": "peer_match",
+          "match_keys": [
+            "param:comm",
+            "param:peer"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": true
+        }
+      },
+      "function": "ncclSend",
+      "ppm": "nccl",
+      "shape_ref": "p2p.direct_send"
+    },
+    {
+      "bindings": {
+        "buffer": "param:recvbuff",
+        "extent": {
+          "count_ref": "param:count",
+          "datatype_ref": "param:datatype"
+        },
+        "matching": {
+          "kind": "peer_match",
+          "match_keys": [
+            "param:comm",
+            "param:peer"
+          ],
+          "matched_across": "paired_call",
+          "program_order_required": true
+        }
+      },
+      "function": "ncclRecv",
+      "ppm": "nccl",
+      "shape_ref": "p2p.direct_recv"
+    },
+    {
+      "bindings": {
+        "block_extent": {
+          "count_ref": "param:recvcount",
+          "datatype_ref": "param:recvtype"
+        },
+        "contribution_extent": {
+          "count_ref": "param:sendcount",
+          "datatype_ref": "param:sendtype"
+        },
+        "dest_buffer": "param:recvbuf",
+        "placement_offset": "rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuf"
+      },
+      "function": "mpi_allgather",
+      "ppm": "mpi",
+      "shape_ref": "collective.gather_to_all"
+    },
+    {
+      "bindings": {
+        "block_extent": {
+          "count_ref": "param:sendcount",
+          "datatype_ref": "param:datatype"
+        },
+        "contribution_extent": {
+          "count_ref": "param:sendcount",
+          "datatype_ref": "param:datatype"
+        },
+        "dest_buffer": "param:recvbuff",
+        "placement_offset": "rank_in(param:comm) * extent_size(param:sendcount, param:datatype)",
+        "scope_selector": "rank in param:comm",
+        "source_buffer": "param:sendbuff"
+      },
+      "function": "ncclAllGather",
+      "ppm": "nccl",
+      "shape_ref": "collective.gather_to_all"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuf",
+        "operation": "param:op",
+        "scope_selector": "rank in param:comm",
+        "slice_extent": {
+          "count_ref": "param:recvcount",
+          "datatype_ref": "param:datatype"
+        },
+        "slice_offset": "rank_in(param:comm) * extent_size(param:recvcount, param:datatype)",
+        "source_buffer": "param:sendbuf"
+      },
+      "function": "mpi_reduce_scatter_block",
+      "ppm": "mpi",
+      "shape_ref": "collective.reduce_scatter"
+    },
+    {
+      "bindings": {
+        "dest_buffer": "param:recvbuff",
+        "operation": "param:op",
+        "scope_selector": "rank in param:comm",
+        "slice_extent": {
+          "count_ref": "param:recvcount",
+          "datatype_ref": "param:datatype"
+        },
+        "slice_offset": "rank_in(param:comm) * extent_size(param:recvcount, param:datatype)",
+        "source_buffer": "param:sendbuff"
+      },
+      "function": "ncclReduceScatter",
+      "ppm": "nccl",
+      "shape_ref": "collective.reduce_scatter"
+    },
+    {
+      "bindings": {
+        "extent": {
+          "count_ref": "param:nelems",
+          "datatype_ref": "type:{T}"
+        },
+        "origin_buffer": "param:source",
+        "signal_buffer": "param:sig_addr",
+        "signal_op": "param:sig_op",
+        "signal_operand": "param:signal",
+        "target_buffer": "param:dest",
+        "target_selector": "rank == param:pe"
+      },
+      "function": "nvshmem_{T}_put_signal",
+      "ppm": "nvshmem",
+      "shape_ref": "rma.put_signal"
+    },
+    {
+      "bindings": {
+        "target_buffer": "param:dest",
+        "target_selector": "rank == param:pe",
+        "value": "param:value"
+      },
+      "function": "shmem_{T}_p",
+      "ppm": "shmem",
+      "shape_ref": "rma.put_scalar"
+    },
+    {
+      "bindings": {
+        "target_buffer": "param:dest",
+        "target_selector": "rank == param:pe",
+        "value": "param:value"
+      },
+      "function": "nvshmem_{T}_p",
+      "ppm": "nvshmem",
+      "shape_ref": "rma.put_scalar"
+    }
+  ]
+}

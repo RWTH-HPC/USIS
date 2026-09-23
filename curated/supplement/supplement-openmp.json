@@ -1,0 +1,155 @@
+{
+  "omp_get_max_threads": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "Complete on return: nothing is left outstanding, as for mpi_comm_rank.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.gpu_scope": {
+      "method": "general_knowledge",
+      "note": "Per-thread: each calling thread asks about itself or its own team, independently of the others.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "thread"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "Callable on the host and inside target regions: LLVM 20.1.7's device runtime implements the thread-team inquiries for the device (llvm-project tag llvmorg-20.1.7, offload/DeviceRTL/include/Interface.h declares all three; offload/DeviceRTL/src/State.cpp defines them). omp.h is the same header for host and device compilation and cannot say so, which is why Heuristic Classification left launch null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu+gpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "Reads only the calling thread's own team state.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "Executes wherever it is called -- on the host, or on the device inside a target region.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu+gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "These routines exist to be called concurrently by every thread of a team (the answer differs per caller), so they place no restriction on concurrent callers.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "multiple"
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "One of the thread-team inquiry routines the runtime library has had since the first OpenMP specifications (Fortran 1.0, 1997; C/C++ 1.0, 1998). Neither omp.h nor the 5.2 specification carries a per-routine version marker.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "OpenMP-1.0"
+    }
+  },
+  "omp_get_num_threads": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "Complete on return: nothing is left outstanding, as for mpi_comm_rank.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.gpu_scope": {
+      "method": "general_knowledge",
+      "note": "Per-thread: each calling thread asks about itself or its own team, independently of the others.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "thread"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "Callable on the host and inside target regions: LLVM 20.1.7's device runtime implements the thread-team inquiries for the device (llvm-project tag llvmorg-20.1.7, offload/DeviceRTL/include/Interface.h declares all three; offload/DeviceRTL/src/State.cpp defines them). omp.h is the same header for host and device compilation and cannot say so, which is why Heuristic Classification left launch null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu+gpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "Reads only the calling thread's own team state.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "Executes wherever it is called -- on the host, or on the device inside a target region.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu+gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "These routines exist to be called concurrently by every thread of a team (the answer differs per caller), so they place no restriction on concurrent callers.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "multiple"
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "One of the thread-team inquiry routines the runtime library has had since the first OpenMP specifications (Fortran 1.0, 1997; C/C++ 1.0, 1998). Neither omp.h nor the 5.2 specification carries a per-routine version marker.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "OpenMP-1.0"
+    }
+  },
+  "omp_get_thread_num": {
+    "execution.completion": {
+      "method": "general_knowledge",
+      "note": "Complete on return: nothing is left outstanding, as for mpi_comm_rank.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "c"
+    },
+    "execution.gpu_scope": {
+      "method": "general_knowledge",
+      "note": "Per-thread: each calling thread asks about itself or its own team, independently of the others.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "thread"
+    },
+    "execution.launch": {
+      "method": "general_knowledge",
+      "note": "Callable on the host and inside target regions: LLVM 20.1.7's device runtime implements the thread-team inquiries for the device (llvm-project tag llvmorg-20.1.7, offload/DeviceRTL/include/Interface.h declares all three; offload/DeviceRTL/src/State.cpp defines them). omp.h is the same header for host and device compilation and cannot say so, which is why Heuristic Classification left launch null.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu+gpu"
+    },
+    "execution.locality": {
+      "method": "general_knowledge",
+      "note": "Reads only the calling thread's own team state.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "local"
+    },
+    "execution.runs_on": {
+      "method": "general_knowledge",
+      "note": "Executes wherever it is called -- on the host, or on the device inside a target region.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "cpu+gpu"
+    },
+    "execution.thread_safety": {
+      "method": "general_knowledge",
+      "note": "These routines exist to be called concurrently by every thread of a team (the answer differs per caller), so they place no restriction on concurrent callers.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "multiple"
+    },
+    "identity.since": {
+      "method": "general_knowledge",
+      "note": "One of the thread-team inquiry routines the runtime library has had since the first OpenMP specifications (Fortran 1.0, 1997; C/C++ 1.0, 1998). Neither omp.h nor the 5.2 specification carries a per-routine version marker.",
+      "retrieved": null,
+      "source_url": null,
+      "value": "OpenMP-1.0"
+    }
+  }
+}

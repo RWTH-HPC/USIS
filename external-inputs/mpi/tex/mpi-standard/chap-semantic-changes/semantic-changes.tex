@@ -1,0 +1,71 @@
+\chapter{Semantic Changes and Warnings}
+\mpitermtitleindex{semantic changes}
+\label{chap:semantic-changes}
+
+This chapter lists semantic changes that have been introduced into the \MPI/ standard as well as
+warnings that could potentially impact program behavior. In addition to those listed here,
+Chapter~\ref{chap:removed} also lists changes and backward incompatibilities caused by removing
+interfaces. Unlike Chapter~\ref{chap:removed}, the changes in this chapter did not go through a deprecation
+process.
+
+\section{Semantic Changes}
+\label{sec:semantic-changes:changes}
+
+This section describes semantics that have changed in a way that would potentially cause an \MPI/
+program to behave differently when using this version of the \MPI/ standard without changing the program's code.
+
+\subsection{Semantic Changes Starting in \texorpdfstring{\mpiivdoto/}{MPI-4.0}}
+\label{subsec:semantic-changes:changes:since40}
+
+\begin{itemize}
+\item
+\mpifunc{MPI\_COMM\_DUP} and \mpifunc{MPI\_COMM\_IDUP} no longer propagate info hints from the input
+communicator to the output communicator. This behavior can be achieved using
+\mpifunc{MPI\_COMM\_DUP\_WITH\_INFO} and \mpifunc{MPI\_COMM\_IDUP\_WITH\_INFO}.
+
+
+\deprecatedsep
+\item
+The default communicator where errors are raised when not involving a
+communicator, window, or file was changed from \mpiconst{MPI\_COMM\_WORLD} to
+\mpiconst{MPI\_COMM\_SELF}.
+
+\end{itemize}
+
+\section{Additional Warnings}
+\label{sec:semantic-changes:warnings}
+
+This section describes additional changes that could potentially cause a program that relies on the semantics described in a previous version of the \MPI/ standard to behave differently than with this version of \MPI/. The changes in this section are limited in scope and unlikely to impact most programs.
+
+\subsection{Warnings Starting in \texorpdfstring{\mpiivdoti/}{MPI-4.1}}
+\label{subsec:semantic-changes:warnings:since41}
+\label{sec:incompatible:since41} % to be substitued as soon as both the change-log entry and this issue is merged.
+
+Implementations are no longer allowed to implement \mpifunc{MPI\_WTICK}, \mpifuncskip{PMPI\_WTICK}, \mpifunc{MPI\_WTIME}, and \mpifuncskip{PMPI\_WTIME}
+as well as handle conversion functions as macros (Sections~\ref{sec:timers}
+and~\ref{sec:misc-handleconvert}).
+This should not impact applications but may require changes in some implementations.
+
+\subsection{Warnings Starting in \texorpdfstring{\mpiivdoto/}{MPI-4.0}}
+\label{subsec:semantic-changes:warnings:since40}
+\label{sec:incompatible:since40} % to be substitued as soon as both the change-log entry and this issue is merged.
+
+The limit for length of \MPI/ identifiers was removed.
+Prior to \MPIIVDOTO/, \MPI/ identifiers were limited to 30 characters
+(31 with the profiling interface).
+This limitation was initially introduced to avoid exceeding the limit on some compilation systems.
+
+\begin{rationale}
+For Fortran, this limit was already relaxed for the Fortran specific function names,
+see \sectionref{sec:f90:linker-names}, and the Fortran language specification 2003
+requires support for a minimum of 63 characters for internal and external identifiers.
+Starting with the ISO/IEC 9899:1999 C programming language standard,
+support for a minimum of 63 characters is required for internal identifiers,
+but only 31 characters are required to be significant for external identifiers.
+At the time of the release of \MPIIVDOTO/, most or nearly all compilers allow external
+identifiers longer than 31 characters. Therefore, the restriction is removed.
+\end{rationale}
+
+\begin{users}
+This affects users only if they store \MPI/ identifiers into fixed sized strings.
+\end{users}

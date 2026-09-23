@@ -1,0 +1,93 @@
+.TH SHMEM_CTX_CREATE 3 "Open Source Software Solutions, Inc." "OpenSHMEM Library Documentation"
+./ sectionStart
+.SH NAME
+shmem_ctx_create \- 
+Create a communication context.
+
+./ sectionEnd
+
+
+./ sectionStart
+.SH   SYNOPSIS
+./ sectionEnd
+
+./ sectionStart
+.SS C/C++:
+
+.B int
+.B shmem\_ctx\_create(long
+.IB "options" ,
+.B shmem_ctx_t
+.I *ctx
+.B );
+
+
+
+./ sectionEnd
+
+
+
+
+./ sectionStart
+
+.SH DESCRIPTION
+.SS Arguments
+.BR "IN " -
+.I options
+- The set of options requested for the given context.
+Multiple options may be requested by combining them with a bitwise
+OR operation; otherwise, 0 can be given if no options are
+requested.
+
+
+.BR "OUT " -
+.I ctx
+- A handle to the newly created context.
+./ sectionEnd
+
+
+./ sectionStart
+
+.SS API Description
+
+The 
+.B shmem\_ctx\_create
+routine creates a new communication context
+and returns its handle through the 
+.I ctx
+argument.
+This context is created from the world team;
+however, the context creation operation is not collective.
+If the context was
+created successfully, a value of zero is returned
+and the context handle pointed to by 
+.I ctx
+specifies a valid context;
+otherwise, a nonzero value is returned and 
+.I ctx
+is set to
+SHMEM\_CTX\_INVALID.
+An unsuccessful context
+creation call is not treated as an error and the OpenSHMEM library remains
+in a correct state. The creation call can be reattempted with different
+options or after additional resources become available.
+
+All OpenSHMEM routines that operate on this context will do so with
+respect to the associated PE team.
+That is, all point-to-point routines operating on this context will use
+team-relative PE numbering.
+
+./ sectionEnd
+
+
+./ sectionStart
+
+.SS Return Values
+
+Zero on success and nonzero otherwise.
+
+./ sectionEnd
+
+
+
+

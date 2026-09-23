@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/RWTH-HPC/USIS/v0.1.0/curated/schemas/shapes.schema.json",
+  "title": "Shape catalog",
+  "description": "Validates curated/shapes/shapes.json -- the authoring-time shape catalog. Logged as missing since 2026-07-15 in docs/schema/shape-catalog.md ('shapes.schema.json -- not yet written as a file'); written 2026-07-22. It covers the catalog's own envelope: that each shape has an id, a slot list, and a template. The template's INTERNALS are deliberately not re-specified here -- they are $defs/shape_template in api-schema.json, which workflow/formal/validate.py's validate_shape_template() already enforces on every shape at test time, and duplicating that structure in a second file is exactly the kind of copy that goes stale.",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "slots",
+      "template"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Dotted shape identifier, '<family>.<name>' (e.g. 'collective.one_to_all_uniform', 'rma.put'). Referenced by a proposal's shape_ref; must be unique across the catalog, which workflow/validate/test_curated.py checks."
+      },
+      "$comment": {
+        "type": "string",
+        "description": "Why this shape exists rather than being folded into a neighbour, and any notes on its design. Written for every shape minted after a near-miss was rejected, per 'a wrong fit is worse than an honest gap'. Absorbed the former provenance `notes` on 2026-07-22."
+      },
+      "slots": {
+        "type": "array",
+        "description": "The bindable holes in the template. A binding supplies one value per non-optional slot; expansion substitutes it for the matching '{{slot_name}}' token.",
+        "items": {
+          "type": "object",
+          "required": [
+            "name",
+            "kind",
+            "optional"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Slot name, referenced in the template as '{{name}}'."
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buffer_slot",
+                "extent_slot",
+                "selector_slot",
+                "operation_slot",
+                "handle_slot",
+                "index_slot",
+                "literal_slot"
+              ],
+              "description": "What kind of value the slot accepts. Closed vocabulary: a new kind is new authoring-time vocabulary and needs the same justification as a new shape."
+            },
+            "optional": {
+              "type": "boolean",
+              "description": "Whether a binding may omit this slot."
+            }
+          }
+        }
+      },
+      "template": {
+        "type": "object",
+        "required": [
+          "participants",
+          "data_flow",
+          "sync",
+          "handle_lifecycle"
+        ],
+        "description": "The semantics.formal skeleton with '{{slot}}' tokens in place of bound values. Structure per $defs/shape_template in api-schema.json -- enforced there, not re-stated here."
+      },
+      "motivated_by": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Entry keys ('model:function_key') of the real functions this shape was derived from -- the project's design-by-concrete-example rule, recorded. Moved here from the seed file 2026-07-22 so a shape's justification travels with the shape."
+      },
+      "cross_ppm_reusable": {
+        "type": [
+          "boolean",
+          "string"
+        ],
+        "description": "Whether the shape is confirmed shared across PPMs -- the reuse that justifies the catalog's complexity at all. Two spellings, both deliberate: `true` when the reuse is unqualified, and a prose qualifier when partial ('MPI only, per shape-catalog.md's own table'; 'SHMEM + NVSHMEM only -- MPI deliberately excluded'). 14 of 27 shapes carry the prose form; a bare `false` would lose the distinction between 'not reusable' and 'reusable across this subset, for this reason'."
+      }
+    }
+  }
+}

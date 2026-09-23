@@ -1,0 +1,60 @@
+\apisummary{
+  A structure type representing team configuration arguments
+}
+
+\begin{apidefinition}
+
+\begin{Csynopsis}
+typedef struct {
+  int num_contexts;
+} shmem_team_config_t;
+\end{Csynopsis}
+
+\begin{apiarguments}
+  None.
+\end{apiarguments}
+
+
+\apidescription{
+  A team configuration object is provided as an argument to
+  \FUNC{shmem\_team\_split\_*} routines.
+  It specifies the requested capabilities of the team to be
+  created.
+
+  The \VAR{num\_contexts} member specifies the total number of simultaneously
+  existing contexts that the program requests to create from this team.
+  These contexts may be created in any number of threads. Successful
+  creation of a team configured with \VAR{num\_contexts} of $N$ means
+  that the implementation will make a best effort to reserve enough
+  resources to support $N$ contexts created from the team
+  in existence at any given time. It is not a guarantee that $N$
+  calls to \FUNC{shmem\_team\_create\_ctx} will succeed.
+  See Section~\ref{sec:ctx} for more on communication contexts and
+  Section~\ref{subsec:shmem_team_create_ctx} for team-based context creation.
+
+  When passing a configuration structure to a team creation routine, the mask parameter
+  specifies which fields the application requests to associate with the new team.
+  Any configuration parameter value that is not indicated in the mask will be
+  ignored, and the default value will be used instead.
+  Therefore, a program must set only the fields for which it does not want the default value.
+
+  A configuration mask is created through a bitwise OR operation of the
+  following library constants.
+  A configuration mask value of \CONST{0} indicates that the team
+  should be created with the default values for all configuration
+  parameters.
+
+  \apitablerow{\LibConstRef{SHMEM\_TEAM\_NUM\_CONTEXTS}}{
+    The team should be created using the value of the
+    \VAR{num\_contexts} member of the configuration parameter
+    \VAR{config} as a requirement.
+  }
+
+  The default values for configuration parameters are:
+
+  \apitablerow{\VAR{num\_contexts} = \CONST{0}}{
+    By default, no contexts can be created on a new team
+  }
+}
+
+\end{apidefinition}

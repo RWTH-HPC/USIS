@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/RWTH-HPC/USIS/v0.1.0/curated/schemas/supplement-input.schema.json",
+  "$comment": "Validates curated/supplement/supplement-<ppm>.json -- a raw, secondary input (not the primary standard/header), never validated against api-schema.json directly. See curated/README.md.",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "description": "Keyed by function name (e.g. 'mpi_send'); each value maps a dotted field path to a supplement entry for that field.",
+    "additionalProperties": {
+      "type": "object",
+      "required": ["value", "method", "source_url", "retrieved", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "The proposed value, same type as the target field would hold in a real entry."
+        },
+        "method": {
+          "type": "string",
+          "enum": ["web", "condensed", "general_knowledge"],
+          "description": "'web': a fresh external lookup. 'condensed': paraphrased/trimmed from text that already exists in this PPM's own vendored primary input (e.g. NVSHMEM's real **Description** block, MPI's real tex prose) -- correct content, wrong shape (too long/multi-sentence) for the target field, not independently recalled. 'general_knowledge': recalled without consulting the primary source's own text for this specific value."
+        },
+        "source_url": {
+          "type": ["string", "null"],
+          "description": "For 'web': the URL, required non-null. For 'condensed': a repo-relative path into external-inputs/<ppm>/ (optionally with a line number or #section anchor), required non-null. Null for 'general_knowledge'."
+        },
+        "retrieved": {
+          "type": ["string", "null"],
+          "description": "ISO 8601 date. Required non-null when method is 'web' (a live external fetch has a retrieval moment worth recording). Null for 'condensed' (the vendored file's own version/README already pins its provenance) and 'general_knowledge'."
+        },
+        "note": {
+          "type": "string",
+          "description": "Why this value is safe to propose without the primary source's own confirmation -- required for every entry, all methods."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "method": { "const": "web" } } },
+          "then": { "properties": { "source_url": { "type": "string" }, "retrieved": { "type": "string" } } }
+        },
+        {
+          "if": { "properties": { "method": { "const": "condensed" } } },
+          "then": { "properties": { "source_url": { "type": "string" }, "retrieved": { "const": null } } }
+        },
+        {
+          "if": { "properties": { "method": { "const": "general_knowledge" } } },
+          "then": { "properties": { "source_url": { "const": null }, "retrieved": { "const": null } } }
+        }
+      ]
+    }
+  }
+}

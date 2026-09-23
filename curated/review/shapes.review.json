@@ -1,0 +1,922 @@
+{
+  "$comment": "Review record for the shape catalog. One group per shape -- the unit a reviewer actually signs off on: its slots, its own justification ($comment in shapes.json), and the seed assignments that exercise it. group_id is the shape id, so renaming a shape correctly returns it to unreviewed. Authorship is not review: the Author Shapes process specifies human review of every shape, and this is where that having happened is recorded. The `groups` list is regenerated; the `status`/`reason`/`reviewed_at`/`exceptions` fields on each group are HAND-EDITED and are preserved verbatim across regenerations. Set status to 'approved' or 'withheld' after reading a group's exemplar; use `exceptions` (entry_key -> {status, reason}) for members that deviate from their group's decision. A group that disappears moves to orphaned_decisions rather than being dropped. Nothing consumes this yet: the build chain has been ungated since 2026-07-21, so this records a human judgment rather than gating output. See docs/workflow/review-records.md.",
+  "generated_at": "2026-09-23T18:17:04.894526+00:00",
+  "groups": [
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "dest_buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "operation": "param:op",
+          "scope_selector": "rank in param:comm",
+          "source_buffer": "param:sendbuf"
+        },
+        "function": "mpi_allreduce",
+        "ppm": "mpi",
+        "shape_ref": "collective.all_to_all_reduce"
+      },
+      "group_id": "collective.all_to_all_reduce",
+      "justification": "Same typed-API finding as one_to_all_uniform, plus a second instance of the same pattern: NVSHMEM/SHMEM's reduction operator (sum/min/max/...) is baked into the function name via a macro OP argument (confirmed directly in external-inputs/nvshmem/implementation/.../nvshmem_coll_api.h's NVSHMEMI_DECL_TEAM_REDUCE(NAME,TYPE,OP) and external-inputs/shmem/tex/shmem-standard/content/shmem_reductions.tex's per-operator FuncDecl list), not a runtime OPERATION-kind parameter the way MPI's op / NCCL's op are. operation_ref is bound to a literal token ('literal:sum') for NVSHMEM/SHMEM, vs. a real param: ref for MPI/NCCL.",
+      "member_count": 4,
+      "members": [
+        "mpi:mpi_allreduce",
+        "nccl:ncclAllReduce",
+        "nvshmem:nvshmem_int_sum_reduce",
+        "shmem:shmem_int_sum_reduce"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "source_buffer: buffer_slot",
+        "dest_buffer: buffer_slot",
+        "extent: extent_slot",
+        "operation: operation_slot",
+        "scope_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "dest_buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:sendcount",
+            "datatype_ref": "param:sendtype"
+          },
+          "index_expr": "rank_in(param:comm) * extent_size(param:sendcount, param:sendtype)",
+          "root_selector": "rank == param:root",
+          "scope_selector": "rank in param:comm",
+          "source_buffer": "param:sendbuf"
+        },
+        "function": "mpi_gather",
+        "ppm": "mpi",
+        "shape_ref": "collective.all_to_one_indexed"
+      },
+      "group_id": "collective.all_to_one_indexed",
+      "justification": "A real modeling ambiguity, resolved and documented rather than silently picked: df_write is attributed to participant 'member' (many), not 'root' (one), even though the buffer being written (dest_buffer) is only semantically meaningful on root's own call instance. This is necessary because offset must vary per contributing rank -- if the write were attributed to 'root' (cardinality one), rank-dependent expressions inside offset would resolve against root's own rank only, not each contributor's. The cost: this technically implies every member's own dest_buffer argument gets written, when MPI only writes root's. Same class of deliberate approximation as collective.one_to_all_uniform's root-inclusive 'member' write.",
+      "member_count": 1,
+      "members": [
+        "mpi:mpi_gather"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "source_buffer: buffer_slot",
+        "dest_buffer: buffer_slot",
+        "extent: extent_slot",
+        "root_selector: selector_slot",
+        "scope_selector: selector_slot",
+        "index_expr: index_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "dest_buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "operation": "param:op",
+          "root_selector": "rank == param:root",
+          "scope_selector": "rank in param:comm",
+          "source_buffer": "param:sendbuf"
+        },
+        "function": "mpi_reduce",
+        "ppm": "mpi",
+        "shape_ref": "collective.all_to_one_reduce"
+      },
+      "group_id": "collective.all_to_one_reduce",
+      "justification": "docs/schema/shape-catalog.md's catalog table marks this shape SHMEM-reusable, but no reduce-to-a-single-root primitive was found anywhere in external-inputs/shmem/tex/shmem-standard/content/shmem_reductions.tex -- every shmem_TYPENAME_op_reduce delivers its result to every PE in the team (that's collective.all_to_all_reduce's shape, already built and grounded in shmem_int_sum_reduce). Flagging this as a probable documentation inaccuracy rather than silently reproducing it or silently omitting SHMEM without explanation. Slot names normalized to source_buffer/dest_buffer/operation for consistency with collective.all_to_all_reduce, differing from the illustrative HTML's sendbuf/recvbuf/op naming for this specific shape.",
+      "member_count": 2,
+      "members": [
+        "mpi:mpi_reduce",
+        "nccl:ncclReduce"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "source_buffer: buffer_slot",
+        "dest_buffer: buffer_slot",
+        "extent: extent_slot",
+        "operation: operation_slot",
+        "root_selector: selector_slot",
+        "scope_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "block_extent": {
+            "count_ref": "param:recvcount",
+            "datatype_ref": "param:recvtype"
+          },
+          "contribution_extent": {
+            "count_ref": "param:sendcount",
+            "datatype_ref": "param:sendtype"
+          },
+          "dest_buffer": "param:recvbuf",
+          "placement_offset": "rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)",
+          "scope_selector": "rank in param:comm",
+          "source_buffer": "param:sendbuf"
+        },
+        "function": "mpi_allgather",
+        "ppm": "mpi",
+        "shape_ref": "collective.gather_to_all"
+      },
+      "group_id": "collective.gather_to_all",
+      "justification": "Built on the 'gathered' source.kind: the written buffer is the per-participant assembly of df_read across all_participant_instances with NO operator, each contribution landing at placement_offset evaluated in the CONTRIBUTING participant's context. The proposal's open sub-question (per-contribution vs. total extent on the write) is decided here as per-contribution (block_extent), matching placement_offset's own per-contribution semantics -- the total is implied by the scope's cardinality. contribution_extent and block_extent are separate slots because MPI declares independent send/recv count+type parameter pairs (sendcount/sendtype vs recvcount/recvtype) while NCCL binds both to the same sendcount/datatype pair. shmem_{T}_fcollect matches this shape's structure exactly but has NO golden yet: its datatype is baked into the symbol (typed-API), so placement_offset's extent_size() has no datatype param: ref to point at -- blocked on the already-logged 'type:<x>' literal-token grammar decision (known-gaps-and-open-questions.md's typed-API row), deliberately not resolved as a side effect here. SHMEM's variable-length collect (vs. fcollect) stays out entirely -- the separate, still-open variable-length-collectives gap.",
+      "member_count": 2,
+      "members": [
+        "mpi:mpi_allgather",
+        "nccl:ncclAllGather"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "source_buffer: buffer_slot",
+        "dest_buffer: buffer_slot",
+        "contribution_extent: extent_slot",
+        "block_extent: extent_slot",
+        "scope_selector: selector_slot",
+        "placement_offset: index_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "dest_buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:recvcount",
+            "datatype_ref": "param:recvtype"
+          },
+          "index_expr": "rank_in(param:comm) * extent_size(param:recvcount, param:recvtype)",
+          "root_selector": "rank == param:root",
+          "scope_selector": "rank in param:comm",
+          "source_buffer": "param:sendbuf"
+        },
+        "function": "mpi_scatter",
+        "ppm": "mpi",
+        "shape_ref": "collective.one_to_all_indexed"
+      },
+      "group_id": "collective.one_to_all_indexed",
+      "justification": "offset is bound identically on both the top-level data_flow entry field and inside source.offset -- confirmed against the original design-discussion HTML's own (never-shipped) live-demo shape definition for this exact shape, which does the same double-binding. Unlike that HTML version (which uses a 'non_root' participant and notes root's own slice is 'simplified for exposition' / not modeled), this version reuses collective.one_to_all_uniform's generalization: 'member' includes root, so root's own slice is captured for free rather than left out.",
+      "member_count": 1,
+      "members": [
+        "mpi:mpi_scatter"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "source_buffer: buffer_slot",
+        "dest_buffer: buffer_slot",
+        "extent: extent_slot",
+        "root_selector: selector_slot",
+        "scope_selector: selector_slot",
+        "index_expr: index_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "dest_buffer": "param:buffer",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "root_selector": "rank == param:root",
+          "scope_selector": "rank in param:comm",
+          "source_buffer": "param:buffer"
+        },
+        "function": "mpi_bcast",
+        "ppm": "mpi",
+        "shape_ref": "collective.one_to_all_uniform"
+      },
+      "group_id": "collective.one_to_all_uniform",
+      "justification": "Generalizes the 'root reads once, everyone (including root) writes' pattern rather than the narrower 'root reads, only non-root writes' version implied by the illustrative sentence in docs/schema/semantics-formal.md. Needed because MPI_Bcast uses a single inout buffer (source_buffer==dest_buffer, root's write is a same-buffer no-op) while NCCL/NVSHMEM/SHMEM use two separate buffers and root itself also receives into a distinct recvbuff/dest. One pure-substitution template covers both by making root a member of the 'member' write participant too, rather than needing a conditional. NVSHMEM/SHMEM's byte-oriented 'mem' variant (used for these golden examples) has no runtime datatype parameter -- datatype is fixed by which typed entry this is (nvshmem_int_broadcast vs. nvshmem_broadcastmem) -- so extent.datatype_ref is bound to a literal type token ('type:byte') rather than a param: ref. See the corresponding entry in docs/cross-ppm-analysis/known-gaps-and-open-questions.md.",
+      "member_count": 4,
+      "members": [
+        "mpi:mpi_bcast",
+        "nccl:ncclBroadcast",
+        "nvshmem:nvshmem_broadcastmem",
+        "shmem:shmem_broadcastmem"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "source_buffer: buffer_slot",
+        "dest_buffer: buffer_slot",
+        "extent: extent_slot",
+        "root_selector: selector_slot",
+        "scope_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "dest_buffer": "param:recvbuf",
+          "operation": "param:op",
+          "scope_selector": "rank in param:comm",
+          "slice_extent": {
+            "count_ref": "param:recvcount",
+            "datatype_ref": "param:datatype"
+          },
+          "slice_offset": "rank_in(param:comm) * extent_size(param:recvcount, param:datatype)",
+          "source_buffer": "param:sendbuf"
+        },
+        "function": "mpi_reduce_scatter_block",
+        "ppm": "mpi",
+        "shape_ref": "collective.reduce_scatter"
+      },
+      "group_id": "collective.reduce_scatter",
+      "justification": "Built on the optional 'offset' on reduced-kind sources: the standard reduce node (identical to collective.all_to_all_reduce's) whose result each participant receives only a slice of, via source.offset -- the 'good third stress test of combining two mechanisms' shape-catalog.md flagged when this shape was first sketched, now actually passing. HONEST LIMITATION, deliberate: df_read/df_reduce's extent is null -- each participant's full contribution spans recvcount x group-size elements, and neither MPI_Reduce_scatter_block nor ncclReduceScatter has a parameter naming that total, so no {count_ref,datatype_ref} pair can state it without arithmetic the extent object deliberately doesn't support. Null (not modeled) beats mis-stating the slice extent as the contribution extent. MPI's v-variant MPI_Reduce_scatter (per-recipient recvcounts array) stays out -- the variable-length gap.",
+      "member_count": 2,
+      "members": [
+        "mpi:mpi_reduce_scatter_block",
+        "nccl:ncclReduceScatter"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "source_buffer: buffer_slot",
+        "dest_buffer: buffer_slot",
+        "slice_extent: extent_slot",
+        "operation: operation_slot",
+        "scope_selector: selector_slot",
+        "slice_offset: index_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "dest_buffer": "param:recvbuf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "operation": "param:op",
+          "scope_selector": "rank in param:comm",
+          "source_buffer": "param:sendbuf"
+        },
+        "function": "mpi_scan",
+        "ppm": "mpi",
+        "shape_ref": "collective.scan_prefix"
+      },
+      "group_id": "collective.scan_prefix",
+      "justification": "Identical mechanism to collective.all_to_all_reduce's reduce node, with inputs[].scope changed from 'all_participant_instances' to 'instances_before_self_in_order' -- no new op, no new shape mechanism, exactly as docs/schema/semantics-formal.md describes this scope value's purpose.",
+      "member_count": 1,
+      "members": [
+        "mpi:mpi_scan"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "source_buffer: buffer_slot",
+        "dest_buffer: buffer_slot",
+        "extent: extent_slot",
+        "operation: operation_slot",
+        "scope_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "handle": "param:win"
+        },
+        "function": "mpi_win_fence",
+        "ppm": "mpi",
+        "shape_ref": "epoch.fence"
+      },
+      "group_id": "epoch.fence",
+      "justification": "MPI_Win_fence both closes the previous access epoch and opens the next one in a single call (or just opens, on the first call in a window's lifetime) -- modeled as always emitting both a close_epoch and an open_epoch event bound to the same handle, which is harmless on the first call (closing an epoch that was never meaningfully open is not separately flagged as an error by this shape; that check is the consuming tool's job, consistent with the project's tool-agnostic boundary).",
+      "member_count": 1,
+      "members": [
+        "mpi:mpi_win_fence"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "handle: handle_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "handle": "param:fh",
+          "role": "open_epoch"
+        },
+        "function": "mpi_file_write_at_all_begin",
+        "ppm": "mpi",
+        "shape_ref": "epoch.file_split_collective"
+      },
+      "group_id": "epoch.file_split_collective",
+      "justification": "extent is marked optional in this shape's slots (unlike every other extent_slot use) because mpi_file_write_at_all_end's real signature (confirmed against apis.json) has no count/datatype parameters at all -- only fh/buf/status. Bound to null for the _end golden example.",
+      "member_count": 2,
+      "members": [
+        "mpi:mpi_file_write_at_all_begin",
+        "mpi:mpi_file_write_at_all_end"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "handle: handle_slot",
+        "role: literal_slot",
+        "buffer: buffer_slot",
+        "extent: extent_slot (optional)"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "handle": "param:win",
+          "role": "open_epoch",
+          "target_selector": "rank == param:rank"
+        },
+        "function": "mpi_win_lock",
+        "ppm": "mpi",
+        "shape_ref": "epoch.lock_unlock"
+      },
+      "group_id": "epoch.lock_unlock",
+      "justification": "One shape, two bindings (role='open_epoch' for lock, 'close_epoch' for unlock) -- same create/destroy-style parameterization already used by resource.lifecycle, applied to epoch events instead of handle_lifecycle roles. Trivial pairwise target (single origin, single target rank), matching.kind left null rather than 'epoch_scoped', since (unlike put/get/accumulate, which defer their matching to an *enclosing* lock/unlock epoch) the lock/unlock calls themselves are the epoch boundary, not something deferring to one.",
+      "member_count": 2,
+      "members": [
+        "mpi:mpi_win_lock",
+        "mpi:mpi_win_unlock"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "handle: handle_slot",
+        "role: literal_slot",
+        "target_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "epoch_scope": "access",
+          "group": "param:group",
+          "handle": "param:win",
+          "role": "open_epoch"
+        },
+        "function": "mpi_win_start",
+        "ppm": "mpi",
+        "shape_ref": "epoch.pscw"
+      },
+      "group_id": "epoch.pscw",
+      "justification": "One shape, four bindings covering the real 4-call PSCW protocol exactly (confirmed against apis.json: mpi_win_start/post take a group parameter, mpi_win_complete/wait don't -- the group slot is bound to null for the latter two, which the schema's group_ref field already allows). 'group' uses handle_slot rather than a new slot kind, on the reasoning that a process-group reference is closer to a resource handle than to a literal constant -- a pragmatic choice, not a clean fit (GROUP isn't in handle_kind's enum either, but handle_slot's binding target here is sync.events[].group_ref, not handle_lifecycle, so handle_kind validation doesn't apply).",
+      "member_count": 4,
+      "members": [
+        "mpi:mpi_win_start",
+        "mpi:mpi_win_complete",
+        "mpi:mpi_win_post",
+        "mpi:mpi_win_wait"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "handle: handle_slot",
+        "role: literal_slot",
+        "epoch_scope: literal_slot",
+        "group: handle_slot (optional)"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "handle": "param:request",
+          "matching": {
+            "kind": "tag_match",
+            "match_keys": [
+              "param:comm",
+              "param:tag",
+              "param:source"
+            ],
+            "matched_across": "paired_call",
+            "program_order_required": false
+          }
+        },
+        "function": "mpi_irecv",
+        "ppm": "mpi",
+        "shape_ref": "handle_bound.post_recv"
+      },
+      "group_id": "handle_bound.post_recv",
+      "justification": "Mirror of post_send: op is 'write' instead of 'read', and source.kind is 'matched' (the written value is only known once the matching send is paired at runtime) instead of null.",
+      "member_count": 1,
+      "members": [
+        "mpi:mpi_irecv"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "buffer: buffer_slot",
+        "extent: extent_slot",
+        "handle: handle_slot",
+        "matching: literal_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "handle": "param:request",
+          "matching": {
+            "kind": "tag_match",
+            "match_keys": [
+              "param:comm",
+              "param:tag",
+              "param:dest",
+              "self_rank_as_source"
+            ],
+            "matched_across": "paired_call",
+            "program_order_required": false
+          }
+        },
+        "function": "mpi_isend",
+        "ppm": "mpi",
+        "shape_ref": "handle_bound.post_send"
+      },
+      "group_id": "handle_bound.post_send",
+      "justification": "shape-catalog.md's own catalog table lists NCCL as also using this shape (ncclSend, via a peer_match extra), and viz/html/examples/formal-semantics-V3.html has a worked example for it -- but that example binds handle to a sentinel string 'implicit_stream_handle', not a real param: ref, because NCCL's send/recv have no REQUEST-like (or any) handle parameter; completion is tracked by CUDA stream order, not a handle value flowing through a parameter. handle_lifecycle_entry.handle_kind's enum (REQUEST/WINDOW/COMMUNICATOR/DATATYPE/SYMMETRIC_ALLOCATION/FILE/SESSION) has no value that honestly describes 'implicit, stream-ordered completion'. Rather than force NCCL into this shape with an invented handle_kind, this seed grounds handle_bound.post_send/post_recv in MPI only and logs the NCCL mismatch as a new entry in known-gaps-and-open-questions.md. Separately: source.matched.via (required by $defs/data_flow_entry when source.kind is 'matched') has no documented convention anywhere in the existing docs for what string it should hold; post_recv's golden example below binds it to the sync.events entry id ('local_complete') that gates when the written value becomes valid -- a reasonable but previously-unspecified choice, flagged for the project owner to confirm rather than presented as settled.",
+      "member_count": 1,
+      "members": [
+        "mpi:mpi_isend"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "buffer: buffer_slot",
+        "extent: extent_slot",
+        "handle: handle_slot",
+        "matching: literal_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "handle": "param:request"
+        },
+        "function": "mpi_wait",
+        "ppm": "mpi",
+        "shape_ref": "handle_bound.wait_on_handle"
+      },
+      "group_id": "handle_bound.wait_on_handle",
+      "justification": "Deliberately has no data_flow or sync.events -- matches docs/consumers/tool-consumption-model.md's own trace table, which describes Wait as contributing only 'handle_lifecycle: [request destroy]'. The actual ordering guarantee (Wait cannot return before the posting call's local completion) is NOT encoded as an explicit ordering edge inside this shape, because the event it would order against (post_send's local_complete) belongs to a *different* entry's expansion. Per tool-consumption-model.md, correlating create/destroy across two entries via the shared handle value is the consuming tool's job (dataflow-track the handle through the IR), not something one entry's semantics.formal can declare about another entry.",
+      "member_count": 1,
+      "members": [
+        "mpi:mpi_wait"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "handle: handle_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "matching": {
+            "kind": "tag_match",
+            "match_keys": [
+              "param:comm",
+              "param:tag",
+              "param:source"
+            ],
+            "matched_across": "paired_call",
+            "program_order_required": false
+          }
+        },
+        "function": "mpi_recv",
+        "ppm": "mpi",
+        "shape_ref": "p2p.direct_recv"
+      },
+      "group_id": "p2p.direct_recv",
+      "justification": "Mirror of p2p.direct_send: op is 'write' instead of 'read', and source.kind is 'matched' (via 'local_complete', same previously-unspecified-but-reused convention as handle_bound.post_recv) instead of null. See p2p.direct_send's notes for the full rationale.",
+      "member_count": 2,
+      "members": [
+        "mpi:mpi_recv",
+        "nccl:ncclRecv"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "buffer: buffer_slot",
+        "extent: extent_slot",
+        "matching: literal_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "buffer": "param:buf",
+          "extent": {
+            "count_ref": "param:count",
+            "datatype_ref": "param:datatype"
+          },
+          "matching": {
+            "kind": "tag_match",
+            "match_keys": [
+              "param:comm",
+              "param:tag",
+              "param:dest",
+              "self_rank_as_source"
+            ],
+            "matched_across": "paired_call",
+            "program_order_required": false
+          }
+        },
+        "function": "mpi_send",
+        "ppm": "mpi",
+        "shape_ref": "p2p.direct_send"
+      },
+      "group_id": "p2p.direct_send",
+      "justification": "Added 2026-07-17 after reviewing the pilot corpus (workflow/formal/assign.py's mpi_send/ncclSend proposals both hit 'escalate_new_shape' against the existing catalog for exactly this reason). This is the exact NCCL gap handle_bound.post_send's own notes above already anticipated ('completion is tracked by CUDA stream order, not a handle value flowing through a parameter') plus the symmetric, previously-unlogged MPI blocking case: mpi_send/ncclSend have no REQUEST-style (or any) handle at all, so handle_bound.post_send is a near-miss -- forcing either into it (with an invented handle_kind, or a sentinel non-param handle value) would be exactly the wrong-fit CLAUDE.md warns against. p2p.direct_send is structurally identical to handle_bound.post_send minus the handle: same single-participant read, but sync.events[].bound_to is null (the call's own return IS the completion point) and handle_lifecycle is empty. sync.matching is left null in the template and supplied via extra per assignment -- match_keys genuinely differ per function (MPI's tag_match needs comm+tag+dest, NCCL's peer_match needs only comm+peer), mirroring how handle_bound.post_send/post_recv already handle mpi_isend/mpi_irecv's matching, not a new pattern.",
+      "member_count": 2,
+      "members": [
+        "mpi:mpi_send",
+        "nccl:ncclSend"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "buffer: buffer_slot",
+        "extent: extent_slot",
+        "matching: literal_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "handle": "param:comm",
+          "handle_kind": "COMMUNICATOR",
+          "role": "create",
+          "scope_selector": "rank in all_pes"
+        },
+        "function": "ncclCommInitRank",
+        "ppm": "nccl",
+        "shape_ref": "resource.collective_lifecycle"
+      },
+      "group_id": "resource.collective_lifecycle",
+      "justification": "Added 2026-07-21 (field audit). resource.lifecycle hard-codes a single participant (cardinality 'one', selector 'self') and matching: null, which is right for a purely local create/destroy (MPI_Win_create on an already-built communicator, an MPI handle free) and wrong for the large class of lifecycle calls that are themselves collective: ncclCommInitRank/ncclCommDestroy, shmem_malloc/shmem_free, nvshmem_malloc/nvshmem_free. Those five carried execution.collective = true while their own formal block said one participant and no matching at all -- a direct self-contradiction inside one entry, and one that makes a collective-matching checker silently skip them. Minted as its own shape rather than widened in place, per the project's 'a wrong fit is worse than an honest gap' rule: local and collective lifecycle really are different participant structures, not one structure with an optional field. Split out of resource.lifecycle 2026-07-21 during the field audit. All six motivating functions carry execution.collective = true, but resource.lifecycle's template hard-codes a single 'self' participant (cardinality 'one') and matching: null -- so each of these entries asserted, inside itself, both that every PE/rank must call it and that it has no collective matching rule at all. A collective-matching checker reading the formal layer would silently skip exactly the calls most likely to deadlock on a missing participant. resource.lifecycle is unchanged and still correct for genuinely local lifecycle calls (mpi_win_create/mpi_win_free on an existing communicator). scope_selector binding note: ncclCommDestroy scopes to 'rank in param:comm', but ncclCommInitRank cannot -- its comm parameter is the OUT handle being created, so the clique is defined by the shared ncclUniqueId instead; it uses the whole-run 'all_pes' scope, as do the four SHMEM/NVSHMEM symmetric-heap calls, which are collective over all PEs by definition.",
+      "member_count": 6,
+      "members": [
+        "nccl:ncclCommInitRank",
+        "nccl:ncclCommDestroy",
+        "nvshmem:nvshmem_malloc",
+        "nvshmem:nvshmem_free",
+        "shmem:shmem_malloc",
+        "shmem:shmem_free"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "handle: handle_slot",
+        "handle_kind: literal_slot",
+        "role: literal_slot",
+        "scope_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "handle": "param:win",
+          "handle_kind": "WINDOW",
+          "role": "create"
+        },
+        "function": "mpi_win_create",
+        "ppm": "mpi",
+        "shape_ref": "resource.lifecycle"
+      },
+      "group_id": "resource.lifecycle",
+      "justification": "Strongest cross-PPM evidence in this seed set -- all four PPMs, both directions (create and destroy) of the interval. nvshmem_malloc/shmem_malloc bind handle to the literal 'return_value' token per handle_lifecycle's documented convention (docs/schema/semantics-formal.md), since the handle is the function's return value, not a parameter.",
+      "member_count": 2,
+      "members": [
+        "mpi:mpi_win_create",
+        "mpi:mpi_win_free"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "handle: handle_slot",
+        "handle_kind: literal_slot",
+        "role: literal_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "operation": "param:op",
+          "origin_buffer": "param:origin_addr",
+          "target_buffer": "param:win",
+          "target_selector": "rank == param:target_rank"
+        },
+        "function": "mpi_accumulate",
+        "ppm": "mpi",
+        "shape_ref": "rma.accumulate"
+      },
+      "group_id": "rma.accumulate",
+      "justification": "The two-party reduce case docs/schema/semantics-formal.md describes ('rma_target_prior' scope: combines the origin's incoming value with the target's own resident value, not a sibling call-instance read'). Same MPI window+displacement gap as rma.put/rma.get for target_buffer.",
+      "member_count": 1,
+      "members": [
+        "mpi:mpi_accumulate"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "origin_buffer: buffer_slot",
+        "target_buffer: buffer_slot",
+        "extent: extent_slot",
+        "operation: operation_slot",
+        "target_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "operand": "param:value",
+          "operation": "literal:add",
+          "target_buffer": "param:dest",
+          "target_selector": "rank == param:pe"
+        },
+        "function": "shmem_{T}_atomic_add",
+        "ppm": "shmem",
+        "shape_ref": "rma.atomic"
+      },
+      "group_id": "rma.atomic",
+      "justification": "Corrected 2026-07-21 (full-corpus audit). Two defects, both in the single data_flow entry: (1) inputs[].ref was bound straight to {{operand}}, i.e. a 'param:value' reference, but inputs[].ref is defined as the id of a SIBLING data_flow entry -- the cross-entry consistency checker flagged it as naming no such sibling, and a consumer following the reference found nothing. (2) its scope was 'single_instance', which appears nowhere in the scope registry in docs/schema/semantics-formal.md -- schema-open, registry-closed means an unregistered scope is exactly as damaging as an undocumented enum value. Both are fixed by modelling what actually happens: the ORIGIN reads its operand (a real data_flow read), and the target's read-modify-write combines that incoming value with the target's own resident value -- which is precisely the already-registered 'rma_target_prior' scope, minted for MPI_Accumulate's identical two-party case. No new vocabulary needed. MPI is deliberately NOT grounded here, consistent with the already-established finding in docs/schema/design-conventions.md ('Honest gaps over forced fits'): MPI_Compare_and_swap passes its operands as three separate local buffers, not by value, and does not fit this SHMEM-shaped binding pattern. shmem_int_atomic_add/nvshmem_int_atomic_add were chosen over the fetch_add variants specifically to sidestep an unresolved sub-problem: fetch_add returns the PRE-operation value to the caller, and data_flow has no mechanism for exposing a location's value immediately before a write it also describes -- non-fetching add has no such return, avoiding the issue rather than solving it (flagged, not fixed). Two further, real gaps surfaced authoring this shape: (1) 'operand' (the by-value TYPE value parameter) doesn't fit any of the 7 slot kinds -- none represent a bare scalar (non-buffer, non-handle, non-operation) parameter reference; bound via literal_slot as the least-wrong available option. (2) data_flow[].inputs is documented (docs/schema/semantics-formal.md) as being 'for op:reduce' specifically; this shape uses it on an op:'read_modify_write' entry instead -- schema-valid (inputs isn't conditionally restricted by op in api-schema.json), but extends the field beyond its documented scope, worth confirming is intentional. Reduction operator is again a literal token ('literal:add'), same typed-API pattern as the collective shapes -- op is baked into the function name (nvshmem_api.h's NVSHMEMI_DECL_TYPE_ADD_SET macro), not a runtime parameter.",
+      "member_count": 2,
+      "members": [
+        "shmem:shmem_{T}_atomic_add",
+        "nvshmem:nvshmem_int_atomic_add"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "target_buffer: buffer_slot",
+        "operand: literal_slot",
+        "operation: literal_slot",
+        "target_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "origin_buffer": "param:origin_addr",
+          "target_buffer": "param:win",
+          "target_selector": "rank == param:target_rank"
+        },
+        "function": "mpi_get",
+        "ppm": "mpi",
+        "shape_ref": "rma.get"
+      },
+      "group_id": "rma.get",
+      "justification": "Exact mirror of rma.put (op/participant roles swapped). Inherits the same MPI window+displacement gap already logged for rma.put -- mpi_get's real signature (confirmed against apis.json) has no target-buffer parameter either, so target_buffer binds to the window handle ('param:win') for the same documented reason.",
+      "member_count": 3,
+      "members": [
+        "mpi:mpi_get",
+        "nvshmem:nvshmem_{T}_get",
+        "shmem:shmem_{T}_get"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "origin_buffer: buffer_slot",
+        "target_buffer: buffer_slot",
+        "extent: extent_slot",
+        "target_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "extent": {
+            "count_ref": "param:origin_count",
+            "datatype_ref": "param:origin_datatype"
+          },
+          "origin_buffer": "param:origin_addr",
+          "target_buffer": "param:win",
+          "target_selector": "rank == param:target_rank"
+        },
+        "function": "mpi_put",
+        "ppm": "mpi",
+        "shape_ref": "rma.put"
+      },
+      "group_id": "rma.put",
+      "justification": "MPI_Put's real signature (confirmed against external-inputs/mpi/tex/mpi-standard/apis.json) has no target-buffer parameter at all -- the remote address is resolved via (win, target_disp) against a region already registered by a separate mpi_win_create call, not a literal pointer. This binds target_buffer to the window handle itself ('param:win') rather than inventing a param: ref that doesn't exist. That is a genuine, newly-found gap: data_flow[].buffer implicitly assumes a nameable BUFFER-kind parameter, which MPI's window+displacement addressing model doesn't provide -- flagged in known-gaps-and-open-questions.md. SHMEM/NVSHMEM's symmetric-heap put has a real dest pointer and doesn't hit this. Also simplified: MPI_Put's origin and target sides can have independent count/datatype; this shape binds one shared extent from the origin side only and does not model the two diverging -- acceptable for a seed shape, called out here rather than silently assumed.",
+      "member_count": 3,
+      "members": [
+        "mpi:mpi_put",
+        "nvshmem:nvshmem_{T}_put",
+        "shmem:shmem_{T}_put"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "origin_buffer: buffer_slot",
+        "target_buffer: buffer_slot",
+        "extent: extent_slot",
+        "target_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "target_buffer": "param:dest",
+          "target_selector": "rank == param:pe",
+          "value": "param:value"
+        },
+        "function": "shmem_{T}_p",
+        "ppm": "shmem",
+        "shape_ref": "rma.put_scalar"
+      },
+      "group_id": "rma.put_scalar",
+      "justification": "The single-element put. shmem_{T}_p(dest, value, pe) writes ONE element whose value arrives as a by-value operand rather than through a local buffer, so rma.put does not fit: rma.put's df_read reads an origin_buffer that these functions do not have, and its extent slot has nothing to bind to. Modelled on rma.atomic instead, which already had exactly this problem and solved it with a literal_slot operand read at the origin -- the only difference here is that the target's op is a plain write sourced structurally from that read, not a read_modify_write. Authored 2026-07-21 (second full-corpus audit): 26 function families across SHMEM and NVSHMEM were escalating for want of it, the largest single escalation family that was not already a logged schema gap. The mirrored read direction (shmem_{T}_g) is deliberately NOT authored alongside it -- see docs/cross-ppm-analysis/known-gaps-and-open-questions.md: a _g returns the fetched value as the function's RETURN VALUE, and the formal layer has no way to name a return value as a data_flow destination. Inventing a phantom destination buffer for it would be exactly the wrong fit this project rejects.",
+      "member_count": 2,
+      "members": [
+        "shmem:shmem_{T}_p",
+        "nvshmem:nvshmem_{T}_p"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "target_buffer: buffer_slot",
+        "value: literal_slot",
+        "target_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "extent": {
+            "count_ref": "param:nelems",
+            "datatype_ref": "type:{T}"
+          },
+          "origin_buffer": "param:source",
+          "signal_buffer": "param:sig_addr",
+          "signal_op": "param:sig_op",
+          "signal_operand": "param:signal",
+          "target_buffer": "param:dest",
+          "target_selector": "rank == param:pe"
+        },
+        "function": "nvshmem_{T}_put_signal",
+        "ppm": "nvshmem",
+        "shape_ref": "rma.put_signal"
+      },
+      "group_id": "rma.put_signal",
+      "justification": "Added 2026-07-21 (full-corpus audit). The put-with-signal family (shmem_put_signal, nvshmem_putmem_signal, and their typed/sized/_nbi variants -- 32 corpus functions) was being assigned the plain rma.put shape, which silently dropped sig_addr/signal/sig_op entirely: the signal write is the whole reason the call exists over an ordinary put, and without it the entry describes a different operation. This shape is rma.put plus a second, separately-addressed access on the TARGET -- a read_modify_write, because sig_op selects between set and add semantics rather than being a plain store. No new vocabulary was needed: read_modify_write is an existing data_flow[].op and the operand comes through the existing structural/source machinery. Minted 2026-07-21 during the full-corpus audit. The 32-function put-with-signal family was being bound to plain rma.put, which references only dest/source/nelems/pe and therefore dropped sig_addr, signal and sig_op on the floor -- the entry then described an ordinary put, losing the one thing that distinguishes this call. The signal update is modelled as a read_modify_write rather than a write because sig_op selects between SET and ADD semantics, and as a separate data_flow entry rather than a second extent because it targets a different address with its own (single-element) size. sync.ordering records that the payload write lands before the signal becomes observable, which is the ordering guarantee the whole put-with-signal idiom exists to provide.",
+      "member_count": 1,
+      "members": [
+        "nvshmem:nvshmem_{T}_put_signal"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "origin_buffer: buffer_slot",
+        "target_buffer: buffer_slot",
+        "extent: extent_slot",
+        "target_selector: selector_slot",
+        "signal_buffer: buffer_slot",
+        "signal_operand: buffer_slot",
+        "signal_op: operation_slot"
+      ],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {},
+        "function": "shmem_fence",
+        "ppm": "shmem",
+        "shape_ref": "sync_only.local_fence"
+      },
+      "group_id": "sync_only.local_fence",
+      "justification": "Both real signatures (confirmed: external-inputs/shmem/tex/shmem-standard/content/shmem_fence.tex, external-inputs/nvshmem/implementation/.../nvshmem_api.h) take zero parameters -- hence zero slots. Deliberately does NOT encode the actual ordering guarantee (this fence orders all of the caller's previously-issued RMA operations before subsequent ones), because that needs the not-yet-built implicit_all_prior matching.kind already logged for the _nbi family in known-gaps-and-open-questions.md -- fence closing every open _nbi-style window is exactly that same gap, encountered again from a different angle.",
+      "member_count": 2,
+      "members": [
+        "shmem:shmem_fence",
+        "nvshmem:nvshmem_fence"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [],
+      "status": "unreviewed"
+    },
+    {
+      "exceptions": {},
+      "exemplar": {
+        "bindings": {
+          "scope_selector": "rank in param:comm"
+        },
+        "function": "mpi_barrier",
+        "ppm": "mpi",
+        "shape_ref": "sync_only.rendezvous"
+      },
+      "group_id": "sync_only.rendezvous",
+      "justification": "Grounded in the team/communicator-scoped variants (shmem_team_sync, nvshmem_barrier), not the zero-argument *_all() variants (shmem_barrier_all(), nvshmem_barrier_all()) confirmed in the same headers -- those take no parameters at all, so scope_selector would have no param: ref to bind to (the world-scope is implicit, not named). Not modeled here; would need a literal 'true'/'everyone' selector value, analogous to the type/operation literal-token pattern already used elsewhere.",
+      "member_count": 3,
+      "members": [
+        "mpi:mpi_barrier",
+        "shmem:shmem_team_sync",
+        "nvshmem:nvshmem_barrier"
+      ],
+      "reason": null,
+      "reviewed_at": null,
+      "slots": [
+        "scope_selector: selector_slot"
+      ],
+      "status": "unreviewed"
+    }
+  ],
+  "orphaned_decisions": [],
+  "reviews": "curated/shapes/shapes.json",
+  "status_vocabulary": [
+    "unreviewed",
+    "approved",
+    "withheld"
+  ],
+  "summary": {
+    "groups": 27,
+    "groups_reviewed": 0,
+    "groups_unreviewed": 27,
+    "proposals_covered": 58,
+    "proposals_in_reviewed_groups": 0
+  }
+}

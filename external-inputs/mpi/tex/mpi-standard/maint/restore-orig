@@ -1,0 +1,7 @@
+#! /bin/bash
+#
+for file in chap-*/*.tex.orig ; do
+    dir=`dirname $file`
+    newname=`basename $file .orig`
+    cp $file $dir/$newname
+done

@@ -1,0 +1,4 @@
+#! /bin/sh
+grep MPIupdate chap-*/*.tex | sed -e 's/%.*//'
+grep MPIreplace chap-*/*.tex | sed -e 's/%.*//'
+grep MPIdelete chap-*/*.tex | sed -e 's/%.*//'
